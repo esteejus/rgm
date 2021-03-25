@@ -1,0 +1,2 @@
+/usr/bin/ar qc libclas12reader.a  CMakeFiles/clas12reader.dir/work/clas12/users/esteejus/clas12root/Clas12Banks/clas12reader.cpp.o
+/usr/bin/ranlib libclas12reader.a

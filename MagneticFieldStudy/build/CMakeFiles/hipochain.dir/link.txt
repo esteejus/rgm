@@ -1,0 +1,2 @@
+/usr/bin/ar qc libhipochain.a  CMakeFiles/hipochain.dir/work/clas12/users/esteejus/clas12root/Clas12Root/HipoChain.cpp.o
+/usr/bin/ranlib libhipochain.a
