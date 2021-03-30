@@ -16,7 +16,7 @@
 #include "clas12reader.h"
 #include "HipoChain.h"
 //#include <mysql.h>
-#include "Connection.h"
+#include "RCDB/Connection.h"
 
 using namespace clas12;
 
@@ -215,16 +215,20 @@ int main(int argc, char ** argv){
   auto *pq_truth_lead_w = new TH2F("pq_truth_lead_w","#theta vs |p|/|q| Truth lead",100,0,1,100,0,100);
   auto *pq_truth_recoil_w = new TH2F("pq_truth_recoil_w","#theta vs |p|/|q| Truth recoil",100,0,1,100,0,100);
 
-  gBenchmark->Start("timer");
+  //  gBenchmark->Start("timer");
  
-  TFile *cutf = TFile::Open("cuts_v1.root");
+  TFile *cutf = TFile::Open("../cuts_v1.root");
   TCutG *elec_cut = (TCutG *)cutf->Get("elec");
   TCutG *ftof_p = (TCutG *)cutf->Get("ftof_p");
   TCutG *ctof_p = (TCutG *)cutf->Get("ctof_p");
   
+
   clas12reader c12(inputFile.Data());
 
     while(c12.next()==true){
+
+
+      cout<<counter<<endl;
 
       auto mceve=c12.mcevent(); 
 
@@ -556,8 +560,8 @@ int main(int argc, char ** argv){
       counter++;
     }
     
-    gBenchmark->Stop("timer");
-    gBenchmark->Print("timer");
+    //    gBenchmark->Stop("timer");
+    //    gBenchmark->Print("timer");
     
     
     TCanvas* can = new TCanvas();
