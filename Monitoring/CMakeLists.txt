@@ -1,97 +1,24 @@
 cmake_minimum_required(VERSION 3.0)
+project(monitorPID)
 
-# specify the C++ standard
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
+set (CLAS12ROOT $ENV{CLAS12ROOT})
+set (exename monitorPID)
 
-# set the project name and version
-project(Monitoring VERSION 1.0)
+include_directories(${CLAS12ROOT}/Clas12Banks)
+include_directories(${CLAS12ROOT}/Clas12Root)
+include_directories(${CLAS12ROOT}/hipo4)
+include_directories(${CLAS12ROOT}/rcdb/cpp/include)
 
-find_package(ROOT REQUIRED)
-find_package(CLAS12ROOT REQUIRED HINTS /w/hallb-scifs17exp/clas12/users/esteejus/clas12root/)
 
-if(DEFINED ENV{CLAS12ROOT}) 
- set(CLAS12ROOT_DIR $ENV{CLAS12ROOT})
-endif()
+find_package(ROOT)
+list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS}) 
+include(${ROOT_USE_FILE})
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ROOT_CXX_FLAGS}")
 
-include_directories(${CLAS12ROOT_DIR}/Clas12Root)
-include_directories(${CLAS12ROOT_DIR}/hipo4)
-include_directories(${CLAS12ROOT_DIR}/Clas12Banks)
-include_directories(${CLAS12ROOT_DIR}/rcdb/cpp/include/)
 
-link_directories(${CLAS12ROOT_DIR}/Clas12Root)
-link_directories(${CLAS12ROOT_DIR}/Clas12Banks)
-
-add_library(hipochain ${CLAS12ROOT_DIR}/Clas12Root/HipoChain.h ${CLAS12ROOT_DIR}/Clas12Root/HipoChain.cpp)
-
-add_library(clas12reader ${CLAS12ROOT_DIR}/Clas12Banks/clas12reader.h  ${CLAS12ROOT_DIR}/Clas12Banks/clas12reader.cpp) 
-
-target_link_libraries(clas12reader 
-ROOT::Core
-ROOT::Gpad
-ROOT::Graf3d
-ROOT::Graf
-ROOT::Hist
-ROOT::Imt
-ROOT::MathCore
-ROOT::Matrix
-ROOT::MultiProc
-ROOT::Net
-ROOT::Physics
-ROOT::Postscript
-ROOT::RIO
-ROOT::ROOTDataFrame
-ROOT::ROOTVecOps
-ROOT::Rint
-ROOT::EG
-ROOT::Thread
-ROOT::TreePlayer
-ROOT::Tree)
-
-target_link_libraries(hipochain 
-ROOT::Core
-ROOT::Gpad
-ROOT::Graf3d
-ROOT::Graf
-ROOT::Hist
-ROOT::Imt
-ROOT::MathCore
-ROOT::Matrix
-ROOT::MultiProc
-ROOT::Net
-ROOT::Physics
-ROOT::Postscript
-ROOT::EG
-ROOT::RIO
-ROOT::ROOTDataFrame
-ROOT::ROOTVecOps
-ROOT::Rint
-ROOT::Thread
-ROOT::TreePlayer
-ROOT::Tree
-)
-
-# add the executable
-add_executable(Mon LowEnergyReader.cpp)
-target_link_libraries(Mon clas12reader hipochain 
-ROOT::Core
-ROOT::Gpad
-ROOT::Graf3d
-ROOT::Graf
-ROOT::Hist
-ROOT::Imt
-ROOT::MathCore
-ROOT::Matrix
-ROOT::MultiProc
-ROOT::Net
-ROOT::Physics
-ROOT::Postscript
-ROOT::EG
-ROOT::RIO
-ROOT::ROOTDataFrame
-ROOT::ROOTVecOps
-ROOT::Rint
-ROOT::Thread
-ROOT::TreePlayer
-ROOT::Tree
-)
+add_executable(${exename}  monitorPID.cpp )
+ 
+target_link_libraries(${exename} ${ROOT_LIBRARIES} -lEG)
+target_link_libraries(${exename} -lClas12Banks -lHipo4 -lClas12Root)
+target_link_libraries(${exename} -L${CLAS12ROOT}/lib)
+target_link_libraries(${exename} -L${CLAS12ROOT}/ccdb/lib)
