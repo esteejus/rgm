@@ -1,3 +1,6 @@
+#define PBSTR "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
+#define PBWIDTH 60
+
 #include <cstdlib>
 #include <iostream>
 #include <chrono>
@@ -22,6 +25,8 @@ using namespace clas12;
 
 const double mN = 0.939;
 const double mD = 1.8756;
+
+void printProgress(double percentage);
 
 double get_mmiss(TVector3 vbeam, TVector3 ve, TVector3 vp){
   
@@ -84,7 +89,7 @@ void monitorPID(int argc, char** argv){
 
 void Usage()
 {
-  std::cerr << "Usage: ./monitorPID <MC =1,Data = 0> <path/to/input.hipo>  <path/to/output.root> \n\n\n";
+  std::cerr << "Usage: ./monitorPID <MC =1,Data = 0> <path/to/ouput.root>  <path/to/input.hipo> \n\n\n";
 
 }
 
@@ -276,10 +281,12 @@ int main(int argc, char ** argv){
   clas12root::HipoChain chain;
   TString inputFile = argv[3];
 
+  cout<<"Input file "<<inputFile<<endl;
   chain.Add(inputFile);
   auto config_c12=chain.GetC12Reader();
   chain.SetReaderTags({0});
   auto& c12=chain.C12ref();
+
 
   double Ebeam = 4.247;
   if(isMC){Ebeam=6;}
@@ -287,7 +294,8 @@ int main(int argc, char ** argv){
   while(chain.Next()==true){
       //Display completed  
       counter++;
-      if((counter%1000000) == 0){
+      if((counter%100000) == 0){
+	//	printProgress(.5);
 	cerr << counter <<" completed \n";
       }    
       // get particles by type
@@ -571,7 +579,126 @@ int main(int argc, char ** argv){
   for(int i=0; i<hist_list_2.size(); i++){
     hist_list_2[i]->Write();
   }
+
+
+  int pixelx = 1980;
+  int pixely = 1530;
+
+  TCanvas *cvs_electron = new TCanvas("cvs_electron","cvs_electron",pixelx,pixely);
+  cvs_electron->Divide(2,3);
+  cvs_electron->cd(1);
+  h_Vcal_EoP->Draw("colz");
+  cvs_electron->cd(2);
+  h_Wcal_EoP->Draw("colz");
+  cvs_electron->cd(3);
+  h_phi_theta->Draw("colz");
+  cvs_electron->cd(4);
+  h_sector->Draw("colz");
+  cvs_electron->cd(5);
+  h_P_EoP->Draw("colz");
+  cvs_electron->cd(6);
+  h_nphe->Draw();
+
+  //  cvs_electron->SaveAs("electron_pid.pdf");
+
+
+  TCanvas *cvs_electron_kin = new TCanvas("cvs_electron_kin","cvs_electron_kin",pixelx,pixely);
+
+  cvs_electron_kin->Divide(2,3);
+  cvs_electron_kin->cd(1);
+  h_xB->Draw();
+  cvs_electron_kin->cd(2);
+  h_QSq->Draw();
+  cvs_electron_kin->cd(3);
+  h_WSq->Draw();
+  cvs_electron_kin->cd(4);
+  h_xB_QSq->Draw("colz");
+  cvs_electron_kin->cd(5);
+  h_xB_WSq->Draw("colz");
+  cvs_electron_kin->cd(6);
+  h_QSq_WSq->Draw("colz");
+
+  //  cvs_electron_kin->SaveAs("electron_kinematics.pdf");
+
+  TCanvas *cvs_proton = new TCanvas("cvs_proton","cvs_proton",pixelx,pixely);
+  cvs_proton->Divide(2,3);
+  cvs_proton->cd(1);
+  h_theta_L->Draw("colz");
+  cvs_proton->cd(2);
+  h_theta_Lq->Draw("colz");
+  cvs_proton->cd(3);
+
+  cvs_proton->cd(4);
+
+  cvs_proton->cd(5);
+
+  cvs_proton->cd(6);
+
+
+
+  TCanvas *cvs_lead_proton = new TCanvas("cvs_lead_proton","cvs_lead_proton",pixelx,pixely);
+  cvs_lead_proton->Divide(2,5);
+
+  cvs_lead_proton->cd(1);
+  h_theta_L_FTOF->Draw();
+  cvs_lead_proton->cd(2);
+  h_theta_Lq_FTOF->Draw();
+  cvs_lead_proton->cd(3);
+  h_phi_e_L->Draw();
+  cvs_lead_proton->cd(4);
+  h_mmiss_phi_e_L->Draw("colz");
+  cvs_lead_proton->cd(5);
+  h_xB_mmiss->Draw("colz");
+  cvs_lead_proton->cd(6);
+  h_pmiss_mmiss->Draw("colz");
+  cvs_lead_proton->cd(7);
+  h_xB_theta_1q->Draw("colz");
+  cvs_lead_proton->cd(8);
+  h_Loq_theta_1q->Draw("colz");
+  cvs_lead_proton->cd(9);
+  h_pmiss_theta_miss->Draw("colz");
+
+
+  TCanvas *cvs_leadsrc_proton = new TCanvas("cvs_leadsrc_proton","cvs_leadsrc_proton",pixelx,pixely);
+  cvs_leadsrc_proton->Divide(2,4);
+
+  cvs_leadsrc_proton->cd(1);
+  h_pmiss->Draw();
+  cvs_leadsrc_proton->cd(2);
+  h_mmiss->Draw();
+  cvs_leadsrc_proton->cd(3);
+  h_pmiss_theta_miss_SRC->Draw();
+  cvs_leadsrc_proton->cd(4);
+  h_xB_Loq_SRC->Draw("colz");
+  cvs_leadsrc_proton->cd(5);
+  h_pmiss_tight->Draw();
+  cvs_leadsrc_proton->cd(6);
+  h_mmiss_tight->Draw();
+  cvs_leadsrc_proton->cd(7);
+  h_pmiss_theta_miss_SRC_tight->Draw("colz");
+
+
+  //first pdf page needs ("
+  //last pdf page needs )" becareful if you are haveing pdf display issues
+  cvs_electron->Print("output.pdf(","pdf");
+  cvs_electron_kin->Print("output.pdf","pdf");
+  cvs_proton->Print("output.pdf","pdf");
+  cvs_lead_proton->Print("output.pdf","pdf");
+  cvs_leadsrc_proton->Print("output.pdf)","pdf");
+
   outFile->Close();
   cout<<"Finished making file: "<< out <<"\n";
 
+
+
 }
+
+
+void printProgress(double percentage) {
+  int val = (int) (percentage * 100);
+  int lpad = (int) (percentage * PBWIDTH);
+  int rpad = PBWIDTH - lpad;
+  printf("\r%3d%% [%.*s%*s]", val, lpad, PBSTR, rpad, "");
+  fflush(stdout);
+}
+
