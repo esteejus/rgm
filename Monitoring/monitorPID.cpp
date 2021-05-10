@@ -17,6 +17,7 @@
 #include <TChain.h>
 #include <TCanvas.h>
 #include <TBenchmark.h>
+#include <TStyle.h>
 #include "clas12reader.h"
 #include "HipoChain.h"
 
@@ -94,7 +95,14 @@ void Usage()
 }
 
 
-int main(int argc, char ** argv){
+int main(int argc, char ** argv)
+{
+
+  gStyle->SetTitleXSize(0.06);
+  gStyle->SetTitleYSize(0.06);
+
+  gStyle->SetTitleXOffset(0.8);
+  gStyle->SetTitleYOffset(0.8);
 
   if(argc < 3)
     {
@@ -125,6 +133,30 @@ int main(int argc, char ** argv){
   TH1D * h_sector = new TH1D("sector","sector;sector",6,1,7);
   hist_list_1.push_back(h_sector);
 
+
+
+  h_Vcal_EoP -> GetXaxis()->SetTitle("ECAL V coordinate (cm)");
+  h_Vcal_EoP -> GetYaxis()->SetTitle("Sampling Fraction");
+  h_Vcal_EoP -> GetXaxis()->CenterTitle();
+  h_Vcal_EoP -> GetYaxis()->CenterTitle();
+
+  h_Wcal_EoP -> GetXaxis()->SetTitle("ECAL W coordinate (cm)");
+  h_Wcal_EoP -> GetYaxis()->SetTitle("Sampling Fraction");
+  h_Wcal_EoP -> GetXaxis()->CenterTitle();
+  h_Wcal_EoP -> GetYaxis()->CenterTitle();
+
+
+  h_phi_theta ->SetTitle("Electron Angles");
+  h_phi_theta -> GetXaxis()->SetTitle("#phi Angle (Degrees)");
+  h_phi_theta -> GetYaxis()->SetTitle("#theta Angle (Degrees)");
+  h_phi_theta -> GetXaxis()->CenterTitle();
+  h_phi_theta -> GetYaxis()->CenterTitle();
+
+  h_sector -> GetXaxis()->SetTitle("ECAL Sector");
+  h_sector -> GetYaxis()->SetTitle("Counts");
+  h_sector -> GetXaxis()->CenterTitle();
+  h_sector -> GetYaxis()->CenterTitle();
+
   /////////////////////////////////////
   //Electron Pid
   /////////////////////////////////////
@@ -133,6 +165,18 @@ int main(int argc, char ** argv){
   TH1D * h_nphe = new TH1D("nphe","nphe;nphe",100,0,100);
   hist_list_1.push_back(h_nphe);
   
+
+  h_P_EoP -> GetXaxis()->SetTitle("Electron Momentum (GeV)");
+  h_P_EoP -> GetYaxis()->SetTitle("Sampling Fraction");
+  h_P_EoP -> GetXaxis()->CenterTitle();
+  h_P_EoP -> GetYaxis()->CenterTitle();
+
+
+  h_nphe -> GetXaxis()->SetTitle("#Electrons Cherenkov Counter");
+  h_nphe -> GetYaxis()->SetTitle("Counts");
+  h_nphe -> GetXaxis()->CenterTitle();
+  h_nphe -> GetYaxis()->CenterTitle();
+
   /////////////////////////////////////
   //Electron Kinematics  
   /////////////////////////////////////
@@ -149,6 +193,37 @@ int main(int argc, char ** argv){
   TH2D * h_QSq_WSq = new TH2D("QSq_WSq","QSq vs. WSq ;QSq;WSq",100,0,3,100,0,7);
   hist_list_2.push_back(h_QSq_WSq);
 
+  h_xB -> GetXaxis()->SetTitle("#chi_{B}");
+  h_xB -> GetYaxis()->SetTitle("Counts");
+  h_xB -> GetXaxis()->CenterTitle();
+  h_xB -> GetYaxis()->CenterTitle();
+
+  h_QSq -> GetXaxis()->SetTitle("Q^{2} (GeV^{2})");
+  h_QSq -> GetYaxis()->SetTitle("Counts");
+  h_QSq -> GetXaxis()->CenterTitle();
+  h_QSq -> GetYaxis()->CenterTitle();
+
+  h_WSq -> GetXaxis()->SetTitle("W^{2} (GeV^{2})");
+  h_WSq -> GetYaxis()->SetTitle("Counts");
+  h_WSq -> GetXaxis()->CenterTitle();
+  h_WSq -> GetYaxis()->CenterTitle();
+
+  h_xB_QSq -> GetXaxis()->SetTitle("X_{B}");
+  h_xB_QSq -> GetYaxis()->SetTitle("Q^{2} (GeV^{2})");
+  h_xB_QSq -> GetXaxis()->CenterTitle();
+  h_xB_QSq -> GetYaxis()->CenterTitle();
+
+  h_xB_WSq -> GetXaxis()->SetTitle("X_{B}");
+  h_xB_WSq -> GetYaxis()->SetTitle("W^{2} (GeV^{2})");
+  h_xB_WSq -> GetXaxis()->CenterTitle();
+  h_xB_WSq -> GetYaxis()->CenterTitle();
+
+  h_QSq_WSq -> GetXaxis()->SetTitle("Q^{2} (GeV^{2})");
+  h_QSq_WSq -> GetYaxis()->SetTitle("W^{2} (GeV^{2})");
+  h_QSq_WSq -> GetXaxis()->CenterTitle();
+  h_QSq_WSq -> GetYaxis()->CenterTitle();
+
+
   /////////////////////////////////////
   //All Proton Angles
   /////////////////////////////////////
@@ -156,6 +231,19 @@ int main(int argc, char ** argv){
   hist_list_1.push_back(h_theta_L);
   TH1D * h_theta_Lq = new TH1D("theta_Lq","theta_Lq;theta_Lq",180,0,180);
   hist_list_1.push_back(h_theta_Lq);
+
+
+  h_theta_L -> GetXaxis()->SetTitle("#theta_{proton}");
+  h_theta_L -> GetYaxis()->SetTitle("Counts");
+  h_theta_L -> GetXaxis()->CenterTitle();
+  h_theta_L -> GetYaxis()->CenterTitle();
+
+
+  h_theta_Lq -> GetXaxis()->SetTitle("#theta_{pq}");
+  h_theta_Lq -> GetYaxis()->SetTitle("Counts");
+  h_theta_Lq -> GetXaxis()->CenterTitle();
+  h_theta_Lq -> GetYaxis()->CenterTitle();
+
 
   /////////////////////////////////////
   //All Neutron Angles
@@ -175,6 +263,7 @@ int main(int argc, char ** argv){
   hist_list_1.push_back(h_theta_nLq);
   TH1D * h_phi_e_nL = new TH1D("phi_e_nL","phi_e minus phi_nL;phi_e_nL",180,0,180);
   hist_list_1.push_back(h_phi_e_nL);
+
 
   /////////////////////////////////////
   //Lead Proton Checks
@@ -198,6 +287,53 @@ int main(int argc, char ** argv){
   TH2D * h_pmiss_theta_miss = new TH2D("pmiss_theta_miss","pmiss vs theta_miss;pmiss;theta_miss",100,0,1.5,180,0,180);
   hist_list_2.push_back(h_pmiss_theta_miss);
 
+
+  h_theta_L_FTOF -> GetXaxis()->SetTitle("#theta_{proton} FTOF");
+  h_theta_L_FTOF -> GetYaxis()->SetTitle("Counts");
+  h_theta_L_FTOF -> GetXaxis()->CenterTitle();
+  h_theta_L_FTOF -> GetYaxis()->CenterTitle();
+
+  h_theta_Lq_FTOF -> GetXaxis()->SetTitle("#theta_{pq} FTOF");
+  h_theta_Lq_FTOF -> GetYaxis()->SetTitle("Counts");
+  h_theta_Lq_FTOF -> GetXaxis()->CenterTitle();
+  h_theta_Lq_FTOF -> GetYaxis()->CenterTitle();
+
+  h_phi_e_L -> GetXaxis()->SetTitle("#phi_{e^{-}} - #phi_{proton}");
+  h_phi_e_L -> GetYaxis()->SetTitle("Counts");
+  h_phi_e_L -> GetXaxis()->CenterTitle();
+  h_phi_e_L -> GetYaxis()->CenterTitle();
+
+  h_mmiss_phi_e_L -> GetXaxis()->SetTitle("Missing Mass (GeV)");
+  h_mmiss_phi_e_L -> GetYaxis()->SetTitle("#phi_{e^{-}} - #phi_{proton}");
+  h_mmiss_phi_e_L -> GetXaxis()->CenterTitle();
+  h_mmiss_phi_e_L -> GetYaxis()->CenterTitle();
+
+  h_xB_mmiss -> GetXaxis()->SetTitle("x_{B}");
+  h_xB_mmiss -> GetYaxis()->SetTitle("Missing Mass (GeV)");
+  h_xB_mmiss -> GetXaxis()->CenterTitle();
+  h_xB_mmiss -> GetYaxis()->CenterTitle();
+
+  h_pmiss_mmiss -> GetXaxis()->SetTitle("Missing Momentum (GeV)");
+  h_pmiss_mmiss -> GetYaxis()->SetTitle("Missing Mass (GeV)");
+  h_pmiss_mmiss -> GetXaxis()->CenterTitle();
+  h_pmiss_mmiss -> GetYaxis()->CenterTitle();
+
+  h_xB_theta_1q -> GetXaxis()->SetTitle("x_{B}");
+  h_xB_theta_1q -> GetYaxis()->SetTitle("#theta_{Recoil,pq}");
+  h_xB_theta_1q -> GetXaxis()->CenterTitle();
+  h_xB_theta_1q -> GetYaxis()->CenterTitle();
+
+  h_pmiss_theta_miss -> GetXaxis()->SetTitle("Missing Momentum (GeV)");
+  h_pmiss_theta_miss -> GetYaxis()->SetTitle("#theta_{miss}");
+  h_pmiss_theta_miss -> GetXaxis()->CenterTitle();
+  h_pmiss_theta_miss -> GetYaxis()->CenterTitle();
+
+  h_Loq_theta_1q -> GetXaxis()->SetTitle("|p|/|q|");
+  h_Loq_theta_1q -> GetYaxis()->SetTitle("#theta_{p_{recoil}q}");
+  h_Loq_theta_1q -> GetXaxis()->CenterTitle();
+  h_Loq_theta_1q -> GetYaxis()->CenterTitle();
+
+
   /////////////////////////////////////
   //Lead SRC Proton Checks
   /////////////////////////////////////
@@ -218,6 +354,44 @@ int main(int argc, char ** argv){
   TH2D * h_pmiss_theta_miss_SRC_tight = new TH2D("pmiss_theta_miss_SRC_tight","pmiss vs theta_miss SRC;pmiss;theta_1",100,0,1.5,180,0,180);
   hist_list_2.push_back(h_pmiss_theta_miss_SRC_tight);
   
+
+  h_pmiss -> GetXaxis()->SetTitle("Missing Momentum (GeV)");
+  h_pmiss -> GetYaxis()->SetTitle("Counts");
+  h_pmiss -> GetXaxis()->CenterTitle();
+  h_pmiss -> GetYaxis()->CenterTitle();
+
+  h_mmiss -> GetXaxis()->SetTitle("Missing Mass (GeV)");
+  h_mmiss -> GetYaxis()->SetTitle("Counts");
+  h_mmiss -> GetXaxis()->CenterTitle();
+  h_mmiss -> GetYaxis()->CenterTitle();
+
+  h_pmiss_theta_miss_SRC -> GetXaxis()->SetTitle("Missing Momentum (GeV)");
+  h_pmiss_theta_miss_SRC -> GetYaxis()->SetTitle("#theta_{miss}");
+  h_pmiss_theta_miss_SRC -> GetXaxis()->CenterTitle();
+  h_pmiss_theta_miss_SRC -> GetYaxis()->CenterTitle();
+
+  h_xB_Loq_SRC -> GetXaxis()->SetTitle("x_{B}");
+  h_xB_Loq_SRC -> GetYaxis()->SetTitle("#theta_{pq}");
+  h_xB_Loq_SRC -> GetXaxis()->CenterTitle();
+  h_xB_Loq_SRC -> GetYaxis()->CenterTitle();
+
+  h_mmiss_tight -> GetXaxis()->SetTitle("Missing Mass (GeV)");
+  h_mmiss_tight -> GetYaxis()->SetTitle("Counts");
+  h_mmiss_tight -> GetXaxis()->CenterTitle();
+  h_mmiss_tight -> GetYaxis()->CenterTitle();
+
+  h_pmiss_tight -> GetXaxis()->SetTitle("Missing Momentum (GeV)");
+  h_pmiss_tight -> GetYaxis()->SetTitle("Counts");
+  h_pmiss_tight -> GetXaxis()->CenterTitle();
+  h_pmiss_tight -> GetYaxis()->CenterTitle();
+
+  h_pmiss_theta_miss_SRC_tight -> GetXaxis()->SetTitle("Missing Momentum (GeV)");
+  h_pmiss_theta_miss_SRC_tight -> GetYaxis()->SetTitle("#theta_{miss}");
+  h_pmiss_theta_miss_SRC_tight -> GetXaxis()->CenterTitle();
+  h_pmiss_theta_miss_SRC_tight -> GetYaxis()->CenterTitle();
+
+
+
   /////////////////////////////////////
   //Recoil Nucleons
   /////////////////////////////////////
@@ -637,7 +811,7 @@ int main(int argc, char ** argv){
 
 
   TCanvas *cvs_lead_proton = new TCanvas("cvs_lead_proton","cvs_lead_proton",pixelx,pixely);
-  cvs_lead_proton->Divide(2,5);
+  cvs_lead_proton->Divide(2,3);
 
   cvs_lead_proton->cd(1);
   h_theta_L_FTOF->Draw();
@@ -651,11 +825,24 @@ int main(int argc, char ** argv){
   h_xB_mmiss->Draw("colz");
   cvs_lead_proton->cd(6);
   h_pmiss_mmiss->Draw("colz");
+
+
   cvs_lead_proton->cd(7);
   h_xB_theta_1q->Draw("colz");
   cvs_lead_proton->cd(8);
   h_Loq_theta_1q->Draw("colz");
   cvs_lead_proton->cd(9);
+  h_pmiss_theta_miss->Draw("colz");
+
+
+  TCanvas *cvs_lead_proton_2 = new TCanvas("cvs_lead_proton_2","cvs_lead_proton_2",pixelx,pixely);
+  cvs_lead_proton_2->Divide(2,3);
+
+  cvs_lead_proton_2->cd(1);
+  h_xB_theta_1q->Draw("colz");
+  cvs_lead_proton_2->cd(2);
+  h_Loq_theta_1q->Draw("colz");
+  cvs_lead_proton_2->cd(3);
   h_pmiss_theta_miss->Draw("colz");
 
 
@@ -684,6 +871,7 @@ int main(int argc, char ** argv){
   cvs_electron_kin->Print("output.pdf","pdf");
   cvs_proton->Print("output.pdf","pdf");
   cvs_lead_proton->Print("output.pdf","pdf");
+  cvs_lead_proton_2->Print("output.pdf","pdf");
   cvs_leadsrc_proton->Print("output.pdf)","pdf");
 
   outFile->Close();
