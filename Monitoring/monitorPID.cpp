@@ -14,6 +14,7 @@
 #include <TCutG.h>
 #include <TH1.h>
 #include <TH2.h>
+#include <TLine.h>
 #include <TChain.h>
 #include <TCanvas.h>
 #include <TBenchmark.h>
@@ -120,6 +121,48 @@ int main(int argc, char ** argv)
   TString mc= argv[1];
   bool isMC = false;
   if(mc == 1){isMC=true;}
+
+
+  ////////////////////////////////
+  //Define cuts 
+  ////////////////////////////////
+
+  double loq_min_cut = 0.62; // |p|/|q| min cut
+  double loq_max_cut = 0.96; // |p|/|q| max cut
+
+  double ecal_v_cut = 14; //electron fiducial in V coordinates
+  double ecal_w_cut = 14; //electron fiducial in W coord.
+
+  double elec_mom_min = 1;   //minimum electron momentum cut
+  double elec_mom_max = 6.6; //max electron momentum cut
+
+  double sf_min = 0.18; //sampling fraction minimum cut
+  double sf_max = 0.28; //sampling fraction max cut
+
+  double pq_angle_cut = 25; 
+
+  TLine *line = new TLine(14,0,14,1);
+  line->SetLineWidth(2);
+  line->SetLineColor(2);
+  TCutG *sampl_frac_cut = new TCutG("sampl_fract_cut",5);
+  sampl_frac_cut->SetPoint(0,elec_mom_min,sf_min);
+  sampl_frac_cut->SetPoint(1,elec_mom_min,sf_max);
+  sampl_frac_cut->SetPoint(2,elec_mom_max,sf_max);
+  sampl_frac_cut->SetPoint(3,elec_mom_max,sf_min);
+  sampl_frac_cut->SetPoint(4,elec_mom_min,sf_min);
+  sampl_frac_cut->SetLineWidth(2);
+  sampl_frac_cut->SetLineColor(2);
+
+  TCutG *leadp_src_cut = new TCutG("leadp_src_cut",5);
+  leadp_src_cut->SetPoint(0,loq_min_cut,0);
+  leadp_src_cut->SetPoint(1,loq_min_cut,pq_angle_cut);
+  leadp_src_cut->SetPoint(2,loq_max_cut,pq_angle_cut);
+  leadp_src_cut->SetPoint(3,loq_max_cut,0);
+  leadp_src_cut->SetPoint(4,loq_min_cut,0);
+  leadp_src_cut->SetLineWidth(2);
+  leadp_src_cut->SetLineColor(2);
+
+
 
   /////////////////////////////////////
   //Electron fiducials
@@ -229,6 +272,8 @@ int main(int argc, char ** argv)
   /////////////////////////////////////
   TH1D * h_theta_L = new TH1D("theta_L","theta_L;theta_L",180,0,180);
   hist_list_1.push_back(h_theta_L);
+  TH2D * h_theta_L_pq = new TH2D("theta_L_pq","theta_L;theta_L",100,0,2,180,0,180);
+  hist_list_1.push_back(h_theta_L_pq);
   TH1D * h_theta_Lq = new TH1D("theta_Lq","theta_Lq;theta_Lq",180,0,180);
   hist_list_1.push_back(h_theta_Lq);
 
@@ -286,6 +331,12 @@ int main(int argc, char ** argv)
   hist_list_2.push_back(h_Loq_theta_1q);
   TH2D * h_pmiss_theta_miss = new TH2D("pmiss_theta_miss","pmiss vs theta_miss;pmiss;theta_miss",100,0,1.5,180,0,180);
   hist_list_2.push_back(h_pmiss_theta_miss);
+
+  TH2D *pid_p_fd = new TH2D("pid_p_fd","FD TOF vs p PID proton",500,0,10,500,0,1.3);
+  hist_list_2.push_back(pid_p_fd);
+
+  TH2D *pid_p_cd = new TH2D("pid_p_cd","CD TOF vs p PID proton",200,0,10,200,0,1.3);
+  hist_list_2.push_back(pid_p_cd);
 
 
   h_theta_L_FTOF -> GetXaxis()->SetTitle("#theta_{proton} FTOF");
@@ -495,8 +546,8 @@ int main(int argc, char ** argv)
       h_phi_theta->Fill(p_e.Phi()*180/M_PI,p_e.Theta()*180/M_PI,weight);
       h_sector->Fill(electrons[0]->getSector(),weight);
 
-      if(electrons[0]->cal(ECIN)->getLv() < 14){ continue; }
-      if(electrons[0]->cal(ECIN)->getLw() < 14){ continue; }
+      if(electrons[0]->cal(ECIN)->getLv() < ecal_v_cut){ continue; }
+      if(electrons[0]->cal(ECIN)->getLw() < ecal_w_cut){ continue; }
 	  
   /////////////////////////////////////
   //Electron Pid
@@ -504,10 +555,10 @@ int main(int argc, char ** argv)
       h_P_EoP->Fill(p_e.Mag(),EoP_e,weight);
       h_nphe->Fill(electrons[0]->che(HTCC)->getNphe(),weight);
 
-      if(EoP_e < 0.18){ continue; }
-      if(EoP_e > 0.28){ continue; }
-      if(p_e.Mag() < 1){ continue; }
-      if(p_e.Mag() > 6.6){ continue; }
+      if(EoP_e < sf_min){ continue; }
+      if(EoP_e > sf_max){ continue; }
+      if(p_e.Mag() < elec_mom_min){ continue; }
+      if(p_e.Mag() > elec_mom_max){ continue; }
       if(!isMC){
 	if(electrons[0]->par()->getVz() < -5){continue;}
 	if(electrons[0]->par()->getVz() > -1){continue;}
@@ -544,11 +595,20 @@ int main(int argc, char ** argv)
 	double vtz_diff = electrons[0]->par()->getVz()-vtz_L;
 	if(isMC){vtz_diff=0.5;}
 	h_theta_L->Fill(theta_L,weight);
+	h_theta_L_pq->Fill(p_L.Mag()/p_q.Mag(),theta_Lq,weight);
 	h_theta_Lq->Fill(theta_Lq,weight);
+
+
+	if(protons[j]->getRegion()==FD)
+	  pid_p_fd -> Fill(protons[j]->par()->getP(),protons[j]->par()->getBeta() );
+
+	if(protons[j]->getRegion()==CD)
+	  pid_p_cd -> Fill(protons[j]->par()->getP(),protons[j]->par()->getBeta() );
+
 
 	if(((protons[j]->sci(FTOF1A)->getDetector()==12) || (protons[j]->sci(FTOF1B)->getDetector()==12)) || (protons[j]->sci(FTOF2)->getDetector()==12))
 	  {
-	    if(theta_Lq<25){
+	    if(theta_Lq < pq_angle_cut){
 	      if(lowThetaCut(p_L.Theta(),Chi2Pid_L,vtz_diff)){
 		num_L++;
 		index_L=j;
@@ -585,9 +645,9 @@ int main(int argc, char ** argv)
 	    if(ToM>3.5){
 	      h_mom_nL->Fill(p_nL.Mag(),weight);
 	      h_theta_nL->Fill(theta_nL,weight);
-	      if(theta_nL<35){
+	      if(theta_nL < 35){
 		h_theta_nLq->Fill(theta_nLq,weight);
-		if(theta_nLq<25){
+		if(theta_nLq < 25){
 		  h_phi_e_nL->Fill(phi_diff_n,weight);
 		}
 	      }
@@ -636,7 +696,7 @@ int main(int argc, char ** argv)
 	      h_pmiss_theta_miss_SRC->Fill(p_miss.Mag(),theta_miss,weight);
 	      h_xB_Loq_SRC->Fill(xB,Loq,weight);
 	      isSRC_loose=true;	      
-	      if((Loq > 0.62) && (Loq < 0.96)){
+	      if((Loq > loq_min_cut) && (Loq < loq_max_cut)){
 		if(xB > 1.2){
 		  h_pmiss_tight->Fill(p_miss.Mag(),weight);
 		  h_mmiss_tight->Fill(mmiss,weight);
@@ -755,63 +815,84 @@ int main(int argc, char ** argv)
   }
 
 
-  int pixelx = 1980;
+  //  int pixelx = 1980;
+  //  int pixely = 1530;
+
+  int pixelx = 2720;
   int pixely = 1530;
 
   TCanvas *cvs_electron = new TCanvas("cvs_electron","cvs_electron",pixelx,pixely);
-  cvs_electron->Divide(2,3);
+  cvs_electron->Divide(3,3);
   cvs_electron->cd(1);
   h_Vcal_EoP->Draw("colz");
+  line->DrawLine(ecal_v_cut,0.05,ecal_v_cut,.4);
+
   cvs_electron->cd(2);
-  h_Wcal_EoP->Draw("colz");
+  h_QSq_WSq->Draw("colz");
+
   cvs_electron->cd(3);
   h_phi_theta->Draw("colz");
+
   cvs_electron->cd(4);
-  h_sector->Draw("colz");
+  h_Wcal_EoP->Draw("colz");
+  line->DrawLine(ecal_w_cut,0.05,ecal_w_cut,.4);
+
   cvs_electron->cd(5);
-  h_P_EoP->Draw("colz");
+  h_xB_WSq->Draw("colz");
+
   cvs_electron->cd(6);
   h_nphe->Draw();
+
+  cvs_electron->cd(7);
+  h_P_EoP->Draw("colz");
+  sampl_frac_cut->Draw("same");
+
+  cvs_electron->cd(8);
+  h_xB_QSq->Draw("colz");
+
+  cvs_electron->cd(9);
+  h_sector->Draw("colz");
 
   //  cvs_electron->SaveAs("electron_pid.pdf");
 
 
   TCanvas *cvs_electron_kin = new TCanvas("cvs_electron_kin","cvs_electron_kin",pixelx,pixely);
 
-  cvs_electron_kin->Divide(2,3);
+  cvs_electron_kin->Divide(3,2);
   cvs_electron_kin->cd(1);
-  h_xB->Draw();
+  //  h_xB->Draw();
   cvs_electron_kin->cd(2);
-  h_QSq->Draw();
+  //  h_QSq->Draw();
   cvs_electron_kin->cd(3);
-  h_WSq->Draw();
+  //  h_WSq->Draw();
   cvs_electron_kin->cd(4);
-  h_xB_QSq->Draw("colz");
+  //  h_xB_QSq->Draw("colz");
   cvs_electron_kin->cd(5);
-  h_xB_WSq->Draw("colz");
+  //  h_xB_WSq->Draw("colz");
   cvs_electron_kin->cd(6);
-  h_QSq_WSq->Draw("colz");
+  //  h_QSq_WSq->Draw("colz");
 
   //  cvs_electron_kin->SaveAs("electron_kinematics.pdf");
 
   TCanvas *cvs_proton = new TCanvas("cvs_proton","cvs_proton",pixelx,pixely);
-  cvs_proton->Divide(2,3);
+  cvs_proton->Divide(3,2);
+
   cvs_proton->cd(1);
-  h_theta_L->Draw("colz");
+  pid_p_fd->Draw("colz");
   cvs_proton->cd(2);
-  h_theta_Lq->Draw("colz");
+  h_theta_L->Draw("colz");
   cvs_proton->cd(3);
-
+  h_theta_Lq->Draw("colz");
   cvs_proton->cd(4);
-
+  pid_p_cd->Draw("colz");
   cvs_proton->cd(5);
 
   cvs_proton->cd(6);
-
-
+  h_theta_L_pq->Draw("colz");
+  leadp_src_cut->Draw("same");
 
   TCanvas *cvs_lead_proton = new TCanvas("cvs_lead_proton","cvs_lead_proton",pixelx,pixely);
-  cvs_lead_proton->Divide(2,3);
+  cvs_lead_proton->Divide(3,2);
 
   cvs_lead_proton->cd(1);
   h_theta_L_FTOF->Draw();
@@ -836,7 +917,7 @@ int main(int argc, char ** argv)
 
 
   TCanvas *cvs_lead_proton_2 = new TCanvas("cvs_lead_proton_2","cvs_lead_proton_2",pixelx,pixely);
-  cvs_lead_proton_2->Divide(2,3);
+  cvs_lead_proton_2->Divide(3,2);
 
   cvs_lead_proton_2->cd(1);
   h_xB_theta_1q->Draw("colz");
@@ -847,7 +928,7 @@ int main(int argc, char ** argv)
 
 
   TCanvas *cvs_leadsrc_proton = new TCanvas("cvs_leadsrc_proton","cvs_leadsrc_proton",pixelx,pixely);
-  cvs_leadsrc_proton->Divide(2,4);
+  cvs_leadsrc_proton->Divide(4,2);
 
   cvs_leadsrc_proton->cd(1);
   h_pmiss->Draw();
