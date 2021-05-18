@@ -14,6 +14,7 @@
 #include <TCutG.h>
 #include <TH1.h>
 #include <TH2.h>
+#include <TLatex.h>
 #include <TChain.h>
 #include <TCanvas.h>
 #include <TBenchmark.h>
@@ -90,19 +91,13 @@ void monitorPID(int argc, char** argv){
 
 void Usage()
 {
-  std::cerr << "Usage: ./monitorPID <MC =1,Data = 0> <path/to/ouput.root>  <path/to/input.hipo> \n\n\n";
+  std::cerr << "Usage: ./monitorPID <MC =1,Data = 0> <path/to/ouput.root> <path/to/ouput.pdf>  <path/to/input.hipo> \n\n\n";
 
 }
 
 
 int main(int argc, char ** argv)
 {
-
-  gStyle->SetTitleXSize(0.06);
-  gStyle->SetTitleYSize(0.06);
-
-  gStyle->SetTitleXOffset(0.8);
-  gStyle->SetTitleYOffset(0.8);
 
   if(argc < 3)
     {
@@ -113,137 +108,62 @@ int main(int argc, char ** argv)
   /////////////////////////////////////
   //  TString opt=gApplication->Argv(3);
   TString out = argv[2]; 
-  TFile * outFile = new TFile(out,"RECREATE");
+  TFile * outFile = new TFile(argv[2],"RECREATE");
   vector<TH1*> hist_list_1;
   vector<TH2*> hist_list_2;
 
-  TString mc= argv[1];
   bool isMC = false;
-  if(mc == 1){isMC=true;}
+  if(atoi(argv[1]) == 1){isMC=true;}
+
+  gStyle->SetTitleXSize(0.05);
+  gStyle->SetTitleYSize(0.05);
+
+  gStyle->SetTitleXOffset(0.8);
+  gStyle->SetTitleYOffset(0.8);
 
   /////////////////////////////////////
   //Electron fiducials
   /////////////////////////////////////
-  TH2D * h_Vcal_EoP = new TH2D("Vcal_EoP","Vcal vs. EoP ;Vcal;EoP",60,0,30,150,0.05,0.40);
+  TH2D * h_Vcal_EoP = new TH2D("Vcal_EoP","ECAL V coordinate vs. Sampling Fraction ;ECAL V coordinate;Sampling Fraction",60,0,30,150,0.05,0.40);
   hist_list_2.push_back(h_Vcal_EoP);
-  TH2D * h_Wcal_EoP = new TH2D("Wcal_EoP","Wcal vs. EoP ;Wcal;EoP",60,0,30,150,0.05,0.40);
+  TH2D * h_Wcal_EoP = new TH2D("Wcal_EoP","ECAL W coordinate vs. Sampling Fraction ;ECAL W coordinate;Sampling Fraction",60,0,30,150,0.05,0.40);
   hist_list_2.push_back(h_Wcal_EoP);
-  TH2D * h_phi_theta = new TH2D("phi_theta","phi vs. theta ;phi;theta",100,-180,180,100,5,40);
+  TH2D * h_phi_theta = new TH2D("phi_theta","#phi_{e} vs. #theta_{e} ;#phi_{e};#theta_{e}",100,-180,180,100,5,40);
   hist_list_2.push_back(h_phi_theta);
-  TH1D * h_sector = new TH1D("sector","sector;sector",6,1,7);
+  TH1D * h_sector = new TH1D("sector","ECAL Sector;Sector;Counts",6,1,7);
   hist_list_1.push_back(h_sector);
-
-
-
-  h_Vcal_EoP -> GetXaxis()->SetTitle("ECAL V coordinate (cm)");
-  h_Vcal_EoP -> GetYaxis()->SetTitle("Sampling Fraction");
-  h_Vcal_EoP -> GetXaxis()->CenterTitle();
-  h_Vcal_EoP -> GetYaxis()->CenterTitle();
-
-  h_Wcal_EoP -> GetXaxis()->SetTitle("ECAL W coordinate (cm)");
-  h_Wcal_EoP -> GetYaxis()->SetTitle("Sampling Fraction");
-  h_Wcal_EoP -> GetXaxis()->CenterTitle();
-  h_Wcal_EoP -> GetYaxis()->CenterTitle();
-
-
-  h_phi_theta ->SetTitle("Electron Angles");
-  h_phi_theta -> GetXaxis()->SetTitle("#phi Angle (Degrees)");
-  h_phi_theta -> GetYaxis()->SetTitle("#theta Angle (Degrees)");
-  h_phi_theta -> GetXaxis()->CenterTitle();
-  h_phi_theta -> GetYaxis()->CenterTitle();
-
-  h_sector -> GetXaxis()->SetTitle("ECAL Sector");
-  h_sector -> GetYaxis()->SetTitle("Counts");
-  h_sector -> GetXaxis()->CenterTitle();
-  h_sector -> GetYaxis()->CenterTitle();
 
   /////////////////////////////////////
   //Electron Pid
   /////////////////////////////////////
-  TH2D * h_P_EoP = new TH2D("P_EoP","P vs. EoP ;P;EoP",100,0,7,100,0.15,0.35);
+  TH2D * h_P_EoP = new TH2D("P_EoP","p_{e} vs. Sampling Fraction ;p_{e};Sampling Faction",100,0,7,100,0.15,0.35);
   hist_list_2.push_back(h_P_EoP);
-  TH1D * h_nphe = new TH1D("nphe","nphe;nphe",100,0,100);
+  TH1D * h_nphe = new TH1D("nphe","#Photo-electrons in HTCC;#Photo-electrons;Counts",100,0,50);
   hist_list_1.push_back(h_nphe);
   
-
-  h_P_EoP -> GetXaxis()->SetTitle("Electron Momentum (GeV)");
-  h_P_EoP -> GetYaxis()->SetTitle("Sampling Fraction");
-  h_P_EoP -> GetXaxis()->CenterTitle();
-  h_P_EoP -> GetYaxis()->CenterTitle();
-
-
-  h_nphe -> GetXaxis()->SetTitle("#Electrons Cherenkov Counter");
-  h_nphe -> GetYaxis()->SetTitle("Counts");
-  h_nphe -> GetXaxis()->CenterTitle();
-  h_nphe -> GetYaxis()->CenterTitle();
-
   /////////////////////////////////////
   //Electron Kinematics  
   /////////////////////////////////////
-  TH1D * h_xB = new TH1D("xB","xB;xB",100,0,2);
+  TH1D * h_xB = new TH1D("xB","x_{B};x_{B};Counts",100,0,2);
   hist_list_1.push_back(h_xB);
-  TH1D * h_QSq = new TH1D("QSq","QSq;QSq",100,0,3);
+  TH1D * h_QSq = new TH1D("QSq","Q^{2};Q^{2};Counts",100,0,3);
   hist_list_1.push_back(h_QSq);
-  TH1D * h_WSq = new TH1D("WSq","WSq;WSq",100,0,7);
+  TH1D * h_WSq = new TH1D("WSq","W^{2};W^{2}",100,0,7);
   hist_list_1.push_back(h_WSq);
-  TH2D * h_xB_QSq = new TH2D("xB_QSq","xB vs. QSq ;xB;QSq",100,0,2,100,0,3);
+  TH2D * h_xB_QSq = new TH2D("xB_QSq","x_{B} vs. Q^{2} ;x_{B};Q^{2}",100,0,2,100,0,3);
   hist_list_2.push_back(h_xB_QSq);
-  TH2D * h_xB_WSq = new TH2D("xB_WSq","xB vs. WSq ;xB;WSq",100,0,2,100,0,7);
+  TH2D * h_xB_WSq = new TH2D("xB_WSq","x_{B} vs. W^{2} ;x_{B};W^{2}",100,0,2,100,0,7);
   hist_list_2.push_back(h_xB_WSq);
-  TH2D * h_QSq_WSq = new TH2D("QSq_WSq","QSq vs. WSq ;QSq;WSq",100,0,3,100,0,7);
+  TH2D * h_QSq_WSq = new TH2D("QSq_WSq","Q^{2} vs. W^{2} ;Q^{2};W^{2}",100,0,3,100,0,7);
   hist_list_2.push_back(h_QSq_WSq);
-
-  h_xB -> GetXaxis()->SetTitle("#chi_{B}");
-  h_xB -> GetYaxis()->SetTitle("Counts");
-  h_xB -> GetXaxis()->CenterTitle();
-  h_xB -> GetYaxis()->CenterTitle();
-
-  h_QSq -> GetXaxis()->SetTitle("Q^{2} (GeV^{2})");
-  h_QSq -> GetYaxis()->SetTitle("Counts");
-  h_QSq -> GetXaxis()->CenterTitle();
-  h_QSq -> GetYaxis()->CenterTitle();
-
-  h_WSq -> GetXaxis()->SetTitle("W^{2} (GeV^{2})");
-  h_WSq -> GetYaxis()->SetTitle("Counts");
-  h_WSq -> GetXaxis()->CenterTitle();
-  h_WSq -> GetYaxis()->CenterTitle();
-
-  h_xB_QSq -> GetXaxis()->SetTitle("X_{B}");
-  h_xB_QSq -> GetYaxis()->SetTitle("Q^{2} (GeV^{2})");
-  h_xB_QSq -> GetXaxis()->CenterTitle();
-  h_xB_QSq -> GetYaxis()->CenterTitle();
-
-  h_xB_WSq -> GetXaxis()->SetTitle("X_{B}");
-  h_xB_WSq -> GetYaxis()->SetTitle("W^{2} (GeV^{2})");
-  h_xB_WSq -> GetXaxis()->CenterTitle();
-  h_xB_WSq -> GetYaxis()->CenterTitle();
-
-  h_QSq_WSq -> GetXaxis()->SetTitle("Q^{2} (GeV^{2})");
-  h_QSq_WSq -> GetYaxis()->SetTitle("W^{2} (GeV^{2})");
-  h_QSq_WSq -> GetXaxis()->CenterTitle();
-  h_QSq_WSq -> GetYaxis()->CenterTitle();
-
 
   /////////////////////////////////////
   //All Proton Angles
   /////////////////////////////////////
-  TH1D * h_theta_L = new TH1D("theta_L","theta_L;theta_L",180,0,180);
+  TH1D * h_theta_L = new TH1D("theta_L","#theta_{proton};#theta_{proton};Counts",180,0,180);
   hist_list_1.push_back(h_theta_L);
-  TH1D * h_theta_Lq = new TH1D("theta_Lq","theta_Lq;theta_Lq",180,0,180);
+  TH1D * h_theta_Lq = new TH1D("theta_Lq","#theta_{pq};#theta_{pq};Counts",180,0,180);
   hist_list_1.push_back(h_theta_Lq);
-
-
-  h_theta_L -> GetXaxis()->SetTitle("#theta_{proton}");
-  h_theta_L -> GetYaxis()->SetTitle("Counts");
-  h_theta_L -> GetXaxis()->CenterTitle();
-  h_theta_L -> GetYaxis()->CenterTitle();
-
-
-  h_theta_Lq -> GetXaxis()->SetTitle("#theta_{pq}");
-  h_theta_Lq -> GetYaxis()->SetTitle("Counts");
-  h_theta_Lq -> GetXaxis()->CenterTitle();
-  h_theta_Lq -> GetYaxis()->CenterTitle();
-
 
   /////////////////////////////////////
   //All Neutron Angles
@@ -268,23 +188,25 @@ int main(int argc, char ** argv)
   /////////////////////////////////////
   //Lead Proton Checks
   /////////////////////////////////////
-  TH1D * h_theta_L_FTOF = new TH1D("theta_L_FTOF","theta_L;theta_L",180,0,180);
+  TH1D * h_theta_L_FTOF = new TH1D("theta_L_FTOF","#theta_{proton} Lead;theta_{proton}",180,0,180);
   hist_list_1.push_back(h_theta_L_FTOF);
-  TH1D * h_theta_Lq_FTOF = new TH1D("theta_Lq_FTOF","theta_Lq_FTOF;theta_Lq",180,0,180);
+  TH1D * h_theta_Lq_FTOF = new TH1D("theta_Lq_FTOF","#theta_{pq} Lead;#theta_{pq}",180,0,180);
   hist_list_1.push_back(h_theta_Lq_FTOF);
-  TH1D * h_phi_e_L = new TH1D("phi_e_L","phi_e minus phi_L;phi_e_L",180,0,180);
+  TH1D * h_phi_e_L = new TH1D("phi_e_L","|#phi_{e} - #phi_{p}|;|#phi_{e} - #phi_{p}|,Counts",180,0,180);
   hist_list_1.push_back(h_phi_e_L);
-  TH2D * h_mmiss_phi_e_L = new TH2D("mmiss_phi_e_L","mmiss vs. phi_e minus phi_L;mmiss;phi_e_L",100,0.4,1.4,180,0,180);
+  TH1D * h_mmiss_FTOF = new TH1D("mmiss_FTOF","m_{miss};m_{miss};Counts",100,0.4,1.4);
+  hist_list_1.push_back(h_mmiss_FTOF);
+  TH2D * h_mmiss_phi_e_L = new TH2D("mmiss_phi_e_L","m_{miss} vs. |#phi_{e} - #phi_{p}|;m_{miss};|#phi_{e} - #phi_{p}",100,0.4,1.4,180,0,180);
   hist_list_2.push_back(h_mmiss_phi_e_L);
-  TH2D * h_xB_mmiss = new TH2D("xB_mmiss","xB vs. mmiss;xB;mmiss",100,0,2,100,0.4,1.4);
+  TH2D * h_xB_mmiss = new TH2D("xB_mmiss","x_{B} vs. m_{miss};xB;mmiss",100,0,2,100,0.4,1.4);
   hist_list_2.push_back(h_xB_mmiss);
-  TH2D * h_pmiss_mmiss = new TH2D("pmiss_mmiss","pmiss vs. mmiss;pmiss;mmiss",100,0,1.5,100,0.4,1.4);
+  TH2D * h_pmiss_mmiss = new TH2D("pmiss_mmiss","p_{miss} vs. m_{miss};p_{miss};m_{miss}",100,0,1.5,100,0.4,1.4);
   hist_list_2.push_back(h_pmiss_mmiss);
-  TH2D * h_xB_theta_1q = new TH2D("xB_theta_1q","xB vs. theta_1q;xB;theta_1q",100,0,2,180,0,180);
+  TH2D * h_xB_theta_1q = new TH2D("xB_theta_1q","x_{B} vs. #theta_{p_{i},q};x_{B};#theta_{p_{i},q}",100,0,2,180,0,180);
   hist_list_2.push_back(h_xB_theta_1q);
-  TH2D * h_Loq_theta_1q = new TH2D("Loq_theta_1q","Loq vs. theta_1q;Loq;theta_1q",100,0,1.5,180,0,180);
+  TH2D * h_Loq_theta_1q = new TH2D("Loq_theta_1q","|p|/|q| vs. #theta_{p_{i},q};Loq;theta_1q",100,0,1.5,180,0,180);
   hist_list_2.push_back(h_Loq_theta_1q);
-  TH2D * h_pmiss_theta_miss = new TH2D("pmiss_theta_miss","pmiss vs theta_miss;pmiss;theta_miss",100,0,1.5,180,0,180);
+  TH2D * h_pmiss_theta_miss = new TH2D("pmiss_theta_miss","p_{miss} vs. #theta_{miss};pmiss;theta_miss",100,0,1.5,180,0,180);
   hist_list_2.push_back(h_pmiss_theta_miss);
 
 
@@ -337,21 +259,21 @@ int main(int argc, char ** argv)
   /////////////////////////////////////
   //Lead SRC Proton Checks
   /////////////////////////////////////
-  TH1D * h_pmiss = new TH1D("pmiss","pmiss;pmiss",100,0,1.5);
+  TH1D * h_pmiss = new TH1D("pmiss","p_{miss};pmiss",100,0,1.5);
   hist_list_1.push_back(h_pmiss);
-  TH1D * h_mmiss = new TH1D("mmiss","mmiss;mmiss",100,0.4,1.4);
+  TH1D * h_mmiss = new TH1D("mmiss","m_{miss};mmiss",100,0.4,1.4);
   hist_list_1.push_back(h_mmiss);
-  TH2D * h_pmiss_theta_miss_SRC = new TH2D("pmiss_theta_miss_SRC","pmiss vs theta_miss SRC;pmiss;theta_1",100,0,1.5,180,0,180);
+  TH2D * h_pmiss_theta_miss_SRC = new TH2D("pmiss_theta_miss_SRC","p_{miss} vs. #theta_{miss};pmiss;theta_1",100,0,1.5,180,0,180);
   hist_list_2.push_back(h_pmiss_theta_miss_SRC);
-  TH2D * h_xB_Loq_SRC = new TH2D("xB_Loq","xB vs Loq SRC;xB;Loq",100,0,2,100,0,1.5);
+  TH2D * h_xB_Loq_SRC = new TH2D("xB_Loq","x_{B} vs |p|/|q|;xB;Loq",100,0,2,100,0,1.5);
   hist_list_2.push_back(h_xB_Loq_SRC);
 
 
-  TH1D * h_pmiss_tight = new TH1D("pmiss_tight","pmiss;pmiss",100,0,1.5);
+  TH1D * h_pmiss_tight = new TH1D("pmiss_tight","p_{miss};pmiss",100,0,1.5);
   hist_list_1.push_back(h_pmiss_tight);
-  TH1D * h_mmiss_tight = new TH1D("mmiss_tight","mmiss;mmiss",100,0.4,1.4);
+  TH1D * h_mmiss_tight = new TH1D("mmiss_tight","m_{miss};mmiss",100,0.4,1.4);
   hist_list_1.push_back(h_mmiss_tight);
-  TH2D * h_pmiss_theta_miss_SRC_tight = new TH2D("pmiss_theta_miss_SRC_tight","pmiss vs theta_miss SRC;pmiss;theta_1",100,0,1.5,180,0,180);
+  TH2D * h_pmiss_theta_miss_SRC_tight = new TH2D("pmiss_theta_miss_SRC_tight","p_{miss} vs. #theta_{miss};pmiss;theta_1",100,0,1.5,180,0,180);
   hist_list_2.push_back(h_pmiss_theta_miss_SRC_tight);
   
 
@@ -400,63 +322,67 @@ int main(int argc, char ** argv)
   TH1D * h_p_2 = new TH1D("p_2","p Recoil;p_2",100,0,1.5);
   hist_list_1.push_back(h_p_2);
 
-  TH1D * h_num_R_tight = new TH1D("num_R_tight","num Recoil;num_R",5,0,5);
+  TH1D * h_num_R_tight = new TH1D("num_R_tight","#Recoil Protons;#Recoil Protons;Counts",5,0,5);
   hist_list_1.push_back(h_num_R_tight);
-  TH1D * h_p_2_tight = new TH1D("p_2_tight","p Recoil;p_2",100,0,1.5);
+  TH1D * h_p_2_tight = new TH1D("p_2_tight","p_{rec};p_{rec};Counts",100,0,1.5);
   hist_list_1.push_back(h_p_2_tight);
   
   /////////////////////////////////////
   //Recoil SRC Nucleons
   /////////////////////////////////////
-  TH1D * h_p_2_high = new TH1D("p_2_high","p Recoil;p_2",100,0,1.5);
+  TH1D * h_p_2_high = new TH1D("p_2_high","p_{rec};p_{rec};Counts",100,0,1.5);
   hist_list_1.push_back(h_p_2_high);
-  TH1D * h_p_rel = new TH1D("p_rel","p Relative;p_rel",100,0,1.5);
+  TH1D * h_p_rel = new TH1D("p_rel","p_{rel};p_{rel};Counts",100,0,1.5);
   hist_list_1.push_back(h_p_rel);
-  TH1D * h_p_cm = new TH1D("p_cm","p CM;p_cm",100,0,0.5);
+  TH1D * h_p_cm = new TH1D("p_cm","p_{C.M.};p_{C.M.};Counts",100,0,0.5);
   hist_list_1.push_back(h_p_cm);
-  TH1D * h_p_t_cm = new TH1D("p_t_cm","p_t CM;p_t_cm",100,-0.5,0.5);
+  TH1D * h_p_t_cm = new TH1D("p_t_cm","p_{t,C.M.};p_{t,C.M.};Counts",100,-0.5,0.5);
   hist_list_1.push_back(h_p_t_cm);
-  TH1D * h_p_y_cm = new TH1D("p_y_cm","p_y CM;p_y_cm",100,-0.5,0.5);
+  TH1D * h_p_y_cm = new TH1D("p_y_cm","p_{y,C.M.};p_{y,C.M.};Counts",100,-0.5,0.5);
   hist_list_1.push_back(h_p_y_cm);
-  TH1D * h_p_x_cm = new TH1D("p_x_cm","p_x CM;p_x_cm",100,-0.5,0.5);
+  TH1D * h_p_x_cm = new TH1D("p_x_cm","p_{x,C.M.};p_{x,C.M.};Counts",100,-0.5,0.5);
   hist_list_1.push_back(h_p_x_cm);
-  TH1D * h_theta_rel = new TH1D("theta_rel","theta Relative;theta_rel",180,0,180);
+  TH1D * h_theta_rel = new TH1D("theta_rel","#theta_{rel};#theta_{rel};Counts",180,0,180);
   hist_list_1.push_back(h_theta_rel);
-  TH2D * h_p_cm_theta_rel = new TH2D("p_cm_theta_rel","p CM vs. theta Relative;p_cm;theta_rel",100,0,0.5,180,0,180);
+  TH2D * h_p_cm_theta_rel = new TH2D("p_cm_theta_rel","p_{C.M.} vs. #theta_{rel};p_{C.M.};#theta_{rel}",100,0,0.5,180,0,180);
   hist_list_2.push_back(h_p_cm_theta_rel);
 
-  TH1D * h_p_2_high_tight = new TH1D("p_2_high_tight","p Recoil;p_2",100,0,1.5);
+  TH1D * h_p_2_high_tight = new TH1D("p_2_high_tight","p_{rec};p_{rec};Counts",100,0,1.5);
   hist_list_1.push_back(h_p_2_high_tight);
-  TH1D * h_p_rel_tight = new TH1D("p_rel_tight","p Relative;p_rel",100,0,1.5);
+  TH1D * h_p_rel_tight = new TH1D("p_rel_tight","p_{rel};p_{rel};Counts",100,0,1.5);
   hist_list_1.push_back(h_p_rel_tight);
-  TH1D * h_p_cm_tight = new TH1D("p_cm_tight","p CM;p_cm",100,0,0.5);
+  TH1D * h_p_cm_tight = new TH1D("p_cm_tight","p_{C.M.};p_{C.M.};Counts",100,0,0.5);
   hist_list_1.push_back(h_p_cm_tight);
-  TH1D * h_p_t_cm_tight = new TH1D("p_t_cm_tight","p_t CM;p_t_cm",100,-0.5,0.5);
+  TH1D * h_p_t_cm_tight = new TH1D("p_t_cm_tight","p_{t,C.M.};p_{t,C.M.};Counts",100,-0.5,0.5);
   hist_list_1.push_back(h_p_t_cm_tight);
-  TH1D * h_p_y_cm_tight = new TH1D("p_y_cm_tight","p_y CM;p_y_cm",100,-0.5,0.5);
+  TH1D * h_p_y_cm_tight = new TH1D("p_y_cm_tight","p_{y,C.M.};p_{y,C.M.};Counts",100,-0.5,0.5);
   hist_list_1.push_back(h_p_y_cm_tight);
-  TH1D * h_p_x_cm_tight = new TH1D("p_x_cm_tight","p_x CM;p_x_cm",100,-0.5,0.5);
+  TH1D * h_p_x_cm_tight = new TH1D("p_x_cm_tight","p_{x,C.M.};p_{x,C.M.};Counts",100,-0.5,0.5);
   hist_list_1.push_back(h_p_x_cm_tight);
-  TH1D * h_theta_rel_tight = new TH1D("theta_rel_tight","theta Relative;theta_rel",180,0,180);
+  TH1D * h_theta_rel_tight = new TH1D("theta_rel_tight","#theta_{rel};#theta_{rel};Counts",180,0,180);
   hist_list_1.push_back(h_theta_rel_tight);
-  TH2D * h_p_cm_theta_rel_tight = new TH2D("p_cm_theta_rel_tight","p CM vs. theta Relative;p_cm;theta_rel",100,0,0.5,180,0,180);
+  TH2D * h_p_cm_theta_rel_tight = new TH2D("p_cm_theta_rel_tight","p_{C.M.} vs. #theta_{rel};p_{C.M.};#theta_{rel}",100,0,0.5,180,0,180);
   hist_list_2.push_back(h_p_cm_theta_rel_tight);
 
 
   for(int i=0; i<hist_list_1.size(); i++){
     hist_list_1[i]->Sumw2();
+    hist_list_1[i]->GetXaxis()->CenterTitle();
+    hist_list_1[i]->GetYaxis()->CenterTitle();
   }
   for(int i=0; i<hist_list_2.size(); i++){
     hist_list_2[i]->Sumw2();
+    hist_list_2[i]->GetXaxis()->CenterTitle();
+    hist_list_2[i]->GetYaxis()->CenterTitle();
   }
   
   int counter = 0;
   
   clas12root::HipoChain chain;
-  TString inputFile = argv[3];
-
-  cout<<"Input file "<<inputFile<<endl;
-  chain.Add(inputFile);
+  for(int k = 4; k < argc; k++){
+    cout<<"Input file "<<argv[k]<<endl;
+    chain.Add(argv[k]);
+  }
   auto config_c12=chain.GetC12Reader();
   chain.SetReaderTags({0});
   auto& c12=chain.C12ref();
@@ -495,8 +421,6 @@ int main(int argc, char ** argv)
       h_phi_theta->Fill(p_e.Phi()*180/M_PI,p_e.Theta()*180/M_PI,weight);
       h_sector->Fill(electrons[0]->getSector(),weight);
 
-      if(electrons[0]->cal(ECIN)->getLv() < 14){ continue; }
-      if(electrons[0]->cal(ECIN)->getLw() < 14){ continue; }
 	  
   /////////////////////////////////////
   //Electron Pid
@@ -504,6 +428,8 @@ int main(int argc, char ** argv)
       h_P_EoP->Fill(p_e.Mag(),EoP_e,weight);
       h_nphe->Fill(electrons[0]->che(HTCC)->getNphe(),weight);
 
+      if(electrons[0]->cal(ECIN)->getLv() < 14){ continue; }
+      if(electrons[0]->cal(ECIN)->getLw() < 14){ continue; }
       if(EoP_e < 0.18){ continue; }
       if(EoP_e > 0.28){ continue; }
       if(p_e.Mag() < 1){ continue; }
@@ -512,7 +438,6 @@ int main(int argc, char ** argv)
 	if(electrons[0]->par()->getVz() < -5){continue;}
 	if(electrons[0]->par()->getVz() > -1){continue;}
       }
-
   /////////////////////////////////////
   //Electron Kinematics  
   /////////////////////////////////////
@@ -619,6 +544,7 @@ int main(int argc, char ** argv)
 	h_theta_Lq_FTOF->Fill(theta_Lq,weight);
 
 	h_phi_e_L->Fill(phi_diff,weight);
+	h_mmiss_FTOF->Fill(mmiss,weight);
 	h_mmiss_phi_e_L->Fill(mmiss,phi_diff,weight);
 	h_xB_mmiss->Fill(xB,mmiss,weight);
 	h_pmiss_mmiss->Fill(p_miss.Mag(),mmiss,weight);
@@ -755,6 +681,10 @@ int main(int argc, char ** argv)
   }
 
 
+  /////////////////////////////////////////////////////
+  //Now create the output PDFs
+  /////////////////////////////////////////////////////
+
   int pixelx = 1980;
   int pixely = 1530;
 
@@ -795,7 +725,7 @@ int main(int argc, char ** argv)
   //  cvs_electron_kin->SaveAs("electron_kinematics.pdf");
 
   TCanvas *cvs_proton = new TCanvas("cvs_proton","cvs_proton",pixelx,pixely);
-  cvs_proton->Divide(2,3);
+  cvs_proton->Divide(2,2);
   cvs_proton->cd(1);
   h_theta_L->Draw("colz");
   cvs_proton->cd(2);
@@ -804,34 +734,31 @@ int main(int argc, char ** argv)
 
   cvs_proton->cd(4);
 
-  cvs_proton->cd(5);
-
-  cvs_proton->cd(6);
 
 
+  TCanvas *cvs_lead_proton_1 = new TCanvas("cvs_lead_proton_1","cvs_lead_proton_1",pixelx,pixely);
+  cvs_lead_proton_1->Divide(2,3);
 
-  TCanvas *cvs_lead_proton = new TCanvas("cvs_lead_proton","cvs_lead_proton",pixelx,pixely);
-  cvs_lead_proton->Divide(2,3);
-
-  cvs_lead_proton->cd(1);
+  cvs_lead_proton_1->cd(1);
   h_theta_L_FTOF->Draw();
-  cvs_lead_proton->cd(2);
+  cvs_lead_proton_1->cd(2);
   h_theta_Lq_FTOF->Draw();
-  cvs_lead_proton->cd(3);
+  cvs_lead_proton_1->cd(3);
   h_phi_e_L->Draw();
-  cvs_lead_proton->cd(4);
+  cvs_lead_proton_1->cd(4);
+  h_mmiss_FTOF->Draw();
+  cvs_lead_proton_1->cd(5);
   h_mmiss_phi_e_L->Draw("colz");
-  cvs_lead_proton->cd(5);
+  cvs_lead_proton_1->cd(6);
   h_xB_mmiss->Draw("colz");
-  cvs_lead_proton->cd(6);
+
+  cvs_lead_proton_1->cd(7);
   h_pmiss_mmiss->Draw("colz");
-
-
-  cvs_lead_proton->cd(7);
+  cvs_lead_proton_1->cd(8);
   h_xB_theta_1q->Draw("colz");
-  cvs_lead_proton->cd(8);
+  cvs_lead_proton_1->cd(9);
   h_Loq_theta_1q->Draw("colz");
-  cvs_lead_proton->cd(9);
+  cvs_lead_proton_1->cd(10);
   h_pmiss_theta_miss->Draw("colz");
 
 
@@ -847,35 +774,133 @@ int main(int argc, char ** argv)
 
 
   TCanvas *cvs_leadsrc_proton = new TCanvas("cvs_leadsrc_proton","cvs_leadsrc_proton",pixelx,pixely);
-  cvs_leadsrc_proton->Divide(2,4);
+  cvs_leadsrc_proton->Divide(2,3);
 
   cvs_leadsrc_proton->cd(1);
-  h_pmiss->Draw();
-  cvs_leadsrc_proton->cd(2);
-  h_mmiss->Draw();
-  cvs_leadsrc_proton->cd(3);
-  h_pmiss_theta_miss_SRC->Draw();
-  cvs_leadsrc_proton->cd(4);
-  h_xB_Loq_SRC->Draw("colz");
-  cvs_leadsrc_proton->cd(5);
   h_pmiss_tight->Draw();
-  cvs_leadsrc_proton->cd(6);
+  cvs_leadsrc_proton->cd(2);
   h_mmiss_tight->Draw();
-  cvs_leadsrc_proton->cd(7);
+  cvs_leadsrc_proton->cd(3);
   h_pmiss_theta_miss_SRC_tight->Draw("colz");
 
 
+  TCanvas *cvs_rec_proton = new TCanvas("cvs_rec_proton","cvs_rec_proton",pixelx,pixely);
+  cvs_rec_proton->Divide(2,3);
+  cvs_rec_proton->cd(1);
+  h_num_R_tight->Draw("colz");
+  cvs_rec_proton->cd(2);
+  h_p_2_tight->Draw("colz");
+  cvs_rec_proton->cd(3);
+
+  cvs_proton->cd(4);
+
+
+  TCanvas * myCanvas = new TCanvas("myPage","myPage",pixelx,pixely);
+  myCanvas->Divide(2,3);
+  myCanvas->cd(1);
+  h_p_2_high_tight->Draw();
+  myCanvas->cd(2);
+  h_p_rel_tight->Draw();
+  myCanvas->cd(3);
+  h_p_cm_tight->Draw();
+  myCanvas->cd(4);
+  h_p_t_cm_tight->Draw();
+  myCanvas->cd(5);
+  h_p_y_cm_tight->Draw();
+  myCanvas->cd(6);
+  h_p_x_cm_tight->Draw();
+
   //first pdf page needs ("
   //last pdf page needs )" becareful if you are haveing pdf display issues
-  cvs_electron->Print("output.pdf(","pdf");
-  cvs_electron_kin->Print("output.pdf","pdf");
-  cvs_proton->Print("output.pdf","pdf");
-  cvs_lead_proton->Print("output.pdf","pdf");
-  cvs_lead_proton_2->Print("output.pdf","pdf");
-  cvs_leadsrc_proton->Print("output.pdf)","pdf");
+
+  char fileName[100];
+  sprintf(fileName,"%s[",argv[3]);
+
+  TLatex text;
+  text.SetTextSize(0.05);
+  TCanvas * myText = new TCanvas("myText","myText",pixelx,pixely);
+  myText->SaveAs(fileName);
+  sprintf(fileName,"%s",argv[3]);
+
+  text.DrawLatex(0.2,0.9,"(e,e') Candidates:");
+  text.DrawLatex(0.2,0.8,"No Cuts");
+  myText->Print(fileName,"pdf");
+  myText->Clear();
+
+  cvs_electron->Print(fileName,"pdf");
+
+  text.DrawLatex(0.2,0.9,"(e,e') Cuts:");
+  text.DrawLatex(0.2,0.8,"V_{cal} and W_{cal} > 14 [cm]");
+  text.DrawLatex(0.2,0.7,"0.18 < SF < 0.28");
+  text.DrawLatex(0.2,0.6,"1 [GeV] < p_{e} < E_{beam}");
+  myText->Print(fileName,"pdf");
+  myText->Clear();
+
+  cvs_electron_kin->Print(fileName,"pdf");
+
+  text.DrawLatex(0.2,0.9,"(e,e'p) Cuts:");
+  text.DrawLatex(0.2,0.8,"(e,e') Cuts");
+  text.DrawLatex(0.2,0.7,"Proton Detected");
+  myText->Print(fileName,"pdf");
+  myText->Clear();
+
+
+  cvs_proton->Print(fileName,"pdf");
+
+  text.DrawLatex(0.2,0.9,"(e,e'p_{Lead}) Cuts:");
+  text.DrawLatex(0.2,0.8,"(e,e'p) Cuts");
+  text.DrawLatex(0.2,0.7,"FTOF Proton");
+  text.DrawLatex(0.2,0.6,"#theta_{p,q}<25^{o}");
+  text.DrawLatex(0.2,0.5,"-3 < #chi^{2} PID<3 ");
+  text.DrawLatex(0.2,0.4,"#theta_{p} <50^{o}");
+  myText->Print(fileName,"pdf");
+  myText->Clear();
+
+  cvs_lead_proton_1->Print(fileName,"pdf");
+  cvs_lead_proton_2->Print(fileName,"pdf");
+
+  text.DrawLatex(0.2,0.9,"(e,e'p_{Lead,SRC}) Cuts:");
+  text.DrawLatex(0.2,0.8,"(e,e'p_{LEAD}) Cuts");
+  text.DrawLatex(0.2,0.7,"1.5 < Q^{2} [GeV]");
+  text.DrawLatex(0.2,0.6,"0.25 [GeV] < p_{miss}");
+  text.DrawLatex(0.2,0.5,"0.84 [GeV] < m_{mmiss} < 1.04 [GeV]");
+  text.DrawLatex(0.2,0.4,"0.62 < |p|/|q| < 0.96");
+  text.DrawLatex(0.2,0.3,"1.2 < x_{B}");
+  myText->Print(fileName,"pdf");
+  myText->Clear();
+
+  cvs_leadsrc_proton->Print(fileName,"pdf");
+
+  text.DrawLatex(0.2,0.9,"(e,e'p_{Lead,SRC}p_{Rec}) Cuts:");
+  text.DrawLatex(0.2,0.8,"(e,e'p_{LEAD,SRC}) Cuts");
+  text.DrawLatex(0.2,0.7,"Second Proton Detected");
+  myText->Print(fileName,"pdf");
+  myText->Clear();
+
+  cvs_rec_proton->Print(fileName,"pdf");
+
+  text.DrawLatex(0.2,0.9,"(e,e'p_{Lead,SRC}p_{Rec,SRC}) Cuts:");
+  text.DrawLatex(0.2,0.8,"(e,e'p_{LEAD,SRC},p_{Rec}) Cuts");
+  text.DrawLatex(0.2,0.7,"0.25 [GeV] < p_{Rec}");
+  myText->Print(fileName,"pdf");
+  myText->Clear();
+
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+  myCanvas->Divide(2,3);
+  myCanvas->cd(1);
+  h_theta_rel->Draw();
+  myCanvas->cd(2);
+  h_p_cm_theta_rel->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+
+
+  myCanvas->Clear();
+  sprintf(fileName,"%s]",argv[3]);
+  myCanvas->Print(fileName,"pdf");
 
   outFile->Close();
-  cout<<"Finished making file: "<< out <<"\n";
+  cout<<"Finished making file: "<< argv[2] <<"\n";
 
 
 
