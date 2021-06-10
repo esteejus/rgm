@@ -1,0 +1,3 @@
+[submodule "Simulation/GCF_Generator_Suite"]
+	path = Simulation/GCF_Generator_Suite
+	url = https://github.com/JacksonPybus/GCF_Generator_Suite.git
