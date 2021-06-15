@@ -1,4 +1,4 @@
-#Compile GCF generator
+# Compile GCF generator
 ```
 cd Simulation/GCF_Generator_Suite/
 ccmake ./src/
