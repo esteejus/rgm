@@ -18,6 +18,6 @@ source /group/clas12/packages/setup.sh
 module load clas12/pro
 module switch clas12root/1.7.2
 
-srun gemc -USE_GUI=0  -SCALE_FIELD="TorusSymmetric, $TORUS" -SCALE_FIELD="clas12-newSolenoid, -1.0" -N=50000 -INPUT_GEN_FILE="lund, ../lundfiles/lund_qe_${RUN}_${SLURM_ARRAY_TASK_ID}.dat" -OUTPUT="evio, ../eviofiles/out_${RUN}_${SLURM_ARRAY_TASK_ID}_torus$TORUS.ev" /group/clas12/gemc/4.4.1/config/rgb_spring2019.gcard
-srun evio2hipo -t $TORUS -s -1 -i ../eviofiles/out_${RUN}_${SLURM_ARRAY_TASK_ID}_torus$TORUS.ev -o ../mchipo/qe_${RUN}_${SLURM_ARRAY_TASK_ID}_torus$TORUS.hipo
-srun recon-util -y /group/clas12/gemc/4.4.1/config/rgb_spring2019.yaml -i ../mchipo/qe_${RUN}_${SLURM_ARRAY_TASK_ID}_torus$TORUS.hipo -o ../reconhipo/recon_qe_${RUN}_${SLURM_ARRAY_TASK_ID}_torus$TORUS.hipo
+srun gemc -USE_GUI=0  -SCALE_FIELD="TorusSymmetric, $TORUS" -SCALE_FIELD="clas12-newSolenoid, -1.0" -N=50000 -INPUT_GEN_FILE="lund, ../../lundfiles/lund_qe_${RUN}_${SLURM_ARRAY_TASK_ID}.dat" -OUTPUT="evio, ../../eviofiles/out_${RUN}_${SLURM_ARRAY_TASK_ID}_torus$TORUS.ev" /group/clas12/gemc/4.4.1/config/rgb_spring2019.gcard
+srun evio2hipo -t $TORUS -s -1 -i ../../eviofiles/out_${RUN}_${SLURM_ARRAY_TASK_ID}_torus$TORUS.ev -o ../../mchipo/qe_${RUN}_${SLURM_ARRAY_TASK_ID}_torus$TORUS.hipo
+srun recon-util -y /group/clas12/gemc/4.4.1/config/rgb_spring2019.yaml -i ../../mchipo/qe_${RUN}_${SLURM_ARRAY_TASK_ID}_torus$TORUS.hipo -o ../../reconhipo/recon_qe_${RUN}_${SLURM_ARRAY_TASK_ID}_torus$TORUS.hipo
