@@ -1,4 +1,10 @@
-# rgm
-Run Group M repository for all codes related to the experiment. 
+# Run Group M 
+A repository for Run Group M. 
 
-git clone --recurse-submodules
+
+If you want to also clone the latest GCF generator to do simulations, clone using:
+
+```
+git clone --recurse-submodules https://github.com/esteejus/rgm.git
+```
+
