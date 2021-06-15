@@ -4,3 +4,6 @@
 *.pcm
 *.d
 *#
+*.ev
+*.hipo
+*.out
