@@ -3,9 +3,10 @@
 
 ```
 module load cmake
+module load clas12/dev
 mkdir build
 cd build
-cmake ../
+cmake ../ -DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_COMPILER=gcc
 make
 ```
 # Running Monitoring Code
