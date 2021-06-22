@@ -77,21 +77,10 @@ bool lowThetaCut(double theta, double chi2PID, double vtzDiff){
   
   return true;
 }
-/*
-void monitorPID(int argc, char** argv){
-
-  if( argc < 3 ){
-    cerr << "Incorrect number of arugments. Instead use:\n\t./code [outputRootFile] [inputFiles]... \n\n";
-    return;
-  }
-
-  TFile * outFile = new TFile(argv[1],"RECREATE");
-*/
-
 
 void Usage()
 {
-  std::cerr << "Usage: ./monitorPID <MC =1,Data = 0> <path/to/ouput.root> <path/to/ouput.pdf>  <path/to/input.hipo> \n\n\n";
+  std::cerr << "Usage: ./monitorPID <path/to/ouput.root> <path/to/ouput.pdf>  <path/to/input.hipo> \n\n\n";
 
 }
 
@@ -106,14 +95,41 @@ int main(int argc, char ** argv)
     }
 
   /////////////////////////////////////
-  //  TString opt=gApplication->Argv(3);
-  TString out = argv[2]; 
-  TFile * outFile = new TFile(argv[2],"RECREATE");
+  TString out = argv[1]; 
+  TFile * outFile = new TFile(argv[1],"RECREATE");
   vector<TH1*> hist_list_1;
   vector<TH2*> hist_list_2;
 
   bool isMC = false;
-  if(atoi(argv[1]) == 1){isMC=true;}
+  bool input_energy = false; 
+  double beam_energyIN = 0; //input beam energy which overides any info in RCDB or for simulation
+
+  for(;;)
+    {
+      switch(getopt(argc-3, &argv[3], "SE:")) // note the colon (:) to indicate that 'b' has a parameter and is not a switch
+	{
+	case 'S':
+	  printf("Simulation(MC) option 'S' specified\n");
+	  isMC = true;
+	  continue;
+	case 'E':
+	  printf("Beam Energy 'E' specified with the value %s\n (GeV)", optarg);
+	  input_energy = true;
+	  beam_energyIN = atof(optarg);
+	  continue;
+
+	case '?':
+	case 'h':
+	default :
+	  printf("Help/Usage Example\n");
+	  break;
+
+	case -1:
+	  break;
+	}
+
+      break;
+    }
 
   gStyle->SetTitleXSize(0.05);
   gStyle->SetTitleYSize(0.05);
@@ -377,34 +393,47 @@ int main(int argc, char ** argv)
   }
   
   int counter = 0;
+
+  //  clas12databases::SetCCDBRemoteConnection(); //not recommended
+  //  clas12databases::SetRCDBRemoteConnection(); //not recommended
   
+  //create a local database with PrepareDatabases.C supplied in ../ or $CLAS12ROOT/RunRoot/
+  clas12databases::SetCCDBLocalConnection("../ccdb.sqlite"); 
+  clas12databases::SetRCDBRootConnection("../rcdb.root");
+
   clas12root::HipoChain chain;
-  for(int k = 4; k < argc; k++){
-    cout<<"Input file "<<argv[k]<<endl;
-    chain.Add(argv[k]);
-  }
+  //  for(int k = 4; k < argc; k++){
+    cout<<"Input file "<<argv[3]<<endl;
+    chain.Add(argv[3]);
+    //  }
   auto config_c12=chain.GetC12Reader();
   chain.SetReaderTags({0});
   auto& c12=chain.C12ref();
 
+  auto& rcdbData= config_c12->rcdb()->current();//struct with all relevent rcdb values
+  auto Ebeam = rcdbData.beam_energy/1000;
 
-  double Ebeam = 4.247;
-  if(isMC){Ebeam=6;}
+  if( input_energy)
+    Ebeam = beam_energyIN;
 
-  while(chain.Next()==true){
+  while(chain.Next()==true)
+    {
+      if(!input_energy && counter == 0)
+	Ebeam = rcdbData.beam_energy/1000;
+      if(counter == 0)
+	cout<<"Beam Energy "<<Ebeam<<endl;
+
       //Display completed  
       counter++;
-      if((counter%100000) == 0){
-	//	printProgress(.5);
+      if((counter%100000) == 0)
 	cerr << counter <<" completed \n";
-      }    
+
       // get particles by type
       auto electrons=c12->getByID(11);
       auto protons=c12->getByID(2212);
       auto neutrons=c12->getByID(2112);
       double weight = 1;
-      if(isMC){weight=c12->mcevent()->getWeight()/10000;}
-      //cout<<"weight = "<<weight<<endl;
+      if(isMC){weight=c12->mcevent()->getWeight();}
       
 
   /////////////////////////////////////
@@ -814,13 +843,13 @@ int main(int argc, char ** argv)
   //last pdf page needs )" becareful if you are haveing pdf display issues
 
   char fileName[100];
-  sprintf(fileName,"%s[",argv[3]);
+  sprintf(fileName,"%s[",argv[2]);
 
   TLatex text;
   text.SetTextSize(0.05);
   TCanvas * myText = new TCanvas("myText","myText",pixelx,pixely);
   myText->SaveAs(fileName);
-  sprintf(fileName,"%s",argv[3]);
+  sprintf(fileName,"%s",argv[2]);
 
   text.DrawLatex(0.2,0.9,"(e,e') Candidates:");
   text.DrawLatex(0.2,0.8,"No Cuts");
@@ -896,11 +925,11 @@ int main(int argc, char ** argv)
 
 
   myCanvas->Clear();
-  sprintf(fileName,"%s]",argv[3]);
+  sprintf(fileName,"%s]",argv[2]);
   myCanvas->Print(fileName,"pdf");
 
   outFile->Close();
-  cout<<"Finished making file: "<< argv[2] <<"\n";
+  cout<<"Finished making file: "<< argv[1] <<"\n";
 
 
 
