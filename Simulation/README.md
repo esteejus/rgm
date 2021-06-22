@@ -1,9 +1,12 @@
+#Setup Environment on Farm
+```
+module load cmake
+module load clas12/dev
+```
+
 # Compile GCF generator
 ```
 cd Simulation/GCF_Generator_Suite/
-ccmake ./src/
-```
-Press [c] then [c] then [g]
-```
+cmake ./
 make
 ```
