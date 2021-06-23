@@ -1,9 +1,15 @@
 
 # Install Monitoring Code
 
+Setup environment 
 ```
 module load cmake
-module load clas12/dev
+module load sqlite/4.4.1
+module load clas12/pro
+module switch clas12root/1.7.3
+```
+
+```
 mkdir build
 cd build
 cmake ../ -DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_COMPILER=gcc
