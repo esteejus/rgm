@@ -48,8 +48,8 @@ void LUND_tagged(int iFile, TString prefix) {
 	double mass_p = 0.938272;	
 	double mass_n = 0.93957;
 
-	int targA = 40;
-	int targZ = 18;
+	int targA = 2;
+	int targZ = 1;
 	double targP = 0.; // polarization
 	double beamP = 0.; // polarization
 	int interactN = 1;
