@@ -14,7 +14,7 @@ using namespace std;
 void LUND_tagged(int iFile, TString prefix);
 
 
-void GCF_D_LUND(int nFiles = 1000, TString prefix = "") {
+void GCF_He_LUND(int nFiles = 1000, TString prefix = "") {
 
   for(int i = 1; i < nFiles+1; i++) 
     {
@@ -48,8 +48,8 @@ void LUND_tagged(int iFile, TString prefix) {
 	double mass_p = 0.938272;	
 	double mass_n = 0.93957;
 
-	int targA = 2;
-	int targZ = 1;
+	int targA = 4;
+	int targZ = 2;
 	double targP = 0.; // polarization
 	double beamP = 0.; // polarization
 	int interactN = 1;
