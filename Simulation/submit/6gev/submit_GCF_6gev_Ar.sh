@@ -1,6 +1,4 @@
-#!/bin/bash                                                                                  
-
-source /apps/root/6.18.04/bin/thisroot.csh 
+#!/bin/bash                                                                                   
 
 for i in {1..100}
 do
