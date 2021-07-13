@@ -37,8 +37,8 @@ void LUND_tagged(int iFile, TString prefix) {
 
 	TTree* T = (TTree*)inFile->Get("genT");
 
-	double targetMin = -5.;	   //vz min [cm]
-	double targetMax = 5.; //vz max [cm]
+	double targetMin = -2.5;   //vz min [cm]
+	double targetMax = 2.5; //vz max [cm]
 	double rasterX = 0.04;	   // cm
 	double rasterY = 0.04; 	   // cm
 
