@@ -229,7 +229,7 @@ int main(int argc, char ** argv)
       auto protons=c12->getByID(2212);
       auto neutrons=c12->getByID(2112);
       double weight = 1;
-      if(isMC){weight=c12->mcevent()->getWeight()/10000;}
+      if(isMC){weight=c12->mcevent()->getWeight();}
       TVector3 	p_b(0,0,Ebeam);
 
 

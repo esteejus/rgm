@@ -1,0 +1,1 @@
+clas12-workflow.py --model decrecana --runGroup era --tag v3era --runs runs_era.dat --inputs input_files_era.dat --outDir /volatile/clas12/rg-m/engineering_runs/v3era --coatjava 6.6.4 --reconYaml /volatile/clas12/rg-m/data_recon.yaml --trainYaml calib --submit 
