@@ -5,22 +5,20 @@
 #include <iostream>
 #include <chrono>
 #include <vector>
+
 #include <TFile.h>
 #include <TTree.h>
-#include <TApplication.h>
-#include <TROOT.h>
-#include <TDatabasePDG.h>
 #include <TLorentzVector.h>
-#include <TCutG.h>
 #include <TH1.h>
 #include <TH2.h>
 #include <TLatex.h>
 #include <TChain.h>
 #include <TCanvas.h>
-#include <TBenchmark.h>
 #include <TStyle.h>
+
 #include "clas12reader.h"
 #include "HipoChain.h"
+#include "eventcut.h"
 
 using namespace std;
 using namespace clas12;
@@ -105,8 +103,8 @@ int main(int argc, char ** argv)
       return -1;
     }
 
+  eventcut myCut();
   /////////////////////////////////////
-  //  TString opt=gApplication->Argv(3);
   TString out = argv[2]; 
   TFile * outFile = new TFile(argv[2],"RECREATE");
   vector<TH1*> hist_list_1;
@@ -243,7 +241,7 @@ int main(int argc, char ** argv)
   h_xB_theta_1q -> GetXaxis()->SetTitle("x_{B}");
   h_xB_theta_1q -> GetYaxis()->SetTitle("#theta_{Recoil,pq}");
   h_xB_theta_1q -> GetXaxis()->CenterTitle();
-  h_xB_theta_1q -> GetYaxis()->CenterTitle();
+ h_xB_theta_1q -> GetYaxis()->CenterTitle();
 
   h_pmiss_theta_miss -> GetXaxis()->SetTitle("Missing Momentum (GeV)");
   h_pmiss_theta_miss -> GetYaxis()->SetTitle("#theta_{miss}");
@@ -364,6 +362,29 @@ int main(int argc, char ** argv)
   TH2D * h_p_cm_theta_rel_tight = new TH2D("p_cm_theta_rel_tight","p_{C.M.} vs. #theta_{rel};p_{C.M.};#theta_{rel}",100,0,0.5,180,0,180);
   hist_list_2.push_back(h_p_cm_theta_rel_tight);
 
+  /////////////////////////////////////
+  //Testers
+  /////////////////////////////////////
+  TH1D * h_mmiss_all = new TH1D("mmiss_all","m_{miss} All;Counts",100,0.4,1.4);
+  hist_list_1.push_back(h_mmiss_all);
+  TH1D * h_mmiss_FTOF1 = new TH1D("mmiss_FTOF1","m_{miss} FTOF1;Counts",100,0.4,1.4);
+  hist_list_1.push_back(h_mmiss_FTOF1);
+  TH1D * h_mmiss_FTOF2 = new TH1D("mmiss_FTOF2","m_{miss} FTOF2;Counts",100,0.4,1.4);
+  hist_list_1.push_back(h_mmiss_FTOF2);
+  TH1D * h_mmiss_noFTOF = new TH1D("mmiss_noFTOF","m_{miss} noFTOF;Counts",100,0.4,1.4);
+  hist_list_1.push_back(h_mmiss_noFTOF);
+  TH2D * h_mmiss_FTOF2_mag = new TH2D("mmiss_FTOF2_mag","m_{miss} FTOF2; Mag;Counts",100,0.4,1.4,100,0,4);
+  hist_list_2.push_back(h_mmiss_FTOF2_mag);
+  TH2D * h_mmiss_FTOF2_theta = new TH2D("mmiss_FTOF2_theta","m_{miss} FTOF2; Theta;Counts",100,0.4,1.4,100,30,50);
+  hist_list_2.push_back(h_mmiss_FTOF2_theta);
+  TH2D * h_mmiss_FTOF2_phi = new TH2D("mmiss_FTOF2_phi","m_{miss} FTOF2; Phi;Counts",100,0.4,1.4,360,-180,180);
+  hist_list_2.push_back(h_mmiss_FTOF2_phi);
+  TH2D * h_mmiss_FTOF2_chi = new TH2D("mmiss_FTOF2_chi","m_{miss} FTOF2; Chi;Counts",100,0.4,1.4,100,-10,10);
+  hist_list_2.push_back(h_mmiss_FTOF2_chi);
+
+  TH2D * h_mmiss_noFTOF_theta = new TH2D("mmiss_noFTOF_theta","m_{miss} noFTOF; Theta;Counts",100,0.4,1.4,180,0,180);
+  hist_list_2.push_back(h_mmiss_noFTOF_theta);
+
 
   for(int i=0; i<hist_list_1.size(); i++){
     hist_list_1[i]->Sumw2();
@@ -389,7 +410,7 @@ int main(int argc, char ** argv)
 
 
   double Ebeam = 4.247;
-  if(isMC){Ebeam=6;}
+  if(isMC){Ebeam=4.244;}
 
   while(chain.Next()==true){
       //Display completed  
@@ -404,16 +425,16 @@ int main(int argc, char ** argv)
       auto neutrons=c12->getByID(2112);
       double weight = 1;
       if(isMC){weight=c12->mcevent()->getWeight()/10000;}
+      TVector3 	p_b(0,0,Ebeam);
       //cout<<"weight = "<<weight<<endl;
       
-
   /////////////////////////////////////
   //Electron fiducials
   /////////////////////////////////////
       if(electrons.size()!=1){continue;}
-      TVector3 	p_b(0,0,Ebeam);
       TVector3 p_e;
       p_e.SetMagThetaPhi(electrons[0]->getP(),electrons[0]->getTheta(),electrons[0]->getPhi());
+
       double EoP_e =  (electrons[0]->cal(PCAL)->getEnergy() +  electrons[0]->cal(ECIN)->getEnergy() +  electrons[0]->cal(ECOUT)->getEnergy()) / p_e.Mag();
       
       h_Vcal_EoP->Fill(electrons[0]->cal(PCAL)->getLv(),EoP_e,weight);
@@ -426,8 +447,9 @@ int main(int argc, char ** argv)
   //Electron Pid
   /////////////////////////////////////
       h_P_EoP->Fill(p_e.Mag(),EoP_e,weight);
-      h_nphe->Fill(electrons[0]->che(HTCC)->getNphe(),weight);
-
+      int nphe = electrons[0]->che(HTCC)->getNphe();
+      if(nphe < 2){ continue; }
+      h_nphe->Fill(nphe,weight);
       if(electrons[0]->cal(ECIN)->getLv() < 14){ continue; }
       if(electrons[0]->cal(ECIN)->getLw() < 14){ continue; }
       if(EoP_e < 0.18){ continue; }
@@ -446,6 +468,7 @@ int main(int argc, char ** argv)
       double QSq = p_q.Mag2() - (nu*nu);
       double xB = QSq / (2 * mN * nu);
       double WSq = (mN*mN) - QSq + (2*nu*mN);
+      //if(WSq>1.25){continue;}
       
       h_xB->Fill(xB,weight);
       h_QSq->Fill(QSq,weight);
@@ -454,6 +477,15 @@ int main(int argc, char ** argv)
       h_xB_WSq->Fill(xB,WSq,weight);
       h_QSq_WSq->Fill(QSq,WSq,weight);
 
+      /*
+      if((electrons.size()>0) && (num_L==1)){
+	TVector3 p_e_t;
+	p_e_t.SetMagThetaPhi(electrons[0]->getP(),electrons[0]->getTheta(),electrons[0]->getPhi());
+	TVector3 p_p_t;
+	p_p_t.SetMagThetaPhi(protons[index_L]->getP(),protons[index_L]->getTheta(),protons[index_L]->getPhi());
+	double mmiss_t = get_mmiss(p_b,p_e_t,p_p_t);
+	h_mmiss_t->Fill(mmiss_t,weight);
+	}*/
   /////////////////////////////////////
   //All Proton Angles
   /////////////////////////////////////
@@ -463,6 +495,7 @@ int main(int argc, char ** argv)
 	TVector3 p_L;
 	p_L.SetMagThetaPhi(protons[j]->getP(),protons[j]->getTheta(),protons[j]->getPhi());
 	double theta_L = p_L.Theta() * 180 / M_PI;
+	double phi_L = p_L.Phi() * 180 / M_PI;
 	double theta_Lq = p_L.Angle(p_q) * 180 / M_PI;
 	double vtz_L = protons[j]->par()->getVz();
 	double Chi2Pid_L = protons[j]->par()->getChi2Pid();
@@ -471,7 +504,31 @@ int main(int argc, char ** argv)
 	h_theta_L->Fill(theta_L,weight);
 	h_theta_Lq->Fill(theta_Lq,weight);
 
+	double mmiss_t = get_mmiss(p_b,p_e,p_L);
+	h_mmiss_all->Fill(mmiss_t,weight);
+	if((protons[j]->sci(FTOF1A)->getDetector()==12) && (protons[j]->sci(FTOF1B)->getDetector()==12)){
+	  h_mmiss_FTOF1->Fill(mmiss_t,weight);
+	}
+	else if(protons[j]->sci(FTOF2)->getDetector()==12){
+	  h_mmiss_FTOF2->Fill(mmiss_t,weight);
+	  h_mmiss_FTOF2_mag->Fill(mmiss_t,p_L.Mag(),weight);
+	  h_mmiss_FTOF2_theta->Fill(mmiss_t,theta_L,weight);
+	  h_mmiss_FTOF2_phi->Fill(mmiss_t,phi_L,weight);
+	  h_mmiss_FTOF2_chi->Fill(mmiss_t,Chi2Pid_L,weight);
+
+	  /*
+	  h_mmiss_FTOF2_PCAL->Fill(mmiss_t,protons[j]->cal(PCAL)->getEnergy(),weight);
+	  h_mmiss_FTOF2_ECIN->Fill(mmiss_t,protons[j]->cal(ECIN)->getEnergy(),weight);
+	  h_mmiss_FTOF2_ECOUT->Fill(mmiss_t,protons[j]->cal(ECOUT)->getEnergy(),weight);
+	  */
+	}
+	else{
+	  h_mmiss_noFTOF->Fill(mmiss_t,weight);
+	  h_mmiss_noFTOF_theta->Fill(mmiss_t,theta_L,weight);
+	}
+
 	if(((protons[j]->sci(FTOF1A)->getDetector()==12) || (protons[j]->sci(FTOF1B)->getDetector()==12)) || (protons[j]->sci(FTOF2)->getDetector()==12))
+	//if(((protons[j]->sci(FTOF1A)->getDetector()==12) || (protons[j]->sci(FTOF1B)->getDetector()==12)))
 	  {
 	    if(theta_Lq<25){
 	      if(lowThetaCut(p_L.Theta(),Chi2Pid_L,vtz_diff)){
@@ -562,14 +619,14 @@ int main(int argc, char ** argv)
 	      h_pmiss_theta_miss_SRC->Fill(p_miss.Mag(),theta_miss,weight);
 	      h_xB_Loq_SRC->Fill(xB,Loq,weight);
 	      isSRC_loose=true;	      
-	      if((Loq > 0.62) && (Loq < 0.96)){
-		if(xB > 1.2){
+	      //if((Loq > 0.62) && (Loq < 0.96)){
+	      //if(xB > 1.2){
 		  h_pmiss_tight->Fill(p_miss.Mag(),weight);
 		  h_mmiss_tight->Fill(mmiss,weight);
 		  h_pmiss_theta_miss_SRC_tight->Fill(p_miss.Mag(),theta_miss,weight);	       
 		  isSRC_tight=true;
-		}
-	      }
+		  //}
+		  //}
 	    }
 	  }
 	}
@@ -886,6 +943,7 @@ int main(int argc, char ** argv)
   myText->Clear();
 
   myCanvas->Print(fileName,"pdf");
+
   myCanvas->Clear();
   myCanvas->Divide(2,3);
   myCanvas->cd(1);
@@ -894,6 +952,45 @@ int main(int argc, char ** argv)
   h_p_cm_theta_rel->Draw("colz");
   myCanvas->Print(fileName,"pdf");
 
+  myCanvas->Clear();
+  myCanvas->Divide(2,2);
+  myCanvas->cd(1);
+  h_mmiss_all->Draw();
+  myCanvas->cd(2);
+  h_mmiss_FTOF1->Draw();
+  myCanvas->cd(3);
+  h_mmiss_FTOF2->Draw();
+  myCanvas->cd(4);
+  h_mmiss_noFTOF->Draw();
+  myCanvas->Print(fileName,"pdf");
+
+  myCanvas->Clear();
+  myCanvas->Divide(2,2);
+  myCanvas->cd(1);
+  h_mmiss_FTOF2_mag->Draw("colz");
+  myCanvas->cd(2);
+  h_mmiss_FTOF2_theta->Draw("colz");
+  myCanvas->cd(3);
+  h_mmiss_FTOF2_phi->Draw("colz");
+  myCanvas->cd(4);
+  h_mmiss_FTOF2_chi->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  /*
+  myCanvas->Clear();
+  myCanvas->Divide(2,2);
+  myCanvas->cd(1);
+  h_mmiss_FTOF2_PCAL->Draw("colz");
+  myCanvas->cd(2);
+  h_mmiss_FTOF2_ECIN->Draw("colz");
+  myCanvas->cd(3);
+  h_mmiss_FTOF2_ECOUT->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  */
+  myCanvas->Clear();
+  myCanvas->Divide(2,2);
+  myCanvas->cd(1);
+  h_mmiss_noFTOF_theta->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
 
   myCanvas->Clear();
   sprintf(fileName,"%s]",argv[3]);
