@@ -80,28 +80,45 @@ bool lowThetaCut(double theta, double chi2PID, double vtzDiff){
 
 void Usage()
 {
-  std::cerr << "Usage: ./monitorPID <MC =1,Data = 0> <path/to/ouput.root> <path/to/ouput.pdf> [scintillator number (4 or 12)] <path/to/input.hipo> \n\n\n";
-
+  std::cerr << "Usage: ./code <MC =1,Data = 0> <Ebeam(GeV)> <path/to/ouput.root> <path/to/ouput.pdf> [scintillator number (4 or 12)] <path/to/input.hipo> \n";
 }
 
 
 int main(int argc, char ** argv)
 {
 
-  if(argc < 6)
+  if(argc < 7)
     {
+      std::cerr<<"Wrong number of arguments.\n";
       Usage();
       return -1;
     }
 
   /////////////////////////////////////
   
-  TFile * outFile = new TFile(argv[2],"RECREATE");
-  vector<TH1*> hist_list_1;
-  vector<TH2*> hist_list_2;
-
   bool isMC = false;
   if(atoi(argv[1]) == 1){isMC=true;}
+
+  double Ebeam = atof(argv[2]);
+  
+  TFile * outFile = new TFile(argv[3],"RECREATE");
+  char * pdfFile = argv[4];
+  int TOFID = atoi(argv[5]);
+  clas12root::HipoChain chain;
+  for(int k = 6; k < argc; k++){
+    cout<<"Input file "<<argv[k]<<endl;
+    chain.Add(argv[k]);
+  }
+  auto config_c12=chain.GetC12Reader();
+  chain.SetReaderTags({0});
+  const std::unique_ptr<clas12::clas12reader>& c12=chain.C12ref();
+  
+
+  /////////////////////////////////////
+  //Prepare histograms
+  /////////////////////////////////////
+  vector<TH1*> hist_list_1;
+  vector<TH2*> hist_list_2;
 
   gStyle->SetTitleXSize(0.05);
   gStyle->SetTitleYSize(0.05);
@@ -201,22 +218,13 @@ int main(int argc, char ** argv)
     hist_list_2[i]->GetXaxis()->CenterTitle();
     hist_list_2[i]->GetYaxis()->CenterTitle();
   }
-  
+
+
   int counter = 0;
-  
-  clas12root::HipoChain chain;
-  for(int k = 5; k < argc; k++){
-    cout<<"Input file "<<argv[k]<<endl;
-    chain.Add(argv[k]);
-  }
-  auto config_c12=chain.GetC12Reader();
-  chain.SetReaderTags({0});
-  const std::unique_ptr<clas12::clas12reader>& c12=chain.C12ref();
-  //auto& c12=chain.C12ref();
-  double Ebeam = 4.247;
-  if(isMC){Ebeam=4.244;}
+
+  //Define cut class
   eventcut myCut(Ebeam);
-  myCut.setl_scint(atoi(argv[4]));
+  myCut.setl_scint(TOFID);
   while(chain.Next()==true){
       //Display completed  
       counter++;
@@ -351,9 +359,9 @@ int main(int argc, char ** argv)
   text.SetTextSize(0.05);
 
   char fileName[100];
-  sprintf(fileName,"%s[",argv[3]);
+  sprintf(fileName,"%s[",pdfFile);
   myText->SaveAs(fileName);
-  sprintf(fileName,"%s",argv[3]);
+  sprintf(fileName,"%s",pdfFile);
 
   /////////////////////////////////////
   //Electron fiducials and Pid
@@ -433,7 +441,7 @@ int main(int argc, char ** argv)
   text.DrawLatex(0.2,0.9,"(e,e'p_{Lead}) Cuts:");
   text.DrawLatex(0.2,0.8,"(e,e'p) Cuts");
   char temp[100];
-  sprintf(temp,"Scintillator = %d",atoi(argv[4]));
+  sprintf(temp,"Scintillator = %d",TOFID);
   text.DrawLatex(0.2,0.7,temp);
   text.DrawLatex(0.2,0.6,"#theta_{p,q}<25^{o}");
   text.DrawLatex(0.2,0.5,"-3 < #chi^{2} PID<3 ");
@@ -495,12 +503,10 @@ int main(int argc, char ** argv)
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
-  sprintf(fileName,"%s]",argv[3]);
+  sprintf(fileName,"%s]",pdfFile);
   myCanvas->Print(fileName,"pdf");
 
   outFile->Close();
-  cout<<"Finished making file: "<< argv[2] <<"\n";
-
 }
 
 
