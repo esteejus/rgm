@@ -188,9 +188,9 @@ int main(int argc, char ** argv)
   hist_list_2.push_back(h_xB_mmiss);
   TH2D * h_pmiss_mmiss = new TH2D("pmiss_mmiss","p_{miss} vs. m_{miss};p_{miss};m_{miss};Counts",100,0,1.5,100,0.4,1.4);
   hist_list_2.push_back(h_pmiss_mmiss);
-  TH2D * h_xB_theta_1q = new TH2D("xB_theta_1q","x_{B} vs. #theta_{p,q};x_{B};#theta_{p,q};Counts",100,0,2,180,0,180);
+  TH2D * h_xB_theta_1q = new TH2D("xB_theta_1q","x_{B} vs. #theta_{miss,q};x_{B};#theta_{miss,q};Counts",100,0,2,180,0,180);
   hist_list_2.push_back(h_xB_theta_1q);
-  TH2D * h_Loq_theta_1q = new TH2D("Loq_theta_1q","|p|/|q| vs. #theta_{p,q};|p|/|q|;#theta_{p,q}",100,0,1.5,180,0,180);
+  TH2D * h_Loq_theta_1q = new TH2D("Loq_theta_1q","|p|/|q| vs. #theta_{miss,q};|p|/|q|;#theta_{miss,q}",100,0,1.5,180,0,180);
   hist_list_2.push_back(h_Loq_theta_1q);
   TH2D * h_pmiss_theta_miss = new TH2D("pmiss_theta_miss","p_{miss} vs. #theta_{miss};p_{miss};#theta_{miss}",100,0,1.5,180,0,180);
   hist_list_2.push_back(h_pmiss_theta_miss);
@@ -302,7 +302,6 @@ int main(int argc, char ** argv)
   /////////////////////////////////////
       int index_L = myCut.leadnucleoncut(c12);
       if(index_L < 0){ continue; }
-      //cout<<protons[index_L]->sci(clas12::CTOF)->getDetector()<<endl;
       TVector3 p_L;
       p_L.SetMagThetaPhi(protons[index_L]->getP(),protons[index_L]->getTheta(),protons[index_L]->getPhi());
       TVector3 p_1 = p_L - p_q;
