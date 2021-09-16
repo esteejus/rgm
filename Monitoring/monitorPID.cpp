@@ -648,14 +648,14 @@ int main(int argc, char ** argv)
 	      h_pmiss_theta_miss_SRC->Fill(p_miss.Mag(),theta_miss,weight);
 	      h_xB_Loq_SRC->Fill(xB,Loq,weight);
 	      isSRC_loose=true;	      
-	      //if((Loq > 0.62) && (Loq < 0.96)){
-	      //if(xB > 1.2){
+	      if((Loq > 0.62) && (Loq < 0.96)){
+		if(xB > 1.2){
 		  h_pmiss_tight->Fill(p_miss.Mag(),weight);
 		  h_mmiss_tight->Fill(mmiss,weight);
 		  h_pmiss_theta_miss_SRC_tight->Fill(p_miss.Mag(),theta_miss,weight);	       
 		  isSRC_tight=true;
-		  //}
-		  //}
+		}
+	      }
 	    }
 	  }
 	}
