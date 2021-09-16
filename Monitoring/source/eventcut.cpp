@@ -5,7 +5,8 @@ eventcut::eventcut(double E)
   Ebeam = E;
   vbeam.SetXYZ(0,0,Ebeam);
   cutInfo structcut;
-
+  
+  //Electron Cuts
   structcut.docut = true;
   structcut.min = 1;
   structcut.max = 100;
@@ -31,7 +32,7 @@ eventcut::eventcut(double E)
   structcut.max = 6.6;
   cutmap[e_mom]=structcut;
 
-
+  //Lead Proton Cuts
   structcut.docut = true;
   structcut.count = 2212;  
   cutmap[l_pid]=structcut;
@@ -55,6 +56,8 @@ eventcut::eventcut(double E)
   structcut.max = 3;
   cutmap[l_chipid]=structcut;
 
+
+  //Lead Proton SRC Cuts
   structcut.docut = true;
   structcut.min = 1.5;
   structcut.max = 100;
@@ -67,12 +70,12 @@ eventcut::eventcut(double E)
 
   structcut.docut = true;
   structcut.min = 0.3;
-  structcut.max = 100;
+  structcut.max = 1.0;
   cutmap[lsrc_pmiss]=structcut;
 
   structcut.docut = true;
-  structcut.min = 0.84;
-  structcut.max = 1.04;
+  structcut.min = 0.8;
+  structcut.max = 1.1;
   cutmap[lsrc_mmiss]=structcut;
 
   structcut.docut = true;

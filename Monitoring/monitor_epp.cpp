@@ -208,6 +208,19 @@ int main(int argc, char ** argv)
   TH2D * h_xB_Loq_SRC = new TH2D("xB_Loq","x_{B} vs |p|/|q|;x_{B};|p|/|q|",100,0,2,100,0,1.5);
   hist_list_2.push_back(h_xB_Loq_SRC);
 
+  /////////////////////////////////////
+  //Recoil Nucleons
+  /////////////////////////////////////
+  TH1D * h_p_2 = new TH1D("p_2","p Recoil;p_2",100,0,1.5);
+  hist_list_1.push_back(h_p_2);
+
+  /////////////////////////////////////
+  //Recoil SRC Nucleons
+  /////////////////////////////////////
+  TH1D * h_p_2_high = new TH1D("p_2_high","p_{rec};p_{rec};Counts",100,0,1.5);
+  hist_list_1.push_back(h_p_2_high);
+
+
   for(int i=0; i<hist_list_1.size(); i++){
     hist_list_1[i]->Sumw2();
     hist_list_1[i]->GetXaxis()->CenterTitle();
@@ -335,6 +348,21 @@ int main(int argc, char ** argv)
       h_pmiss_theta_miss_SRC->Fill(p_miss.Mag(),theta_miss,weight);
       h_xB_Loq_SRC->Fill(xB,Loq,weight);
 
+
+      int count_R = 0;
+      int index_R = -1;
+      for(int j = 0; j < protons.size(); j++){
+	if(j==index_L){continue;}
+	h_p_2->Fill(protons[j]->getP(),weight);
+	if(protons[j]->getP()>0.35){
+	  count_R++;
+	  index_R = j;
+	}
+      }
+      if(index_R == -1){continue;}
+      if(count_R != 1){continue;}
+      h_p_2_high->Fill(protons[index_R]->getP(),weight);
+      
   }
   cout<<counter<<endl;
 
@@ -501,6 +529,42 @@ int main(int argc, char ** argv)
   h_xB_Loq_SRC->Draw("colz");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
+
+  /////////////////////////////////////
+  //Recoil Nucleons
+  /////////////////////////////////////
+
+  myText->cd();
+  text.DrawLatex(0.2,0.9,"(e,e'p_{Lead,SRC}p_{Rec}) Cuts:");
+  text.DrawLatex(0.2,0.8,"(e,e'p_{LEAD,SRC}) Cuts");
+  text.DrawLatex(0.2,0.7,"Second Proton Detected");
+  myText->Print(fileName,"pdf");
+  myText->Clear();
+
+  myCanvas->Divide(2,2);
+  myCanvas->cd(1);
+  h_p_2->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  /////////////////////////////////////
+  //Recoil SRC Nucleons
+  /////////////////////////////////////
+
+  myText->cd();
+  text.DrawLatex(0.2,0.9,"(e,e'p_{Lead,SRC}p_{Rec,SRC}) Cuts:");
+  text.DrawLatex(0.2,0.8,"(e,e'p_{LEAD,SRC},p_{Rec}) Cuts");
+  text.DrawLatex(0.2,0.7,"0.35 [GeV] < p_{Rec}");
+  myText->Print(fileName,"pdf");
+  myText->Clear();
+
+  myCanvas->Divide(2,2);
+  myCanvas->cd(1);
+  h_p_2_high->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+
 
   sprintf(fileName,"%s]",pdfFile);
   myCanvas->Print(fileName,"pdf");
