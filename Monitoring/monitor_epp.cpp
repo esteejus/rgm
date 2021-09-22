@@ -62,25 +62,9 @@ double get_phi_diff(double e_phi, double p_phi){
   }
 }
 
-bool lowThetaCut(double theta, double chi2PID, double vtzDiff){
-  
-  if(theta > (50 * M_PI / 180)){
-    return false;
-  }
-  if(fabs(chi2PID-0.459179)>(3*1.2085)){
-    return false;
-  }
-  if(fabs(vtzDiff-0.484268)>(3*1.30286)){
-    return false;
-  }
-  
-  return true;
-}
-
-
 void Usage()
 {
-  std::cerr << "Usage: ./code <MC =1,Data = 0> <Ebeam(GeV)> <path/to/ouput.root> <path/to/ouput.pdf> [scintillator number (4 or 12)] <path/to/input.hipo> \n";
+  std::cerr << "Usage: ./code <MC =1,Data = 0> <Ebeam(GeV)> <path/to/ouput.root> <path/to/ouput.pdf> <path/to/cutfile.txt> <path/to/input.hipo> \n";
 }
 
 
@@ -103,7 +87,8 @@ int main(int argc, char ** argv)
   
   TFile * outFile = new TFile(argv[3],"RECREATE");
   char * pdfFile = argv[4];
-  int TOFID = atoi(argv[5]);
+  eventcut myCut(Ebeam,argv[5]);
+  myCut.print_cuts();
   clas12root::HipoChain chain;
   for(int k = 6; k < argc; k++){
     cout<<"Input file "<<argv[k]<<endl;
@@ -236,8 +221,6 @@ int main(int argc, char ** argv)
   int counter = 0;
 
   //Define cut class
-  eventcut myCut(Ebeam);
-  myCut.setl_scint(TOFID);
   while(chain.Next()==true){
       //Display completed  
       counter++;
@@ -349,18 +332,12 @@ int main(int argc, char ** argv)
       h_xB_Loq_SRC->Fill(xB,Loq,weight);
 
 
-      int count_R = 0;
-      int index_R = -1;
       for(int j = 0; j < protons.size(); j++){
 	if(j==index_L){continue;}
-	h_p_2->Fill(protons[j]->getP(),weight);
-	if(protons[j]->getP()>0.35){
-	  count_R++;
-	  index_R = j;
-	}
       }
-      if(index_R == -1){continue;}
-      if(count_R != 1){continue;}
+
+      int index_R = myCut.recoilSRCnucleoncut(c12,index_L);
+      if(index_R < 0){ continue; }
       h_p_2_high->Fill(protons[index_R]->getP(),weight);
       
   }
@@ -468,7 +445,7 @@ int main(int argc, char ** argv)
   text.DrawLatex(0.2,0.9,"(e,e'p_{Lead}) Cuts:");
   text.DrawLatex(0.2,0.8,"(e,e'p) Cuts");
   char temp[100];
-  sprintf(temp,"Scintillator = %d",TOFID);
+  sprintf(temp,"Scintillator = %d",0);
   text.DrawLatex(0.2,0.7,temp);
   text.DrawLatex(0.2,0.6,"#theta_{p,q}<25^{o}");
   text.DrawLatex(0.2,0.5,"-3 < #chi^{2} PID<3 ");
