@@ -1,0 +1,17 @@
+e_nphe: 1 100
+e_calv: 14 3000
+e_calw: 14 3000
+e_SF: 0.18 0.28
+e_mom: 1.0 6.6
+l_pid: Proton
+l_scint: FTOF
+l_theta: 0.0 80.0
+l_thetalq: 0.0 25.0
+l_chipid: -3.0 3.0
+lsrc_Q2: 1.5 100
+lsrc_xB: 1.2 2.0
+lsrc_pmiss: 0.3 1.0
+lsrc_mmiss: 0.84 1.04
+lsrc_loq: 0.62 0.96
+rsrc_pid: Proton
+rsrc_mom: 0.25 1.0
