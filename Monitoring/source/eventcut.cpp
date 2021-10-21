@@ -9,6 +9,11 @@ eventcut::eventcut(double E, char * filename)
   //Set all cuts to false
   cutInfo cutStruct;
   cutStruct.docut = false;
+  cutStruct.min = -1000000;
+  cutStruct.max =  1000000;
+  cutStruct.count =  0;
+  cutStruct.label =  "";
+
   for(int i = e_nphe; i != fake; i++){
     cutName thisCut = static_cast<cutName>(i);
     cutmap[thisCut] = cutStruct;    
@@ -29,6 +34,32 @@ eventcut::~eventcut()
 {
 }
 
+bool eventcut::getDoCut(cutName thisCut)
+{
+  return cutmap[thisCut].docut;
+}
+
+double eventcut::getCutMin(cutName thisCut)
+{
+  return cutmap[thisCut].min;
+}
+
+double eventcut::getCutMax(cutName thisCut)
+{
+  return cutmap[thisCut].max;
+}
+
+int eventcut::getCutCount(cutName thisCut)
+{
+  return cutmap[thisCut].count;
+}
+
+std::string eventcut::getCutLabel(cutName thisCut)
+{
+  return cutmap[thisCut].label;
+}
+
+
 void eventcut::set_cuts(char * filename)
 {
 
@@ -46,6 +77,11 @@ void eventcut::set_cuts(char * filename)
       //Parse the line into a cutName and a string with the cut values
       cutInfo cutStruct;
       cutStruct.docut=true;
+      cutStruct.min = -1000000;
+      cutStruct.max =  1000000;
+      cutStruct.count =  0;
+      cutStruct.label =  "";
+
       cutName thisCut = hashit(line.substr(0,line.find(": ")));
       std::string cut_values =line.erase(0, line.find(": ") + 2);	 
 

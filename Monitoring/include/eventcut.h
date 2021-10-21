@@ -46,14 +46,12 @@ class eventcut{
   void set_cuts(char * filename);
   void print_cuts();
   
-  //Not yet implemented
-  /*
   bool getDoCut(cutName thisCut);
   double getCutMin(cutName thisCut);
   double getCutMax(cutName thisCut);
   int getCutCount(cutName thisCut);
   std::string getCutLabel(cutName thisCut);
-  */
+
   bool electroncut(const std::unique_ptr<clas12::clas12reader>& c12);
   int leadnucleoncut(const std::unique_ptr<clas12::clas12reader>& c12);
   bool leadSRCnucleoncut(const std::unique_ptr<clas12::clas12reader>& c12, int index_L);
