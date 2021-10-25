@@ -1,4 +1,4 @@
-ke_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.0)
 project(monitorPID)
 
 set (CLAS12ROOT $ENV{CLAS12ROOT})
@@ -14,7 +14,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ROOT_CXX_FLAGS}")
 add_subdirectory(source)
 
 # compile executables in source directory
-foreach(fnameSrc monitorPID.cpp monitor_epp.cpp monitor_epn.cpp skimmer_ep.cpp)
+#foreach(fnameSrc monitorPID.cpp monitor_epp.cpp monitor_epn.cpp)
+foreach (fnameSrc monitorPID.cpp)
 #foreach(fnameSrc monitorPID.cpp  monitor_epp.cpp qe_mec.cpp skimmer_ep.cpp proton_checks.cpp)
 #foreach(fnameSrc monitorPID.cpp  monitor_epp.cpp qe_mec.cpp skimmer_ep.cpp proton_checks.cpp)
   message(STATUS ${fnameSRC})
