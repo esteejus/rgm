@@ -80,7 +80,7 @@ bool lowThetaCut(double theta, double chi2PID, double vtzDiff){
 
 void Usage()
 {
-  std::cerr << "Usage: ./code <MC =1,Data = 0> <Ebeam(GeV)> <path/to/output.root> <path/to/output.pdf> [scintillator number (4 ctof / 12 ftof)] <path/to/input.hipo> \n";
+  std::cerr << "Usage: ./code <MC =1,Data = 0> <Ebeam(GeV)> <path/to/output.root> <path/to/output.pdf> [scintillator number (4 ctof / 12 ftof)] <path/to/cutfile.txt> <path/to/input.hipo> \n";
 }
 
 
@@ -104,8 +104,11 @@ int main(int argc, char ** argv)
   TFile * outFile = new TFile(argv[3],"RECREATE");
   char * pdfFile = argv[4];
   int TOFID = atoi(argv[5]);
+  // NEW CLASS INSTANTIATION
+  eventcut myCut(Ebeam,argv[6]);
+  myCut.print_cuts();
   clas12root::HipoChain chain;
-  for(int k = 6; k < argc; k++){
+  for(int k = 7; k < argc; k++){
     cout<<"Input file "<<argv[k]<<endl;
     chain.Add(argv[k]);
   }
@@ -169,8 +172,10 @@ int main(int argc, char ** argv)
   hist_list_1.push_back(h_theta_L);
   TH1D * h_theta_Lq = new TH1D("theta_Lq","#theta_{pq};#theta_{pq};Counts",180,0,180);
   hist_list_1.push_back(h_theta_Lq);
-  TH1D * h_num_proton = new TH1D("num p","Number of Protons;num p;Counts",5,0,5);
-  hist_list_1.push_back(h_num_proton);
+  TH1D * h_num_proton_i = new TH1D("num p before","Number of Protons;num p;Counts",5,0,5);
+  hist_list_1.push_back(h_num_proton_i);
+  TH1D * h_num_proton_f = new TH1D("num p after","Number of Protons;num p;Counts",5,0,5);
+  hist_list_1.push_back(h_num_proton_f);
 
   /////////////////////////////////////
   //Lead Proton Checks
@@ -215,17 +220,19 @@ int main(int argc, char ** argv)
   /////////////////////////////////////
   TH1D * h_p_2 = new TH1D("p_2","p Recoil;p_2",100,0,1.5);
   hist_list_1.push_back(h_p_2);
-  TH1D * h_num_neutron = new TH1D("num n","Number of Neutrons;num n;Counts",5,0,5);
-  hist_list_1.push_back(h_num_neutron);
+  TH1D * h_num_neutron_i = new TH1D("num n before","Number of Neutrons;num n;Counts",5,0,5);
+  hist_list_1.push_back(h_num_neutron_i);
+  TH1D * h_num_neutron_f = new TH1D("num n after","Number of Neutrons;num n;Counts",5,0,5);
+  hist_list_1.push_back(h_num_neutron_f);
 
   /////////////////////////////////////
   //Recoil SRC Nucleons
   /////////////////////////////////////
   TH1D * h_p_2_high = new TH1D("p_2_high","p_{rec};p_{rec};Counts",100,0,1.5);
   hist_list_1.push_back(h_p_2_high);
-  TH1D * h_tofm = new TH1D("tof_m","TOF / m;TOF/m;Counts",25,100,200);
+  TH1D * h_tofm = new TH1D("tof_m","TOF/m;TOF/m (ns/m);Counts",40,0,40);
   hist_list_1.push_back(h_tofm);
-  TH2D * h_tofm_cnd = new TH2D("tof_m_phi","TOF / m vs CND sector;phi CND;Time",360,-180,180,25,100,200);
+  TH2D * h_tofm_cnd = new TH2D("tof_m_phi","TOF/m vs CND sector;phi CND;TOF/m (ns/m)",360,-180,180,40,0,40);
   hist_list_2.push_back(h_tofm_cnd);
   TH2D * h_nacc_fd = new TH2D("nacc FD","Neutron Acceptance (FD);Phi;Theta",360,-180,180,180,0,180);
   hist_list_2.push_back(h_nacc_fd);
@@ -250,8 +257,9 @@ int main(int argc, char ** argv)
   int counter = 0;
 
   //Define cut class
-  eventcut myCut(Ebeam);
-  myCut.setl_scint(TOFID);
+  //eventcut myCut(Ebeam,argv[6]);
+  //myCut.print_cuts();
+  //myCut.l_scintcut(c12,TOFID);
   while(chain.Next()==true){
       //Display completed  
       counter++;
@@ -297,7 +305,7 @@ int main(int argc, char ** argv)
   /////////////////////////////////////
   //Electron Kinematics  
   /////////////////////////////////////
-      TVector3	p_q = p_b - p_e;
+      TVector3 p_q = p_b - p_e;
       double nu = Ebeam - p_e.Mag();
       double QSq = p_q.Mag2() - (nu*nu);
       double xB = QSq / (2 * mN * nu);
@@ -323,12 +331,12 @@ int main(int argc, char ** argv)
 	h_theta_L->Fill(theta_L,weight);
 	h_theta_Lq->Fill(theta_Lq,weight);
       }
-      //h_num_proton->Fill(protons.size());
+      h_num_proton_i->Fill(protons.size(),weight);
 
   /////////////////////////////////////
   //Lead Proton Checks
   /////////////////////////////////////
-      int index_L = myCut.leadnucleoncut(c12);
+      int index_L = myCut.leadnucleoncut(c12);  // inc limitation of 1 lead p
       if(index_L < 0){ continue; }
       TVector3 p_L;
       p_L.SetMagThetaPhi(protons[index_L]->getP(),protons[index_L]->getTheta(),protons[index_L]->getPhi());
@@ -341,8 +349,8 @@ int main(int argc, char ** argv)
       double theta_Lq = p_L.Angle(p_q) * 180 / M_PI;
       double Loq = p_L.Mag() / p_q.Mag();
       double theta_1q = p_1.Angle(p_q) * 180 / M_PI;
-      h_num_proton->Fill(protons.size());
-
+      
+      h_num_proton_f->Fill(protons.size(),weight);
       h_theta_L_FTOF->Fill(theta_L,weight);
       h_theta_Lq_FTOF->Fill(theta_Lq,weight);
       h_phi_e_L->Fill(phi_diff,weight);
@@ -368,7 +376,18 @@ int main(int argc, char ** argv)
   //////////////////////////////////////
   //Recoil SRC Neutron Checks
   //////////////////////////////////////
-      int count_R = 0;
+      h_num_neutron_i->Fill(neutrons.size(),weight);
+
+      for (int j = 0; j < neutrons.size(); j++){
+        if (neutrons.size()==0) {continue;}
+        h_p_2->Fill(neutrons[j]->getP(),weight);
+      }      
+
+      int index_R = myCut.recoilSRCnucleoncut(c12,index_L); // determines isospin from cut file, limits to 1 recoil
+      if(index_R < 0){ continue; }
+      h_p_2_high->Fill(neutrons[index_R]->getP(),weight);  
+
+      /*int count_R = 0;
       int index_R = -1;
       h_num_neutron->Fill(neutrons.size());
       for(int j = 0; j < neutrons.size(); j++){
@@ -380,13 +399,13 @@ int main(int argc, char ** argv)
 	}
       }
       if(index_R == -1){continue;}
-      if(count_R != 1){continue;}
+      if(count_R != 1){continue;}*/
 
-      double tofm = neutrons[index_R]->getTime();
-      std::cout << tofm << '\n';
+      double tofm = (neutrons[index_R]->getTime())/(neutrons[index_R]->getPath());
+      //double tofm = 0.939565/(neutrons[index_R]->getP());
       double tofphi = neutrons[index_R]->getPhi()*180./M_PI;
-
-      h_p_2_high->Fill(neutrons[index_R]->getP(),weight);
+      std::cout << tofm << '\n';
+      h_num_neutron_f->Fill(neutrons.size(),weight);
       h_tofm->Fill(tofm);
       h_tofm_cnd->Fill(tofphi,tofm);
       if (TOFID==12) {h_nacc_fd->Fill(neutrons[index_R]->getPhi()*180./M_PI,neutrons[index_R]->getTheta()*180./M_PI,weight);}
@@ -489,7 +508,7 @@ int main(int argc, char ** argv)
   myCanvas->cd(2);
   h_theta_Lq->Draw("colz");
   myCanvas->cd(3);
-  h_num_proton->Draw();
+  h_num_proton_i->Draw();
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
@@ -533,6 +552,8 @@ int main(int argc, char ** argv)
   h_Loq_theta_1q->Draw("colz");
   myCanvas->cd(4);
   h_pmiss_theta_miss->Draw("colz");
+  myCanvas->cd(5);
+  h_num_proton_f->Draw();
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
@@ -550,7 +571,7 @@ int main(int argc, char ** argv)
   myText->Print(fileName,"pdf");
   myText->Clear();
   
-  myCanvas->Divide(2,2);
+  myCanvas->Divide(2,3);
   myCanvas->cd(1);
   h_pmiss->Draw();
   myCanvas->cd(2);
@@ -559,6 +580,8 @@ int main(int argc, char ** argv)
   h_pmiss_theta_miss_SRC->Draw("colz");
   myCanvas->cd(4);
   h_xB_Loq_SRC->Draw("colz");
+  myCanvas->cd(5);
+  h_num_neutron_i->Draw();
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
@@ -575,8 +598,6 @@ int main(int argc, char ** argv)
 
   myCanvas->Divide(2,2);
   myCanvas->cd(1);
-  h_num_neutron->Draw();
-  myCanvas->cd(2);
   h_p_2->Draw();
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
@@ -594,21 +615,25 @@ int main(int argc, char ** argv)
 
   myCanvas->Divide(2,3);
   myCanvas->cd(1);
-  h_p_2_high->Draw();
+  h_num_neutron_f->Draw();
   myCanvas->cd(2);
-  h_tofm->Draw();
+  h_p_2_high->Draw();
   myCanvas->cd(3);
-  h_tofm_cnd->Draw("colz");  // REPLACE WITH TOF/M BY CND
+  h_tofm->Draw();
   myCanvas->cd(4);
-  h_nacc_fd->Draw("colz");
+  h_tofm_cnd->Draw("colz");  // REPLACE WITH TOF/M BY CND
   myCanvas->cd(5);
-  h_nacc_cd->Draw("colz");
+  h_nacc_fd->Draw("colz");
   myCanvas->cd(6);
-  h_nbeta->Draw();
+  h_nacc_cd->Draw("colz");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
- 
+  myCanvas->Divide(2,3);
+  myCanvas->cd(1);
+  h_nbeta->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
 
 
   sprintf(fileName,"%s]",pdfFile);
