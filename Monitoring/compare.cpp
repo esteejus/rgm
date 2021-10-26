@@ -10,14 +10,14 @@
 #include <TChain.h>
 #include <TCanvas.h>
 #include <TStyle.h>
-
+#include <TLegend.h>
 
 using namespace std;
 
 int main(int argc, char ** argv)
 {
-
   if (argc!=5)
+    {
       cout << "Wrong number of arguments. Instead use \n compare </path/to/output/root/file> </path/to/output/pdf/file> </path/to/input/simulation/root/file> </path/to/input/data/root/file> \n";
       exit(-2);
     }
@@ -190,20 +190,32 @@ int main(int argc, char ** argv)
 
   myCanvas->Divide(2,2);
   myCanvas->cd(1);
-  sim_xB_SRC->SetLineColor(2);
-  sim_xB_SRC->Draw();
   data_xB_SRC->SetLineColor(1);
-  data_xB_SRC->Draw("SAME");
+  data_xB_SRC->SetMarkerColor(1);
+  data_xB_SRC->Draw();
+  sim_xB_SRC->SetLineColor(2);
+  sim_xB_SRC->SetMarkerColor(2);
+  sim_xB_SRC->Draw("SAME");
+  TLegend *legend1 = new TLegend(0.11,0.8,0.3,0.9);
+  legend1->SetTextSize(.03);
+  legend1->SetHeader("Legend","C");
+  legend1->AddEntry(data_xB_SRC,"Data","lep");
+  legend1->AddEntry(sim_xB_SRC, "Simulation","lep");
+  legend1->Draw();
   myCanvas->cd(2);
-  sim_pmiss_SRC->SetLineColor(2);
-  sim_pmiss_SRC->Draw();
   data_pmiss_SRC->SetLineColor(1);
-  data_pmiss_SRC->Draw("SAME");
+  data_pmiss_SRC->SetMarkerColor(1); 
+  data_pmiss_SRC->Draw();
+  sim_pmiss_SRC->SetLineColor(2);
+  sim_pmiss_SRC->SetMarkerColor(2);
+  sim_pmiss_SRC->Draw("SAME");
   myCanvas->cd(3);
-  sim_mmiss_SRC->SetLineColor(2);
-  sim_mmiss_SRC->Draw();
   data_mmiss_SRC->SetLineColor(1);
-  data_mmiss_SRC->Draw("SAME");
+  data_mmiss_SRC->SetMarkerColor(1);
+  data_mmiss_SRC->Draw();
+  sim_mmiss_SRC->SetLineColor(2);
+  sim_mmiss_SRC->SetMarkerColor(2);
+  sim_mmiss_SRC->Draw("SAME");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
@@ -218,15 +230,25 @@ int main(int argc, char ** argv)
 
   myCanvas->Divide(2,2);
   myCanvas->cd(1);
-  sim_p_2_AllRec->SetLineColor(2);
-  sim_p_2_AllRec->Draw();
   data_p_2_AllRec->SetLineColor(1);
-  data_p_2_AllRec->Draw("SAME");
+  data_p_2_AllRec->SetMarkerColor(1);
+  data_p_2_AllRec->Draw();
+  sim_p_2_AllRec->SetLineColor(2);
+  sim_p_2_AllRec->SetMarkerColor(2);
+  sim_p_2_AllRec->Draw("SAME");
+  TLegend *legend2 = new TLegend(0.11,0.8,0.3,0.9);
+  legend2->SetTextSize(.03);
+  legend2->SetHeader("Legend","C");
+  legend2->AddEntry(data_p_2_AllRec,"Data","lep");
+  legend2->AddEntry(sim_p_2_AllRec, "Simulation","lep");
+  legend2->Draw();
   myCanvas->cd(2);
-  sim_count_AllRec->SetLineColor(2);
-  sim_count_AllRec->Draw();
   data_count_AllRec->SetLineColor(1);
-  data_count_AllRec->Draw("SAME");
+  data_count_AllRec->SetMarkerColor(1);
+  data_count_AllRec->Draw();
+  sim_count_AllRec->SetLineColor(2);
+  sim_count_AllRec->SetMarkerColor(2);
+  sim_count_AllRec->Draw("SAME");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
@@ -242,44 +264,70 @@ int main(int argc, char ** argv)
 
   myCanvas->Divide(2,2);
   myCanvas->cd(1);
-  sim_p_2_Rec->SetLineColor(2);
-  sim_p_2_Rec->Draw();
   data_p_2_Rec->SetLineColor(1);
-  data_p_2_Rec->Draw("SAME");
+  data_p_2_Rec->SetMarkerColor(1);
+  data_p_2_Rec->Draw();
+  sim_p_2_Rec->SetLineColor(2);
+  sim_p_2_Rec->SetMarkerColor(2);
+  sim_p_2_Rec->Draw("SAME");
+  TLegend *legend3 = new TLegend(0.11,0.8,0.3,0.9);
+  legend3->SetTextSize(.03);
+  legend3->SetHeader("Legend","C");
+  legend3->AddEntry(data_p_2_Rec,"Data","lep");
+  legend3->AddEntry(sim_p_2_Rec, "Simulation","lep");
+  legend3->Draw();
   myCanvas->cd(2);
-  sim_p_rel_Rec->SetLineColor(2);
-  sim_p_rel_Rec->Draw();
   data_p_rel_Rec->SetLineColor(1);
-  data_p_rel_Rec->Draw("SAME");
+  data_p_rel_Rec->SetMarkerColor(1);
+  data_p_rel_Rec->Draw();
+  sim_p_rel_Rec->SetLineColor(2);
+  sim_p_rel_Rec->SetMarkerColor(2);
+  sim_p_rel_Rec->Draw("SAME");
   myCanvas->cd(3);
-  sim_p_cm_Rec->SetLineColor(2);
-  sim_p_cm_Rec->Draw();
   data_p_cm_Rec->SetLineColor(1);
-  data_p_cm_Rec->Draw("SAME");
+  data_p_cm_Rec->SetMarkerColor(1);
+  data_p_cm_Rec->Draw();
+  sim_p_cm_Rec->SetLineColor(2);
+  sim_p_cm_Rec->SetMarkerColor(2);
+  sim_p_cm_Rec->Draw("SAME");
   myCanvas->cd(4);
-  sim_p_t_cm_Rec->SetLineColor(2);
-  sim_p_t_cm_Rec->Draw();
   data_p_t_cm_Rec->SetLineColor(1);
-  data_p_t_cm_Rec->Draw("SAME");
+  data_p_t_cm_Rec->SetMarkerColor(1);
+  data_p_t_cm_Rec->Draw();
+  sim_p_t_cm_Rec->SetLineColor(2);
+  sim_p_t_cm_Rec->SetMarkerColor(2);
+  sim_p_t_cm_Rec->Draw("SAME");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
   myCanvas->Divide(2,2);
   myCanvas->cd(1);
-  sim_p_y_cm_Rec->SetLineColor(2);
-  sim_p_y_cm_Rec->Draw();
   data_p_y_cm_Rec->SetLineColor(1);
-  data_p_y_cm_Rec->Draw("SAME");
+  data_p_y_cm_Rec->SetMarkerColor(1);
+  data_p_y_cm_Rec->Draw();
+  sim_p_y_cm_Rec->SetLineColor(2);
+  sim_p_y_cm_Rec->SetMarkerColor(2);
+  sim_p_y_cm_Rec->Draw("SAME");
+  TLegend *legend4 = new TLegend(0.11,0.8,0.3,0.9);
+  legend4->SetTextSize(.03);
+  legend4->SetHeader("Legend","C");
+  legend4->AddEntry(data_p_y_cm_Rec,"Data","lep");
+  legend4->AddEntry(sim_p_y_cm_Rec, "Simulation","lep");
+  legend4->Draw();
   myCanvas->cd(2);
-  sim_p_x_cm_Rec->SetLineColor(2);
-  sim_p_x_cm_Rec->Draw();
   data_p_x_cm_Rec->SetLineColor(1);
-  data_p_x_cm_Rec->Draw("SAME");
+  data_p_x_cm_Rec->SetMarkerColor(1);
+  data_p_x_cm_Rec->Draw();
+  sim_p_x_cm_Rec->SetLineColor(2);
+  sim_p_x_cm_Rec->SetMarkerColor(2);
+  sim_p_x_cm_Rec->Draw("SAME");
   myCanvas->cd(3);
-  sim_theta_rel_Rec->SetLineColor(2);
-  sim_theta_rel_Rec->Draw();
   data_theta_rel_Rec->SetLineColor(1);
-  data_theta_rel_Rec->Draw("SAME");
+  data_theta_rel_Rec->SetMarkerColor(1);
+  data_theta_rel_Rec->Draw();
+  sim_theta_rel_Rec->SetLineColor(2);
+  sim_theta_rel_Rec->SetMarkerColor(2);
+  sim_theta_rel_Rec->Draw("SAME");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
