@@ -20,61 +20,13 @@
 #include "clas12reader.h"
 #include "HipoChain.h"
 #include "eventcut.h"
+#include "functions.h"
 
 using namespace std;
 using namespace clas12;
 
-const double mN = 0.939;
-const double mD = 1.8756;
 
 void printProgress(double percentage);
-
-double get_mmiss(TVector3 vbeam, TVector3 ve, TVector3 vp){
-  
-  double Ebeam = vbeam.Mag();
-  double Ee = ve.Mag();
-  double Ep = sqrt((mN * mN) + vp.Mag2());
-
-  TVector3 vmiss = vbeam - ve - vp;
-  double emiss = Ebeam + mD - Ee - Ep;
-  double mmiss = sqrt((emiss * emiss) - vmiss.Mag2());
-
-  return mmiss;
-}
-
-double get_mpi(TVector3 vbeam, TVector3 ve, TVector3 vp){
-  
-  double Ebeam = vbeam.Mag();
-  double Ee = ve.Mag();
-  double Ep = sqrt((mN * mN) + vp.Mag2());
-
-  TVector3 vpi = ve + vp - vbeam;
-
-  double epi = Ep + Ee - Ebeam - mN;
-  double mpi = sqrt((epi * epi) - vpi.Mag2());
-
-  return mpi;
-}
-
-double get_phi_diff(double e_phi, double p_phi){
-
-  if(e_phi>p_phi){
-    if((e_phi-p_phi)<=180){
-      return (e_phi-p_phi);
-    }
-    else{
-      return 360 - (e_phi-p_phi);
-    }
-  }
-  else{
-    if((p_phi-e_phi)<=180){
-      return (p_phi-e_phi);
-    }
-    else{
-      return 360 - (p_phi-e_phi);
-    }
-  }
-}
 
 void Usage()
 {
@@ -215,7 +167,7 @@ int main(int argc, char ** argv)
   hist_list_1.push_back(h_theta_pq_FTOF);
   TH2D * h_phi_theta_p_FTOF = new TH2D("phi_theta_p_FTOF","#phi_{p} vs. #theta_{p} ;#phi_{p};#theta_{p}",100,-180,180,100,5,45);
   hist_list_2.push_back(h_phi_theta_p_FTOF);
-  TH2D * h_mom_beta_p_FTOF = new TH2D("mom_beta_p_FTOF","#p_{p} vs. #beta_{p} ;#p_{p};#beta_{p}",100,0,4,100,0.7,1);
+  TH2D * h_mom_beta_p_FTOF = new TH2D("mom_beta_p_FTOF","p_{p} vs. #beta_{p} ;p_{p};#beta_{p}",100,0,4,100,0.7,1);
   hist_list_2.push_back(h_mom_beta_p_FTOF);
 
 
@@ -247,7 +199,7 @@ int main(int argc, char ** argv)
   hist_list_1.push_back(h_theta_pq_CTOF);
   TH2D * h_phi_theta_p_CTOF = new TH2D("phi_theta_p_CTOF","#phi_{p} vs. #theta_{p} ;#phi_{p};#theta_{p}",100,-180,180,100,5,45);
   hist_list_2.push_back(h_phi_theta_p_CTOF);
-  TH2D * h_mom_beta_p_CTOF = new TH2D("mom_beta_p_CTOF","#p_{p} vs. #beta_{p} ;#p_{p};#beta_{p}",100,0,4,100,0.7,1);
+  TH2D * h_mom_beta_p_CTOF = new TH2D("mom_beta_p_CTOF","p_{p} vs. #beta_{p} ;p_{p};#beta_{p}",100,0,4,100,0.7,1);
   hist_list_2.push_back(h_mom_beta_p_CTOF);
   TH2D * h_mom_theta_p_CTOF = new TH2D("mom_theta_p_CTOF","#p_{p} vs. #theta_{p} ;#p_{p};#theta_{p}",100,0,4,100,30,135);
   hist_list_2.push_back(h_mom_theta_p_CTOF);
@@ -260,12 +212,14 @@ int main(int argc, char ** argv)
   hist_list_1.push_back(h_theta_p_Lead);
   TH1D * h_theta_pq_Lead = new TH1D("theta_pq_Lead","#theta_{pq} Lead;#theta_{pq};Counts",180,0,90);
   hist_list_1.push_back(h_theta_pq_Lead);
-  TH2D * h_mom_theta_p_Lead = new TH2D("mom_theta_p_Lead","#p_{p,Lead} vs. #theta_{p,Lead} ;#p_{p,Lead};#theta_{p,Lead}",100,0,4,100,30,135);
+  TH2D * h_mom_theta_p_Lead = new TH2D("mom_theta_p_Lead","#p_{p,Lead} vs. #theta_{p,Lead} ;#p_{p,Lead};#theta_{p,Lead}",100,0,4,100,0,135);
   hist_list_2.push_back(h_mom_theta_p_Lead);
-  TH1D * h_phi_e_p_Lead = new TH1D("phi_e_p_Lead","|#phi_{e} - #phi_{p,Lead}|;|#phi_{e} - #phi_{p,Lead}|,Counts",180,0,180);
+  TH1D * h_phi_e_p_Lead = new TH1D("phi_e_p_Lead","|#phi_{e} - #phi_{p,Lead}|;|#phi_{e} - #phi_{p,Lead}|,Counts",100,120,180);
   hist_list_1.push_back(h_phi_e_p_Lead);
   TH1D * h_xB_Lead = new TH1D("xB_Lead","x_{B} Lead;x_{B};Counts",100,0.0,2.0);
   hist_list_1.push_back(h_xB_Lead);
+  TH2D * h_vtz_e_vtz_p_Lead = new TH2D("vtz_e_vtz_p_Lead","Electron Z Vertex vs. Proton Z Vertex;vertex e;vertex p",100,-15,15,100,-15,15);
+  hist_list_2.push_back(h_vtz_e_vtz_p_Lead);
 
 
   TH1D * h_pmiss_Lead = new TH1D("pmiss_Lead","p_{miss} Lead;p_{miss};Counts",100,0,1.5);
@@ -280,7 +234,7 @@ int main(int argc, char ** argv)
 
   TH1D * h_mmiss_Lead = new TH1D("mmiss_Lead","m_{miss} Lead;m_{miss};Counts",100,0.4,1.4);
   hist_list_1.push_back(h_mmiss_Lead);
-  TH2D * h_mmiss_phi_e_p_Lead = new TH2D("mmiss_phi_e_p_Lead","m_{miss} vs. |#phi_{e} - #phi_{p}| Lead;m_{miss};|#phi_{e} - #phi_{p};Counts",100,0.4,1.4,180,0,180);
+  TH2D * h_mmiss_phi_e_p_Lead = new TH2D("mmiss_phi_e_p_Lead","m_{miss} vs. |#phi_{e} - #phi_{p}| Lead;m_{miss};|#phi_{e} - #phi_{p};Counts",100,0.4,1.4,100,120,180);
   hist_list_2.push_back(h_mmiss_phi_e_p_Lead);
   TH2D * h_mmiss_xB_Lead = new TH2D("mmiss_xB_Lead","m_{miss} vs. x_{B} Lead;m_{miss};x_{B};Counts",100,0.4,1.4,100,0.0,2.0);
   hist_list_2.push_back(h_mmiss_xB_Lead);
@@ -315,9 +269,13 @@ int main(int argc, char ** argv)
   /////////////////////////////////////
   //Recoil Nucleons
   /////////////////////////////////////
-  TH1D * h_p_2_AllRec = new TH1D("p_2_AllRec","p All Recoisl;p_2",100,0,1.5);
+  TH1D * h_p_2_AllRec = new TH1D("p_2_AllRec","p All Recoils;p_2",100,0,1.5);
   hist_list_1.push_back(h_p_2_AllRec);
-  TH1D * h_count_AllRec = new TH1D("count_AllRec","Number of Recoisl;Multiplicity",5,0,5);
+  TH1D * h_chiSq_rec_AllRec = new TH1D("chiSq_rec_AllRec","#chi^{2}_{rec} All Recoils;#chi^{2}_{rec}",100,-5,5);
+  hist_list_1.push_back(h_chiSq_rec_AllRec);
+  TH2D * h_mom_beta_rec_AllRec = new TH2D("mom_beta_rec_AllRec","p_{rec} vs. #beta_{rec} ;p_{rec};#beta_{rec}",100,0,4,100,0.7,1);
+  hist_list_2.push_back(h_mom_beta_rec_AllRec);
+  TH1D * h_count_AllRec = new TH1D("count_AllRec","Number of Recoils;Multiplicity",5,0,5);
   hist_list_1.push_back(h_count_AllRec);
 
   /////////////////////////////////////
@@ -402,10 +360,6 @@ int main(int argc, char ** argv)
 
 
       if(!myCut.electroncut(c12)){continue;}      
-      if(!isMC){
-	if(electrons[0]->par()->getVz() < -5){continue;}
-	if(electrons[0]->par()->getVz() > -1){continue;}
-      }
   /////////////////////////////////////
   //Electron Kinematics  
   /////////////////////////////////////
@@ -433,22 +387,17 @@ int main(int argc, char ** argv)
 	double theta_p = p_p.Theta() * 180 / M_PI;
 	double phi_p = p_p.Phi() * 180 / M_PI;
 	double theta_pq = p_p.Angle(p_q) * 180 / M_PI;
-	double beta_p = protons[j]->getBeta();
+	double beta_p = protons[j]->par()->getBeta();
 	double Chi2Pid_p = protons[j]->par()->getChi2Pid();
-	double vtz_p = protons[0]->par()->getVz();
+	double vtz_p = protons[j]->par()->getVz();
 	double vtz_ep_delta = vtz_e - vtz_p;
 
-	bool FTOF1A = false;
-	if(protons[j]->sci(clas12::FTOF1A)->getDetector() == 12){FTOF1A = true;}
-	bool FTOF1B = false;
-	if(protons[j]->sci(clas12::FTOF1B)->getDetector() == 12){FTOF1B = true;}
-	bool FTOF2 = false;
-	if(protons[j]->sci(clas12::FTOF2)->getDetector() == 12){FTOF2 = true;}
-	bool FTOF = FTOF1A || FTOF1B || FTOF2;
-	bool CTOF = false;
-	if(protons[j]->sci(clas12::CTOF)->getDetector() == 4){CTOF = true;}
+	bool FTOF1A = (protons[j]->sci(clas12::FTOF1A)->getDetector() == 12);
+	bool FTOF1B = (protons[j]->sci(clas12::FTOF1B)->getDetector() == 12);
+	bool FTOF2 = (protons[j]->sci(clas12::FTOF2)->getDetector() == 12);
+	bool CTOF = (protons[j]->sci(clas12::CTOF)->getDetector() == 4);
 
-	if(FTOF){
+	if(FTOF1A || FTOF1B || FTOF2){
 	  h_chiSq_p_FTOF->Fill(Chi2Pid_p,weight);
 	  h_vtz_p_FTOF->Fill(vtz_p,weight);
 	  h_vtz_ep_delta_FTOF->Fill(vtz_ep_delta,weight);
@@ -487,19 +436,21 @@ int main(int argc, char ** argv)
       TVector3 p_1 = p_L - p_q;
       TVector3 p_miss = -p_1;
       double mmiss = get_mmiss(p_b,p_e,p_L);
-      double phi_diff = get_phi_diff(p_e.Phi()*180/M_PI,p_L.Phi()*180/M_PI);
+      double phi_diff = get_phi_diff(p_e,p_L);
       double theta_L = p_L.Theta() * 180 / M_PI;
       double phi_L = p_L.Phi() * 180 / M_PI;
       double theta_miss = p_miss.Theta() * 180 / M_PI;
       double theta_Lq = p_L.Angle(p_q) * 180 / M_PI;
       double Loq = p_L.Mag() / p_q.Mag();
       double theta_1q = p_1.Angle(p_q) * 180 / M_PI;
+      double vtz_p = protons[index_L]->par()->getVz();
 
       h_theta_p_Lead->Fill(theta_L,weight);
       h_theta_pq_Lead->Fill(theta_Lq,weight);
       h_mom_theta_p_Lead->Fill(p_L.Mag(),theta_L,weight);
       h_phi_e_p_Lead->Fill(phi_diff,weight);
       h_xB_Lead->Fill(xB,weight);
+      h_vtz_e_vtz_p_Lead->Fill(vtz_e,vtz_p,weight);
       
       h_pmiss_Lead->Fill(p_miss.Mag(),weight);
       h_pmiss_thetamiss_Lead->Fill(p_miss.Mag(),theta_miss,weight);
@@ -534,6 +485,8 @@ int main(int argc, char ** argv)
       for(int j = 0; j < protons.size(); j++){
 	if(j==index_L){continue;}
 	h_p_2_AllRec->Fill(protons[j]->getP(),weight);
+	h_chiSq_rec_AllRec->Fill(protons[j]->par()->getChi2Pid(),weight);
+	h_mom_beta_rec_AllRec->Fill(protons[j]->getP(),protons[j]->par()->getBeta(),weight);
       }
       h_count_AllRec->Fill(protons.size()-1,weight);
 
@@ -774,9 +727,13 @@ int main(int argc, char ** argv)
   myCanvas->cd(2);
   h_theta_pq_Lead->Draw();
   myCanvas->cd(3);
-  h_phi_e_p_Lead->Draw();
+  h_mom_theta_p_Lead->Draw("colz");
   myCanvas->cd(4);
+  h_phi_e_p_Lead->Draw();
+  myCanvas->cd(5);
   h_xB_Lead->Draw();
+  myCanvas->cd(6);
+  h_vtz_e_vtz_p_Lead->Draw("colz");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
@@ -830,22 +787,18 @@ int main(int argc, char ** argv)
   myText->Print(fileName,"pdf");
   myText->Clear();
   
-  myCanvas->Divide(2,2);
+  myCanvas->Divide(2,3);
   myCanvas->cd(1);
   h_xB_SRC->Draw();
   myCanvas->cd(2);
   h_pmiss_SRC->Draw();
   myCanvas->cd(3);
   h_mmiss_SRC->Draw();
-  myCanvas->Print(fileName,"pdf");
-  myCanvas->Clear();
-
-  myCanvas->Divide(2,2);
-  myCanvas->cd(1);
+  myCanvas->cd(4);
   h_pmiss_theta_miss_SRC->Draw("colz");
-  myCanvas->cd(2);
+  myCanvas->cd(5);
   h_pmiss_theta_L_SRC->Draw("colz");
-  myCanvas->cd(3);
+  myCanvas->cd(6);
   h_xB_Loq_SRC->Draw("colz");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
@@ -861,10 +814,14 @@ int main(int argc, char ** argv)
   myText->Print(fileName,"pdf");
   myText->Clear();
 
-  myCanvas->Divide(2,2);
+  myCanvas->Divide(2,3);
   myCanvas->cd(1);
   h_p_2_AllRec->Draw();
   myCanvas->cd(2);
+  h_chiSq_rec_AllRec->Draw();
+  myCanvas->cd(3);
+  h_mom_beta_rec_AllRec->Draw("colz");
+  myCanvas->cd(4);
   h_count_AllRec->Draw();
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
