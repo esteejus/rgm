@@ -14,8 +14,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ROOT_CXX_FLAGS}")
 add_subdirectory(source)
 
 # compile executables in source directory
-#foreach(fnameSrc monitorPID.cpp  monitor_epp.cpp qe_mec.cpp skimmer_ep.cpp proton_checks.cpp)
-foreach(fnameSrc monitor_ep.cpp monitor_epp.cpp skimmer.cpp)
+foreach(fnameSrc monitor_ep.cpp monitor_epp.cpp monitor_epn.cpp compare.cpp skimmer.cpp)
   message(STATUS ${fnameSRC})
   string (REPLACE ".cpp" "" fnameExe ${fnameSrc})
   add_executable(${fnameExe} ${fnameSrc})
