@@ -15,8 +15,7 @@ add_subdirectory(source)
 
 # compile executables in source directory
 #foreach(fnameSrc monitorPID.cpp  monitor_epp.cpp qe_mec.cpp skimmer_ep.cpp proton_checks.cpp)
-#foreach(fnameSrc monitorPID.cpp  monitor_epp.cpp qe_mec.cpp skimmer_ep.cpp proton_checks.cpp)
-foreach(fnameSrc monitorPID.cpp  monitor_epp.cpp skimmer_ep.cpp)
+foreach(fnameSrc monitor_ep.cpp monitor_epp.cpp skimmer.cpp)
   message(STATUS ${fnameSRC})
   string (REPLACE ".cpp" "" fnameExe ${fnameSrc})
   add_executable(${fnameExe} ${fnameSrc})
