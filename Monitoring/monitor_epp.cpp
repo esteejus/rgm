@@ -25,6 +25,7 @@
 using namespace std;
 using namespace clas12;
 
+const double c = 29.9792458;
 
 void printProgress(double percentage);
 
@@ -167,8 +168,10 @@ int main(int argc, char ** argv)
   hist_list_1.push_back(h_theta_pq_FTOF);
   TH2D * h_phi_theta_p_FTOF = new TH2D("phi_theta_p_FTOF","#phi_{p} vs. #theta_{p} ;#phi_{p};#theta_{p}",100,-180,180,100,5,45);
   hist_list_2.push_back(h_phi_theta_p_FTOF);
-  TH2D * h_mom_beta_p_FTOF = new TH2D("mom_beta_p_FTOF","p_{p} vs. #beta_{p} ;p_{p};#beta_{p}",100,0,4,100,0.7,1);
+  TH2D * h_mom_beta_p_FTOF = new TH2D("mom_beta_p_FTOF","p_{p} vs. #beta_{p} ;p_{p};#beta_{p}",100,0,4,100,0.3,1);
   hist_list_2.push_back(h_mom_beta_p_FTOF);
+  TH1D * h_timediff_p_FTOF = new TH1D("timediff_p_FTOF","ToF-ToF_{|p|} ;ToF-ToF_{|p|};Counts",100,-2,2);
+  hist_list_1.push_back(h_timediff_p_FTOF);
 
 
   TH2D * h_mom_theta_p_FTOF[6];
@@ -199,8 +202,10 @@ int main(int argc, char ** argv)
   hist_list_1.push_back(h_theta_pq_CTOF);
   TH2D * h_phi_theta_p_CTOF = new TH2D("phi_theta_p_CTOF","#phi_{p} vs. #theta_{p} ;#phi_{p};#theta_{p}",100,-180,180,100,5,45);
   hist_list_2.push_back(h_phi_theta_p_CTOF);
-  TH2D * h_mom_beta_p_CTOF = new TH2D("mom_beta_p_CTOF","p_{p} vs. #beta_{p} ;p_{p};#beta_{p}",100,0,4,100,0.7,1);
+  TH2D * h_mom_beta_p_CTOF = new TH2D("mom_beta_p_CTOF","p_{p} vs. #beta_{p} ;p_{p};#beta_{p}",100,0,4,100,0.3,1);
   hist_list_2.push_back(h_mom_beta_p_CTOF);
+  TH1D * h_timediff_p_CTOF = new TH1D("timediff_p_CTOF","ToF-ToF_{|p|} ;ToF-ToF_{|p|};Counts",100,-2,2);
+  hist_list_1.push_back(h_timediff_p_CTOF);
   TH2D * h_mom_theta_p_CTOF = new TH2D("mom_theta_p_CTOF","#p_{p} vs. #theta_{p} ;#p_{p};#theta_{p}",100,0,4,100,30,135);
   hist_list_2.push_back(h_mom_theta_p_CTOF);
 
@@ -384,6 +389,7 @@ int main(int argc, char ** argv)
       for(int j = 0; j < protons.size(); j++){
 	TVector3 p_p;
 	p_p.SetMagThetaPhi(protons[j]->getP(),protons[j]->getTheta(),protons[j]->getPhi());
+	double E_p = sqrt(mN*mN + p_p.Mag2());
 	double theta_p = p_p.Theta() * 180 / M_PI;
 	double phi_p = p_p.Phi() * 180 / M_PI;
 	double theta_pq = p_p.Angle(p_q) * 180 / M_PI;
@@ -391,6 +397,12 @@ int main(int argc, char ** argv)
 	double Chi2Pid_p = protons[j]->par()->getChi2Pid();
 	double vtz_p = protons[j]->par()->getVz();
 	double vtz_ep_delta = vtz_e - vtz_p;
+
+	double path_p = protons[j]->getPath();
+	double beta_frommom_p = p_p.Mag()/E_p;
+	double time_frommom_p = path_p / (c*beta_frommom_p);
+	double time_frombeta_p = path_p / (c*beta_p);
+
 
 	bool FTOF1A = (protons[j]->sci(clas12::FTOF1A)->getDetector() == 12);
 	bool FTOF1B = (protons[j]->sci(clas12::FTOF1B)->getDetector() == 12);
@@ -407,7 +419,8 @@ int main(int argc, char ** argv)
 	  h_theta_pq_FTOF->Fill(theta_pq,weight);	
 	  h_phi_theta_p_FTOF->Fill(phi_p,theta_p,weight);
 	  h_mom_beta_p_FTOF->Fill(p_p.Mag(),beta_p,weight);
-	  
+	  h_timediff_p_FTOF->Fill(time_frommom_p-time_frombeta_p,weight);
+
 	  h_mom_theta_p_FTOF[protons[j]->getSector()-1]->Fill(p_p.Mag(),theta_p,weight);
 	}
 
@@ -421,6 +434,7 @@ int main(int argc, char ** argv)
 	  h_theta_pq_CTOF->Fill(theta_pq,weight);	
 	  h_phi_theta_p_CTOF->Fill(phi_p,theta_p,weight);
 	  h_mom_beta_p_CTOF->Fill(p_p.Mag(),beta_p,weight);
+	  h_timediff_p_CTOF->Fill(time_frommom_p-time_frombeta_p,weight);
 	  
 	  h_mom_theta_p_CTOF->Fill(p_p.Mag(),theta_p,weight);
 	}
@@ -598,10 +612,16 @@ int main(int argc, char ** argv)
   /////////////////////////////////////
   myText->cd();
   text.DrawLatex(0.2,0.9,"(e,e') Cuts:");
-  text.DrawLatex(0.2,0.8,"V_{cal} and W_{cal} > 14 [cm]");
-  text.DrawLatex(0.2,0.7,"0.18 < SF < 0.28");
-  text.DrawLatex(0.2,0.6,"1 [GeV] < p_{e} < E_{beam}");
-  myText->Print(fileName,"pdf");
+  double line = 0.8;
+  if(myCut.getDoCut(e_cuts)){
+    myCut.print_cut_onPDF(text,e_nphe,line);
+    myCut.print_cut_onPDF(text,e_calv,line);
+    myCut.print_cut_onPDF(text,e_calw,line);
+    myCut.print_cut_onPDF(text,e_SF,line);
+    myCut.print_cut_onPDF(text,e_mom,line);
+    myCut.print_cut_onPDF(text,e_vtze,line);
+  }
+  myText->Print(fileName,"pdf");  
   myText->Clear();
   
   myCanvas->Divide(2,3);
@@ -659,6 +679,8 @@ int main(int argc, char ** argv)
   h_phi_theta_p_FTOF->Draw("colz");
   myCanvas->cd(4);
   h_mom_beta_p_FTOF->Draw("colz");
+  myCanvas->cd(5);
+  h_timediff_p_FTOF->Draw();
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
@@ -702,6 +724,8 @@ int main(int argc, char ** argv)
   myCanvas->cd(4);
   h_mom_beta_p_CTOF->Draw("colz");
   myCanvas->cd(5);
+  h_timediff_p_CTOF->Draw();
+  myCanvas->cd(6);
   h_mom_theta_p_CTOF->Draw("colz");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
@@ -712,12 +736,16 @@ int main(int argc, char ** argv)
   myText->cd();
   text.DrawLatex(0.2,0.9,"(e,e'p_{Lead}) Cuts:");
   text.DrawLatex(0.2,0.8,"(e,e'p) Cuts");
-  char temp[100];
-  sprintf(temp,"Scintillator = %d",0);
-  text.DrawLatex(0.2,0.7,temp);
-  text.DrawLatex(0.2,0.6,"#theta_{p,q}<25^{o}");
-  text.DrawLatex(0.2,0.5,"-3 < #chi^{2} PID<3 ");
-  //text.DrawLatex(0.2,0.4,"#theta_{p} <50^{o}");
+  line = 0.7;
+  if(myCut.getDoCut(l_cuts)){
+    myCut.print_cut_onPDF(text,l_pid,line);
+    myCut.print_cut_onPDF(text,l_scint,line);
+    myCut.print_cut_onPDF(text,l_theta,line);
+    myCut.print_cut_onPDF(text,l_thetalq,line);
+    myCut.print_cut_onPDF(text,l_chipid,line);
+    myCut.print_cut_onPDF(text,l_vtzdiff,line);
+    myCut.print_cut_onPDF(text,l_phidiff,line);
+  }
   myText->Print(fileName,"pdf");
   myText->Clear();
 
@@ -779,11 +807,14 @@ int main(int argc, char ** argv)
   myText->cd();
   text.DrawLatex(0.2,0.9,"(e,e'p_{Lead,SRC}) Cuts:");
   text.DrawLatex(0.2,0.8,"(e,e'p_{LEAD}) Cuts");
-  text.DrawLatex(0.2,0.7,"1.5 < Q^{2} [GeV]");
-  text.DrawLatex(0.2,0.6,"0.3 [GeV] < p_{miss}");
-  text.DrawLatex(0.2,0.5,"0.84 [GeV] < m_{mmiss} < 1.04 [GeV]");
-  text.DrawLatex(0.2,0.4,"0.62 < |p|/|q| < 0.96");
-  text.DrawLatex(0.2,0.3,"1.2 < x_{B}");
+  line = 0.7;
+  if(myCut.getDoCut(lsrc_cuts)){
+    myCut.print_cut_onPDF(text,lsrc_Q2,line);
+    myCut.print_cut_onPDF(text,lsrc_xB,line);
+    myCut.print_cut_onPDF(text,lsrc_pmiss,line);
+    myCut.print_cut_onPDF(text,lsrc_mmiss,line);
+    myCut.print_cut_onPDF(text,lsrc_loq,line);
+  }
   myText->Print(fileName,"pdf");
   myText->Clear();
   
@@ -833,7 +864,12 @@ int main(int argc, char ** argv)
   myText->cd();
   text.DrawLatex(0.2,0.9,"(e,e'p_{Lead,SRC}p_{Rec,SRC}) Cuts:");
   text.DrawLatex(0.2,0.8,"(e,e'p_{LEAD,SRC},p_{Rec}) Cuts");
-  text.DrawLatex(0.2,0.7,"0.35 [GeV] < p_{Rec}");
+  line = 0.7;
+  if(myCut.getDoCut(rsrc_cuts)){
+    myCut.print_cut_onPDF(text,rsrc_pid,line);
+    myCut.print_cut_onPDF(text,rsrc_mom,line);
+    myCut.print_cut_onPDF(text,rsrc_chipid,line);
+  }
   myText->Print(fileName,"pdf");
   myText->Clear();
 

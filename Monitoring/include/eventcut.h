@@ -53,7 +53,7 @@ class eventcut{
   void set_cuts(char * filename);
   void print_cuts();
   void print_cut_loop(cutName startCut, cutName endCut);
-  
+  void print_cut_onPDF(TLatex &myText, cutName thisCut, double &line);
   
   bool electroncut(const std::unique_ptr<clas12::clas12reader>& c12);
   int leadnucleoncut(const std::unique_ptr<clas12::clas12reader>& c12);

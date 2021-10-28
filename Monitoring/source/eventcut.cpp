@@ -339,6 +339,14 @@ void eventcut::print_cut_loop(cutName startCut, cutName endCut)
   }  
 }
 
+void eventcut::print_cut_onPDF(TLatex &myText, cutName thisCut, double &line)
+{
+  if(cutmap[thisCut].docut){
+    myText.DrawLatex(0.2,line,getCutInformation(thisCut).c_str());
+    line-=0.1;
+  }
+}
+
 cutName eventcut::hashit(std::string cut_name)
 {
   //Electron Cuts
