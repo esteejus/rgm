@@ -25,7 +25,7 @@
 #include "TF1.h"
 #include "TCanvas.h"
 
-enum cutName{e_cuts,e_nphe,e_calv,e_calw,e_SF,e_mom,e_vtze,l_cuts,l_pid,l_scint,l_theta,l_thetalq,l_chipid,l_vtzdiff,l_phidiff,lsrc_cuts,lsrc_Q2,lsrc_xB,lsrc_pmiss,lsrc_mmiss,lsrc_loq,rsrc_cuts,rsrc_pid,rsrc_mom,rsrc_chipid,fake};
+enum cutName{e_cuts,e_nphe,e_calv,e_calw,e_SF,e_mom,e_vtze,l_cuts,l_pid,l_scint,l_theta,l_thetalq,l_chipid,l_vtzdiff,l_phidiff,lsrc_cuts,lsrc_Q2,lsrc_xB,lsrc_pmiss,lsrc_mmiss,lsrc_loq,rsrc_cuts,rsrc_pid,rsrc_scint,rsrc_mom,rsrc_chipid,fake};
 
 struct cutInfo{
   bool docut;
@@ -91,6 +91,7 @@ class eventcut{
   bool lsrc_loqcut(const std::unique_ptr<clas12::clas12reader>& c12, int i);
   
   //SRC (e,e'NN) Cuts
+  bool rsrc_scintcut(const std::unique_ptr<clas12::clas12reader>& c12,int j);
   bool rsrc_momcut(const std::unique_ptr<clas12::clas12reader>& c12,int j);
   bool rsrc_chipidcut(const std::unique_ptr<clas12::clas12reader>& c12,int j);
 
