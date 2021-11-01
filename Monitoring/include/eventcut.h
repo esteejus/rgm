@@ -21,12 +21,11 @@
 
 #include "clas12reader.h"
 #include "HipoChain.h"
-#include "eventcut.h"
 
 #include "TF1.h"
 #include "TCanvas.h"
 
-enum cutName{e_nphe,e_calv,e_calw,e_SF,e_mom,l_pid,l_scint,l_theta,l_thetalq,l_chipid,lsrc_Q2,lsrc_xB,lsrc_pmiss,lsrc_mmiss,lsrc_loq,rsrc_pid,rsrc_mom,fake};
+enum cutName{e_cuts,e_nphe,e_calv,e_calw,e_SF,e_mom,e_vtze,l_cuts,l_pid,l_scint,l_theta,l_thetalq,l_chipid,l_vtzdiff,l_phidiff,lsrc_cuts,lsrc_Q2,lsrc_xB,lsrc_pmiss,lsrc_mmiss,lsrc_loq,rsrc_cuts,rsrc_pid,rsrc_mom,rsrc_chipid,fake};
 
 struct cutInfo{
   bool docut;
@@ -43,15 +42,19 @@ class eventcut{
   eventcut(double E);
   ~eventcut();
 
-  void set_cuts(char * filename);
-  void print_cuts();
-  
   bool getDoCut(cutName thisCut);
   double getCutMin(cutName thisCut);
   double getCutMax(cutName thisCut);
   int getCutCount(cutName thisCut);
   std::string getCutLabel(cutName thisCut);
+  std::string getCutName(cutName thisCut);
+  std::string getCutInformation(cutName thisCut);
 
+  void set_cuts(char * filename);
+  void print_cuts();
+  void print_cut_loop(cutName startCut, cutName endCut);
+  void print_cut_onPDF(TLatex &myText, cutName thisCut, double &line);
+  
   bool electroncut(const std::unique_ptr<clas12::clas12reader>& c12);
   int leadnucleoncut(const std::unique_ptr<clas12::clas12reader>& c12);
   bool leadSRCnucleoncut(const std::unique_ptr<clas12::clas12reader>& c12, int index_L);
@@ -68,6 +71,7 @@ class eventcut{
   bool e_calwcut(const std::unique_ptr<clas12::clas12reader>& c12);
   bool e_SFcut(const std::unique_ptr<clas12::clas12reader>& c12);
   bool e_momcut(const std::unique_ptr<clas12::clas12reader>& c12);
+  bool e_vtzecut(const std::unique_ptr<clas12::clas12reader>& c12);
 
 
   //Lead Nucleon Cuts
@@ -76,7 +80,8 @@ class eventcut{
   bool l_thetacut(const std::unique_ptr<clas12::clas12reader>& c12, int i);
   bool l_thetalqcut(const std::unique_ptr<clas12::clas12reader>& c12, int i);
   bool l_chipidcut(const std::unique_ptr<clas12::clas12reader>& c12, int i);
-
+  bool l_vtzdiffcut(const std::unique_ptr<clas12::clas12reader>& c12, int i);
+  bool l_phidiffcut(const std::unique_ptr<clas12::clas12reader>& c12, int i);
 
   //SRC (e,e'N) Cuts
   bool lsrc_Q2cut(const std::unique_ptr<clas12::clas12reader>& c12);
@@ -87,6 +92,10 @@ class eventcut{
   
   //SRC (e,e'NN) Cuts
   bool rsrc_momcut(const std::unique_ptr<clas12::clas12reader>& c12,int j);
+  bool rsrc_chipidcut(const std::unique_ptr<clas12::clas12reader>& c12,int j);
+
+  //General Cut
+  bool inRange(double x, cutName thisCut);
 
   const double mN = 0.939;
   const double mD = 1.8756;
@@ -97,6 +106,7 @@ class eventcut{
   double Ebeam;
   TVector3 vbeam;
   std::map<cutName,cutInfo> cutmap;
+
 };
 
 #endif
