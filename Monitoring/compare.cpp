@@ -12,24 +12,164 @@
 #include <TStyle.h>
 #include <TLegend.h>
 
+
 using namespace std;
 
 int main(int argc, char ** argv)
 {
-  if (argc!=5)
+  if (argc != 8 and argc != 9)
     {
-      cout << "Wrong number of arguments. Instead use \n compare </path/to/output/root/file> </path/to/output/pdf/file> </path/to/input/simulation/root/file> </path/to/input/data/root/file> \n";
+      cout << "Wrong number of arguments. Instead use \n compare  <Ebeam (GeV)> <Z> <N>  <CTOF = 0, FTOF = 1> </path/to/output/root/file> </path/to/output/pdf/file> </path/to/input/data/root/file> </path/to/input/simulation/root/file (OPTIONAL)>\n\n";
+      cout << "Valid Target Options:\n\n";
+      cout << "Target  Z   N \n";
+      cout << "--------------\n";
+      cout << "d       1   1 \n";
+      cout << "He      2   2 \n";
+      cout << "C       6   6 \n";
+      cout << "Ar     18  22 \n";
+      cout << "Ca40   20  20 \n";
+      cout << "Ca48   20  28 \n";
+      cout << "Sn     50  70 \n";
       exit(-2);
     }
 
+  //declaring variables to contain inputs
+  TFile *sim_file;
+  
 
-  ///////////////////////
-  ////input root files///                                                                            ///////////////////////       
+  if (argc==8)
+    {
+      double E_beam = atof(argv[1]);
+      int Z = atoi(argv[2]);
+      int N = atoi(argv[3]);
+      int det = atoi(argv[4]);
+
+      if ((E_beam == 4.) or (E_beam == 4) or (E_beam == 4.0)) //4GeV
+	{
+	  if ((Z == 1) and (N == 1)) //deuterium
+	    {
+	      if (det == 0) //ctof
+		{
+		  sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/d_4gev_ctof.root"); 
+		}
+	      if (det == 1) //ftof
+		{
+		  sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/d_4gev_ftof.root");
+		}
+	    }
+	  else if ((Z == 6) and (N == 6)) //carbon
+	    {
+	      if (det == 0) //ctof
+		{
+		  sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/c_4gev_ctof.root"); 
+		}
+	      if (det == 1) //ftof
+		{
+		  sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/c_4gev_ftof.root");
+		}
+
+	    }
+	  else if ((Z == 18) and (Z == 22)) //argon
+	    {
+	      if (det == 0) //ctof
+		{
+		  sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/ar_4gev_ctof.root"); 
+		}
+	      if (det == 1) //ftof
+		{
+		  sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/ar_4gev_ftof.root");
+		}
+	    }
+	  else
+	    {
+	      cout << "Please choose a valid target/beam combination \n";
+	    }
+	}
+      if ((E_beam == 6.) or (E_beam == 6) or (E_beam == 6.0)) //6GeV
+	{
+	  if ((Z == 1) and (N == 1))//deuterium
+	    {
+	      if (det == 0) //ctof
+		{
+		  sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/d_6gev_ctof.root"); 
+		}
+	      if (det == 1) //ftof
+		{
+		  sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/d_6gev_ftof.root");
+		}	    
+	    }
+	  else if ((Z == 2) and (N == 2)) //helium
+	    {
+	      if (det == 0) //ctof
+		{
+		  sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/he_6gev_ctof.root"); 
+		}
+	      if (det == 1) //ftof
+		{
+		  sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/he_6gev_ftof.root");
+		}	    
+	    }
+	  else if ( ((Z == 6) and (N == 6)) or ((Z == 20) and (N == 28)) or ((Z == 50) and (N == 70)) ) //carbon, calcium 48, tin
+	    {
+	      if (det == 0) //ctof
+		{
+		  sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/c_6gev_ctof.root"); 
+		}
+	      if (det == 1) //ftof
+		{
+		  sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/c_6gev_ftof.root");
+		}	     
+	    }
+	  else if ((Z == 20) and (N == 20)) //calcium 40
+	    {
+	      if (det == 0) //ctof
+		{
+		  sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/ca40_6gev_ctof.root"); 
+		}
+	      if (det == 1) //ftof
+		{
+		  sim_file  == new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/ca40_6gev_ftof.root");
+		}	    
+	    }
+	  else if ((Z == 18) and (N == 22)) //argon
+	    {
+	      if (det == 0) //ctof
+		{
+		  sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/ar_6gev_ctof.root"); 
+		}
+	      if (det == 1) //ftof
+		{
+		  sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/ar_6gev_ftof.root");
+		}	    
+	    }
+	  else
+	    {
+	      cout << "Please choose a valid target \n";
+	    }
+	}
+      else 
+	{
+	  cout << "Please choose 4 or 6 GeV as your beam energy \n";
+	}
+    }
+  else if (argc == 9)
+    {
+      sim_file  = new TFile (argv[8]); //simulation  ("golden run") root file        
+      cout << "My sim file is " << argv[8] <<"\n";
+    }
+
+
+
+ ///////////////////////
+ ////input root files///
+ ///////////////////////       
                                   
-  TFile * sim_file  = new TFile (argv[3]); //simulation  ("golden run") root file                                                      
-  TFile * data_file = new TFile  (argv[4]); //data root file                                                                           
+  TFile * data_file = new TFile  (argv[7]); //data root file                                     
+  cout << "My data file is " << argv[7] << "\n";                                    
+ 
   //////////////////////////////////////////
-  ///grab histograms from simulation file///                                                         //////////////////////////////////////////
+  ///grab histograms from simulation file///                                                        
+  //////////////////////////////////////////
 
   TH1D * sim_xB_SRC = (TH1D*)sim_file->Get("xB_SRC");
   TH1D * sim_pmiss_SRC = (TH1D*)sim_file->Get("pmiss_SRC");
@@ -66,10 +206,11 @@ int main(int argc, char ** argv)
                                                                         
 
   ///////////////////
-  ////output files///                                                                                ///////////////////      
+  ////output files///                                                                                
+  ///////////////////      
                                
-  TFile * outfile = new TFile (argv[1],"RECREATE");
-  char * pdffile = argv[2];
+  TFile * outfile = new TFile (argv[5],"RECREATE");
+  char * pdffile = argv[6];
 
   
   ////////////////////////////////////////
@@ -134,7 +275,7 @@ int main(int argc, char ** argv)
   /////////////////////////////////////////////////////////////
   
   //Lead SRC Proton Checks
-  sim_xB_SRC->Scale(data_xB_SRC_norm/sim_xB_SRC_norm);
+  //sim_xB_SRC->Scale(data_xB_SRC_norm/sim_xB_SRC_norm);
   sim_pmiss_SRC->Scale(data_pmiss_SRC_norm/sim_pmiss_SRC_norm);
   sim_mmiss_SRC->Scale(data_mmiss_SRC_norm/sim_mmiss_SRC_norm);
 
@@ -196,8 +337,8 @@ int main(int argc, char ** argv)
   sim_xB_SRC->SetLineColor(2);
   sim_xB_SRC->SetMarkerColor(2);
   sim_xB_SRC->Draw("SAME");
-  TLegend *legend1 = new TLegend(0.11,0.8,0.3,0.9);
-  legend1->SetTextSize(.03);
+  TLegend *legend1 = new TLegend(0.11,0.7,0.3,0.9);
+  legend1->SetTextSize(.04);
   legend1->SetHeader("Legend","C");
   legend1->AddEntry(data_xB_SRC,"Data","lep");
   legend1->AddEntry(sim_xB_SRC, "Simulation","lep");
@@ -236,8 +377,8 @@ int main(int argc, char ** argv)
   sim_p_2_AllRec->SetLineColor(2);
   sim_p_2_AllRec->SetMarkerColor(2);
   sim_p_2_AllRec->Draw("SAME");
-  TLegend *legend2 = new TLegend(0.11,0.8,0.3,0.9);
-  legend2->SetTextSize(.03);
+  TLegend *legend2 = new TLegend(0.11,0.7,0.3,0.9);
+  legend2->SetTextSize(.04);
   legend2->SetHeader("Legend","C");
   legend2->AddEntry(data_p_2_AllRec,"Data","lep");
   legend2->AddEntry(sim_p_2_AllRec, "Simulation","lep");
@@ -270,8 +411,8 @@ int main(int argc, char ** argv)
   sim_p_2_Rec->SetLineColor(2);
   sim_p_2_Rec->SetMarkerColor(2);
   sim_p_2_Rec->Draw("SAME");
-  TLegend *legend3 = new TLegend(0.11,0.8,0.3,0.9);
-  legend3->SetTextSize(.03);
+  TLegend *legend3 = new TLegend(0.11,0.7,0.3,0.9);
+  legend3->SetTextSize(.04);
   legend3->SetHeader("Legend","C");
   legend3->AddEntry(data_p_2_Rec,"Data","lep");
   legend3->AddEntry(sim_p_2_Rec, "Simulation","lep");
@@ -308,8 +449,8 @@ int main(int argc, char ** argv)
   sim_p_y_cm_Rec->SetLineColor(2);
   sim_p_y_cm_Rec->SetMarkerColor(2);
   sim_p_y_cm_Rec->Draw("SAME");
-  TLegend *legend4 = new TLegend(0.11,0.8,0.3,0.9);
-  legend4->SetTextSize(.03);
+  TLegend *legend4 = new TLegend(0.11,0.7,0.3,0.9);
+  legend4->SetTextSize(.04);
   legend4->SetHeader("Legend","C");
   legend4->AddEntry(data_p_y_cm_Rec,"Data","lep");
   legend4->AddEntry(sim_p_y_cm_Rec, "Simulation","lep");
