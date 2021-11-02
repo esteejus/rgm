@@ -230,16 +230,26 @@ int main(int argc, char ** argv)
   /////////////////////////////////////
   TH1D * h_p_2_high = new TH1D("p_2_high","p_{rec};p_{rec};Counts",100,0,1.5);
   hist_list_1.push_back(h_p_2_high);
-  TH1D * h_tofm = new TH1D("tof_m","TOF/m;TOF/m (ns/m);Counts",40,0,40);
+  TH1D * h_tofm = new TH1D("tof_m","TOF/m;TOF/m (ns/m);Counts",40,0,20);
   hist_list_1.push_back(h_tofm);
-  TH2D * h_tofm_cnd = new TH2D("tof_m_phi","TOF/m vs CND sector;phi CND;TOF/m (ns/m)",360,-180,180,40,0,40);
+  TH2D * h_tofm_cnd = new TH2D("tof_m_phi","TOF/m vs CND sector;phi CND;TOF/m (ns/m)",360,-180,180,40,0,20);
   hist_list_2.push_back(h_tofm_cnd);
   TH2D * h_nacc_fd = new TH2D("nacc FD","Neutron Acceptance (FD);Phi;Theta",360,-180,180,180,0,180);
   hist_list_2.push_back(h_nacc_fd);
   TH2D * h_nacc_cd = new TH2D("nacc CD","Neutron Acceptance (CD);Phi;Theta",360,-180,180,180,0,180);
   hist_list_2.push_back(h_nacc_cd);
+  TH1D * h_cnd_layer = new TH1D("cnd layer","CND Layer",5,0,5);
+  hist_list_1.push_back(h_cnd_layer);
   TH1D * h_nbeta = new TH1D("n beta","Neutron Beta;Beta;Counts",44,0,1.1);
   hist_list_1.push_back(h_nbeta);
+
+  ////////////////////////////////////
+  //Deuterium Momentum Analysis
+  ////////////////////////////////////
+  TH2D * h_pmiss_pn = new TH2D("pmiss_pn","p_{miss} vs p_{n} (D only!);p_{miss};p_{neutron}",50,0,3,50,0,3);
+  hist_list_2.push_back(h_pmiss_pn);
+  TH1D * h_cos0 = new TH1D("cos0","cos #theta_{pmiss,pneutron}",50,-1.05,1.05);
+  hist_list_1.push_back(h_cos0);
 
 
   for(int i=0; i<hist_list_1.size(); i++){
@@ -256,10 +266,7 @@ int main(int argc, char ** argv)
 
   int counter = 0;
 
-  //Define cut class
-  //eventcut myCut(Ebeam,argv[6]);
-  //myCut.print_cuts();
-  //myCut.l_scintcut(c12,TOFID);
+  // loop over files/events
   while(chain.Next()==true){
       //Display completed  
       counter++;
@@ -378,40 +385,85 @@ int main(int argc, char ** argv)
   //////////////////////////////////////
       h_num_neutron_i->Fill(neutrons.size(),weight);
 
-      for (int j = 0; j < neutrons.size(); j++){
-        if (neutrons.size()==0) {continue;}
-        h_p_2->Fill(neutrons[j]->getP(),weight);
-      }      
+      //int index_R = myCut.recoilSRCnucleoncut(c12,index_L); // determines isospin from cut file, limits to 1 recoil
+      //if(index_R < 0){ continue; }
 
-      int index_R = myCut.recoilSRCnucleoncut(c12,index_L); // determines isospin from cut file, limits to 1 recoil
-      if(index_R < 0){ continue; }
-      h_p_2_high->Fill(neutrons[index_R]->getP(),weight);  
-
-      /*int count_R = 0;
+      // find recoil neutron
+      int count_R = 0;
       int index_R = -1;
-      h_num_neutron->Fill(neutrons.size());
       for(int j = 0; j < neutrons.size(); j++){
-	if(j==index_L){continue;}
 	h_p_2->Fill(neutrons[j]->getP(),weight);
-	if(neutrons[j]->getP()>0.35){
+	if(neutrons[j]->getP()>0.3 && neutrons[j]->getP()<1.0){
 	  count_R++;
 	  index_R = j;
 	}
       }
-      if(index_R == -1){continue;}
-      if(count_R != 1){continue;}*/
+      if(index_R == -1){continue;} // if no recoils, continue
+      if(count_R != 1){continue;} // if not exactly 1 recoil, continue
+
+      // detector cut: CND only
+      bool in_CND1 = (neutrons[index_R]->sci(CND1)->getDetector()==3);
+      bool in_CND2 = (neutrons[index_R]->sci(CND2)->getDetector()==3);
+      bool in_CND3 = (neutrons[index_R]->sci(CND3)->getDetector()==3);
+      bool in_CND = (in_CND1 || in_CND2 || in_CND3);
+      if (!in_CND) {continue;}
+
+      // pick layer
+      string cndlayer_str = "CND3";
+      short unsigned int cndnum;
+      if (in_CND1) {cndnum=1;}
+      else if (in_CND2) {cndnum=2;}
+      else if (in_CND3) {cndnum=3;}
+      char const * cndlayer = cndlayer_str.c_str();
+      //std::cout << cndnum << '\n';
+      
+      //std::cout << neutrons[index_R]->sci(cndlayer)->getLayer() << '\n' << '\n';
+std::cout << neutrons[index_R]->sci(CND3)->getPath() << '\n';
+      h_p_2_high->Fill(neutrons[index_R]->getP(),weight);
 
       double tofm = (neutrons[index_R]->getTime())/(neutrons[index_R]->getPath());
-      //double tofm = 0.939565/(neutrons[index_R]->getP());
       double tofphi = neutrons[index_R]->getPhi()*180./M_PI;
-      std::cout << tofm << '\n';
       h_num_neutron_f->Fill(neutrons.size(),weight);
-      h_tofm->Fill(tofm);
+      //h_tofm->Fill(tofm);
       h_tofm_cnd->Fill(tofphi,tofm);
-      if (TOFID==12) {h_nacc_fd->Fill(neutrons[index_R]->getPhi()*180./M_PI,neutrons[index_R]->getTheta()*180./M_PI,weight);}
-      else if (TOFID==4) {h_nacc_cd->Fill(neutrons[index_R]->getPhi()*180./M_PI,neutrons[index_R]->getTheta()*180./M_PI,weight);}
+      if (TOFID==12)
+        {h_nacc_fd->Fill(neutrons[index_R]->getPhi()*180./M_PI,neutrons[index_R]->getTheta()*180./M_PI,weight);}
+      else if (TOFID==4)
+        {h_nacc_cd->Fill(neutrons[index_R]->getPhi()*180./M_PI,neutrons[index_R]->getTheta()*180./M_PI,weight);}
+
+      // which CND layer are we in?
+      if (in_CND1) {
+        //std::cout << '1' << '\t' << neutrons[index_R]->sci
+        h_cnd_layer->Fill(neutrons[index_R]->sci(CND1)->getLayer());
+        h_tofm->Fill((neutrons[index_R]->sci(CND1)->getTime())/(neutrons[index_R]->sci(CND1)->getPath()));
+        }
+      if (in_CND2) {
+        h_cnd_layer->Fill(neutrons[index_R]->sci(CND2)->getLayer());
+        h_tofm->Fill((neutrons[index_R]->sci(CND2)->getTime())/(neutrons[index_R]->sci(CND2)->getPath()));
+        }
+      if (in_CND3) {
+        h_cnd_layer->Fill(neutrons[index_R]->sci(CND3)->getLayer());
+        h_tofm->Fill((neutrons[index_R]->sci(CND3)->getTime())/(neutrons[index_R]->sci(CND3)->getPath()));
+        }
       h_nbeta->Fill(neutrons[index_R]->getBeta(),weight);
-      
+
+   /////////////////////////////////////
+   //Deuterium momentum analysis
+   /////////////////////////////////////
+      // neutron beta cut built into reconstruction
+      // cos0 doesn't matter because hit is in CND, not EC
+      TVector3 vecX(0.,0.,0.);
+      //vecX.SetXYZ(neutrons[index_R]->cal(ECIN)->getX(),neutrons[index_R]->cal(ECIN)->getY(),neutrons[index_R]->cal(ECIN)->getZ()-neutrons[index_R]->par()->getVz());
+      if (TOFID==12)
+        { vecX.SetXYZ(neutrons[index_R]->cal(ECIN)->getX(),neutrons[index_R]->cal(ECIN)->getY(),neutrons[index_R]->cal(ECIN)->getZ()-neutrons[index_R]->par()->getVz()); }
+      else if (TOFID==4)
+        { vecX.SetXYZ(neutrons[index_R]->par()->getPx(),neutrons[index_R]->par()->getPy(),neutrons[index_R]->par()->getPz()); }  // what layer?
+      double cos0 = p_miss.Dot(vecX) / (p_miss.Mag() * vecX.Mag() );
+      //if (cos0 < 0.995) {continue;}
+
+      h_pmiss_pn->Fill(neutrons[index_R]->getP(),p_miss.Mag(),weight);
+      h_cos0->Fill(cos0,weight);
+       
       
   }
   cout<<counter<<endl;
@@ -564,7 +616,7 @@ int main(int argc, char ** argv)
   text.DrawLatex(0.2,0.9,"(e,e'p_{Lead,SRC}) Cuts:");
   text.DrawLatex(0.2,0.8,"(e,e'p_{LEAD}) Cuts");
   text.DrawLatex(0.2,0.7,"1.5 < Q^{2} [GeV]");
-  text.DrawLatex(0.2,0.6,"0.4 [GeV] < p_{miss}");
+  text.DrawLatex(0.2,0.6,"0.35 [GeV] < p_{miss}");
   text.DrawLatex(0.2,0.5,"0.84 [GeV] < m_{mmiss} < 1.04 [GeV]");
   text.DrawLatex(0.2,0.4,"0.62 < |p|/|q| < 0.96");
   text.DrawLatex(0.2,0.3,"1.2 < x_{B}");
@@ -631,7 +683,27 @@ int main(int argc, char ** argv)
 
   myCanvas->Divide(2,3);
   myCanvas->cd(1);
+  h_cnd_layer->Draw();
+  myCanvas->cd(2);
   h_nbeta->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  //////////////////////////////////////
+  //Deuterium momentum analysis
+  //////////////////////////////////////
+  myText->cd();
+  text.DrawLatex(0.2,0.9,"(e,e'p_{Lead,SRC}p_{Rec,SRC}) Cuts");
+  text.DrawLatex(0.2,0.8,"Momentum analysis: Deuterium only");
+  //text.DrawLatex(0.2,0.7,"cos #theta_{pmiss,X} > 0.995");
+  myText->Print(fileName,"pdf");
+  myText->Clear();
+
+  myCanvas->Divide(2,2);
+  myCanvas->cd(1);
+  h_pmiss_pn->Draw("colz");
+  myCanvas->cd(2);
+  h_cos0->Draw();
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
