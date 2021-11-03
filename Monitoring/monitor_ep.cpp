@@ -211,48 +211,93 @@ int main(int argc, char ** argv)
 
 
   /////////////////////////////////////
-  //Lead Proton Checks
+  //Lead Proton FTOF Checks
   /////////////////////////////////////
-  TH1D * h_theta_p_Lead = new TH1D("theta_p_Lead","#theta_{p,Lead};#theta_{p,Lead};Counts",180,0,180);
-  hist_list_1.push_back(h_theta_p_Lead);
-  TH1D * h_theta_pq_Lead = new TH1D("theta_pq_Lead","#theta_{pq} Lead;#theta_{pq};Counts",180,0,90);
-  hist_list_1.push_back(h_theta_pq_Lead);
-  TH2D * h_mom_theta_p_Lead = new TH2D("mom_theta_p_Lead","#p_{p,Lead} vs. #theta_{p,Lead} ;#p_{p,Lead};#theta_{p,Lead}",100,0,4,100,0,135);
-  hist_list_2.push_back(h_mom_theta_p_Lead);
-  TH1D * h_phi_e_p_Lead = new TH1D("phi_e_p_Lead","|#phi_{e} - #phi_{p,Lead}|;|#phi_{e} - #phi_{p,Lead}|,Counts",100,120,180);
-  hist_list_1.push_back(h_phi_e_p_Lead);
-  TH1D * h_xB_Lead = new TH1D("xB_Lead","x_{B} Lead;x_{B};Counts",100,0.0,2.0);
-  hist_list_1.push_back(h_xB_Lead);
-  TH2D * h_vtz_e_vtz_p_Lead = new TH2D("vtz_e_vtz_p_Lead","Electron Z Vertex vs. Proton Z Vertex;vertex e;vertex p",100,-15,15,100,-15,15);
-  hist_list_2.push_back(h_vtz_e_vtz_p_Lead);
+  TH1D * h_theta_p_Lead_FTOF = new TH1D("theta_p_Lead_FTOF","#theta_{p,Lead};#theta_{p,Lead};Counts",180,0,180);
+  hist_list_1.push_back(h_theta_p_Lead_FTOF);
+  TH1D * h_theta_pq_Lead_FTOF = new TH1D("theta_pq_Lead_FTOF","#theta_{pq} Lead;#theta_{pq};Counts",180,0,90);
+  hist_list_1.push_back(h_theta_pq_Lead_FTOF);
+  TH2D * h_mom_theta_p_Lead_FTOF = new TH2D("mom_theta_p_Lead_FTOF","#p_{p,Lead} vs. #theta_{p,Lead} ;#p_{p,Lead};#theta_{p,Lead}",100,0,4,100,0,135);
+  hist_list_2.push_back(h_mom_theta_p_Lead_FTOF);
+  TH1D * h_phi_e_p_Lead_FTOF = new TH1D("phi_e_p_Lead_FTOF","|#phi_{e} - #phi_{p,Lead}|;|#phi_{e} - #phi_{p,Lead}|,Counts",100,120,180);
+  hist_list_1.push_back(h_phi_e_p_Lead_FTOF);
+  TH1D * h_xB_Lead_FTOF = new TH1D("xB_Lead_FTOF","x_{B} Lead;x_{B};Counts",100,0.0,2.0);
+  hist_list_1.push_back(h_xB_Lead_FTOF);
+  TH2D * h_vtz_e_vtz_p_Lead_FTOF = new TH2D("vtz_e_vtz_p_Lead_FTOF","Electron Z Vertex vs. Proton Z Vertex;vertex e;vertex p",100,-15,15,100,-15,15);
+  hist_list_2.push_back(h_vtz_e_vtz_p_Lead_FTOF);
 
 
-  TH1D * h_pmiss_Lead = new TH1D("pmiss_Lead","p_{miss} Lead;p_{miss};Counts",100,0,1.5);
-  hist_list_1.push_back(h_pmiss_Lead);
-  TH2D * h_pmiss_thetamiss_Lead = new TH2D("pmiss_thetamiss_Lead","p_{miss} vs. #theta_{miss} Lead;p_{miss};#theta_{miss}",100,0,1.5,180,0,180);
-  hist_list_2.push_back(h_pmiss_thetamiss_Lead);
-  TH2D * h_xB_theta_1q_Lead = new TH2D("xB_theta_1q_Lead","x_{B} vs. #theta_{miss,q} Lead;x_{B};#theta_{miss,q};Counts",100,0,2,180,0,180);
-  hist_list_2.push_back(h_xB_theta_1q_Lead);
-  TH2D * h_Loq_theta_1q_Lead = new TH2D("Loq_theta_1q_Lead","|p|/|q| vs. #theta_{miss,q} Lead;|p|/|q|;#theta_{miss,q}",100,0,1.5,180,0,180);
-  hist_list_2.push_back(h_Loq_theta_1q_Lead);
+  TH1D * h_pmiss_Lead_FTOF = new TH1D("pmiss_Lead_FTOF","p_{miss} Lead;p_{miss};Counts",100,0,1.5);
+  hist_list_1.push_back(h_pmiss_Lead_FTOF);
+  TH2D * h_pmiss_thetamiss_Lead_FTOF = new TH2D("pmiss_thetamiss_Lead_FTOF","p_{miss} vs. #theta_{miss} Lead;p_{miss};#theta_{miss}",100,0,1.5,180,0,180);
+  hist_list_2.push_back(h_pmiss_thetamiss_Lead_FTOF);
+  TH2D * h_xB_theta_1q_Lead_FTOF = new TH2D("xB_theta_1q_Lead_FTOF","x_{B} vs. #theta_{miss,q} Lead;x_{B};#theta_{miss,q};Counts",100,0,2,180,0,180);
+  hist_list_2.push_back(h_xB_theta_1q_Lead_FTOF);
+  TH2D * h_Loq_theta_1q_Lead_FTOF = new TH2D("Loq_theta_1q_Lead_FTOF","|p|/|q| vs. #theta_{miss,q} Lead;|p|/|q|;#theta_{miss,q}",100,0,1.5,180,0,180);
+  hist_list_2.push_back(h_Loq_theta_1q_Lead_FTOF);
 
 
-  TH1D * h_mmiss_Lead = new TH1D("mmiss_Lead","m_{miss} Lead;m_{miss};Counts",100,0.4,1.4);
-  hist_list_1.push_back(h_mmiss_Lead);
-  TH2D * h_mmiss_phi_e_p_Lead = new TH2D("mmiss_phi_e_p_Lead","m_{miss} vs. |#phi_{e} - #phi_{p}| Lead;m_{miss};|#phi_{e} - #phi_{p};Counts",100,0.4,1.4,100,120,180);
-  hist_list_2.push_back(h_mmiss_phi_e_p_Lead);
-  TH2D * h_mmiss_xB_Lead = new TH2D("mmiss_xB_Lead","m_{miss} vs. x_{B} Lead;m_{miss};x_{B};Counts",100,0.4,1.4,100,0.0,2.0);
-  hist_list_2.push_back(h_mmiss_xB_Lead);
-  TH2D * h_mmiss_pmiss_Lead = new TH2D("mmiss_pmiss_Lead","m_{miss} vs. p_{miss} Lead;m_{miss};p_{miss};Counts",100,0.4,1.4,100,0.0,1.5);
-  hist_list_2.push_back(h_mmiss_pmiss_Lead);
-  TH2D * h_mmiss_theta_1q_Lead = new TH2D("mmiss_theta_1q_Lead","m_{miss} vs. #theta_{miss,q} Lead;m_{miss};#theta_{miss,q};Counts",100,0.4,1.4,180,0,180);
-  hist_list_2.push_back(h_mmiss_theta_1q_Lead);
-  TH2D * h_mmiss_theta_p_Lead = new TH2D("mmiss_theta_p_Lead","m_{miss} vs. #theta_{p,Lead} Lead;m_{miss};#theta_{p,Lead};Counts",100,0.4,1.4,180,0,180);
-  hist_list_2.push_back(h_mmiss_theta_p_Lead);
-  TH2D * h_mmiss_mom_p_Lead = new TH2D("mmiss_mom_p_Lead","m_{miss} vs. p_{p,Lead} Lead;m_{miss};p_{p,Lead};Counts",100,0.4,1.4,100,0,4);
-  hist_list_2.push_back(h_mmiss_mom_p_Lead);
-  TH2D * h_mmiss_momT_p_Lead = new TH2D("mmiss_momT_p_Lead","m_{miss} vs. p_{p,T,Lead} Lead;m_{miss};p_{p,T,Lead};Counts",100,0.4,1.4,100,0,2.5);
-  hist_list_2.push_back(h_mmiss_momT_p_Lead);
+  TH1D * h_mmiss_Lead_FTOF = new TH1D("mmiss_Lead_FTOF","m_{miss} Lead;m_{miss};Counts",100,0.4,1.4);
+  hist_list_1.push_back(h_mmiss_Lead_FTOF);
+  TH2D * h_mmiss_phi_e_p_Lead_FTOF = new TH2D("mmiss_phi_e_p_Lead_FTOF","m_{miss} vs. |#phi_{e} - #phi_{p}| Lead;m_{miss};|#phi_{e} - #phi_{p};Counts",100,0.4,1.4,100,120,180);
+  hist_list_2.push_back(h_mmiss_phi_e_p_Lead_FTOF);
+  TH2D * h_mmiss_xB_Lead_FTOF = new TH2D("mmiss_xB_Lead_FTOF","m_{miss} vs. x_{B} Lead;m_{miss};x_{B};Counts",100,0.4,1.4,100,0.0,2.0);
+  hist_list_2.push_back(h_mmiss_xB_Lead_FTOF);
+  TH2D * h_mmiss_pmiss_Lead_FTOF = new TH2D("mmiss_pmiss_Lead_FTOF","m_{miss} vs. p_{miss} Lead;m_{miss};p_{miss};Counts",100,0.4,1.4,100,0.0,1.5);
+  hist_list_2.push_back(h_mmiss_pmiss_Lead_FTOF);
+  TH2D * h_mmiss_theta_1q_Lead_FTOF = new TH2D("mmiss_theta_1q_Lead_FTOF","m_{miss} vs. #theta_{miss,q} Lead;m_{miss};#theta_{miss,q};Counts",100,0.4,1.4,180,0,180);
+  hist_list_2.push_back(h_mmiss_theta_1q_Lead_FTOF);
+  TH2D * h_mmiss_theta_p_Lead_FTOF = new TH2D("mmiss_theta_p_Lead_FTOF","m_{miss} vs. #theta_{p,Lead} Lead;m_{miss};#theta_{p,Lead};Counts",100,0.4,1.4,180,0,180);
+  hist_list_2.push_back(h_mmiss_theta_p_Lead_FTOF);
+  TH2D * h_mmiss_mom_p_Lead_FTOF = new TH2D("mmiss_mom_p_Lead_FTOF","m_{miss} vs. p_{p,Lead} Lead;m_{miss};p_{p,Lead};Counts",100,0.4,1.4,100,0,4);
+  hist_list_2.push_back(h_mmiss_mom_p_Lead_FTOF);
+  TH2D * h_mmiss_momT_p_Lead_FTOF = new TH2D("mmiss_momT_p_Lead_FTOF","m_{miss} vs. p_{p,T,Lead} Lead;m_{miss};p_{p,T,Lead};Counts",100,0.4,1.4,100,0,2.5);
+  hist_list_2.push_back(h_mmiss_momT_p_Lead_FTOF);
+
+  /////////////////////////////////////
+  //Lead Proton CTOF Checks
+  /////////////////////////////////////
+  TH1D * h_theta_p_Lead_CTOF = new TH1D("theta_p_Lead_CTOF","#theta_{p,Lead};#theta_{p,Lead};Counts",180,0,180);
+  hist_list_1.push_back(h_theta_p_Lead_CTOF);
+  TH1D * h_theta_pq_Lead_CTOF = new TH1D("theta_pq_Lead_CTOF","#theta_{pq} Lead;#theta_{pq};Counts",180,0,90);
+  hist_list_1.push_back(h_theta_pq_Lead_CTOF);
+  TH2D * h_mom_theta_p_Lead_CTOF = new TH2D("mom_theta_p_Lead_CTOF","#p_{p,Lead} vs. #theta_{p,Lead} ;#p_{p,Lead};#theta_{p,Lead}",100,0,4,100,0,135);
+  hist_list_2.push_back(h_mom_theta_p_Lead_CTOF);
+  TH1D * h_phi_e_p_Lead_CTOF = new TH1D("phi_e_p_Lead_CTOF","|#phi_{e} - #phi_{p,Lead}|;|#phi_{e} - #phi_{p,Lead}|,Counts",100,120,180);
+  hist_list_1.push_back(h_phi_e_p_Lead_CTOF);
+  TH1D * h_xB_Lead_CTOF = new TH1D("xB_Lead_CTOF","x_{B} Lead;x_{B};Counts",100,0.0,2.0);
+  hist_list_1.push_back(h_xB_Lead_CTOF);
+  TH2D * h_vtz_e_vtz_p_Lead_CTOF = new TH2D("vtz_e_vtz_p_Lead_CTOF","Electron Z Vertex vs. Proton Z Vertex;vertex e;vertex p",100,-15,15,100,-15,15);
+  hist_list_2.push_back(h_vtz_e_vtz_p_Lead_CTOF);
+
+
+  TH1D * h_pmiss_Lead_CTOF = new TH1D("pmiss_Lead_CTOF","p_{miss} Lead;p_{miss};Counts",100,0,1.5);
+  hist_list_1.push_back(h_pmiss_Lead_CTOF);
+  TH2D * h_pmiss_thetamiss_Lead_CTOF = new TH2D("pmiss_thetamiss_Lead_CTOF","p_{miss} vs. #theta_{miss} Lead;p_{miss};#theta_{miss}",100,0,1.5,180,0,180);
+  hist_list_2.push_back(h_pmiss_thetamiss_Lead_CTOF);
+  TH2D * h_xB_theta_1q_Lead_CTOF = new TH2D("xB_theta_1q_Lead_CTOF","x_{B} vs. #theta_{miss,q} Lead;x_{B};#theta_{miss,q};Counts",100,0,2,180,0,180);
+  hist_list_2.push_back(h_xB_theta_1q_Lead_CTOF);
+  TH2D * h_Loq_theta_1q_Lead_CTOF = new TH2D("Loq_theta_1q_Lead_CTOF","|p|/|q| vs. #theta_{miss,q} Lead;|p|/|q|;#theta_{miss,q}",100,0,1.5,180,0,180);
+  hist_list_2.push_back(h_Loq_theta_1q_Lead_CTOF);
+
+
+  TH1D * h_mmiss_Lead_CTOF = new TH1D("mmiss_Lead_CTOF","m_{miss} Lead;m_{miss};Counts",100,0.4,1.4);
+  hist_list_1.push_back(h_mmiss_Lead_CTOF);
+  TH2D * h_mmiss_phi_e_p_Lead_CTOF = new TH2D("mmiss_phi_e_p_Lead_CTOF","m_{miss} vs. |#phi_{e} - #phi_{p}| Lead;m_{miss};|#phi_{e} - #phi_{p};Counts",100,0.4,1.4,100,120,180);
+  hist_list_2.push_back(h_mmiss_phi_e_p_Lead_CTOF);
+  TH2D * h_mmiss_xB_Lead_CTOF = new TH2D("mmiss_xB_Lead_CTOF","m_{miss} vs. x_{B} Lead;m_{miss};x_{B};Counts",100,0.4,1.4,100,0.0,2.0);
+  hist_list_2.push_back(h_mmiss_xB_Lead_CTOF);
+  TH2D * h_mmiss_pmiss_Lead_CTOF = new TH2D("mmiss_pmiss_Lead_CTOF","m_{miss} vs. p_{miss} Lead;m_{miss};p_{miss};Counts",100,0.4,1.4,100,0.0,1.5);
+  hist_list_2.push_back(h_mmiss_pmiss_Lead_CTOF);
+  TH2D * h_mmiss_theta_1q_Lead_CTOF = new TH2D("mmiss_theta_1q_Lead_CTOF","m_{miss} vs. #theta_{miss,q} Lead;m_{miss};#theta_{miss,q};Counts",100,0.4,1.4,180,0,180);
+  hist_list_2.push_back(h_mmiss_theta_1q_Lead_CTOF);
+  TH2D * h_mmiss_theta_p_Lead_CTOF = new TH2D("mmiss_theta_p_Lead_CTOF","m_{miss} vs. #theta_{p,Lead} Lead;m_{miss};#theta_{p,Lead};Counts",100,0.4,1.4,180,0,180);
+  hist_list_2.push_back(h_mmiss_theta_p_Lead_CTOF);
+  TH2D * h_mmiss_mom_p_Lead_CTOF = new TH2D("mmiss_mom_p_Lead_CTOF","m_{miss} vs. p_{p,Lead} Lead;m_{miss};p_{p,Lead};Counts",100,0.4,1.4,100,0,4);
+  hist_list_2.push_back(h_mmiss_mom_p_Lead_CTOF);
+  TH2D * h_mmiss_momT_p_Lead_CTOF = new TH2D("mmiss_momT_p_Lead_CTOF","m_{miss} vs. p_{p,T,Lead} Lead;m_{miss};p_{p,T,Lead};Counts",100,0.4,1.4,100,0,2.5);
+  hist_list_2.push_back(h_mmiss_momT_p_Lead_CTOF);
+
 
 
 
@@ -408,27 +453,55 @@ int main(int argc, char ** argv)
       double theta_1q = p_1.Angle(p_q) * 180 / M_PI;
       double vtz_p = protons[index_L]->par()->getVz();
 
-      h_theta_p_Lead->Fill(theta_L,weight);
-      h_theta_pq_Lead->Fill(theta_Lq,weight);
-      h_mom_theta_p_Lead->Fill(p_L.Mag(),theta_L,weight);
-      h_phi_e_p_Lead->Fill(phi_diff,weight);
-      h_xB_Lead->Fill(xB,weight);
-      h_vtz_e_vtz_p_Lead->Fill(vtz_e,vtz_p,weight);
+      bool FTOF1A = (protons[index_L]->sci(clas12::FTOF1A)->getDetector() == 12);
+      bool FTOF1B = (protons[index_L]->sci(clas12::FTOF1B)->getDetector() == 12);
+      bool FTOF2 =  (protons[index_L]->sci(clas12::FTOF2)->getDetector() == 12);
+      bool CTOF =   (protons[index_L]->sci(clas12::CTOF)->getDetector() == 4);
 
-      h_pmiss_Lead->Fill(p_miss.Mag(),weight);
-      h_pmiss_thetamiss_Lead->Fill(p_miss.Mag(),theta_miss,weight);
-      h_xB_theta_1q_Lead->Fill(xB,theta_1q,weight);
-      h_Loq_theta_1q_Lead->Fill(Loq,theta_1q,weight);
-      
-      h_mmiss_Lead->Fill(mmiss,weight);
-      h_mmiss_phi_e_p_Lead->Fill(mmiss,phi_diff,weight);
-      h_mmiss_xB_Lead->Fill(mmiss,xB,weight);
-      h_mmiss_pmiss_Lead->Fill(mmiss,p_miss.Mag(),weight);
-      h_mmiss_theta_1q_Lead->Fill(mmiss,theta_1q,weight);
-      h_mmiss_theta_p_Lead->Fill(mmiss,theta_L,weight);
-      h_mmiss_mom_p_Lead->Fill(mmiss,p_L.Mag(),weight);
-      h_mmiss_momT_p_Lead->Fill(mmiss,p_L.Perp(),weight);
-        
+      if(FTOF1A || FTOF1B || FTOF2){
+	h_theta_p_Lead_FTOF->Fill(theta_L,weight);
+	h_theta_pq_Lead_FTOF->Fill(theta_Lq,weight);
+	h_mom_theta_p_Lead_FTOF->Fill(p_L.Mag(),theta_L,weight);
+	h_phi_e_p_Lead_FTOF->Fill(phi_diff,weight);
+	h_xB_Lead_FTOF->Fill(xB,weight);
+	h_vtz_e_vtz_p_Lead_FTOF->Fill(vtz_e,vtz_p,weight);
+	
+	h_pmiss_Lead_FTOF->Fill(p_miss.Mag(),weight);
+	h_pmiss_thetamiss_Lead_FTOF->Fill(p_miss.Mag(),theta_miss,weight);
+	h_xB_theta_1q_Lead_FTOF->Fill(xB,theta_1q,weight);
+	h_Loq_theta_1q_Lead_FTOF->Fill(Loq,theta_1q,weight);
+	
+	h_mmiss_Lead_FTOF->Fill(mmiss,weight);
+	h_mmiss_phi_e_p_Lead_FTOF->Fill(mmiss,phi_diff,weight);
+	h_mmiss_xB_Lead_FTOF->Fill(mmiss,xB,weight);
+	h_mmiss_pmiss_Lead_FTOF->Fill(mmiss,p_miss.Mag(),weight);
+	h_mmiss_theta_1q_Lead_FTOF->Fill(mmiss,theta_1q,weight);
+	h_mmiss_theta_p_Lead_FTOF->Fill(mmiss,theta_L,weight);
+	h_mmiss_mom_p_Lead_FTOF->Fill(mmiss,p_L.Mag(),weight);
+	h_mmiss_momT_p_Lead_FTOF->Fill(mmiss,p_L.Perp(),weight);
+      }
+      if(CTOF){
+	h_theta_p_Lead_CTOF->Fill(theta_L,weight);
+	h_theta_pq_Lead_CTOF->Fill(theta_Lq,weight);
+	h_mom_theta_p_Lead_CTOF->Fill(p_L.Mag(),theta_L,weight);
+	h_phi_e_p_Lead_CTOF->Fill(phi_diff,weight);
+	h_xB_Lead_CTOF->Fill(xB,weight);
+	h_vtz_e_vtz_p_Lead_CTOF->Fill(vtz_e,vtz_p,weight);
+	
+	h_pmiss_Lead_CTOF->Fill(p_miss.Mag(),weight);
+	h_pmiss_thetamiss_Lead_CTOF->Fill(p_miss.Mag(),theta_miss,weight);
+	h_xB_theta_1q_Lead_CTOF->Fill(xB,theta_1q,weight);
+	h_Loq_theta_1q_Lead_CTOF->Fill(Loq,theta_1q,weight);
+	
+	h_mmiss_Lead_CTOF->Fill(mmiss,weight);
+	h_mmiss_phi_e_p_Lead_CTOF->Fill(mmiss,phi_diff,weight);
+	h_mmiss_xB_Lead_CTOF->Fill(mmiss,xB,weight);
+	h_mmiss_pmiss_Lead_CTOF->Fill(mmiss,p_miss.Mag(),weight);
+	h_mmiss_theta_1q_Lead_CTOF->Fill(mmiss,theta_1q,weight);
+	h_mmiss_theta_p_Lead_CTOF->Fill(mmiss,theta_L,weight);
+	h_mmiss_mom_p_Lead_CTOF->Fill(mmiss,p_L.Mag(),weight);
+	h_mmiss_momT_p_Lead_CTOF->Fill(mmiss,p_L.Perp(),weight);
+      }
   }
   cout<<counter<<endl;
 
@@ -629,12 +702,13 @@ int main(int argc, char ** argv)
   myCanvas->Clear();
 
   /////////////////////////////////////
-  //Lead Proton Checks
+  //Lead Proton FTOF Checks
   /////////////////////////////////////
   myText->cd();
   text.DrawLatex(0.2,0.9,"(e,e'p_{Lead}) Cuts:");
   text.DrawLatex(0.2,0.8,"(e,e'p) Cuts");
-  line = 0.7;
+  text.DrawLatex(0.2,0.7,"Lead Scintillator: FTOF");
+  line = 0.6;
   if(myCut.getDoCut(l_cuts)){
     myCut.print_cut_onPDF(text,l_pid,line);
     myCut.print_cut_onPDF(text,l_scint,line);
@@ -649,53 +723,125 @@ int main(int argc, char ** argv)
 
   myCanvas->Divide(2,3);
   myCanvas->cd(1);
-  h_theta_p_Lead->Draw();
+  h_theta_p_Lead_FTOF->Draw();
   myCanvas->cd(2);
-  h_theta_pq_Lead->Draw();
+  h_theta_pq_Lead_FTOF->Draw();
   myCanvas->cd(3);
-  h_mom_theta_p_Lead->Draw("colz");
+  h_mom_theta_p_Lead_FTOF->Draw("colz");
   myCanvas->cd(4);
-  h_phi_e_p_Lead->Draw();
+  h_phi_e_p_Lead_FTOF->Draw();
   myCanvas->cd(5);
-  h_xB_Lead->Draw();
+  h_xB_Lead_FTOF->Draw();
   myCanvas->cd(6);
-  h_vtz_e_vtz_p_Lead->Draw("colz");
+  h_vtz_e_vtz_p_Lead_FTOF->Draw("colz");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
   myCanvas->Divide(2,3);
   myCanvas->cd(1);
-  h_pmiss_Lead->Draw();
+  h_pmiss_Lead_FTOF->Draw();
   myCanvas->cd(2);
-  h_pmiss_thetamiss_Lead->Draw("colz");
+  h_pmiss_thetamiss_Lead_FTOF->Draw("colz");
   myCanvas->cd(3);
-  h_xB_theta_1q_Lead->Draw("colz");
+  h_xB_theta_1q_Lead_FTOF->Draw("colz");
   myCanvas->cd(4);
-  h_Loq_theta_1q_Lead->Draw("colz");
+  h_Loq_theta_1q_Lead_FTOF->Draw("colz");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
   myCanvas->Divide(2,3);
   myCanvas->cd(1);
-  h_mmiss_Lead->Draw();
+  h_mmiss_Lead_FTOF->Draw();
   myCanvas->cd(2);
-  h_mmiss_phi_e_p_Lead->Draw("colz");
+  h_mmiss_phi_e_p_Lead_FTOF->Draw("colz");
   myCanvas->cd(3);
-  h_mmiss_xB_Lead->Draw("colz");
+  h_mmiss_xB_Lead_FTOF->Draw("colz");
   myCanvas->cd(4);
-  h_mmiss_pmiss_Lead->Draw("colz");
+  h_mmiss_pmiss_Lead_FTOF->Draw("colz");
   myCanvas->cd(5);
-  h_mmiss_theta_1q_Lead->Draw("colz");
+  h_mmiss_theta_1q_Lead_FTOF->Draw("colz");
   myCanvas->cd(6);
-  h_mmiss_theta_p_Lead->Draw("colz");
+  h_mmiss_theta_p_Lead_FTOF->Draw("colz");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
   myCanvas->Divide(2,3);
   myCanvas->cd(1);
-  h_mmiss_mom_p_Lead->Draw("colz");
+  h_mmiss_mom_p_Lead_FTOF->Draw("colz");
   myCanvas->cd(2);
-  h_mmiss_momT_p_Lead->Draw("colz");
+  h_mmiss_momT_p_Lead_FTOF->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  /////////////////////////////////////
+  //Lead Proton CTOF Checks
+  /////////////////////////////////////
+  myText->cd();
+  text.DrawLatex(0.2,0.9,"(e,e'p_{Lead}) Cuts:");
+  text.DrawLatex(0.2,0.8,"(e,e'p) Cuts");
+  text.DrawLatex(0.2,0.7,"Lead Scintillator: CTOF");
+  line = 0.6;
+  if(myCut.getDoCut(l_cuts)){
+    myCut.print_cut_onPDF(text,l_pid,line);
+    myCut.print_cut_onPDF(text,l_scint,line);
+    myCut.print_cut_onPDF(text,l_theta,line);
+    myCut.print_cut_onPDF(text,l_thetalq,line);
+    myCut.print_cut_onPDF(text,l_chipid,line);
+    myCut.print_cut_onPDF(text,l_vtzdiff,line);
+    myCut.print_cut_onPDF(text,l_phidiff,line);
+  }
+  myText->Print(fileName,"pdf");
+  myText->Clear();
+
+  myCanvas->Divide(2,3);
+  myCanvas->cd(1);
+  h_theta_p_Lead_CTOF->Draw();
+  myCanvas->cd(2);
+  h_theta_pq_Lead_CTOF->Draw();
+  myCanvas->cd(3);
+  h_mom_theta_p_Lead_CTOF->Draw("colz");
+  myCanvas->cd(4);
+  h_phi_e_p_Lead_CTOF->Draw();
+  myCanvas->cd(5);
+  h_xB_Lead_CTOF->Draw();
+  myCanvas->cd(6);
+  h_vtz_e_vtz_p_Lead_CTOF->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(2,3);
+  myCanvas->cd(1);
+  h_pmiss_Lead_CTOF->Draw();
+  myCanvas->cd(2);
+  h_pmiss_thetamiss_Lead_CTOF->Draw("colz");
+  myCanvas->cd(3);
+  h_xB_theta_1q_Lead_CTOF->Draw("colz");
+  myCanvas->cd(4);
+  h_Loq_theta_1q_Lead_CTOF->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(2,3);
+  myCanvas->cd(1);
+  h_mmiss_Lead_CTOF->Draw();
+  myCanvas->cd(2);
+  h_mmiss_phi_e_p_Lead_CTOF->Draw("colz");
+  myCanvas->cd(3);
+  h_mmiss_xB_Lead_CTOF->Draw("colz");
+  myCanvas->cd(4);
+  h_mmiss_pmiss_Lead_CTOF->Draw("colz");
+  myCanvas->cd(5);
+  h_mmiss_theta_1q_Lead_CTOF->Draw("colz");
+  myCanvas->cd(6);
+  h_mmiss_theta_p_Lead_CTOF->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(2,3);
+  myCanvas->cd(1);
+  h_mmiss_mom_p_Lead_CTOF->Draw("colz");
+  myCanvas->cd(2);
+  h_mmiss_momT_p_Lead_CTOF->Draw("colz");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
