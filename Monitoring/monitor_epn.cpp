@@ -177,7 +177,7 @@ int main(int argc, char ** argv)
   hist_list_2.push_back(h_nacc);
   TH1D * h_nbeta = new TH1D("n beta","Neutron Beta;Beta;Counts",44,0,1.1);
   hist_list_1.push_back(h_nbeta);
-  TH1D * h_tofm = new TH1D("tof_m","TOF/m;TOF/m (ns/m);Counts",40,-10,30);
+  TH1D * h_tofm = new TH1D("tof_m","TOF/m;TOF/m (ns/m);Counts",40,0,60);
   hist_list_1.push_back(h_tofm);
 
   ////////////////////////////////////
@@ -294,7 +294,6 @@ int main(int argc, char ** argv)
       h_pmiss_theta_L_SRC->Fill(p_miss.Mag(),theta_L,weight);
       h_xB_Loq_SRC->Fill(xB,Loq,weight);
 
-
   /////////////////////////////////////
   //Recoil Nucleons
   /////////////////////////////////////
@@ -325,7 +324,7 @@ int main(int argc, char ** argv)
       TVector3 vx = vt.Cross(vy);
 
       // Acceptance, beta, TOF/
-      double tofm = (neutrons[index_R]->getTime())/(neutrons[index_R]->getPath());
+      double tofm = (neutrons[index_R]->getTime())/(neutrons[index_R]->getPath()/10.);
       double tofphi = neutrons[index_R]->getPhi()*180./M_PI;
       
       h_p_2_Rec->Fill(neutrons[index_R]->getP(),weight);
@@ -336,11 +335,9 @@ int main(int argc, char ** argv)
       h_p_x_cm_Rec->Fill(p_cm.Dot(vx),weight);
       h_theta_rel_Rec->Fill(theta_rel,weight);
       h_p_cm_theta_rel_Rec->Fill(p_cm.Mag(),theta_rel,weight);
-      // Erin's histograms
       h_nacc->Fill(neutrons[index_R]->getPhi()*180./M_PI,neutrons[index_R]->getTheta()*180./M_PI,weight);
       h_nbeta->Fill(neutrons[index_R]->getBeta(),weight);
-      h_tofm->Fill((neutrons[index_R]->sci(CND1)->getTime())/(neutrons[index_R]->sci(CND1)->getPath()));
-
+      h_tofm->Fill(tofm);
 
   /////////////////////////////////////
   //Deuterium Momentum Analysis
