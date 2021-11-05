@@ -275,7 +275,7 @@ int main(int argc, char ** argv)
   /////////////////////////////////////////////////////////////
   
   //Lead SRC Proton Checks
-  //sim_xB_SRC->Scale(data_xB_SRC_norm/sim_xB_SRC_norm);
+  sim_xB_SRC->Scale(data_xB_SRC_norm/sim_xB_SRC_norm);
   sim_pmiss_SRC->Scale(data_pmiss_SRC_norm/sim_pmiss_SRC_norm);
   sim_mmiss_SRC->Scale(data_mmiss_SRC_norm/sim_mmiss_SRC_norm);
 
