@@ -20,67 +20,18 @@
 #include "clas12reader.h"
 #include "HipoChain.h"
 #include "eventcut.h"
+#include "functions.h"
 
 using namespace std;
 using namespace clas12;
 
-const double mN = 0.939;
-const double mD = 1.8756;
+const double c = 29.9792458;
 
 void printProgress(double percentage);
 
-double get_mmiss(TVector3 vbeam, TVector3 ve, TVector3 vp){
-  
-  double Ebeam = vbeam.Mag();
-  double Ee = ve.Mag();
-  double Ep = sqrt((mN * mN) + vp.Mag2());
-
-  TVector3 vmiss = vbeam - ve - vp;
-  double emiss = Ebeam + mD - Ee - Ep;
-  double mmiss = sqrt((emiss * emiss) - vmiss.Mag2());
-
-  return mmiss;
-}
-
-double get_phi_diff(double e_phi, double p_phi){
-
-  if(e_phi>p_phi){
-    if((e_phi-p_phi)<=180){
-      return (e_phi-p_phi);
-    }
-    else{
-      return 360 - (e_phi-p_phi);
-    }
-  }
-  else{
-    if((p_phi-e_phi)<=180){
-      return (p_phi-e_phi);
-    }
-    else{
-      return 360 - (p_phi-e_phi);
-    }
-  }
-}
-
-bool lowThetaCut(double theta, double chi2PID, double vtzDiff){
-  
-  if(theta > (50 * M_PI / 180)){
-    return false;
-  }
-  if(fabs(chi2PID-0.459179)>(3*1.2085)){
-    return false;
-  }
-  if(fabs(vtzDiff-0.484268)>(3*1.30286)){
-    return false;
-  }
-  
-  return true;
-}
-
-
 void Usage()
 {
-  std::cerr << "Usage: ./code <MC =1,Data = 0> <Ebeam(GeV)> <path/to/output.root> <path/to/output.pdf> [scintillator number (4 ctof / 12 ftof)] <path/to/cutfile.txt> <path/to/input.hipo> \n";
+  std::cerr << "Usage: ./code <MC =1,Data = 0> <Ebeam(GeV)> <path/to/ouput.root> <path/to/ouput.pdf> <path/to/cutfile.txt> <path/to/input.hipo> \n";
 }
 
 
@@ -103,12 +54,10 @@ int main(int argc, char ** argv)
   
   TFile * outFile = new TFile(argv[3],"RECREATE");
   char * pdfFile = argv[4];
-  int TOFID = atoi(argv[5]);
-  // NEW CLASS INSTANTIATION
-  eventcut myCut(Ebeam,argv[6]);
+  eventcut myCut(Ebeam,argv[5]);
   myCut.print_cuts();
   clas12root::HipoChain chain;
-  for(int k = 7; k < argc; k++){
+  for(int k = 6; k < argc; k++){
     cout<<"Input file "<<argv[k]<<endl;
     chain.Add(argv[k]);
   }
@@ -129,88 +78,66 @@ int main(int argc, char ** argv)
   gStyle->SetTitleXOffset(0.8);
   gStyle->SetTitleYOffset(0.8);
 
-  /////////////////////////////////////
-  //Electron fiducials
-  /////////////////////////////////////
-  TH2D * h_Vcal_EoP = new TH2D("Vcal_EoP","ECAL V coordinate vs. Sampling Fraction ;ECAL V coordinate;Sampling Fraction",60,0,30,150,0.05,0.40);
-  hist_list_2.push_back(h_Vcal_EoP);
-  TH2D * h_Wcal_EoP = new TH2D("Wcal_EoP","ECAL W coordinate vs. Sampling Fraction ;ECAL W coordinate;Sampling Fraction",60,0,30,150,0.05,0.40);
-  hist_list_2.push_back(h_Wcal_EoP);
-  TH2D * h_phi_theta = new TH2D("phi_theta","#phi_{e} vs. #theta_{e} ;#phi_{e};#theta_{e}",100,-180,180,100,5,40);
-  hist_list_2.push_back(h_phi_theta);
-  TH1D * h_sector = new TH1D("sector","ECAL Sector;Sector;Counts",6,1,7);
-  hist_list_1.push_back(h_sector);
-
-  /////////////////////////////////////
-  //Electron Pid
-  /////////////////////////////////////
-  TH2D * h_P_EoP = new TH2D("P_EoP","p_{e} vs. Sampling Fraction ;p_{e};Sampling Faction",100,0,7,100,0.15,0.35);
-  hist_list_2.push_back(h_P_EoP);
-  TH1D * h_nphe = new TH1D("nphe","#Photo-electrons in HTCC;#Photo-electrons;Counts",100,0,50);
-  hist_list_1.push_back(h_nphe);
-  
-  /////////////////////////////////////
-  //Electron Kinematics  
-  /////////////////////////////////////
-  TH1D * h_xB = new TH1D("xB","x_{B};x_{B};Counts",100,0,2);
-  hist_list_1.push_back(h_xB);
-  TH1D * h_QSq = new TH1D("QSq","Q^{2};Q^{2};Counts",100,0,3);
-  hist_list_1.push_back(h_QSq);
-  TH1D * h_WSq = new TH1D("WSq","W^{2};W^{2}",100,0,7);
-  hist_list_1.push_back(h_WSq);
-  TH2D * h_xB_QSq = new TH2D("xB_QSq","x_{B} vs. Q^{2} ;x_{B};Q^{2}",100,0,2,100,0,3);
-  hist_list_2.push_back(h_xB_QSq);
-  TH2D * h_xB_WSq = new TH2D("xB_WSq","x_{B} vs. W^{2} ;x_{B};W^{2}",100,0,2,100,0,7);
-  hist_list_2.push_back(h_xB_WSq);
-  TH2D * h_QSq_WSq = new TH2D("QSq_WSq","Q^{2} vs. W^{2} ;Q^{2};W^{2}",100,0,3,100,0,7);
-  hist_list_2.push_back(h_QSq_WSq);
-
-  /////////////////////////////////////
-  //All Proton Angles
-  /////////////////////////////////////
-  TH1D * h_theta_L = new TH1D("theta_L","#theta_{proton};#theta_{proton};Counts",180,0,180);
-  hist_list_1.push_back(h_theta_L);
-  TH1D * h_theta_Lq = new TH1D("theta_Lq","#theta_{pq};#theta_{pq};Counts",180,0,180);
-  hist_list_1.push_back(h_theta_Lq);
-  TH1D * h_num_proton_i = new TH1D("num p before","Number of Protons;num p;Counts",5,0,5);
-  hist_list_1.push_back(h_num_proton_i);
-  TH1D * h_num_proton_f = new TH1D("num p after","Number of Protons;num p;Counts",5,0,5);
-  hist_list_1.push_back(h_num_proton_f);
+  char temp_name[100];
+  char temp_title[100];
 
   /////////////////////////////////////
   //Lead Proton Checks
   /////////////////////////////////////
-  TH1D * h_theta_L_FTOF = new TH1D("theta_L_FTOF","#theta_{proton} Lead;#theta_{proton};Counts",180,0,180);
-  hist_list_1.push_back(h_theta_L_FTOF);
-  TH1D * h_theta_Lq_FTOF = new TH1D("theta_Lq_FTOF","#theta_{pq} Lead;#theta_{pq};Counts",180,0,180);
-  hist_list_1.push_back(h_theta_Lq_FTOF);
+  TH1D * h_theta_p_Lead = new TH1D("theta_p_Lead","#theta_{p,Lead};#theta_{p,Lead};Counts",180,0,180);
+  hist_list_1.push_back(h_theta_p_Lead);
+  TH1D * h_theta_pq_Lead = new TH1D("theta_pq_Lead","#theta_{pq} Lead;#theta_{pq};Counts",180,0,90);
+  hist_list_1.push_back(h_theta_pq_Lead);
+  TH2D * h_mom_theta_p_Lead = new TH2D("mom_theta_p_Lead","#p_{p,Lead} vs. #theta_{p,Lead} ;#p_{p,Lead};#theta_{p,Lead}",100,0,4,100,0,135);
+  hist_list_2.push_back(h_mom_theta_p_Lead);
+  TH1D * h_phi_e_p_Lead = new TH1D("phi_e_p_Lead","|#phi_{e} - #phi_{p,Lead}|;|#phi_{e} - #phi_{p,Lead}|,Counts",100,120,180);
+  hist_list_1.push_back(h_phi_e_p_Lead);
+  TH1D * h_xB_Lead = new TH1D("xB_Lead","x_{B} Lead;x_{B};Counts",100,0.0,2.0);
+  hist_list_1.push_back(h_xB_Lead);
+  TH2D * h_vtz_e_vtz_p_Lead = new TH2D("vtz_e_vtz_p_Lead","Electron Z Vertex vs. Proton Z Vertex;vertex e;vertex p",100,-15,15,100,-15,15);
+  hist_list_2.push_back(h_vtz_e_vtz_p_Lead);
 
-  TH1D * h_phi_e_L = new TH1D("phi_e_L","|#phi_{e} - #phi_{p}|;|#phi_{e} - #phi_{p}|,Counts",180,0,180);
-  hist_list_1.push_back(h_phi_e_L);
-  TH1D * h_mmiss_FTOF = new TH1D("mmiss_FTOF","m_{miss};m_{miss};Counts",100,0.4,1.4);
-  hist_list_1.push_back(h_mmiss_FTOF);
-  TH2D * h_mmiss_phi_e_L = new TH2D("mmiss_phi_e_L","m_{miss} vs. |#phi_{e} - #phi_{p}|;m_{miss};|#phi_{e} - #phi_{p};Counts",100,0.4,1.4,180,0,180);
-  hist_list_2.push_back(h_mmiss_phi_e_L);
-  TH2D * h_xB_mmiss = new TH2D("xB_mmiss","x_{B} vs. m_{miss};x_{B};m_{miss};Counts",100,0,2,100,0.4,1.4);
-  hist_list_2.push_back(h_xB_mmiss);
-  TH2D * h_pmiss_mmiss = new TH2D("pmiss_mmiss","p_{miss} vs. m_{miss};p_{miss};m_{miss};Counts",100,0,1.5,100,0.4,1.4);
-  hist_list_2.push_back(h_pmiss_mmiss);
-  TH2D * h_xB_theta_1q = new TH2D("xB_theta_1q","x_{B} vs. #theta_{miss,q};x_{B};#theta_{miss,q};Counts",100,0,2,180,0,180);
-  hist_list_2.push_back(h_xB_theta_1q);
-  TH2D * h_Loq_theta_1q = new TH2D("Loq_theta_1q","|p|/|q| vs. #theta_{miss,q};|p|/|q|;#theta_{miss,q}",100,0,1.5,180,0,180);
-  hist_list_2.push_back(h_Loq_theta_1q);
-  TH2D * h_pmiss_theta_miss = new TH2D("pmiss_theta_miss","p_{miss} vs. #theta_{miss};p_{miss};#theta_{miss}",100,0,1.5,180,0,180);
-  hist_list_2.push_back(h_pmiss_theta_miss);
+
+  TH1D * h_pmiss_Lead = new TH1D("pmiss_Lead","p_{miss} Lead;p_{miss};Counts",100,0,1.5);
+  hist_list_1.push_back(h_pmiss_Lead);
+  TH2D * h_pmiss_thetamiss_Lead = new TH2D("pmiss_thetamiss_Lead","p_{miss} vs. #theta_{miss} Lead;p_{miss};#theta_{miss}",100,0,1.5,180,0,180);
+  hist_list_2.push_back(h_pmiss_thetamiss_Lead);
+  TH2D * h_xB_theta_1q_Lead = new TH2D("xB_theta_1q_Lead","x_{B} vs. #theta_{miss,q} Lead;x_{B};#theta_{miss,q};Counts",100,0,2,180,0,180);
+  hist_list_2.push_back(h_xB_theta_1q_Lead);
+  TH2D * h_Loq_theta_1q_Lead = new TH2D("Loq_theta_1q_Lead","|p|/|q| vs. #theta_{miss,q} Lead;|p|/|q|;#theta_{miss,q}",100,0,1.5,180,0,180);
+  hist_list_2.push_back(h_Loq_theta_1q_Lead);
+
+
+  TH1D * h_mmiss_Lead = new TH1D("mmiss_Lead","m_{miss} Lead;m_{miss};Counts",100,0.4,1.4);
+  hist_list_1.push_back(h_mmiss_Lead);
+  TH2D * h_mmiss_phi_e_p_Lead = new TH2D("mmiss_phi_e_p_Lead","m_{miss} vs. |#phi_{e} - #phi_{p}| Lead;m_{miss};|#phi_{e} - #phi_{p};Counts",100,0.4,1.4,100,120,180);
+  hist_list_2.push_back(h_mmiss_phi_e_p_Lead);
+  TH2D * h_mmiss_xB_Lead = new TH2D("mmiss_xB_Lead","m_{miss} vs. x_{B} Lead;m_{miss};x_{B};Counts",100,0.4,1.4,100,0.0,2.0);
+  hist_list_2.push_back(h_mmiss_xB_Lead);
+  TH2D * h_mmiss_pmiss_Lead = new TH2D("mmiss_pmiss_Lead","m_{miss} vs. p_{miss} Lead;m_{miss};p_{miss};Counts",100,0.4,1.4,100,0.0,1.5);
+  hist_list_2.push_back(h_mmiss_pmiss_Lead);
+  TH2D * h_mmiss_theta_1q_Lead = new TH2D("mmiss_theta_1q_Lead","m_{miss} vs. #theta_{miss,q} Lead;m_{miss};#theta_{miss,q};Counts",100,0.4,1.4,180,0,180);
+  hist_list_2.push_back(h_mmiss_theta_1q_Lead);
+  TH2D * h_mmiss_theta_p_Lead = new TH2D("mmiss_theta_p_Lead","m_{miss} vs. #theta_{p,Lead} Lead;m_{miss};#theta_{p,Lead};Counts",100,0.4,1.4,180,0,180);
+  hist_list_2.push_back(h_mmiss_theta_p_Lead);
+  TH2D * h_mmiss_mom_p_Lead = new TH2D("mmiss_mom_p_Lead","m_{miss} vs. p_{p,Lead} Lead;m_{miss};p_{p,Lead};Counts",100,0.4,1.4,100,0,4);
+  hist_list_2.push_back(h_mmiss_mom_p_Lead);
+  TH2D * h_mmiss_momT_p_Lead = new TH2D("mmiss_momT_p_Lead","m_{miss} vs. p_{p,T,Lead} Lead;m_{miss};p_{p,T,Lead};Counts",100,0.4,1.4,100,0,2.5);
+  hist_list_2.push_back(h_mmiss_momT_p_Lead);
 
 
   /////////////////////////////////////
   //Lead SRC Proton Checks
   /////////////////////////////////////
-  TH1D * h_pmiss = new TH1D("pmiss","p_{miss};p_{miss};Counts",100,0,1.5);
-  hist_list_1.push_back(h_pmiss);
-  TH1D * h_mmiss = new TH1D("mmiss","m_{miss};m_{miss};Counts",100,0.4,1.4);
-  hist_list_1.push_back(h_mmiss);
-  TH2D * h_pmiss_theta_miss_SRC = new TH2D("pmiss_theta_miss_SRC","p_{miss} vs. #theta_{miss};p_{miss};theta_{miss};Counts",100,0,1.5,180,0,180);
+  TH1D * h_xB_SRC = new TH1D("xB_SRC","x_{B} SRC;x_{B};Counts",100,1.0,2.0);
+  hist_list_1.push_back(h_xB_SRC);
+  TH1D * h_pmiss_SRC = new TH1D("pmiss_SRC","p_{miss} SRC;p_{miss};Counts",100,0,1.5);
+  hist_list_1.push_back(h_pmiss_SRC);
+  TH1D * h_mmiss_SRC = new TH1D("mmiss_SRC","m_{miss} SRC;m_{miss};Counts",100,0.4,1.4);
+  hist_list_1.push_back(h_mmiss_SRC);
+  TH2D * h_pmiss_theta_miss_SRC = new TH2D("pmiss_theta_miss_SRC","p_{miss} vs. #theta_{miss};p_{miss};#theta_{miss};Counts",100,0,1.5,180,0,180);
+  hist_list_2.push_back(h_pmiss_theta_miss_SRC);
+  TH2D * h_pmiss_theta_L_SRC = new TH2D("pmiss_theta_L_SRC","p_{miss} vs. #theta_{L};p_{miss};#theta_{L};Counts",100,0,1.5,100,5,45);
   hist_list_2.push_back(h_pmiss_theta_miss_SRC);
   TH2D * h_xB_Loq_SRC = new TH2D("xB_Loq","x_{B} vs |p|/|q|;x_{B};|p|/|q|",100,0,2,100,0,1.5);
   hist_list_2.push_back(h_xB_Loq_SRC);
@@ -218,30 +145,40 @@ int main(int argc, char ** argv)
   /////////////////////////////////////
   //Recoil Nucleons
   /////////////////////////////////////
-  TH1D * h_p_2 = new TH1D("p_2","p Recoil;p_2",100,0,1.5);
-  hist_list_1.push_back(h_p_2);
-  TH1D * h_num_neutron_i = new TH1D("num n before","Number of Neutrons;num n;Counts",5,0,5);
-  hist_list_1.push_back(h_num_neutron_i);
-  TH1D * h_num_neutron_f = new TH1D("num n after","Number of Neutrons;num n;Counts",5,0,5);
-  hist_list_1.push_back(h_num_neutron_f);
+  TH1D * h_p_2_AllRec = new TH1D("p_2_AllRec","p All Recoils;p_2",100,0,1.5);
+  hist_list_1.push_back(h_p_2_AllRec);
+  TH1D * h_chiSq_rec_AllRec = new TH1D("chiSq_rec_AllRec","#chi^{2}_{rec} All Recoils;#chi^{2}_{rec}",100,-5,5);
+  hist_list_1.push_back(h_chiSq_rec_AllRec);
+  TH2D * h_mom_beta_rec_AllRec = new TH2D("mom_beta_rec_AllRec","p_{rec} vs. #beta_{rec} ;p_{rec};#beta_{rec}",100,0,4,100,0.7,1);
+  hist_list_2.push_back(h_mom_beta_rec_AllRec);
+  TH1D * h_count_AllRec = new TH1D("count_AllRec","Number of Recoils;Multiplicity",5,0,5);
+  hist_list_1.push_back(h_count_AllRec);
 
   /////////////////////////////////////
   //Recoil SRC Nucleons
   /////////////////////////////////////
-  TH1D * h_p_2_high = new TH1D("p_2_high","p_{rec};p_{rec};Counts",100,0,1.5);
-  hist_list_1.push_back(h_p_2_high);
-  TH1D * h_tofm = new TH1D("tof_m","TOF/m;TOF/m (ns/m);Counts",40,0,20);
-  hist_list_1.push_back(h_tofm);
-  TH2D * h_tofm_cnd = new TH2D("tof_m_phi","TOF/m vs CND sector;phi CND;TOF/m (ns/m)",360,-180,180,40,0,20);
-  hist_list_2.push_back(h_tofm_cnd);
-  TH2D * h_nacc_fd = new TH2D("nacc FD","Neutron Acceptance (FD);Phi;Theta",360,-180,180,180,0,180);
-  hist_list_2.push_back(h_nacc_fd);
-  TH2D * h_nacc_cd = new TH2D("nacc CD","Neutron Acceptance (CD);Phi;Theta",360,-180,180,180,0,180);
-  hist_list_2.push_back(h_nacc_cd);
-  TH1D * h_cnd_layer = new TH1D("cnd layer","CND Layer",5,0,5);
-  hist_list_1.push_back(h_cnd_layer);
+  TH1D * h_p_2_Rec = new TH1D("p_2_Rec","p_{rec};p_{rec};Counts",100,0,1.5);
+  hist_list_1.push_back(h_p_2_Rec);
+  TH1D * h_p_rel_Rec = new TH1D("p_rel_Rec","p_{rel};p_{rel};Counts",100,0,1.5);
+  hist_list_1.push_back(h_p_rel_Rec);
+  TH1D * h_p_cm_Rec = new TH1D("p_cm_Rec","p_{C.M.};p_{C.M.};Counts",100,0,0.5);
+  hist_list_1.push_back(h_p_cm_Rec);
+  TH1D * h_p_t_cm_Rec = new TH1D("p_t_cm_Rec","p_{t,C.M.};p_{t,C.M.};Counts",100,-0.5,0.5);
+  hist_list_1.push_back(h_p_t_cm_Rec);
+  TH1D * h_p_y_cm_Rec = new TH1D("p_y_cm_Rec","p_{y,C.M.};p_{y,C.M.};Counts",100,-0.5,0.5);
+  hist_list_1.push_back(h_p_y_cm_Rec);
+  TH1D * h_p_x_cm_Rec = new TH1D("p_x_cm_Rec","p_{x,C.M.};p_{x,C.M.};Counts",100,-0.5,0.5);
+  hist_list_1.push_back(h_p_x_cm_Rec);
+  TH1D * h_theta_rel_Rec = new TH1D("theta_rel_Rec","#theta_{rel};#theta_{rel};Counts",180,0,180);
+  hist_list_1.push_back(h_theta_rel_Rec);
+  TH2D * h_p_cm_theta_rel_Rec = new TH2D("p_cm_theta_rel_Rec","p_{C.M.} vs. #theta_{rel};p_{C.M.};#theta_{rel}",100,0,0.5,180,100,180);
+  hist_list_2.push_back(h_p_cm_theta_rel_Rec);
+  TH2D * h_nacc = new TH2D("nacc FD","Neutron Acceptance (FD);Phi;Theta",360,-180,180,180,0,180);
+  hist_list_2.push_back(h_nacc);
   TH1D * h_nbeta = new TH1D("n beta","Neutron Beta;Beta;Counts",44,0,1.1);
   hist_list_1.push_back(h_nbeta);
+  TH1D * h_tofm = new TH1D("tof_m","TOF/m;TOF/m (ns/m);Counts",40,0,60);
+  hist_list_1.push_back(h_tofm);
 
   ////////////////////////////////////
   //Deuterium Momentum Analysis
@@ -249,6 +186,14 @@ int main(int argc, char ** argv)
   TH2D * h_pmiss_pn = new TH2D("pmiss_pn","p_{miss} vs p_{n} (D only!);p_{miss};p_{neutron}",50,0,3,50,0,3);
   hist_list_2.push_back(h_pmiss_pn);
   TH1D * h_cos0 = new TH1D("cos0","cos #theta_{pmiss,pneutron}",50,-1.05,1.05);
+  hist_list_1.push_back(h_cos0);
+
+  ////////////////////////////////////
+  //Deuterium with Cuts
+  ////////////////////////////////////
+  TH2D * h_pmiss_pn_cut = new TH2D("pmiss_pn_cut","p_{miss} vs p_{n} (with cuts);p_{miss};p_{neutron}",50,0,3,50,0,3);
+  hist_list_2.push_back(h_pmiss_pn_cut);
+  TH1D * h_cos0_cut = new TH1D("cos0_cut","cos #theta_{pmiss,pneutron}",50,-1.05,1.05);
   hist_list_1.push_back(h_cos0);
 
 
@@ -266,14 +211,17 @@ int main(int argc, char ** argv)
 
   int counter = 0;
 
-  // loop over files/events
+  //Define cut class
   while(chain.Next()==true){
       //Display completed  
       counter++;
-      if((counter%100000) == 0){
-	//	printProgress(.5);
-	cerr << counter <<" completed \n";
+      if((counter%1000000) == 0){
+	cerr << "\n" <<counter/1000000 <<" million completed";
       }    
+      if((counter%100000) == 0){
+	cerr << ".";
+      }    
+
       // get particles by type
       auto electrons=c12->getByID(11);
       auto protons=c12->getByID(2212);
@@ -282,189 +230,135 @@ int main(int argc, char ** argv)
       if(isMC){weight=c12->mcevent()->getWeight();}
       TVector3 	p_b(0,0,Ebeam);
 
+      if(!myCut.electroncut(c12)){continue;}      
 
-      if(electrons.size()!=1){ continue;}
       TVector3 p_e;
       p_e.SetMagThetaPhi(electrons[0]->getP(),electrons[0]->getTheta(),electrons[0]->getPhi());
-      double EoP_e =  (electrons[0]->cal(PCAL)->getEnergy() +  electrons[0]->cal(ECIN)->getEnergy() +  electrons[0]->cal(ECOUT)->getEnergy()) / p_e.Mag();
-      int nphe = electrons[0]->che(HTCC)->getNphe();
-
-  /////////////////////////////////////
-  //Electron fiducials
-  /////////////////////////////////////      
-      h_Vcal_EoP->Fill(electrons[0]->cal(PCAL)->getLv(),EoP_e,weight);
-      h_Wcal_EoP->Fill(electrons[0]->cal(PCAL)->getLw(),EoP_e,weight);
-      h_phi_theta->Fill(p_e.Phi()*180/M_PI,p_e.Theta()*180/M_PI,weight);
-      h_sector->Fill(electrons[0]->getSector(),weight);
-	  
-  /////////////////////////////////////
-  //Electron Pid
-  /////////////////////////////////////
-      h_P_EoP->Fill(p_e.Mag(),EoP_e,weight);
-      h_nphe->Fill(nphe,weight);
-
-
-      if(!myCut.electroncut(c12)){continue;}      
-      if(!isMC){
-	if(electrons[0]->par()->getVz() < -5){continue;}
-	if(electrons[0]->par()->getVz() > -1){continue;}
-      }
-  /////////////////////////////////////
-  //Electron Kinematics  
-  /////////////////////////////////////
-      TVector3 p_q = p_b - p_e;
+      double vtz_e = electrons[0]->par()->getVz();
+      TVector3	p_q = p_b - p_e;
       double nu = Ebeam - p_e.Mag();
       double QSq = p_q.Mag2() - (nu*nu);
       double xB = QSq / (2 * mN * nu);
       double WSq = (mN*mN) - QSq + (2*nu*mN);
       double theta_e = p_e.Theta() * 180 / M_PI;
-      //if(WSq>1.25){continue;}
-      
-      h_xB->Fill(xB,weight);
-      h_QSq->Fill(QSq,weight);
-      h_WSq->Fill(WSq,weight);
-      h_xB_QSq->Fill(xB,QSq,weight);
-      h_xB_WSq->Fill(xB,WSq,weight);
-      h_QSq_WSq->Fill(QSq,WSq,weight);
-
-  /////////////////////////////////////
-  //All Proton Angles
-  /////////////////////////////////////
-      for(int j = 0; j < protons.size(); j++){
-	TVector3 p_L;
-	p_L.SetMagThetaPhi(protons[j]->getP(),protons[j]->getTheta(),protons[j]->getPhi());
-	double theta_L = p_L.Theta() * 180 / M_PI;
-	double theta_Lq = p_L.Angle(p_q) * 180 / M_PI;
-	h_theta_L->Fill(theta_L,weight);
-	h_theta_Lq->Fill(theta_Lq,weight);
-      }
-      h_num_proton_i->Fill(protons.size(),weight);
 
   /////////////////////////////////////
   //Lead Proton Checks
   /////////////////////////////////////
-      int index_L = myCut.leadnucleoncut(c12);  // inc limitation of 1 lead p
+      int index_L = myCut.leadnucleoncut(c12);
       if(index_L < 0){ continue; }
       TVector3 p_L;
       p_L.SetMagThetaPhi(protons[index_L]->getP(),protons[index_L]->getTheta(),protons[index_L]->getPhi());
       TVector3 p_1 = p_L - p_q;
       TVector3 p_miss = -p_1;
       double mmiss = get_mmiss(p_b,p_e,p_L);
-      double phi_diff = get_phi_diff(p_e.Phi()*180/M_PI,p_L.Phi()*180/M_PI);
+      double phi_diff = get_phi_diff(p_e,p_L);
       double theta_L = p_L.Theta() * 180 / M_PI;
+      double phi_L = p_L.Phi() * 180 / M_PI;
       double theta_miss = p_miss.Theta() * 180 / M_PI;
       double theta_Lq = p_L.Angle(p_q) * 180 / M_PI;
       double Loq = p_L.Mag() / p_q.Mag();
       double theta_1q = p_1.Angle(p_q) * 180 / M_PI;
-      
-      h_num_proton_f->Fill(protons.size(),weight);
-      h_theta_L_FTOF->Fill(theta_L,weight);
-      h_theta_Lq_FTOF->Fill(theta_Lq,weight);
-      h_phi_e_L->Fill(phi_diff,weight);
-      h_mmiss_FTOF->Fill(mmiss,weight);
-      h_mmiss_phi_e_L->Fill(mmiss,phi_diff,weight);
-      h_xB_mmiss->Fill(xB,mmiss,weight);
-      h_pmiss_mmiss->Fill(p_miss.Mag(),mmiss,weight);
-      h_xB_theta_1q->Fill(xB,theta_1q,weight);
-      h_Loq_theta_1q->Fill(Loq,theta_1q,weight);
-      h_pmiss_theta_miss->Fill(p_miss.Mag(),theta_miss,weight);
+      double vtz_p = protons[index_L]->par()->getVz();
 
+      h_theta_p_Lead->Fill(theta_L,weight);
+      h_theta_pq_Lead->Fill(theta_Lq,weight);
+      h_mom_theta_p_Lead->Fill(p_L.Mag(),theta_L,weight);
+      h_phi_e_p_Lead->Fill(phi_diff,weight);
+      h_xB_Lead->Fill(xB,weight);
+      h_vtz_e_vtz_p_Lead->Fill(vtz_e,vtz_p,weight);
       
+      h_pmiss_Lead->Fill(p_miss.Mag(),weight);
+      h_pmiss_thetamiss_Lead->Fill(p_miss.Mag(),theta_miss,weight);
+      h_xB_theta_1q_Lead->Fill(xB,theta_1q,weight);
+      h_Loq_theta_1q_Lead->Fill(Loq,theta_1q,weight);
+      
+      h_mmiss_Lead->Fill(mmiss,weight);
+      h_mmiss_phi_e_p_Lead->Fill(mmiss,phi_diff,weight);
+      h_mmiss_xB_Lead->Fill(mmiss,xB,weight);
+      h_mmiss_pmiss_Lead->Fill(mmiss,p_miss.Mag(),weight);
+      h_mmiss_theta_1q_Lead->Fill(mmiss,theta_1q,weight);
+      h_mmiss_theta_p_Lead->Fill(mmiss,theta_L,weight);
+      h_mmiss_mom_p_Lead->Fill(mmiss,p_L.Mag(),weight);
+      h_mmiss_momT_p_Lead->Fill(mmiss,p_L.Perp(),weight);
+        
   /////////////////////////////////////
   //Lead SRC Proton Checks
   /////////////////////////////////////
-      if(!myCut.leadSRCnucleoncut(c12,index_L)){continue;}      
-      h_pmiss->Fill(p_miss.Mag(),weight);
-      h_mmiss->Fill(mmiss,weight);
+      if(!myCut.leadSRCnucleoncut(c12,index_L)){continue;}
+
+      h_xB_SRC->Fill(xB,weight);
+      h_pmiss_SRC->Fill(p_miss.Mag(),weight);
+      h_mmiss_SRC->Fill(mmiss,weight);
       h_pmiss_theta_miss_SRC->Fill(p_miss.Mag(),theta_miss,weight);
+      h_pmiss_theta_L_SRC->Fill(p_miss.Mag(),theta_L,weight);
       h_xB_Loq_SRC->Fill(xB,Loq,weight);
 
-
-  //////////////////////////////////////
-  //Recoil SRC Neutron Checks
-  //////////////////////////////////////
-      h_num_neutron_i->Fill(neutrons.size(),weight);
-
-      //int index_R = myCut.recoilSRCnucleoncut(c12,index_L); // determines isospin from cut file, limits to 1 recoil
-      //if(index_R < 0){ continue; }
-
-      // find recoil neutron
-      int count_R = 0;
-      int index_R = -1;
+  /////////////////////////////////////
+  //Recoil Nucleons
+  /////////////////////////////////////
       for(int j = 0; j < neutrons.size(); j++){
-	h_p_2->Fill(neutrons[j]->getP(),weight);
-	if(neutrons[j]->getP()>0.3 && neutrons[j]->getP()<1.0){
-	  count_R++;
-	  index_R = j;
-	}
+	//if(j==index_L){continue;}
+	h_p_2_AllRec->Fill(neutrons[j]->getP(),weight);
+	h_chiSq_rec_AllRec->Fill(neutrons[j]->par()->getChi2Pid(),weight);
+//std::cout << neutrons[j]->par()->getChi2Pid() << '\n';
+	h_mom_beta_rec_AllRec->Fill(neutrons[j]->getP(),neutrons[j]->par()->getBeta(),weight);
       }
-      if(index_R == -1){continue;} // if no recoils, continue
-      if(count_R != 1){continue;} // if not exactly 1 recoil, continue
+      h_count_AllRec->Fill(neutrons.size()-1,weight);
 
-      // detector cut: CND only
-      bool in_CND1 = (neutrons[index_R]->sci(CND1)->getDetector()==3);
-      bool in_CND2 = (neutrons[index_R]->sci(CND2)->getDetector()==3);
-      bool in_CND3 = (neutrons[index_R]->sci(CND3)->getDetector()==3);
-      bool in_CND = (in_CND1 || in_CND2 || in_CND3);
-      if (!in_CND) {continue;}
-
-      // pick layer
-      string cndlayer_str = "CND3";
-      short unsigned int cndnum;
-      if (in_CND1) {cndnum=1;}
-      else if (in_CND2) {cndnum=2;}
-      else if (in_CND3) {cndnum=3;}
-      char const * cndlayer = cndlayer_str.c_str();
-      //std::cout << cndnum << '\n';
+  /////////////////////////////////////
+  //Recoil SRC Proton Checks
+  /////////////////////////////////////
+      int index_R = myCut.recoilSRCnucleoncut(c12,index_L);
+      if(index_R < 0){ continue; }
+      TVector3 p_2;
+      p_2.SetMagThetaPhi(neutrons[index_R]->getP(),neutrons[index_R]->getTheta(),neutrons[index_R]->getPhi());
+      TVector3 p_rel = p_1-p_2;
+      p_rel.SetMag(p_rel.Mag()/2);
+      TVector3 p_cm = p_1+p_2;
+      double theta_rel = p_1.Angle(p_2) * 180 / M_PI;
       
-      //std::cout << neutrons[index_R]->sci(cndlayer)->getLayer() << '\n' << '\n';
-std::cout << neutrons[index_R]->sci(CND3)->getPath() << '\n';
-      h_p_2_high->Fill(neutrons[index_R]->getP(),weight);
+      //Create new reference frame
+      TVector3 vt = p_2.Unit();
+      TVector3 vy = p_2.Cross(p_q).Unit();
+      TVector3 vx = vt.Cross(vy);
 
-      double tofm = (neutrons[index_R]->getTime())/(neutrons[index_R]->getPath());
+      // Acceptance, beta, TOF/
+      double tofm = (neutrons[index_R]->getTime())/(neutrons[index_R]->getPath()/10.);
       double tofphi = neutrons[index_R]->getPhi()*180./M_PI;
-      h_num_neutron_f->Fill(neutrons.size(),weight);
-      //h_tofm->Fill(tofm);
-      h_tofm_cnd->Fill(tofphi,tofm);
-      if (TOFID==12)
-        {h_nacc_fd->Fill(neutrons[index_R]->getPhi()*180./M_PI,neutrons[index_R]->getTheta()*180./M_PI,weight);}
-      else if (TOFID==4)
-        {h_nacc_cd->Fill(neutrons[index_R]->getPhi()*180./M_PI,neutrons[index_R]->getTheta()*180./M_PI,weight);}
-
-      // which CND layer are we in?
-      if (in_CND1) {
-        //std::cout << '1' << '\t' << neutrons[index_R]->sci
-        h_cnd_layer->Fill(neutrons[index_R]->sci(CND1)->getLayer());
-        h_tofm->Fill((neutrons[index_R]->sci(CND1)->getTime())/(neutrons[index_R]->sci(CND1)->getPath()));
-        }
-      if (in_CND2) {
-        h_cnd_layer->Fill(neutrons[index_R]->sci(CND2)->getLayer());
-        h_tofm->Fill((neutrons[index_R]->sci(CND2)->getTime())/(neutrons[index_R]->sci(CND2)->getPath()));
-        }
-      if (in_CND3) {
-        h_cnd_layer->Fill(neutrons[index_R]->sci(CND3)->getLayer());
-        h_tofm->Fill((neutrons[index_R]->sci(CND3)->getTime())/(neutrons[index_R]->sci(CND3)->getPath()));
-        }
-      h_nbeta->Fill(neutrons[index_R]->getBeta(),weight);
-
-   /////////////////////////////////////
-   //Deuterium momentum analysis
-   /////////////////////////////////////
-      // neutron beta cut built into reconstruction
-      // cos0 doesn't matter because hit is in CND, not EC
-      TVector3 vecX(0.,0.,0.);
-      //vecX.SetXYZ(neutrons[index_R]->cal(ECIN)->getX(),neutrons[index_R]->cal(ECIN)->getY(),neutrons[index_R]->cal(ECIN)->getZ()-neutrons[index_R]->par()->getVz());
-      if (TOFID==12)
-        { vecX.SetXYZ(neutrons[index_R]->cal(ECIN)->getX(),neutrons[index_R]->cal(ECIN)->getY(),neutrons[index_R]->cal(ECIN)->getZ()-neutrons[index_R]->par()->getVz()); }
-      else if (TOFID==4)
-        { vecX.SetXYZ(neutrons[index_R]->par()->getPx(),neutrons[index_R]->par()->getPy(),neutrons[index_R]->par()->getPz()); }  // what layer?
-      double cos0 = p_miss.Dot(vecX) / (p_miss.Mag() * vecX.Mag() );
-      //if (cos0 < 0.995) {continue;}
-
-      h_pmiss_pn->Fill(neutrons[index_R]->getP(),p_miss.Mag(),weight);
-      h_cos0->Fill(cos0,weight);
-       
       
+      h_p_2_Rec->Fill(neutrons[index_R]->getP(),weight);
+      h_p_rel_Rec->Fill(p_rel.Mag(),weight);
+      h_p_cm_Rec->Fill(p_cm.Mag(),weight);
+      h_p_t_cm_Rec->Fill(p_cm.Dot(vt),weight);
+      h_p_y_cm_Rec->Fill(p_cm.Dot(vy),weight);
+      h_p_x_cm_Rec->Fill(p_cm.Dot(vx),weight);
+      h_theta_rel_Rec->Fill(theta_rel,weight);
+      h_p_cm_theta_rel_Rec->Fill(p_cm.Mag(),theta_rel,weight);
+      h_nacc->Fill(neutrons[index_R]->getPhi()*180./M_PI,neutrons[index_R]->getTheta()*180./M_PI,weight);
+      h_nbeta->Fill(neutrons[index_R]->getBeta(),weight);
+      h_tofm->Fill(tofm);
+
+  /////////////////////////////////////
+  //Deuterium Momentum Analysis
+  /////////////////////////////////////
+  TVector3 vecX( neutrons[index_R]->par()->getPx(), neutrons[index_R]->par()->getPy(), neutrons[index_R]->par()->getPz() );
+  double cos0 = p_miss.Dot(vecX) / (p_miss.Mag() * vecX.Mag() );
+
+  h_pmiss_pn->Fill(neutrons[index_R]->getP(),p_miss.Mag(),weight);
+  h_cos0->Fill(cos0,weight);
+
+  /////////////////////////////////////
+  //Deuterium with cuts
+  /////////////////////////////////////
+  if (cos0<0.95) { continue; }
+  
+  h_pmiss_pn_cut->Fill(neutrons[index_R]->getP(),p_miss.Mag(),weight);
+  h_cos0_cut->Fill(cos0,weight);
+
+
+
+
   }
   cout<<counter<<endl;
 
@@ -493,119 +387,73 @@ std::cout << neutrons[index_R]->sci(CND3)->getPath() << '\n';
   sprintf(fileName,"%s",pdfFile);
 
   /////////////////////////////////////
-  //Electron fiducials and Pid
-  /////////////////////////////////////
-  myText->cd();
-  text.DrawLatex(0.2,0.9,"(e,e') Candidates:");
-  text.DrawLatex(0.2,0.8,"No Cuts");
-  myText->Print(fileName,"pdf");
-  myText->Clear();
-  
-  myCanvas->Divide(2,3);
-  myCanvas->cd(1);
-  h_Vcal_EoP->Draw("colz");
-  myCanvas->cd(2);
-  h_Wcal_EoP->Draw("colz");
-  myCanvas->cd(3);
-  h_phi_theta->Draw("colz");
-  myCanvas->cd(4);
-  h_sector->Draw("colz");
-  myCanvas->cd(5);
-  h_P_EoP->Draw("colz");
-  myCanvas->cd(6);
-  h_nphe->Draw();
-  myCanvas->Print(fileName,"pdf");
-  myCanvas->Clear();  
-
-  /////////////////////////////////////
-  //Electron Kinematics  
-  /////////////////////////////////////
-  myText->cd();
-  text.DrawLatex(0.2,0.9,"(e,e') Cuts:");
-  text.DrawLatex(0.2,0.8,"V_{cal} and W_{cal} > 14 [cm]");
-  text.DrawLatex(0.2,0.7,"0.18 < SF < 0.28");
-  text.DrawLatex(0.2,0.6,"1 [GeV] < p_{e} < E_{beam}");
-  myText->Print(fileName,"pdf");
-  myText->Clear();
-  
-  myCanvas->Divide(2,3);
-  myCanvas->cd(1);
-  h_xB->Draw();
-  myCanvas->cd(2);
-  h_QSq->Draw();
-  myCanvas->cd(3);
-  h_WSq->Draw();
-  myCanvas->cd(4);
-  h_xB_QSq->Draw("colz");
-  myCanvas->cd(5);
-  h_xB_WSq->Draw("colz");
-  myCanvas->cd(6);
-  h_QSq_WSq->Draw("colz");
-  myCanvas->Print(fileName,"pdf");
-  myCanvas->Clear();
-  
-  /////////////////////////////////////
-  //All Proton Angles
-  /////////////////////////////////////
-  myText->cd();
-  text.DrawLatex(0.2,0.9,"(e,e'p) Cuts:");
-  text.DrawLatex(0.2,0.8,"(e,e') Cuts");
-  text.DrawLatex(0.2,0.7,"Proton Detected");
-  myText->Print(fileName,"pdf");
-  myText->Clear();
-
-  myCanvas->Divide(2,2);
-  myCanvas->cd(1);
-  h_theta_L->Draw("colz");
-  myCanvas->cd(2);
-  h_theta_Lq->Draw("colz");
-  myCanvas->cd(3);
-  h_num_proton_i->Draw();
-  myCanvas->Print(fileName,"pdf");
-  myCanvas->Clear();
-
-  /////////////////////////////////////
   //Lead Proton Checks
   /////////////////////////////////////
   myText->cd();
   text.DrawLatex(0.2,0.9,"(e,e'p_{Lead}) Cuts:");
   text.DrawLatex(0.2,0.8,"(e,e'p) Cuts");
-  char temp[100];
-  sprintf(temp,"Scintillator = %d",TOFID);
-  text.DrawLatex(0.2,0.7,temp);
-  text.DrawLatex(0.2,0.6,"#theta_{p,q}<25^{o}");
-  text.DrawLatex(0.2,0.5,"-3 < #chi^{2} PID<3 ");
-  //text.DrawLatex(0.2,0.4,"#theta_{p} <50^{o}");
+  double line = 0.7;
+  if(myCut.getDoCut(l_cuts)){
+    myCut.print_cut_onPDF(text,l_pid,line);
+    myCut.print_cut_onPDF(text,l_scint,line);
+    myCut.print_cut_onPDF(text,l_theta,line);
+    myCut.print_cut_onPDF(text,l_thetalq,line);
+    myCut.print_cut_onPDF(text,l_chipid,line);
+    myCut.print_cut_onPDF(text,l_vtzdiff,line);
+    myCut.print_cut_onPDF(text,l_phidiff,line);
+  }
   myText->Print(fileName,"pdf");
   myText->Clear();
 
   myCanvas->Divide(2,3);
   myCanvas->cd(1);
-  h_theta_L_FTOF->Draw();
+  h_theta_p_Lead->Draw();
   myCanvas->cd(2);
-  h_theta_Lq_FTOF->Draw();
+  h_theta_pq_Lead->Draw();
   myCanvas->cd(3);
-  h_phi_e_L->Draw();
+  h_mom_theta_p_Lead->Draw("colz");
   myCanvas->cd(4);
-  h_mmiss_FTOF->Draw();
+  h_phi_e_p_Lead->Draw();
   myCanvas->cd(5);
-  h_mmiss_phi_e_L->Draw("colz");
+  h_xB_Lead->Draw();
   myCanvas->cd(6);
-  h_xB_mmiss->Draw("colz");
+  h_vtz_e_vtz_p_Lead->Draw("colz");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
   myCanvas->Divide(2,3);
   myCanvas->cd(1);
-  h_pmiss_mmiss->Draw("colz");
+  h_pmiss_Lead->Draw();
   myCanvas->cd(2);
-  h_xB_theta_1q->Draw("colz");
+  h_pmiss_thetamiss_Lead->Draw("colz");
   myCanvas->cd(3);
-  h_Loq_theta_1q->Draw("colz");
+  h_xB_theta_1q_Lead->Draw("colz");
   myCanvas->cd(4);
-  h_pmiss_theta_miss->Draw("colz");
+  h_Loq_theta_1q_Lead->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(2,3);
+  myCanvas->cd(1);
+  h_mmiss_Lead->Draw();
+  myCanvas->cd(2);
+  h_mmiss_phi_e_p_Lead->Draw("colz");
+  myCanvas->cd(3);
+  h_mmiss_xB_Lead->Draw("colz");
+  myCanvas->cd(4);
+  h_mmiss_pmiss_Lead->Draw("colz");
   myCanvas->cd(5);
-  h_num_proton_f->Draw();
+  h_mmiss_theta_1q_Lead->Draw("colz");
+  myCanvas->cd(6);
+  h_mmiss_theta_p_Lead->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(2,3);
+  myCanvas->cd(1);
+  h_mmiss_mom_p_Lead->Draw("colz");
+  myCanvas->cd(2);
+  h_mmiss_momT_p_Lead->Draw("colz");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
@@ -615,25 +463,30 @@ std::cout << neutrons[index_R]->sci(CND3)->getPath() << '\n';
   myText->cd();
   text.DrawLatex(0.2,0.9,"(e,e'p_{Lead,SRC}) Cuts:");
   text.DrawLatex(0.2,0.8,"(e,e'p_{LEAD}) Cuts");
-  text.DrawLatex(0.2,0.7,"1.5 < Q^{2} [GeV]");
-  text.DrawLatex(0.2,0.6,"0.35 [GeV] < p_{miss}");
-  text.DrawLatex(0.2,0.5,"0.84 [GeV] < m_{mmiss} < 1.04 [GeV]");
-  text.DrawLatex(0.2,0.4,"0.62 < |p|/|q| < 0.96");
-  text.DrawLatex(0.2,0.3,"1.2 < x_{B}");
+  line = 0.7;
+  if(myCut.getDoCut(lsrc_cuts)){
+    myCut.print_cut_onPDF(text,lsrc_Q2,line);
+    myCut.print_cut_onPDF(text,lsrc_xB,line);
+    myCut.print_cut_onPDF(text,lsrc_pmiss,line);
+    myCut.print_cut_onPDF(text,lsrc_mmiss,line);
+    myCut.print_cut_onPDF(text,lsrc_loq,line);
+  }
   myText->Print(fileName,"pdf");
   myText->Clear();
   
   myCanvas->Divide(2,3);
   myCanvas->cd(1);
-  h_pmiss->Draw();
+  h_xB_SRC->Draw();
   myCanvas->cd(2);
-  h_mmiss->Draw();
+  h_pmiss_SRC->Draw();
   myCanvas->cd(3);
-  h_pmiss_theta_miss_SRC->Draw("colz");
+  h_mmiss_SRC->Draw();
   myCanvas->cd(4);
-  h_xB_Loq_SRC->Draw("colz");
+  h_pmiss_theta_miss_SRC->Draw("colz");
   myCanvas->cd(5);
-  h_num_neutron_i->Draw();
+  h_pmiss_theta_L_SRC->Draw("colz");
+  myCanvas->cd(6);
+  h_xB_Loq_SRC->Draw("colz");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
@@ -648,9 +501,15 @@ std::cout << neutrons[index_R]->sci(CND3)->getPath() << '\n';
   myText->Print(fileName,"pdf");
   myText->Clear();
 
-  myCanvas->Divide(2,2);
+  myCanvas->Divide(2,3);
   myCanvas->cd(1);
-  h_p_2->Draw();
+  h_p_2_AllRec->Draw();
+  myCanvas->cd(2);
+  h_chiSq_rec_AllRec->Draw();
+  myCanvas->cd(3);
+  h_mom_beta_rec_AllRec->Draw("colz");
+  myCanvas->cd(4);
+  h_count_AllRec->Draw();
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
@@ -661,41 +520,52 @@ std::cout << neutrons[index_R]->sci(CND3)->getPath() << '\n';
   myText->cd();
   text.DrawLatex(0.2,0.9,"(e,e'p_{Lead,SRC}p_{Rec,SRC}) Cuts:");
   text.DrawLatex(0.2,0.8,"(e,e'p_{LEAD,SRC},p_{Rec}) Cuts");
-  text.DrawLatex(0.2,0.7,"0.35 [GeV] < p_{Rec}");
+  line = 0.7;
+  if(myCut.getDoCut(rsrc_cuts)){
+    myCut.print_cut_onPDF(text,rsrc_pid,line);
+    myCut.print_cut_onPDF(text,rsrc_mom,line);
+    myCut.print_cut_onPDF(text,rsrc_chipid,line);
+  }
   myText->Print(fileName,"pdf");
   myText->Clear();
 
   myCanvas->Divide(2,3);
   myCanvas->cd(1);
-  h_num_neutron_f->Draw();
+  h_p_2_Rec->Draw();
   myCanvas->cd(2);
-  h_p_2_high->Draw();
+  h_p_rel_Rec->Draw();
   myCanvas->cd(3);
-  h_tofm->Draw();
+  h_p_cm_Rec->Draw();
   myCanvas->cd(4);
-  h_tofm_cnd->Draw("colz");  // REPLACE WITH TOF/M BY CND
+  h_p_t_cm_Rec->Draw();
   myCanvas->cd(5);
-  h_nacc_fd->Draw("colz");
+  h_p_y_cm_Rec->Draw();
   myCanvas->cd(6);
-  h_nacc_cd->Draw("colz");
+  h_p_x_cm_Rec->Draw();
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
   myCanvas->Divide(2,3);
   myCanvas->cd(1);
-  h_cnd_layer->Draw();
+  h_theta_rel_Rec->Draw();
   myCanvas->cd(2);
+  h_p_cm_theta_rel_Rec->Draw("colz");
+  myCanvas->cd(3);
+  h_nacc->Draw("colz");
+  myCanvas->cd(4);
   h_nbeta->Draw();
+  myCanvas->cd(5);
+  h_tofm->Draw();
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
-  //////////////////////////////////////
-  //Deuterium momentum analysis
-  //////////////////////////////////////
+  /////////////////////////////////////
+  //Deuterium only
+  /////////////////////////////////////
   myText->cd();
   text.DrawLatex(0.2,0.9,"(e,e'p_{Lead,SRC}p_{Rec,SRC}) Cuts");
-  text.DrawLatex(0.2,0.8,"Momentum analysis: Deuterium only");
-  //text.DrawLatex(0.2,0.7,"cos #theta_{pmiss,X} > 0.995");
+  text.DrawLatex(0.2,0.8,"Deuterium only");
+  line = 0.7;
   myText->Print(fileName,"pdf");
   myText->Clear();
 
@@ -706,6 +576,25 @@ std::cout << neutrons[index_R]->sci(CND3)->getPath() << '\n';
   h_cos0->Draw();
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
+
+  /////////////////////////////////////
+  //Deuterium with cuts
+  /////////////////////////////////////
+  myText->cd();
+  text.DrawLatex(0.2,0.9,"(e,e'p_{Lead,SRC}p_{Rec,SRC}) Cuts");
+  text.DrawLatex(0.2,0.8,"Deuterium only");
+  text.DrawLatex(0.2,0.7,"cos(#theta_{pmiss,pneutron}>0.95");
+  myText->Print(fileName,"pdf");
+  myText->Clear();
+
+  myCanvas->Divide(2,2);
+  myCanvas->cd(1);
+  h_pmiss_pn_cut->Draw("colz");
+  myCanvas->cd(2);
+  h_cos0_cut->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+  
 
 
   sprintf(fileName,"%s]",pdfFile);
