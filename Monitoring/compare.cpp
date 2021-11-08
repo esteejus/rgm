@@ -17,9 +17,9 @@ using namespace std;
 
 int main(int argc, char ** argv)
 {
-  if (argc != 8 and argc != 9)
+  if (argc != 9 and argc != 5)
     {
-      cout << "Wrong number of arguments. Instead use \n compare  <Ebeam (GeV)> <Z> <N>  <CTOF = 0, FTOF = 1> </path/to/output/root/file> </path/to/output/pdf/file> </path/to/input/data/root/file> </path/to/input/simulation/root/file (OPTIONAL)>\n\n";
+      cout << "Wrong number of arguments. To use default simulations, enter \n compare  <Ebeam (GeV)> <Z> <N>  <epp = 0 , epn = 1> <CTOF = 0, FTOF = 1> </path/to/output/root/file> </path/to/output/pdf/file> </path/to/input/data/root/file> \n\n To directly point to an input simulation file, enter \n compare </path/to/output/root/file> </path/to/output/pdf/file> </path/to/input/data/root/file> </path/to/input/simulation/root/file>\n\n";
       cout << "Valid Target Options:\n\n";
       cout << "Target  Z   N \n";
       cout << "--------------\n";
@@ -34,138 +34,281 @@ int main(int argc, char ** argv)
     }
 
   //declaring variables to contain inputs
-  TFile *sim_file;
-  
+  TFile *sim_file, *data_file,  *outfile;
+  char * pdffile; 
 
-  if (argc==8)
+  if (argc==9)
     {
       double E_beam = atof(argv[1]);
       int Z = atoi(argv[2]);
       int N = atoi(argv[3]);
-      int det = atoi(argv[4]);
+      int channel = atoi(argv[4]);
+      int det = atoi(argv[5]);
 
-      if ((E_beam == 4.) or (E_beam == 4) or (E_beam == 4.0)) //4GeV
-	{
-	  if ((Z == 1) and (N == 1)) //deuterium
-	    {
-	      if (det == 0) //ctof
-		{
-		  sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/d_4gev_ctof.root"); 
-		}
-	      if (det == 1) //ftof
-		{
-		  sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/d_4gev_ftof.root");
-		}
-	    }
-	  else if ((Z == 6) and (N == 6)) //carbon
-	    {
-	      if (det == 0) //ctof
-		{
-		  sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/c_4gev_ctof.root"); 
-		}
-	      if (det == 1) //ftof
-		{
-		  sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/c_4gev_ftof.root");
-		}
 
-	    }
-	  else if ((Z == 18) and (Z == 22)) //argon
-	    {
-	      if (det == 0) //ctof
-		{
-		  sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/ar_4gev_ctof.root"); 
-		}
-	      if (det == 1) //ftof
-		{
-		  sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/ar_4gev_ftof.root");
-		}
-	    }
-	  else
-	    {
-	      cout << "Please choose a valid target/beam combination \n";
-	    }
-	}
-      if ((E_beam == 6.) or (E_beam == 6) or (E_beam == 6.0)) //6GeV
+      ///////////////////////
+      ////input root files///
+      ///////////////////////       
+      
+      
+      data_file = new TFile  (argv[8]); //data root file                                     
+      cout << "My data file is " << argv[8] << "\n";                                    
+
+      // grabbing simulation root file
+      if ( channel == 0 ) //epp
 	{
-	  if ((Z == 1) and (N == 1))//deuterium
+	  if ((E_beam == 4.) or (E_beam == 4) or (E_beam == 4.0)) //4GeV
 	    {
-	      if (det == 0) //ctof
+	      if ((Z == 1) and (N == 1)) //deuterium
 		{
-		  sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/d_6gev_ctof.root"); 
+		  if (det == 0) //ctof
+		    {
+		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/d_4gev_ctof.root"); 
+		    }
+		  if (det == 1) //ftof
+		    {
+		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/d_4gev_ftof.root");
+		    }
 		}
-	      if (det == 1) //ftof
+	      else if ((Z == 6) and (N == 6)) //carbon
 		{
-		  sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/d_6gev_ftof.root");
-		}	    
-	    }
-	  else if ((Z == 2) and (N == 2)) //helium
-	    {
-	      if (det == 0) //ctof
-		{
-		  sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/he_6gev_ctof.root"); 
+		  if (det == 0) //ctof
+		    {
+		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/c_4gev_ctof.root"); 
+		    }
+		  if (det == 1) //ftof
+		    {
+		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/c_4gev_ftof.root");
+		    }
+		  
 		}
-	      if (det == 1) //ftof
+	      else if ((Z == 18) and (Z == 22)) //argon
 		{
-		  sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/he_6gev_ftof.root");
-		}	    
-	    }
-	  else if ( ((Z == 6) and (N == 6)) or ((Z == 20) and (N == 28)) or ((Z == 50) and (N == 70)) ) //carbon, calcium 48, tin
-	    {
-	      if (det == 0) //ctof
-		{
-		  sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/c_6gev_ctof.root"); 
+		  if (det == 0) //ctof
+		    {
+		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/ar_4gev_ctof.root"); 
+		    }
+		  if (det == 1) //ftof
+		    {
+		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/ar_4gev_ftof.root");
+		    }
 		}
-	      if (det == 1) //ftof
+	      else
 		{
-		  sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/c_6gev_ftof.root");
-		}	     
+		  cout << "Please choose a valid target/beam combination \n";
+		}
 	    }
-	  else if ((Z == 20) and (N == 20)) //calcium 40
+	  if ((E_beam == 6.) or (E_beam == 6) or (E_beam == 6.0)) //6GeV
 	    {
-	      if (det == 0) //ctof
+	      if ((Z == 1) and (N == 1))//deuterium
+		{
+		  if (det == 0) //ctof
+		    {
+		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/d_6gev_ctof.root"); 
+		    }
+		  if (det == 1) //ftof
+		    {
+		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/d_6gev_ftof.root");
+		    }	    
+		}
+	      else if ((Z == 2) and (N == 2)) //helium
+		{
+		  if (det == 0) //ctof
+		    {
+		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/he_6gev_ctof.root"); 
+		    }
+		  if (det == 1) //ftof
+		    {
+		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/he_6gev_ftof.root");
+		    }	    
+		}
+	      else if ( ((Z == 6) and (N == 6)) or ((Z == 20) and (N == 28)) or ((Z == 50) and (N == 70)) ) //carbon, calcium 48, tin
+		{
+		  if (det == 0) //ctof
+		    {
+		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/c_6gev_ctof.root"); 
+		    }
+		  if (det == 1) //ftof
+		    {
+		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/c_6gev_ftof.root");
+		    }	     
+		}
+	      else if ((Z == 20) and (N == 20)) //calcium 40
+		{
+		  if (det == 0) //ctof
 		{
 		  sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/ca40_6gev_ctof.root"); 
 		}
-	      if (det == 1) //ftof
-		{
-		  sim_file  == new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/ca40_6gev_ftof.root");
-		}	    
-	    }
-	  else if ((Z == 18) and (N == 22)) //argon
-	    {
-	      if (det == 0) //ctof
-		{
-		  sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/ar_6gev_ctof.root"); 
+		  if (det == 1) //ftof
+		    {
+		      sim_file  == new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/ca40_6gev_ftof.root");
+		    }	    
 		}
-	      if (det == 1) //ftof
+	      else if ((Z == 18) and (N == 22)) //argon
 		{
-		  sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/ar_6gev_ftof.root");
-		}	    
+		  if (det == 0) //ctof
+		    {
+		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/ar_6gev_ctof.root"); 
+		    }
+		  if (det == 1) //ftof
+		    {
+		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/ar_6gev_ftof.root");
+		    }	    
+		}
+	      else
+		{
+		  cout << "Please choose a valid target \n";
+		}
 	    }
-	  else
+	  else 
 	    {
-	      cout << "Please choose a valid target \n";
+	      cout << "Please choose 4 or 6 GeV as your beam energy \n";
 	    }
 	}
-      else 
+      if ( channel == 1 ) //epn
 	{
-	  cout << "Please choose 4 or 6 GeV as your beam energy \n";
+	  if ((E_beam == 4.) or (E_beam == 4) or (E_beam == 4.0)) //4GeV
+	    {
+	      if ((Z == 1) and (N == 1)) //deuterium
+		{
+		  if (det == 0) //ctof
+		    {
+		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/d_4gev_ctof.root"); 
+		    }
+		  if (det == 1) //ftof
+		    {
+		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/d_4gev_ftof.root");
+		    }
+		}
+	      else if ((Z == 6) and (N == 6)) //carbon
+		{
+		  if (det == 0) //ctof
+		    {
+		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/c_4gev_ctof.root"); 
+		    }
+		  if (det == 1) //ftof
+		    {
+		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/c_4gev_ftof.root");
+		    }
+		  
+		}
+	      else if ((Z == 18) and (Z == 22)) //argon
+		{
+		  if (det == 0) //ctof
+		    {
+		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/ar_4gev_ctof.root"); 
+		    }
+		  if (det == 1) //ftof
+		    {
+		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/ar_4gev_ftof.root");
+		    }
+		}
+	      else
+		{
+		  cout << "Please choose a valid target/beam combination \n";
+		}
+	    }
+	  else if ((E_beam == 6.) or (E_beam == 6) or (E_beam == 6.0)) //6GeV
+	    {
+	      if ((Z == 1) and (N == 1))//deuterium
+		{
+		  if (det == 0) //ctof
+		    {
+		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/d_6gev_ctof.root"); 
+		    }
+		  if (det == 1) //ftof
+		    {
+		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/d_6gev_ftof.root");
+		    }	    
+		}
+	      else if ((Z == 2) and (N == 2)) //helium
+		{
+		  if (det == 0) //ctof
+		    {
+		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/he_6gev_ctof.root"); 
+		    }
+		  if (det == 1) //ftof
+		    {
+		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/he_6gev_ftof.root");
+		    }	    
+		}
+	      else if ( ((Z == 6) and (N == 6)) or ((Z == 20) and (N == 28)) or ((Z == 50) and (N == 70)) ) //carbon, calcium 48, tin
+		{
+		  if (det == 0) //ctof
+		    {
+		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/c_6gev_ctof.root"); 
+		    }
+		  if (det == 1) //ftof
+		    {
+		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/c_6gev_ftof.root");
+		    }	     
+		}
+	      else if ((Z == 20) and (N == 20)) //calcium 40
+		{
+		  if (det == 0) //ctof
+		    {
+		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/ca40_6gev_ctof.root"); 
+		    }
+		  if (det == 1) //ftof
+		    {
+		      sim_file  == new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/ca40_6gev_ftof.root");
+		    }	    
+		}
+	      else if ((Z == 18) and (N == 22)) //argon
+		{
+		  if (det == 0) //ctof
+		    {
+		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/ar_6gev_ctof.root"); 
+		    }
+		  if (det == 1) //ftof
+		    {
+		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/ar_6gev_ftof.root");
+		    }	    
+		}
+	      else
+		{
+		  cout << "Please choose a valid target \n";
+		}
+	    }
+	  else 
+	    {
+	      cout << "Please choose 4 or 6 GeV as your beam energy \n";
+	    }
 	}
+    
+      ///////////////////
+      ////output files///                                                                                
+      ///////////////////      
+      
+      outfile = new TFile (argv[6],"RECREATE");
+      pdffile = argv[7];
+    
+
     }
-  else if (argc == 9)
+  else if (argc == 5)
     {
-      sim_file  = new TFile (argv[8]); //simulation  ("golden run") root file        
-      cout << "My sim file is " << argv[8] <<"\n";
+      ///////////////////////
+      ////input root files///
+      ///////////////////////       
+      
+      data_file = new TFile  (argv[3]); //data root file                                     
+      cout << "My data file is " << argv[3] << "\n";                                    
+
+      sim_file  = new TFile (argv[4]); //simulation  ("golden run") root file        
+      cout << "My sim file is " << argv[4] <<"\n";
+
+
+      ///////////////////
+      ////output files///                                                                                
+      ///////////////////      
+      
+      outfile = new TFile (argv[1],"RECREATE");
+      pdffile = argv[2];
+
+
     }
 
 
-
- ///////////////////////
- ////input root files///
- ///////////////////////       
-                                  
-  TFile * data_file = new TFile  (argv[7]); //data root file                                     
-  cout << "My data file is " << argv[7] << "\n";                                    
  
   //////////////////////////////////////////
   ///grab histograms from simulation file///                                                        
@@ -204,13 +347,6 @@ int main(int argc, char ** argv)
   TH1D * data_p_x_cm_Rec =(TH1D*)data_file->Get("p_x_cm_Rec");
   TH1D * data_theta_rel_Rec =(TH1D*)data_file->Get("theta_rel_Rec");
                                                                         
-
-  ///////////////////
-  ////output files///                                                                                
-  ///////////////////      
-                               
-  TFile * outfile = new TFile (argv[5],"RECREATE");
-  char * pdffile = argv[6];
 
   
   ////////////////////////////////////////
@@ -275,7 +411,7 @@ int main(int argc, char ** argv)
   /////////////////////////////////////////////////////////////
   
   //Lead SRC Proton Checks
-  //sim_xB_SRC->Scale(data_xB_SRC_norm/sim_xB_SRC_norm);
+  sim_xB_SRC->Scale(data_xB_SRC_norm/sim_xB_SRC_norm);
   sim_pmiss_SRC->Scale(data_pmiss_SRC_norm/sim_pmiss_SRC_norm);
   sim_mmiss_SRC->Scale(data_mmiss_SRC_norm/sim_mmiss_SRC_norm);
 
