@@ -63,22 +63,22 @@ int main(int argc, char ** argv)
 		{
 		  if (det == 0) //ctof
 		    {
-		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/d_4gev_ctof.root"); 
+		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epp/d4_epp_ctof.root"); 
 		    }
 		  if (det == 1) //ftof
 		    {
-		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/d_4gev_ftof.root");
+		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epp/d4_epp_ftof.root");
 		    }
 		}
 	      else if ((Z == 6) and (N == 6)) //carbon
 		{
 		  if (det == 0) //ctof
 		    {
-		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/c_4gev_ctof.root"); 
+		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epp/c4_epp_ctof.root"); 
 		    }
 		  if (det == 1) //ftof
 		    {
-		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/c_4gev_ftof.root");
+		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epp/c4_epp_ftof.root");
 		    }
 		  
 		}
@@ -86,11 +86,11 @@ int main(int argc, char ** argv)
 		{
 		  if (det == 0) //ctof
 		    {
-		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/ar_4gev_ctof.root"); 
+		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epp/ar4_epp_ctof.root"); 
 		    }
 		  if (det == 1) //ftof
 		    {
-		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/ar_4gev_ftof.root");
+		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epp/ar4_epp_ftof.root");
 		    }
 		}
 	      else
@@ -104,55 +104,55 @@ int main(int argc, char ** argv)
 		{
 		  if (det == 0) //ctof
 		    {
-		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/d_6gev_ctof.root"); 
+		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epp/d6_epp_ctof.root"); 
 		    }
 		  if (det == 1) //ftof
 		    {
-		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/d_6gev_ftof.root");
+		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epp/d6_epp_ftof.root");
 		    }	    
 		}
 	      else if ((Z == 2) and (N == 2)) //helium
 		{
 		  if (det == 0) //ctof
 		    {
-		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/he_6gev_ctof.root"); 
+		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epp/he6_epp_ctof.root"); 
 		    }
 		  if (det == 1) //ftof
 		    {
-		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/he_6gev_ftof.root");
+		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epp/he6_epp_ftof.root");
 		    }	    
 		}
 	      else if ( ((Z == 6) and (N == 6)) or ((Z == 20) and (N == 28)) or ((Z == 50) and (N == 70)) ) //carbon, calcium 48, tin
 		{
 		  if (det == 0) //ctof
 		    {
-		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/c_6gev_ctof.root"); 
+		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epp/c6_epp_ctof.root"); 
 		    }
 		  if (det == 1) //ftof
 		    {
-		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/c_6gev_ftof.root");
+		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epp/c6_epp_ftof.root");
 		    }	     
 		}
 	      else if ((Z == 20) and (N == 20)) //calcium 40
 		{
 		  if (det == 0) //ctof
 		{
-		  sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/ca40_6gev_ctof.root"); 
+		  sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epp/ca406_epp_ctof.root"); 
 		}
 		  if (det == 1) //ftof
 		    {
-		      sim_file  == new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/ca40_6gev_ftof.root");
+		      sim_file  == new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epp/ca406_epp_ftof.root");
 		    }	    
 		}
 	      else if ((Z == 18) and (N == 22)) //argon
 		{
 		  if (det == 0) //ctof
 		    {
-		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/ar_6gev_ctof.root"); 
+		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epp/ar6_epp_ctof.root"); 
 		    }
 		  if (det == 1) //ftof
 		    {
-		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/ar_6gev_ftof.root");
+		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epp/ar6_epp_ftof.root");
 		    }	    
 		}
 	      else
@@ -173,22 +173,22 @@ int main(int argc, char ** argv)
 		{
 		  if (det == 0) //ctof
 		    {
-		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/d_4gev_ctof.root"); 
+		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epn/d4_epn_ctof.root"); 
 		    }
 		  if (det == 1) //ftof
 		    {
-		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/d_4gev_ftof.root");
+		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epn/d4_epn_ftof.root");
 		    }
 		}
 	      else if ((Z == 6) and (N == 6)) //carbon
 		{
 		  if (det == 0) //ctof
 		    {
-		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/c_4gev_ctof.root"); 
+		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epn/c4_epn_ctof.root"); 
 		    }
 		  if (det == 1) //ftof
 		    {
-		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/c_4gev_ftof.root");
+		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epn/c4_epn_ftof.root");
 		    }
 		  
 		}
@@ -196,11 +196,11 @@ int main(int argc, char ** argv)
 		{
 		  if (det == 0) //ctof
 		    {
-		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/ar_4gev_ctof.root"); 
+		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epn/ar4_epn_ctof.root"); 
 		    }
 		  if (det == 1) //ftof
 		    {
-		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/ar_4gev_ftof.root");
+		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epn/ar4_epn_ftof.root");
 		    }
 		}
 	      else
@@ -214,55 +214,55 @@ int main(int argc, char ** argv)
 		{
 		  if (det == 0) //ctof
 		    {
-		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/d_6gev_ctof.root"); 
+		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epn/d6_epn_ctof.root"); 
 		    }
 		  if (det == 1) //ftof
 		    {
-		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/d_6gev_ftof.root");
+		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epn/d6_epn_ftof.root");
 		    }	    
 		}
 	      else if ((Z == 2) and (N == 2)) //helium
 		{
 		  if (det == 0) //ctof
 		    {
-		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/he_6gev_ctof.root"); 
+		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epn/he6_epn_ctof.root"); 
 		    }
 		  if (det == 1) //ftof
 		    {
-		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/he_6gev_ftof.root");
+		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epn/he6_epn_ftof.root");
 		    }	    
 		}
 	      else if ( ((Z == 6) and (N == 6)) or ((Z == 20) and (N == 28)) or ((Z == 50) and (N == 70)) ) //carbon, calcium 48, tin
 		{
 		  if (det == 0) //ctof
 		    {
-		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/c_6gev_ctof.root"); 
+		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epn/c6_epn_ctof.root"); 
 		    }
 		  if (det == 1) //ftof
 		    {
-		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/c_6gev_ftof.root");
+		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epn/c6_epn_ftof.root");
 		    }	     
 		}
 	      else if ((Z == 20) and (N == 20)) //calcium 40
 		{
 		  if (det == 0) //ctof
 		    {
-		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/ca40_6gev_ctof.root"); 
+		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epn/ca406_epn_ctof.root"); 
 		    }
 		  if (det == 1) //ftof
 		    {
-		      sim_file  == new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/ca40_6gev_ftof.root");
+		      sim_file  == new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epn/ca406_epn_ftof.root");
 		    }	    
 		}
 	      else if ((Z == 18) and (N == 22)) //argon
 		{
 		  if (det == 0) //ctof
 		    {
-		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/ar_6gev_ctof.root"); 
+		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epn/ar6_epn_ctof.root"); 
 		    }
 		  if (det == 1) //ftof
 		    {
-		      sim_file  = new TFile ("/w/hallb-scifs17exp/clas12/users/sratliff/repos/rgm/rgm/Monitoring/build/ar_6gev_ftof.root");
+		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epn/ar6_epn_ftof.root");
 		    }	    
 		}
 	      else
