@@ -7,7 +7,7 @@ e_mom: 1.0 6.6
 e_vtze: -5 -1
 Lead Cuts: ON
 l_pid: Proton
-l_scint: FTOF
+l_scint: CTOF
 l_theta: 0.0 45.0
 l_thetalq: 0.0 25.0
 l_chipid: -3.0 3.0
@@ -16,10 +16,11 @@ l_phidiff: 150 180
 Lead SRC Cuts: ON
 lsrc_Q2: 1.5 100
 lsrc_xB: 1.2 2.0
-lsrc_pmiss: 0.0 1.0
+lsrc_pmiss: 0.35 2.5
 lsrc_mmiss: 0.84 1.04
 lsrc_loq: 0.62 0.96
 Recoil SRC Cuts: ON
 rsrc_pid: Proton
-rsrc_mom: 0.25 1.0
+rsrc_scint: CTOF
+rsrc_mom: 0.35 2.5
 rsrc_chipid: -1.0 1.0

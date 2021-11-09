@@ -134,6 +134,9 @@ std::string eventcut::getCutName(cutName thisCut)
     case rsrc_pid:
       myCutName = "Recoil PID";
       break;
+    case rsrc_scint:
+      myCutName = "Recoil Scintillator/Detector";
+      break;
     case rsrc_mom:
       myCutName = "p_{Recoil}";
       break;
@@ -184,6 +187,9 @@ std::string eventcut::getCutInformation(cutName thisCut)
       myCutInformation = getCutName(thisCut)+": "+std::to_string(cutmap[thisCut].count);
       break;
     case l_scint:
+      myCutInformation = getCutName(thisCut)+": "+cutmap[thisCut].label;
+      break;
+    case rsrc_scint:
       myCutInformation = getCutName(thisCut)+": "+cutmap[thisCut].label;
       break;
     case e_cuts:
@@ -265,6 +271,9 @@ void eventcut::set_cuts(char * filename)
 	case l_scint:
 	  cutStruct.label = cut_values;
 	  break;
+        case rsrc_scint:
+          cutStruct.label = cut_values;
+          break;
 	case e_cuts:
 	case l_cuts:
 	case lsrc_cuts:
@@ -433,6 +442,8 @@ cutName eventcut::hashit(std::string cut_name)
   if(cut_name == "rsrc_pid"){ return rsrc_pid; }
   if(cut_name == "recoil_pid"){ return rsrc_pid; }
 
+  if(cut_name == "rsrc_scint"){ return rsrc_scint; }
+
   if(cut_name == "rsrc_mom"){ return rsrc_mom; }
   if(cut_name == "recoil_momentum"){ return rsrc_mom; }
 
@@ -501,6 +512,7 @@ int eventcut::recoilSRCnucleoncut(const std::unique_ptr<clas12::clas12reader>& c
   int index_R = -1;
   for(int j = 0; j < nucleons.size(); j++){
     if((index_L==j) && (pid_L==pid_R)){ continue; }
+    if(!rsrc_scintcut(c12,j)){ continue; }
     if(!rsrc_momcut(c12,j)){ continue; }
     if(!rsrc_chipidcut(c12,j)){ continue; }
     num_R++;
@@ -728,6 +740,63 @@ bool eventcut::lsrc_loqcut(const std::unique_ptr<clas12::clas12reader>& c12, int
 }
 
 //SRC (e,e'NN) Cuts
+bool eventcut::rsrc_scintcut(const std::unique_ptr<clas12::clas12reader>& c12, int j)
+{
+  if(!cutmap[rsrc_scint].docut){ return true;}
+  
+  auto recoilnucleons=c12->getByID(cutmap[rsrc_pid].count);
+  
+  bool FTOF1A = (recoilnucleons[j]->sci(clas12::FTOF1A)->getDetector() == 12);
+  bool FTOF1B = (recoilnucleons[j]->sci(clas12::FTOF1B)->getDetector() == 12);
+  bool FTOF2 = (recoilnucleons[j]->sci(clas12::FTOF2)->getDetector() == 12);
+  bool CTOF = (recoilnucleons[j]->sci(clas12::CTOF)->getDetector() == 4);
+  bool ECIN = (recoilnucleons[j]->cal(clas12::ECIN)->getDetector() == 7);
+  bool ECOUT = (recoilnucleons[j]->cal(clas12::ECOUT)->getDetector() == 7);
+  bool PCAL = (recoilnucleons[j]->cal(clas12::PCAL)->getDetector() == 7);
+  bool CND1 = (recoilnucleons[j]->sci(clas12::CND1)->getDetector() == 3);
+  bool CND2 = (recoilnucleons[j]->sci(clas12::CND2)->getDetector() == 3);
+  bool CND3 = (recoilnucleons[j]->sci(clas12::CND3)->getDetector() == 3);
+
+  std::string ct = cutmap[rsrc_scint].label;
+  bool nameCorrect = false;
+  if(ct.compare("FTOF1A")==0){ nameCorrect = true; }
+  if(ct.compare("FTOF1B")==0){ nameCorrect = true; }
+  if(ct.compare("FTOF1") ==0){ nameCorrect = true; }
+  if(ct.compare("FTOF2") ==0){ nameCorrect = true; }
+  if(ct.compare("FTOF")  ==0){ nameCorrect = true; }
+  if(ct.compare("CTOF")  ==0){ nameCorrect = true; }
+  if(ct.compare("TOF")   ==0){ nameCorrect = true; }
+  if (ct.compare("ECIN") ==0){ nameCorrect = true; }
+  if (ct.compare("ECOUT")==0){ nameCorrect = true; }
+  if (ct.compare("PCAL") ==0){ nameCorrect = true; }
+  if (ct.compare("CND1") ==0){ nameCorrect = true; }
+  if (ct.compare("CND2") ==0){ nameCorrect = true; }
+  if (ct.compare("CND3") ==0){ nameCorrect = true; }
+  if (ct.compare("CND")  ==0){ nameCorrect = true; }
+
+  if(!nameCorrect){
+    std::cerr<<"Incorrect recoil nucleon scintillator choice -"<< ct<<"-\n Aborting...";
+    exit(-2);
+  }
+  if((ct.compare("FTOF1A")==0) && (FTOF1A)){return true;}
+  if((ct.compare("FTOF1B")==0) && (FTOF1B)){return true;}
+  if((ct.compare("FTOF1")==0)  && (FTOF1A || FTOF1B)){return true;}
+  if((ct.compare("FTOF2")==0)  && (FTOF2)){return true;}
+  if((ct.compare("FTOF")==0)   && (FTOF1A || FTOF1B || FTOF2)){return true;}
+  if((ct.compare("CTOF")==0)   && (CTOF)){return true;}
+  if((ct.compare("TOF")==0)    && (FTOF1A || FTOF1B || FTOF2 || CTOF)){return true;}
+  if((ct.compare("ECIN")==0)  && (ECIN)){return true;}
+  if((ct.compare("ECOUT")==0) && (ECOUT)){return true;}
+  if((ct.compare("PCAL")==0)  && (PCAL)){return true;}
+  if((ct.compare("CND1")==0)  && (CND1)){return true;}
+  if((ct.compare("CND2")==0)  && (CND2)){return true;}
+  if((ct.compare("CND3")==0)  && (CND3)){return true;}
+  if((ct.compare("CND")==0)   && (CND1 || CND2 || CND3)){return true;}
+
+  return false;
+
+}
+
 bool eventcut::rsrc_momcut(const std::unique_ptr<clas12::clas12reader>& c12, int j)
 {
   auto recoilnucleons=c12->getByID(cutmap[rsrc_pid].count);
