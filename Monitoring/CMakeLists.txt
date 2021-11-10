@@ -9,12 +9,12 @@ include_directories(${CLAS12ROOT}/Clas12Banks ${CLAS12ROOT}/Clas12Root ${CLAS12R
 find_package(ROOT)
 list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS}) 
 include(${ROOT_USE_FILE})
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ROOT_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ROOT_CXX_FLAGS} -O0 -ggdb")
 
 add_subdirectory(source)
 
 # compile executables in source directory
-foreach(fnameSrc monitor_ep.cpp monitor_epp.cpp monitor_epn.cpp compare.cpp skimmer.cpp)
+foreach(fnameSrc monitor_ep.cpp monitor_epp.cpp monitor_epn.cpp compare_epp.cpp compare_epn.cpp skimmer.cpp)
   message(STATUS ${fnameSRC})
   string (REPLACE ".cpp" "" fnameExe ${fnameSrc})
   add_executable(${fnameExe} ${fnameSrc})
