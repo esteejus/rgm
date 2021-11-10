@@ -194,7 +194,7 @@ int main(int argc, char ** argv)
   TH2D * h_pmiss_pn_cut = new TH2D("pmiss_pn_cut","p_{miss} vs p_{n} (with cuts);p_{miss};p_{neutron}",50,0,3,50,0,3);
   hist_list_2.push_back(h_pmiss_pn_cut);
   TH1D * h_cos0_cut = new TH1D("cos0_cut","cos #theta_{pmiss,pneutron}",50,-1.05,1.05);
-  hist_list_1.push_back(h_cos0);
+  hist_list_1.push_back(h_cos0_cut);
 
 
   for(int i=0; i<hist_list_1.size(); i++){
