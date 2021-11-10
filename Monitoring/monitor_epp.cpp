@@ -131,47 +131,63 @@ int main(int argc, char ** argv)
   /////////////////////////////////////
   TH1D * h_xB_SRC = new TH1D("xB_SRC","x_{B} SRC;x_{B};Counts",100,1.0,2.0);
   hist_list_1.push_back(h_xB_SRC);
+  TH1D * h_Q2_SRC = new TH1D("Q2_SRC","Q^{2} SRC;Q^{2};Counts",100,1.0,3.0);
+  hist_list_1.push_back(h_Q2_SRC);
+  TH1D * h_W_SRC = new TH1D("W_SRC","W SRC;W;Counts",100,0.0,1.0);
+  hist_list_1.push_back(h_W_SRC);
   TH1D * h_pmiss_SRC = new TH1D("pmiss_SRC","p_{miss} SRC;p_{miss};Counts",100,0,1.5);
   hist_list_1.push_back(h_pmiss_SRC);
   TH1D * h_mmiss_SRC = new TH1D("mmiss_SRC","m_{miss} SRC;m_{miss};Counts",100,0.4,1.4);
   hist_list_1.push_back(h_mmiss_SRC);
   TH2D * h_pmiss_theta_miss_SRC = new TH2D("pmiss_theta_miss_SRC","p_{miss} vs. #theta_{miss};p_{miss};#theta_{miss};Counts",100,0,1.5,180,0,180);
   hist_list_2.push_back(h_pmiss_theta_miss_SRC);
-  TH2D * h_pmiss_theta_L_SRC = new TH2D("pmiss_theta_L_SRC","p_{miss} vs. #theta_{L};p_{miss};#theta_{L};Counts",100,0,1.5,100,5,45);
+  TH2D * h_pmiss_xB_SRC = new TH2D("pmiss_xB_SRC","p_{miss} vs. x_{B};p_{miss};x_{B};Counts",100,0,1.5,100,1.0,2.0);
+  hist_list_2.push_back(h_pmiss_xB_SRC);
+  TH2D * h_pmiss_theta_L_SRC = new TH2D("pmiss_theta_L_SRC","p_{miss} vs. #theta_{L};p_{miss};#theta_{L};Counts",100,0,1.5,100,5,90);
   hist_list_2.push_back(h_pmiss_theta_miss_SRC);
-  TH2D * h_xB_Loq_SRC = new TH2D("xB_Loq","x_{B} vs |p|/|q|;x_{B};|p|/|q|",100,0,2,100,0,1.5);
+  TH2D * h_xB_Loq_SRC = new TH2D("xB_Loq","x_{B} vs |p|/|q|;x_{B};|p|/|q|",100,1,2,100,0.5,1.2);
   hist_list_2.push_back(h_xB_Loq_SRC);
+  TH2D * h_mmiss_xB_SRC = new TH2D("mmiss_xB_SRC","m_{miss} vs. x_{B};m_{miss};x_{B};Counts",100,0.4,1.4,100,1.0,2.0);
+  hist_list_2.push_back(h_mmiss_xB_SRC);
+  TH2D * h_mmiss_mom_p_SRC = new TH2D("mmiss_mom_p_SRC","m_{miss} vs. p_{p,Lead};m_{miss};p_{p,Lead};Counts",100,0.4,1.4,100,0,3);
+  hist_list_2.push_back(h_mmiss_mom_p_SRC);
+  TH2D * h_mmiss_theta_p_SRC = new TH2D("mmiss_theta_p_SRC","m_{miss} vs. #theta_{p,Lead};m_{miss};#theta_{p,Lead};Counts",100,0.4,1.4,100,0,90);
+  hist_list_2.push_back(h_mmiss_theta_p_SRC);
 
   /////////////////////////////////////
   //Recoil Nucleons
   /////////////////////////////////////
-  TH1D * h_p_2_AllRec = new TH1D("p_2_AllRec","p All Recoils;p_2",100,0,1.5);
+  TH1D * h_p_2_AllRec = new TH1D("p_2_AllRec","p All Recoils;p_2",50,0,1.5);
   hist_list_1.push_back(h_p_2_AllRec);
-  TH1D * h_chiSq_rec_AllRec = new TH1D("chiSq_rec_AllRec","#chi^{2}_{rec} All Recoils;#chi^{2}_{rec}",100,-5,5);
+  TH1D * h_chiSq_rec_AllRec = new TH1D("chiSq_rec_AllRec","#chi^{2}_{rec} All Recoils;#chi^{2}_{rec}",50,-5,5);
   hist_list_1.push_back(h_chiSq_rec_AllRec);
-  TH2D * h_mom_beta_rec_AllRec = new TH2D("mom_beta_rec_AllRec","p_{rec} vs. #beta_{rec} ;p_{rec};#beta_{rec}",100,0,4,100,0.7,1);
+  TH1D * h_vtz_ep_delta_AllRec = new TH1D("vtz_ep_delta_AllRec","#Delta Vertex (e^{-} and p_{Rec});#Delta Vertex;Counts",50,-5,5);
+  hist_list_1.push_back(h_vtz_ep_delta_AllRec);
+  TH1D * h_timediff_p_AllRec = new TH1D("timediff_p_AllRec","ToF-ToF_{|p|} ;ToF-ToF_{|p|};Counts",50,-2,2);
+  hist_list_1.push_back(h_timediff_p_AllRec);
+  TH2D * h_mom_beta_rec_AllRec = new TH2D("mom_beta_rec_AllRec","p_{rec} vs. #beta_{rec} ;p_{rec};#beta_{rec}",50,0,4,100,0.7,1);
   hist_list_2.push_back(h_mom_beta_rec_AllRec);
-  TH1D * h_count_AllRec = new TH1D("count_AllRec","Number of Recoils;Multiplicity",5,0,5);
+  TH1D * h_count_AllRec = new TH1D("count_AllRec","Number of Recoils;Multiplicity",5,-0.5,4.5);
   hist_list_1.push_back(h_count_AllRec);
 
   /////////////////////////////////////
   //Recoil SRC Nucleons
   /////////////////////////////////////
-  TH1D * h_p_2_Rec = new TH1D("p_2_Rec","p_{rec};p_{rec};Counts",100,0,1.5);
+  TH1D * h_p_2_Rec = new TH1D("p_2_Rec","p_{rec};p_{rec};Counts",50,0,1.5);
   hist_list_1.push_back(h_p_2_Rec);
-  TH1D * h_p_rel_Rec = new TH1D("p_rel_Rec","p_{rel};p_{rel};Counts",100,0,1.5);
+  TH1D * h_p_rel_Rec = new TH1D("p_rel_Rec","p_{rel};p_{rel};Counts",50,0,1.5);
   hist_list_1.push_back(h_p_rel_Rec);
-  TH1D * h_p_cm_Rec = new TH1D("p_cm_Rec","p_{C.M.};p_{C.M.};Counts",100,0,0.5);
+  TH1D * h_p_cm_Rec = new TH1D("p_cm_Rec","p_{C.M.};p_{C.M.};Counts",50,0,0.5);
   hist_list_1.push_back(h_p_cm_Rec);
-  TH1D * h_p_t_cm_Rec = new TH1D("p_t_cm_Rec","p_{t,C.M.};p_{t,C.M.};Counts",100,-0.5,0.5);
+  TH1D * h_p_t_cm_Rec = new TH1D("p_t_cm_Rec","p_{t,C.M.};p_{t,C.M.};Counts",50,-0.5,0.5);
   hist_list_1.push_back(h_p_t_cm_Rec);
-  TH1D * h_p_y_cm_Rec = new TH1D("p_y_cm_Rec","p_{y,C.M.};p_{y,C.M.};Counts",100,-0.5,0.5);
+  TH1D * h_p_y_cm_Rec = new TH1D("p_y_cm_Rec","p_{y,C.M.};p_{y,C.M.};Counts",50,-0.5,0.5);
   hist_list_1.push_back(h_p_y_cm_Rec);
-  TH1D * h_p_x_cm_Rec = new TH1D("p_x_cm_Rec","p_{x,C.M.};p_{x,C.M.};Counts",100,-0.5,0.5);
+  TH1D * h_p_x_cm_Rec = new TH1D("p_x_cm_Rec","p_{x,C.M.};p_{x,C.M.};Counts",50,-0.5,0.5);
   hist_list_1.push_back(h_p_x_cm_Rec);
-  TH1D * h_theta_rel_Rec = new TH1D("theta_rel_Rec","#theta_{rel};#theta_{rel};Counts",180,0,180);
+  TH1D * h_theta_rel_Rec = new TH1D("theta_rel_Rec","#theta_{rel};#theta_{rel};Counts",45,90,180);
   hist_list_1.push_back(h_theta_rel_Rec);
-  TH2D * h_p_cm_theta_rel_Rec = new TH2D("p_cm_theta_rel_Rec","p_{C.M.} vs. #theta_{rel};p_{C.M.};#theta_{rel}",100,0,0.5,180,100,180);
+  TH2D * h_p_cm_theta_rel_Rec = new TH2D("p_cm_theta_rel_Rec","p_{C.M.} vs. #theta_{rel};p_{C.M.};#theta_{rel}",50,0,0.5,45,90,180);
   hist_list_2.push_back(h_p_cm_theta_rel_Rec);
 
 
@@ -266,11 +282,18 @@ int main(int argc, char ** argv)
       if(!myCut.leadSRCnucleoncut(c12,index_L)){continue;}
 
       h_xB_SRC->Fill(xB,weight);
+      h_Q2_SRC->Fill(QSq,weight);
+      h_W_SRC->Fill(sqrt(WSq),weight);
       h_pmiss_SRC->Fill(p_miss.Mag(),weight);
       h_mmiss_SRC->Fill(mmiss,weight);
+
       h_pmiss_theta_miss_SRC->Fill(p_miss.Mag(),theta_miss,weight);
+      h_pmiss_xB_SRC->Fill(p_miss.Mag(),xB,weight);
       h_pmiss_theta_L_SRC->Fill(p_miss.Mag(),theta_L,weight);
       h_xB_Loq_SRC->Fill(xB,Loq,weight);
+      h_mmiss_xB_SRC->Fill(mmiss,xB,weight);
+      h_mmiss_mom_p_SRC->Fill(mmiss,p_L.Mag(),weight);
+      h_mmiss_theta_p_SRC->Fill(mmiss,theta_L,weight);
 
 
   /////////////////////////////////////
@@ -278,8 +301,18 @@ int main(int argc, char ** argv)
   /////////////////////////////////////
       for(int j = 0; j < protons.size(); j++){
 	if(j==index_L){continue;}
-	h_p_2_AllRec->Fill(protons[j]->getP(),weight);
+	double mom = protons[j]->getP();
+	double beta_p = protons[j]->par()->getBeta();
+	double path_p = protons[j]->getPath();
+	double beta_frommom_p = mom/sqrt(mom*mom + mN*mN);
+	double time_frommom_p = path_p / (c*beta_frommom_p);
+	double time_frombeta_p = path_p / (c*beta_p);
+	double time_diff = time_frombeta_p-time_frommom_p;
+
+	h_p_2_AllRec->Fill(mom,weight);
 	h_chiSq_rec_AllRec->Fill(protons[j]->par()->getChi2Pid(),weight);
+	h_vtz_ep_delta_AllRec->Fill(vtz_e-protons[j]->par()->getVz(),weight);
+	h_timediff_p_AllRec->Fill(time_diff,weight);
 	h_mom_beta_rec_AllRec->Fill(protons[j]->getP(),protons[j]->par()->getBeta(),weight);
       }
       h_count_AllRec->Fill(protons.size()-1,weight);
@@ -430,15 +463,31 @@ int main(int argc, char ** argv)
   myCanvas->cd(1);
   h_xB_SRC->Draw();
   myCanvas->cd(2);
-  h_pmiss_SRC->Draw();
+  h_Q2_SRC->Draw();
   myCanvas->cd(3);
-  h_mmiss_SRC->Draw();
+  h_W_SRC->Draw();
   myCanvas->cd(4);
-  h_pmiss_theta_miss_SRC->Draw("colz");
+  h_pmiss_SRC->Draw();
   myCanvas->cd(5);
-  h_pmiss_theta_L_SRC->Draw("colz");
+  h_mmiss_SRC->Draw();
   myCanvas->cd(6);
+  h_pmiss_theta_miss_SRC->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(2,3);
+  myCanvas->cd(1);
+  h_pmiss_xB_SRC->Draw("colz");
+  myCanvas->cd(2);
+  h_pmiss_theta_L_SRC->Draw("colz");
+  myCanvas->cd(3);
   h_xB_Loq_SRC->Draw("colz");
+  myCanvas->cd(4);
+  h_mmiss_xB_SRC->Draw("colz");
+  myCanvas->cd(5);
+  h_mmiss_mom_p_SRC->Draw("colz");
+  myCanvas->cd(6);
+  h_mmiss_theta_p_SRC->Draw("colz");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
@@ -459,8 +508,12 @@ int main(int argc, char ** argv)
   myCanvas->cd(2);
   h_chiSq_rec_AllRec->Draw();
   myCanvas->cd(3);
-  h_mom_beta_rec_AllRec->Draw("colz");
+  h_vtz_ep_delta_AllRec->Draw();
   myCanvas->cd(4);
+  h_timediff_p_AllRec->Draw();
+  myCanvas->cd(5);
+  h_mom_beta_rec_AllRec->Draw("colz");
+  myCanvas->cd(6);
   h_count_AllRec->Draw();
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
