@@ -122,7 +122,6 @@ int main(int argc, char ** argv)
     h_mom_EoP[i] = new TH2D(temp_name,temp_title,100,0,7,100,0.1,0.35);
     hist_list_2.push_back(h_mom_EoP[i]);
   }
-
   
   /////////////////////////////////////
   //Electron Kinematics  
@@ -131,6 +130,8 @@ int main(int argc, char ** argv)
   hist_list_1.push_back(h_xB);
   TH1D * h_QSq = new TH1D("QSq","Q^{2};Q^{2};Counts",100,0,3);
   hist_list_1.push_back(h_QSq);
+  TH1D * h_W = new TH1D("W","W;W",100,0.5,2);
+  hist_list_1.push_back(h_W);
   TH1D * h_WSq = new TH1D("WSq","W^{2};W^{2}",100,0,7);
   hist_list_1.push_back(h_WSq);
   TH2D * h_xB_QSq = new TH2D("xB_QSq","x_{B} vs. Q^{2} ;x_{B};Q^{2}",100,0,2,100,0,3);
@@ -149,9 +150,45 @@ int main(int argc, char ** argv)
   }
 
   /////////////////////////////////////
+  //Electron Kinematics with SRC kinematics
+  /////////////////////////////////////
+  TH2D * h_mom_theta_eSRC = new TH2D("mom_theta_eSRC","p_{e} vs. #theta_{e} ;p_{e};#theta_{e}",100,0,7,100,5,40);
+  hist_list_2.push_back(h_mom_theta_eSRC);  
+  TH2D * h_xB_theta_eSRC = new TH2D("xB_theta_eSRC","x_{B} vs. #theta_{e} ;x_{B};#theta_{e}",100,1,2,100,5,40);
+  hist_list_2.push_back(h_xB_theta_eSRC);  
+  TH2D * h_thetaq_theta_eSRC = new TH2D("thetaq_theta_eSRC","#theta_{q} vs. #theta_{e} ;#theta_{q};#theta_{e}",100,0,90,100,5,40);
+  hist_list_2.push_back(h_thetaq_theta_eSRC);  
+  TH2D * h_thetaq_xB_eSRC = new TH2D("thetaq_xB_eSRC","#theta_{q} vs. x_{B} ;#theta_{q};x_{B}",100,0,90,100,1,2);
+  hist_list_2.push_back(h_thetaq_xB_eSRC);  
+  TH1D * h_thetaq_eSRC = new TH1D("thetaq_eSRC","#theta_{q};#theta_{q}",100,0,90);
+  hist_list_1.push_back(h_thetaq_eSRC);  
+  
+
+  /////////////////////////////////////
+  //Hadron Information
+  /////////////////////////////////////
+  TH2D * h_mom_beta_hadplus_FTOF = new TH2D("mom_beta_hadplus_FTOF","p vs. #beta FTOF (All +hadrons);p;#beta",100,0,4,100,0.3,1.2);
+  hist_list_2.push_back(h_mom_beta_hadplus_FTOF);
+  TH2D * h_mom_beta_hadplus_CTOF = new TH2D("mom_beta_hadplus_CTOF","p vs. #beta CTOF (All +hadrons);p;#beta",100,0,4,100,0.0,20);
+  hist_list_2.push_back(h_mom_beta_hadplus_CTOF);
+  TH2D * h_mom_beta_hadplus_CTOF_zoom = new TH2D("mom_beta_hadplus_CTOF_zoom","p vs. #beta CTOF (All +hadrons);p;#beta",100,0,4,100,0.0,4);
+  hist_list_2.push_back(h_mom_beta_hadplus_CTOF_zoom);
+
+  TH2D * h_mom_beta_proton_CTOF_zoom = new TH2D("mom_beta_proton_CTOF","p vs. #beta CTOF (Protons);p;#beta",100,0,4,100,0.0,4);
+  hist_list_2.push_back(h_mom_beta_proton_CTOF_zoom);
+  TH2D * h_mom_beta_pion_CTOF_zoom = new TH2D("mom_beta_pion_CTOF","p vs. #beta CTOF (Pions);p;#beta",100,0,4,100,0.0,4);
+  hist_list_2.push_back(h_mom_beta_pion_CTOF_zoom);
+  TH2D * h_mom_beta_kaon_CTOF_zoom = new TH2D("mom_beta_kaon_CTOF","p vs. #beta CTOF (Kaons);p;#beta",100,0,4,100,0.0,4);
+  hist_list_2.push_back(h_mom_beta_kaon_CTOF_zoom);
+  TH2D * h_mom_beta_deuteron_CTOF_zoom = new TH2D("mom_beta_deuteron_CTOF","p vs. #beta CTOF (Deuterons);p;#beta",100,0,4,100,0.0,4);
+  hist_list_2.push_back(h_mom_beta_deuteron_CTOF_zoom);
+  TH2D * h_mom_beta_0_CTOF_zoom = new TH2D("mom_beta_0_CTOF","p vs. #beta CTOF (PID=0);p;#beta",100,0,4,100,0.0,4);
+  hist_list_2.push_back(h_mom_beta_0_CTOF_zoom);
+
+  /////////////////////////////////////
   //FTOF Proton Information
   /////////////////////////////////////
-  TH1D * h_chiSq_p_FTOF = new TH1D("chiSq_p_FTOF","#chi^{2}_{PID};#chi^{2}_{PID};Counts",100,-5,5);
+  TH1D * h_chiSq_p_FTOF = new TH1D("chiSq_p_FTOF","#chi^{2}_{PID};#chi^{2}_{PID};Counts",100,-10,10);
   hist_list_1.push_back(h_chiSq_p_FTOF);
 
   TH1D * h_vtz_p_FTOF = new TH1D("vtz_p_FTOF","Proton Z Vertex;vertex;Counts",100,-10,10);
@@ -160,6 +197,8 @@ int main(int argc, char ** argv)
   hist_list_1.push_back(h_vtz_ep_delta_FTOF);
   TH2D * h_vtz_e_vtz_p_FTOF = new TH2D("vtz_e_vtz_p_FTOF","Electron Z Vertex vs. Proton Z Vertex;vertex e;vertex p",100,-10,10,100,-10,10);
   hist_list_2.push_back(h_vtz_e_vtz_p_FTOF);
+  TH1D * h_phi_e_p_FTOF = new TH1D("phi_e_p_FTOF","|#phi_{e} - #phi_{p}|;|#phi_{e} - #phi_{p}|,Counts",100,100,180);
+  hist_list_1.push_back(h_phi_e_p_FTOF);
 
 
   TH1D * h_theta_p_FTOF = new TH1D("theta_p_FTOF","#theta_{proton};#theta_{proton};Counts",100,0,60);
@@ -185,7 +224,7 @@ int main(int argc, char ** argv)
   /////////////////////////////////////
   //CTOF Proton Information
   /////////////////////////////////////
-  TH1D * h_chiSq_p_CTOF = new TH1D("chiSq_p_CTOF","#chi^{2}_{PID};#chi^{2}_{PID};Counts",100,-5,5);
+  TH1D * h_chiSq_p_CTOF = new TH1D("chiSq_p_CTOF","#chi^{2}_{PID};#chi^{2}_{PID};Counts",100,-10,10);
   hist_list_1.push_back(h_chiSq_p_CTOF);
 
   TH1D * h_vtz_p_CTOF = new TH1D("vtz_p_CTOF","Proton Z Vertex;vertex;Counts",100,-10,10);
@@ -194,6 +233,8 @@ int main(int argc, char ** argv)
   hist_list_1.push_back(h_vtz_ep_delta_CTOF);
   TH2D * h_vtz_e_vtz_p_CTOF = new TH2D("vtz_e_vtz_p_CTOF","Electron Z Vertex vs. Proton Z Vertex;vertex e;vertex p",100,-10,10,100,-10,10);
   hist_list_2.push_back(h_vtz_e_vtz_p_CTOF);
+  TH1D * h_phi_e_p_CTOF = new TH1D("phi_e_p_CTOF","|#phi_{e} - #phi_{p}|;|#phi_{e} - #phi_{p}|,Counts",100,100,180);
+  hist_list_1.push_back(h_phi_e_p_CTOF);
 
 
   TH1D * h_theta_p_CTOF = new TH1D("theta_p_CTOF","#theta_{proton};#theta_{proton};Counts",100,20,140);
@@ -325,8 +366,11 @@ int main(int argc, char ** argv)
       }    
 
       // get particles by type
+      auto allParticles = c12->getDetParticles();
       auto electrons=c12->getByID(11);
       auto protons=c12->getByID(2212);
+      auto pionplus=c12->getByID(211);
+      auto kaonplus=c12->getByID(321);
       auto neutrons=c12->getByID(2112);
       double weight = 1;
       if(isMC){weight=c12->mcevent()->getWeight();}
@@ -360,6 +404,7 @@ int main(int argc, char ** argv)
   //Electron Kinematics  
   /////////////////////////////////////
       TVector3	p_q = p_b - p_e;
+      double theta_q =  p_q.Theta() * 180 / M_PI;
       double nu = Ebeam - p_e.Mag();
       double QSq = p_q.Mag2() - (nu*nu);
       double xB = QSq / (2 * mN * nu);
@@ -370,10 +415,59 @@ int main(int argc, char ** argv)
       h_xB->Fill(xB,weight);
       h_QSq->Fill(QSq,weight);
       h_WSq->Fill(WSq,weight);
+      h_W->Fill(sqrt(WSq),weight);
       h_xB_QSq->Fill(xB,QSq,weight);
       h_xB_WSq->Fill(xB,WSq,weight);
       h_QSq_WSq->Fill(QSq,WSq,weight);
-      h_mom_theta[esector-1]->Fill(p_e.Mag(),p_e.Theta()*180/M_PI,weight);
+      h_mom_theta[esector-1]->Fill(p_e.Mag(),theta_e,weight);
+
+  /////////////////////////////////////
+  //Electron Kinematics with SRC kinematics
+  /////////////////////////////////////
+      if((xB>1) && (QSq>1.5)){
+	h_mom_theta_eSRC->Fill(p_e.Mag(),theta_e,weight);
+	h_xB_theta_eSRC->Fill(xB,theta_e,weight);
+	h_thetaq_theta_eSRC->Fill(theta_q,theta_e,weight);
+	h_thetaq_xB_eSRC->Fill(theta_q,xB,weight);
+	h_thetaq_eSRC->Fill(theta_q,weight);
+      }
+      
+  /////////////////////////////////////
+  //Hadron Information
+  /////////////////////////////////////
+      for(int j = 0; j < allParticles.size(); j ++){
+	if(allParticles[j]->par()->getCharge()<1){continue;}
+	//cout<<"PID="<<allParticles[j]->getPid()<<endl;
+	bool FTOF1A = (allParticles[j]->sci(clas12::FTOF1A)->getDetector() == 12);
+	bool FTOF1B = (allParticles[j]->sci(clas12::FTOF1B)->getDetector() == 12);
+	bool FTOF2 = (allParticles[j]->sci(clas12::FTOF2)->getDetector() == 12);
+	bool CTOF = (allParticles[j]->sci(clas12::CTOF)->getDetector() == 4);
+	if(FTOF1A || FTOF1B || FTOF2){
+	  h_mom_beta_hadplus_FTOF->Fill(allParticles[j]->getP(),allParticles[j]->par()->getBeta(),weight);
+	}
+	if(CTOF){
+	  h_mom_beta_hadplus_CTOF->Fill(allParticles[j]->getP(),allParticles[j]->par()->getBeta(),weight);
+	  h_mom_beta_hadplus_CTOF_zoom->Fill(allParticles[j]->getP(),allParticles[j]->par()->getBeta(),weight);
+ 	  
+	  int PID = allParticles[j]->getPid();
+	  if(PID==2212){
+	    h_mom_beta_proton_CTOF_zoom->Fill(allParticles[j]->getP(),allParticles[j]->par()->getBeta(),weight);  
+	  }
+	  if(PID==211){
+	    h_mom_beta_pion_CTOF_zoom->Fill(allParticles[j]->getP(),allParticles[j]->par()->getBeta(),weight);  
+	  }
+	  if(PID==321){
+	    h_mom_beta_kaon_CTOF_zoom->Fill(allParticles[j]->getP(),allParticles[j]->par()->getBeta(),weight);  
+	  }
+	  if(PID==45){
+	    h_mom_beta_deuteron_CTOF_zoom->Fill(allParticles[j]->getP(),allParticles[j]->par()->getBeta(),weight);
+	  }
+	  if(PID==0){
+	    h_mom_beta_0_CTOF_zoom->Fill(allParticles[j]->getP(),allParticles[j]->par()->getBeta(),weight);  
+	  }
+
+	}
+      }
   /////////////////////////////////////
   //FTOF and CTOF Proton Information
   /////////////////////////////////////
@@ -386,6 +480,7 @@ int main(int argc, char ** argv)
 	double theta_pq = p_p.Angle(p_q) * 180 / M_PI;
 	double beta_p = protons[j]->par()->getBeta();
 	double Chi2Pid_p = protons[j]->par()->getChi2Pid();
+	double phi_diff = get_phi_diff(p_e,p_p);
 	double vtz_p = protons[j]->par()->getVz();
 	double vtz_ep_delta = vtz_e - vtz_p;
 
@@ -404,6 +499,7 @@ int main(int argc, char ** argv)
 	  h_vtz_p_FTOF->Fill(vtz_p,weight);
 	  h_vtz_ep_delta_FTOF->Fill(vtz_ep_delta,weight);
 	  h_vtz_e_vtz_p_FTOF->Fill(vtz_e,vtz_p,weight);
+	  h_phi_e_p_FTOF->Fill(phi_diff,weight);
 
 	  h_theta_p_FTOF->Fill(theta_p,weight);
 	  h_theta_pq_FTOF->Fill(theta_pq,weight);	
@@ -419,6 +515,7 @@ int main(int argc, char ** argv)
 	  h_vtz_p_CTOF->Fill(vtz_p,weight);
 	  h_vtz_ep_delta_CTOF->Fill(vtz_ep_delta,weight);
 	  h_vtz_e_vtz_p_CTOF->Fill(vtz_e,vtz_p,weight);
+	  h_phi_e_p_CTOF->Fill(phi_diff,weight);
 
 	  h_theta_p_CTOF->Fill(theta_p,weight);
 	  h_theta_pq_CTOF->Fill(theta_pq,weight);	
@@ -615,6 +712,67 @@ int main(int argc, char ** argv)
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();  
 
+  myCanvas->Divide(2,3);
+  myCanvas->cd(1);
+  h_W->Draw();
+  myCanvas->Clear();
+
+  /////////////////////////////////////
+  //Electron Kinematics with SRC kinematics
+  /////////////////////////////////////
+  myText->cd();
+  text.DrawLatex(0.2,0.9,"(e,e') Cuts");
+  text.DrawLatex(0.2,0.8,"x_{B}: min=1. max=2.");
+  text.DrawLatex(0.2,0.7,"Q^{2}: min=1.5 max=10.");
+  myText->Print(fileName,"pdf");
+  myText->Clear();
+
+  myCanvas->Divide(2,3);
+  myCanvas->cd(1);
+  h_mom_theta_eSRC->Draw("colz");
+  myCanvas->cd(2);
+  h_xB_theta_eSRC->Draw("colz");
+  myCanvas->cd(3);
+  h_thetaq_theta_eSRC->Draw("colz");
+  myCanvas->cd(4);
+  h_thetaq_xB_eSRC->Draw("colz");
+  myCanvas->cd(5);
+  h_thetaq_eSRC->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  /////////////////////////////////////
+  //Hadron Detected
+  /////////////////////////////////////
+  myText->cd();
+  text.DrawLatex(0.2,0.9,"(e,e') Cuts with positive Hadron");
+  myText->Print(fileName,"pdf");  
+  myText->Clear();
+
+  myCanvas->Divide(2,3);
+  myCanvas->cd(1);
+  h_mom_beta_hadplus_FTOF->Draw("colz");
+  myCanvas->cd(2);
+  h_mom_beta_hadplus_CTOF->Draw("colz");
+  myCanvas->cd(3);
+  h_mom_beta_hadplus_CTOF_zoom->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(2,3);
+  myCanvas->cd(1);
+  h_mom_beta_proton_CTOF_zoom->Draw("colz");
+  myCanvas->cd(2);
+  h_mom_beta_pion_CTOF_zoom->Draw("colz");
+  myCanvas->cd(3);
+  h_mom_beta_kaon_CTOF_zoom->Draw("colz");
+  myCanvas->cd(4);
+  h_mom_beta_deuteron_CTOF_zoom->Draw("colz");
+  myCanvas->cd(5);
+  h_mom_beta_0_CTOF_zoom->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
   /////////////////////////////////////
   //FTOF Proton Information
   /////////////////////////////////////
@@ -634,6 +792,8 @@ int main(int argc, char ** argv)
   h_vtz_ep_delta_FTOF->Draw();
   myCanvas->cd(4);
   h_vtz_e_vtz_p_FTOF->Draw("colz");
+  myCanvas->cd(5);
+  h_phi_e_p_FTOF->Draw();
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
@@ -678,6 +838,8 @@ int main(int argc, char ** argv)
   h_vtz_ep_delta_CTOF->Draw();
   myCanvas->cd(4);
   h_vtz_e_vtz_p_CTOF->Draw("colz");
+  myCanvas->cd(5);
+  h_phi_e_p_FTOF->Draw();
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
