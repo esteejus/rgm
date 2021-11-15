@@ -17,9 +17,9 @@ using namespace std;
 
 int main(int argc, char ** argv)
 {
-  if (argc != 9 and argc != 5)
+  if (argc != 8 and argc != 5)
     {
-      cout << "Wrong number of arguments. To use default simulations, enter \n compare  <Ebeam (GeV)> <Z> <N>  <epp = 0 , epn = 1> <CTOF = 0, FTOF = 1> </path/to/output/root/file> </path/to/output/pdf/file> </path/to/input/data/root/file> \n\n To directly point to an input simulation file, enter \n compare </path/to/output/root/file> </path/to/output/pdf/file> </path/to/input/data/root/file> </path/to/input/simulation/root/file>\n\n";
+      cout << "Wrong number of arguments. To use default simulations, enter \n compare  <Ebeam (GeV)> <Z> <N> <CTOF = 0, FTOF = 1> </path/to/output/root/file> </path/to/output/pdf/file> </path/to/input/data/root/file> \n\n To directly point to an input simulation file, enter \n compare </path/to/output/root/file> </path/to/output/pdf/file> </path/to/input/data/root/file> </path/to/input/simulation/root/file>\n\n";
       cout << "Valid Target Options:\n\n";
       cout << "Target  Z   N \n";
       cout << "--------------\n";
@@ -36,114 +36,111 @@ int main(int argc, char ** argv)
   //declaring variables to contain inputs
   TFile *sim_file, *data_file,  *outfile;
   char * pdffile; 
-
-  if (argc==9)
+  
+  if (argc==8)
     {
       double E_beam = atof(argv[1]);
       int Z = atoi(argv[2]);
       int N = atoi(argv[3]);
-      int channel = atoi(argv[4]);
-      int det = atoi(argv[5]);
-
-
+      int det = atoi(argv[4]);
+      
+      
       ///////////////////////
       ////input root files///
       ///////////////////////       
       
       
-      data_file = new TFile  (argv[8]); //data root file                                     
-      cout << "My data file is " << argv[8] << "\n";                                    
-
+      data_file = new TFile  (argv[7]); //data root file                                     
+      cout << "My data file is " << argv[7] << "\n";                                    
+      
       // grabbing simulation root file
-      if ( channel == 0 ) //epp
+      if ((E_beam == 4.) or (E_beam == 4) or (E_beam == 4.0)) //4GeV
 	{
-	  if ((E_beam == 4.) or (E_beam == 4) or (E_beam == 4.0)) //4GeV
+	  if ((Z == 1) and (N == 1)) //deuterium
 	    {
-	      if ((Z == 1) and (N == 1)) //deuterium
+	      if (det == 0) //ctof
 		{
-		  if (det == 0) //ctof
-		    {
-		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epp/d4_epp_ctof.root"); 
-		    }
-		  if (det == 1) //ftof
-		    {
-		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epp/d4_epp_ftof.root");
-		    }
+		  sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epp/d4_epp_ctof.root"); 
 		}
-	      else if ((Z == 6) and (N == 6)) //carbon
+	      if (det == 1) //ftof
 		{
-		  if (det == 0) //ctof
-		    {
-		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epp/c4_epp_ctof.root"); 
-		    }
-		  if (det == 1) //ftof
-		    {
-		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epp/c4_epp_ftof.root");
-		    }
-		  
-		}
-	      else if ((Z == 18) and (Z == 22)) //argon
-		{
-		  if (det == 0) //ctof
-		    {
-		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epp/ar4_epp_ctof.root"); 
-		    }
-		  if (det == 1) //ftof
-		    {
-		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epp/ar4_epp_ftof.root");
-		    }
-		}
-	      else
-		{
-		  cout << "Please choose a valid target/beam combination \n";
+		  sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epp/d4_epp_ftof.root");
 		}
 	    }
-	  if ((E_beam == 6.) or (E_beam == 6) or (E_beam == 6.0)) //6GeV
+	  else if ((Z == 6) and (N == 6)) //carbon
 	    {
-	      if ((Z == 1) and (N == 1))//deuterium
+	      if (det == 0) //ctof
 		{
-		  if (det == 0) //ctof
-		    {
-		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epp/d6_epp_ctof.root"); 
-		    }
-		  if (det == 1) //ftof
-		    {
-		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epp/d6_epp_ftof.root");
-		    }	    
+		  sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epp/c4_epp_ctof.root"); 
 		}
-	      else if ((Z == 2) and (N == 2)) //helium
+	      if (det == 1) //ftof
 		{
-		  if (det == 0) //ctof
-		    {
-		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epp/he6_epp_ctof.root"); 
-		    }
-		  if (det == 1) //ftof
-		    {
-		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epp/he6_epp_ftof.root");
-		    }	    
+		  sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epp/c4_epp_ftof.root");
 		}
-	      else if ( ((Z == 6) and (N == 6)) or ((Z == 20) and (N == 28)) or ((Z == 50) and (N == 70)) ) //carbon, calcium 48, tin
+	      
+	    }
+	  else if ((Z == 18) and (Z == 22)) //argon
+	    {
+	      if (det == 0) //ctof
 		{
-		  if (det == 0) //ctof
-		    {
-		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epp/c6_epp_ctof.root"); 
+		  sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epp/ar4_epp_ctof.root"); 
 		    }
-		  if (det == 1) //ftof
-		    {
-		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epp/c6_epp_ftof.root");
-		    }	     
-		}
-	      else if ((Z == 20) and (N == 20)) //calcium 40
+	      if (det == 1) //ftof
 		{
-		  if (det == 0) //ctof
+		  sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epp/ar4_epp_ftof.root");
+		}
+	    }
+	  else
+	    {
+	      cout << "Please choose a valid target/beam combination \n";
+	    }
+	}
+      else if ((E_beam == 6.) or (E_beam == 6) or (E_beam == 6.0)) //6GeV
+	{
+	  if ((Z == 1) and (N == 1))//deuterium
+	    {
+	      if (det == 0) //ctof
+		{
+		  sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epp/d6_epp_ctof.root"); 
+		}
+	      if (det == 1) //ftof
+		{
+		  sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epp/d6_epp_ftof.root");
+		}	    
+	    }
+	  else if ((Z == 2) and (N == 2)) //helium
+	    {
+	      if (det == 0) //ctof
+		{
+		  sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epp/he6_epp_ctof.root"); 
+		}
+	      if (det == 1) //ftof
+		{
+		  sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epp/he6_epp_ftof.root");
+		}	    
+	    }
+	  else if ( ((Z == 6) and (N == 6)) or ((Z == 20) and (N == 28)) or ((Z == 50) and (N == 70)) ) //carbon, calcium 48, tin
+	    {
+	      if (det == 0) //ctof
+		{
+		  sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epp/c6_epp_ctof.root"); 
+		}
+	      if (det == 1) //ftof
+		{
+		  sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epp/c6_epp_ftof.root");
+		}	     
+	    }
+	  else if ((Z == 20) and (N == 20)) //calcium 40
+	    {
+	      if (det == 0) //ctof
 		{
 		  sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epp/ca406_epp_ctof.root"); 
 		}
-		  if (det == 1) //ftof
-		    {
-		      sim_file  == new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epp/ca406_epp_ftof.root");
-		    }	    
-		}
+	      if (det == 1) //ftof
+		{
+		  sim_file  == new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epp/ca406_epp_ftof.root");
+		}	    
+	    }
 	      else if ((Z == 18) and (N == 22)) //argon
 		{
 		  if (det == 0) //ctof
@@ -159,131 +156,24 @@ int main(int argc, char ** argv)
 		{
 		  cout << "Please choose a valid target \n";
 		}
-	    }
-	  else 
-	    {
-	      cout << "Please choose 4 or 6 GeV as your beam energy \n";
-	    }
 	}
-      if ( channel == 1 ) //epn
+      else 
 	{
-	  if ((E_beam == 4.) or (E_beam == 4) or (E_beam == 4.0)) //4GeV
-	    {
-	      if ((Z == 1) and (N == 1)) //deuterium
-		{
-		  if (det == 0) //ctof
-		    {
-		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epn/d4_epn_ctof.root"); 
-		    }
-		  if (det == 1) //ftof
-		    {
-		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epn/d4_epn_ftof.root");
-		    }
-		}
-	      else if ((Z == 6) and (N == 6)) //carbon
-		{
-		  if (det == 0) //ctof
-		    {
-		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epn/c4_epn_ctof.root"); 
-		    }
-		  if (det == 1) //ftof
-		    {
-		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epn/c4_epn_ftof.root");
-		    }
-		  
-		}
-	      else if ((Z == 18) and (Z == 22)) //argon
-		{
-		  if (det == 0) //ctof
-		    {
-		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epn/ar4_epn_ctof.root"); 
-		    }
-		  if (det == 1) //ftof
-		    {
-		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epn/ar4_epn_ftof.root");
-		    }
-		}
-	      else
-		{
-		  cout << "Please choose a valid target/beam combination \n";
-		}
-	    }
-	  else if ((E_beam == 6.) or (E_beam == 6) or (E_beam == 6.0)) //6GeV
-	    {
-	      if ((Z == 1) and (N == 1))//deuterium
-		{
-		  if (det == 0) //ctof
-		    {
-		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epn/d6_epn_ctof.root"); 
-		    }
-		  if (det == 1) //ftof
-		    {
-		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epn/d6_epn_ftof.root");
-		    }	    
-		}
-	      else if ((Z == 2) and (N == 2)) //helium
-		{
-		  if (det == 0) //ctof
-		    {
-		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epn/he6_epn_ctof.root"); 
-		    }
-		  if (det == 1) //ftof
-		    {
-		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epn/he6_epn_ftof.root");
-		    }	    
-		}
-	      else if ( ((Z == 6) and (N == 6)) or ((Z == 20) and (N == 28)) or ((Z == 50) and (N == 70)) ) //carbon, calcium 48, tin
-		{
-		  if (det == 0) //ctof
-		    {
-		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epn/c6_epn_ctof.root"); 
-		    }
-		  if (det == 1) //ftof
-		    {
-		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epn/c6_epn_ftof.root");
-		    }	     
-		}
-	      else if ((Z == 20) and (N == 20)) //calcium 40
-		{
-		  if (det == 0) //ctof
-		    {
-		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epn/ca406_epn_ctof.root"); 
-		    }
-		  if (det == 1) //ftof
-		    {
-		      sim_file  == new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epn/ca406_epn_ftof.root");
-		    }	    
-		}
-	      else if ((Z == 18) and (N == 22)) //argon
-		{
-		  if (det == 0) //ctof
-		    {
-		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epn/ar6_epn_ctof.root"); 
-		    }
-		  if (det == 1) //ftof
-		    {
-		      sim_file  = new TFile ("/u/group/clas12/users/rgm/rgm_software/Monitoring/sim_files/epn/ar6_epn_ftof.root");
-		    }	    
-		}
-	      else
-		{
-		  cout << "Please choose a valid target \n";
-		}
-	    }
-	  else 
-	    {
-	      cout << "Please choose 4 or 6 GeV as your beam energy \n";
-	    }
+	  cout << "Please choose 4 or 6 GeV as your beam energy \n";
+	  exit(-2);
 	}
-    
+      
+      cout << "My sim file is " << sim_file << "\n";
+
       ///////////////////
-      ////output files///                                                                                
+      ////output files///                                                                   
       ///////////////////      
       
-      outfile = new TFile (argv[6],"RECREATE");
-      pdffile = argv[7];
-    
-
+      outfile = new TFile (argv[5],"RECREATE");
+      pdffile = argv[6];
+      
+      cout << "My outfile is " << outfile << " and my pdffile is " << pdffile << "\n";
+ 
     }
   else if (argc == 5)
     {
@@ -293,33 +183,91 @@ int main(int argc, char ** argv)
       
       data_file = new TFile  (argv[3]); //data root file                                     
       cout << "My data file is " << argv[3] << "\n";                                    
-
+      
       sim_file  = new TFile (argv[4]); //simulation  ("golden run") root file        
       cout << "My sim file is " << argv[4] <<"\n";
-
-
+      
+      
       ///////////////////
-      ////output files///                                                                                
+      ////output files///                                                                            
       ///////////////////      
       
       outfile = new TFile (argv[1],"RECREATE");
       pdffile = argv[2];
-
-
+      
+      cout << "My outfile is " << outfile << " and my pdffile is " << pdffile << "\n";
     }
-
-
- 
+  
+  
+  
   //////////////////////////////////////////
   ///grab histograms from simulation file///                                                        
   //////////////////////////////////////////
-
+  
   TH1D * sim_xB_SRC = (TH1D*)sim_file->Get("xB_SRC");
+  TH1D * sim_Q2_SRC = (TH1D*)sim_file->Get("Q2_SRC");
+  TH1D * sim_W_SRC = (TH1D*)sim_file->Get("W_SRC"); 
   TH1D * sim_pmiss_SRC = (TH1D*)sim_file->Get("pmiss_SRC");
   TH1D * sim_mmiss_SRC = (TH1D*)sim_file->Get("mmiss_SRC");
 
+  if (!sim_xB_SRC)
+    {
+      cout << "Couldn't get sim_xB_SRC \n";
+      exit(-2);
+    }
+  if (!sim_Q2_SRC)
+    {
+      cout << "Couldn't get sim_Q2_SRC \n";
+      exit(-2);
+    }
+  if (!sim_W_SRC)
+    {
+      cout << "Couldn't get sim_W_SRC \n";
+      exit(-2);
+    }   
+  if (!sim_pmiss_SRC)
+    {
+      cout << "Couldn't get sim_pmiss_SRC \n";
+      exit(-2);
+    }   
+  if (!sim_mmiss_SRC)
+    {
+      cout << "Couldn't get sim_mmiss_SRC \n";
+      exit(-2);
+    }   
+  
+  
   TH1D * sim_p_2_AllRec = (TH1D*)sim_file->Get("p_2_AllRec");
+  TH1D * sim_chiSq_rec_AllRec = (TH1D*)sim_file->Get("chiSq_rec_AllRec");
+  TH1D * sim_vtz_ep_delta_AllRec = (TH1D*)sim_file->Get("vtz_ep_delta_AllRec");
+  TH1D * sim_timediff_p_AllRec = (TH1D*)sim_file->Get("timediff_p_AllRec");
   TH1D * sim_count_AllRec = (TH1D*)sim_file->Get("count_AllRec");
+
+  if (!sim_p_2_AllRec)
+    {
+      cout << "Couldn't get sim_p_2_AllRec \n";
+      exit(-2);
+    }   
+  if (!sim_chiSq_rec_AllRec)
+    {
+      cout << "Couldn't get sim_chiSq_rec_AllRec \n";
+      exit(-2);
+    }   
+  if (!sim_vtz_ep_delta_AllRec)
+    {
+      cout << "Couldn't get sim_vtz_ep_delta_AllRec \n";
+      exit(-2);
+    }   
+  if (!sim_timediff_p_AllRec)
+    {
+      cout << "Couldn't get sim_timediff_p_SRC \n";
+      exit(-2);
+    }   
+  if (!sim_count_AllRec)
+    {
+      cout << "Couldn't get sim_count_AllRec \n";
+      exit(-2);
+    }   
 
   TH1D * sim_p_2_Rec = (TH1D*)sim_file->Get("p_2_Rec");
   TH1D * sim_p_rel_Rec = (TH1D*)sim_file->Get("p_rel_Rec");
@@ -329,14 +277,22 @@ int main(int argc, char ** argv)
   TH1D * sim_p_x_cm_Rec =(TH1D*)sim_file->Get("p_x_cm_Rec");
   TH1D * sim_theta_rel_Rec =(TH1D*)sim_file->Get("theta_rel_Rec");
 
+   
+
+
   ////////////////////////////////////
   ///grab histograms from data file///                             
   ////////////////////////////////////
   TH1D * data_xB_SRC = (TH1D*)data_file->Get("xB_SRC");
+  TH1D * data_Q2_SRC = (TH1D*)data_file->Get("Q2_SRC");
+  TH1D * data_W_SRC = (TH1D*)data_file->Get("W_SRC"); 
   TH1D * data_pmiss_SRC = (TH1D*)data_file->Get("pmiss_SRC");
   TH1D * data_mmiss_SRC = (TH1D*)data_file->Get("mmiss_SRC");
 
   TH1D * data_p_2_AllRec = (TH1D*)data_file->Get("p_2_AllRec");
+  TH1D * data_chiSq_rec_AllRec = (TH1D*)data_file->Get("chiSq_rec_AllRec");
+  TH1D * data_vtz_ep_delta_AllRec = (TH1D*)data_file->Get("vtz_ep_delta_AllRec");
+  TH1D * data_timediff_p_AllRec = (TH1D*)data_file->Get("timediff_p_AllRec");
   TH1D * data_count_AllRec = (TH1D*)data_file->Get("count_AllRec");
 
   TH1D * data_p_2_Rec = (TH1D*)data_file->Get("p_2_Rec");
@@ -358,6 +314,14 @@ int main(int argc, char ** argv)
   double sim_xB_SRC_norm = sim_xB_SRC->Integral(1,n_bins_xB_SRC);
   double data_xB_SRC_norm = data_xB_SRC->Integral(1,n_bins_xB_SRC);
 
+  double n_bins_Q2_SRC = sim_Q2_SRC->GetXaxis()->GetNbins();
+  double sim_Q2_SRC_norm = sim_Q2_SRC->Integral(1,n_bins_Q2_SRC);
+  double data_Q2_SRC_norm = data_Q2_SRC->Integral(1,n_bins_Q2_SRC);
+
+  double n_bins_W_SRC = sim_W_SRC->GetXaxis()->GetNbins();
+  double sim_W_SRC_norm = sim_W_SRC->Integral(1,n_bins_W_SRC);
+  double data_W_SRC_norm = data_W_SRC->Integral(1,n_bins_W_SRC);
+
   double n_bins_pmiss_SRC = sim_pmiss_SRC->GetXaxis()->GetNbins();
   double sim_pmiss_SRC_norm = sim_pmiss_SRC->Integral(1,n_bins_pmiss_SRC);
   double data_pmiss_SRC_norm = data_pmiss_SRC->Integral(1,n_bins_pmiss_SRC);
@@ -370,6 +334,18 @@ int main(int argc, char ** argv)
   double n_bins_p_2_AllRec = sim_p_2_AllRec->GetXaxis()->GetNbins();
   double sim_p_2_AllRec_norm = sim_p_2_AllRec->Integral(1,n_bins_p_2_AllRec);
   double data_p_2_AllRec_norm = data_p_2_AllRec->Integral(1,n_bins_p_2_AllRec);
+
+  double n_bins_chiSq_rec_AllRec = sim_chiSq_rec_AllRec->GetXaxis()->GetNbins();
+  double sim_chiSq_rec_AllRec_norm = sim_chiSq_rec_AllRec->Integral(1,n_bins_chiSq_rec_AllRec);
+  double data_chiSq_rec_AllRec_norm = data_chiSq_rec_AllRec->Integral(1,n_bins_chiSq_rec_AllRec);
+
+  double n_bins_vtz_ep_delta_AllRec = sim_vtz_ep_delta_AllRec->GetXaxis()->GetNbins();
+  double sim_vtz_ep_delta_AllRec_norm = sim_vtz_ep_delta_AllRec->Integral(1,n_bins_vtz_ep_delta_AllRec);
+  double data_vtz_ep_delta_AllRec_norm = data_vtz_ep_delta_AllRec->Integral(1,n_bins_vtz_ep_delta_AllRec);
+
+  double n_bins_timediff_p_AllRec = sim_timediff_p_AllRec->GetXaxis()->GetNbins();
+  double sim_timediff_p_AllRec_norm = sim_timediff_p_AllRec->Integral(1,n_bins_timediff_p_AllRec);
+  double data_timediff_p_AllRec_norm = data_timediff_p_AllRec->Integral(1,n_bins_timediff_p_AllRec);
 
   double n_bins_count_AllRec = sim_count_AllRec->GetXaxis()->GetNbins();
   double sim_count_AllRec_norm = sim_count_AllRec->Integral(1,n_bins_count_AllRec);
@@ -412,11 +388,16 @@ int main(int argc, char ** argv)
   
   //Lead SRC Proton Checks
   sim_xB_SRC->Scale(data_xB_SRC_norm/sim_xB_SRC_norm);
+  sim_Q2_SRC->Scale(data_Q2_SRC_norm/sim_Q2_SRC_norm);
+  sim_W_SRC->Scale(data_W_SRC_norm/sim_W_SRC_norm);
   sim_pmiss_SRC->Scale(data_pmiss_SRC_norm/sim_pmiss_SRC_norm);
   sim_mmiss_SRC->Scale(data_mmiss_SRC_norm/sim_mmiss_SRC_norm);
 
   //Recoil Nucleons
   sim_p_2_AllRec->Scale(data_p_2_AllRec_norm/sim_p_2_AllRec_norm);
+  sim_chiSq_rec_AllRec->Scale(data_chiSq_rec_AllRec_norm/sim_chiSq_rec_AllRec_norm);
+  sim_vtz_ep_delta_AllRec->Scale(data_vtz_ep_delta_AllRec_norm/sim_vtz_ep_delta_AllRec_norm);
+  sim_timediff_p_AllRec->Scale(data_timediff_p_AllRec_norm/sim_timediff_p_AllRec_norm);
   sim_count_AllRec->Scale(data_count_AllRec_norm/sim_count_AllRec_norm);
 
   //Recoil SRC Nucleons
@@ -465,7 +446,7 @@ int main(int argc, char ** argv)
   myText->Clear();
 
 
-  myCanvas->Divide(2,2);
+  myCanvas->Divide(3,2);
   myCanvas->cd(1);
   data_xB_SRC->SetLineColor(1);
   data_xB_SRC->SetMarkerColor(1);
@@ -480,13 +461,27 @@ int main(int argc, char ** argv)
   legend1->AddEntry(sim_xB_SRC, "Simulation","lep");
   legend1->Draw();
   myCanvas->cd(2);
+  data_Q2_SRC->SetLineColor(1);
+  data_Q2_SRC->SetMarkerColor(2);
+  data_Q2_SRC->Draw();
+  sim_Q2_SRC->SetLineColor(1);
+  sim_Q2_SRC->SetMarkerColor(2);
+  sim_Q2_SRC->Draw("SAME");
+  myCanvas->cd(3);
+  data_W_SRC->SetLineColor(1);
+  data_W_SRC->SetMarkerColor(2);
+  data_W_SRC->Draw();
+  sim_W_SRC->SetLineColor(1);
+  sim_W_SRC->SetMarkerColor(2);
+  sim_W_SRC->Draw("SAME");
+  myCanvas->cd(4);
   data_pmiss_SRC->SetLineColor(1);
   data_pmiss_SRC->SetMarkerColor(1); 
   data_pmiss_SRC->Draw();
   sim_pmiss_SRC->SetLineColor(2);
   sim_pmiss_SRC->SetMarkerColor(2);
   sim_pmiss_SRC->Draw("SAME");
-  myCanvas->cd(3);
+  myCanvas->cd(5);
   data_mmiss_SRC->SetLineColor(1);
   data_mmiss_SRC->SetMarkerColor(1);
   data_mmiss_SRC->Draw();
@@ -505,7 +500,7 @@ int main(int argc, char ** argv)
   myText->Print(fileName,"pdf");
   myText->Clear();
 
-  myCanvas->Divide(2,2);
+  myCanvas->Divide(3,2);
   myCanvas->cd(1);
   data_p_2_AllRec->SetLineColor(1);
   data_p_2_AllRec->SetMarkerColor(1);
@@ -520,6 +515,27 @@ int main(int argc, char ** argv)
   legend2->AddEntry(sim_p_2_AllRec, "Simulation","lep");
   legend2->Draw();
   myCanvas->cd(2);
+  data_chiSq_rec_AllRec->SetLineColor(1);
+  data_chiSq_rec_AllRec->SetMarkerColor(1);
+  data_chiSq_rec_AllRec->Draw();
+  sim_chiSq_rec_AllRec->SetLineColor(2);
+  sim_chiSq_rec_AllRec->SetMarkerColor(2);
+  sim_chiSq_rec_AllRec->Draw("SAME");
+  myCanvas->cd(3);
+  data_vtz_ep_delta_AllRec->SetLineColor(1);
+  data_vtz_ep_delta_AllRec->SetMarkerColor(1);
+  data_vtz_ep_delta_AllRec->Draw();
+  sim_vtz_ep_delta_AllRec->SetLineColor(2);
+  sim_vtz_ep_delta_AllRec->SetMarkerColor(2);
+  sim_vtz_ep_delta_AllRec->Draw("SAME");
+  myCanvas->cd(4);
+  data_timediff_p_AllRec->SetLineColor(1);
+  data_timediff_p_AllRec->SetMarkerColor(1);
+  data_timediff_p_AllRec->Draw();
+  sim_timediff_p_AllRec->SetLineColor(2);
+  sim_timediff_p_AllRec->SetMarkerColor(2);
+  sim_timediff_p_AllRec->Draw("SAME");
+  myCanvas->cd(5);
   data_count_AllRec->SetLineColor(1);
   data_count_AllRec->SetMarkerColor(1);
   data_count_AllRec->Draw();
