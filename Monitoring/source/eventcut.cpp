@@ -104,6 +104,9 @@ std::string eventcut::getCutName(cutName thisCut)
     case l_chipid:
       myCutName = "Lead #chi^{2}_{PID}";
       break;
+    case l_timediff:
+      myCutName = "Lead ToF-ToF_{p}";
+      break;
     case l_vtzdiff:
       myCutName = "Vertex Z_{e} - Z_{Lead}";
       break;
@@ -143,6 +146,12 @@ std::string eventcut::getCutName(cutName thisCut)
     case rsrc_chipid:
       myCutName = "Recoil #chi^{2}_{PID}";
       break;
+    case rsrc_timediff:
+      myCutName = "Recoil ToF-ToF_{p}";
+      break;
+    case rsrc_vtzdiff:
+      myCutName = "Vertex Z_{e} - Z_{Rec}";
+      break;
     default:
       myCutName = "Unknown Cut";
       break;
@@ -171,6 +180,7 @@ std::string eventcut::getCutInformation(cutName thisCut)
     case l_theta:
     case l_thetalq:
     case l_chipid:
+    case l_timediff:
     case l_vtzdiff:
     case l_phidiff:
     case lsrc_Q2:
@@ -180,6 +190,8 @@ std::string eventcut::getCutInformation(cutName thisCut)
     case lsrc_loq:
     case rsrc_mom:
     case rsrc_chipid:	  
+    case rsrc_timediff:
+    case rsrc_vtzdiff:	  
       myCutInformation = getCutName(thisCut)+": min="+min+" max="+max;
       break;
     case l_pid:
@@ -243,6 +255,7 @@ void eventcut::set_cuts(char * filename)
 	case l_theta:
 	case l_thetalq:
 	case l_chipid:
+	case l_timediff:
 	case l_vtzdiff:
 	case l_phidiff:
 	case lsrc_Q2:
@@ -252,6 +265,8 @@ void eventcut::set_cuts(char * filename)
 	case lsrc_loq:
 	case rsrc_mom:
 	case rsrc_chipid:
+	case rsrc_timediff:
+	case rsrc_vtzdiff:
 	  std::string::size_type sz;
 	  cutStruct.min = std::stod(cut_values,&sz);
 	  cutStruct.max = std::stod(cut_values.substr(sz));
@@ -408,6 +423,8 @@ cutName eventcut::hashit(std::string cut_name)
   if(cut_name == "l_chipid"){ return l_chipid; }
   if(cut_name == "lead_chipid"){ return l_chipid; }
 
+  if(cut_name == "l_timediff"){ return l_timediff; }
+
   if(cut_name == "l_vtzdiff"){ return l_vtzdiff; }
 
   if(cut_name == "l_phidiff"){ return l_phidiff; }
@@ -449,6 +466,10 @@ cutName eventcut::hashit(std::string cut_name)
 
   if(cut_name == "rsrc_chipid"){ return rsrc_chipid; }
 
+  if(cut_name == "rsrc_timediff"){ return rsrc_timediff; }
+
+  if(cut_name == "rsrc_vtzdiff"){ return rsrc_vtzdiff; }
+
   std::cerr<<"This is an invalid cut:\n"
 	   <<cut_name<<std::endl
 	   <<"Aborting...\n";
@@ -482,6 +503,7 @@ int eventcut::leadnucleoncut(const std::unique_ptr<clas12::clas12reader>& c12)
     if(!l_thetacut(c12,i)){ continue; }
     if(!l_thetalqcut(c12,i)){ continue; }
     if(!l_chipidcut(c12,i)){ continue; }
+    if(!l_timediffcut(c12,i)){ continue; }
     if(!l_vtzdiffcut(c12,i)){ continue; }
     if(!l_phidiffcut(c12,i)){ continue; }
     num_L++;
@@ -515,6 +537,8 @@ int eventcut::recoilSRCnucleoncut(const std::unique_ptr<clas12::clas12reader>& c
     if(!rsrc_scintcut(c12,j)){ continue; }
     if(!rsrc_momcut(c12,j)){ continue; }
     if(!rsrc_chipidcut(c12,j)){ continue; }
+    if(!rsrc_timediffcut(c12,j)){ continue; }
+    if(!rsrc_vtzdiffcut(c12,j)){ continue; }
     num_R++;
     index_R = j;
   }
@@ -625,6 +649,23 @@ bool eventcut::l_chipidcut(const std::unique_ptr<clas12::clas12reader>& c12, int
 {
   auto leadnucleons=c12->getByID(cutmap[l_pid].count);
   return inRange(leadnucleons[i]->par()->getChi2Pid(),l_chipid);  
+}
+bool eventcut::l_timediffcut(const std::unique_ptr<clas12::clas12reader>& c12, int i)
+{
+  auto leadnucleons=c12->getByID(cutmap[l_pid].count);
+
+  double path = leadnucleons[i]->getPath();
+
+  double mom = leadnucleons[i]->getP();
+  double beta_frommom = mom/sqrt(mom*mom + mN*mN);
+  double time_frommom = path / (c*beta_frommom);
+
+  double beta = leadnucleons[i]->par()->getBeta();
+  double time_frombeta = path / (c*beta);
+  
+  double time_diff = time_frombeta-time_frommom;
+
+  return inRange(time_diff,l_timediff);  
 }
 bool eventcut::l_vtzdiffcut(const std::unique_ptr<clas12::clas12reader>& c12, int i)
 {
@@ -806,6 +847,32 @@ bool eventcut::rsrc_chipidcut(const std::unique_ptr<clas12::clas12reader>& c12, 
 {
   auto recoilnucleons=c12->getByID(cutmap[rsrc_pid].count);
   return inRange(recoilnucleons[j]->par()->getChi2Pid(),rsrc_chipid);
+}
+bool eventcut::rsrc_timediffcut(const std::unique_ptr<clas12::clas12reader>& c12, int j)
+{
+  auto recoilnucleons=c12->getByID(cutmap[rsrc_pid].count);
+
+  double path = recoilnucleons[j]->getPath();
+
+  double mom = recoilnucleons[j]->getP();
+  double beta_frommom = mom/sqrt(mom*mom + mN*mN);
+  double time_frommom = path / (c*beta_frommom);
+
+  double beta = recoilnucleons[j]->par()->getBeta();
+  double time_frombeta = path / (c*beta);
+  
+  double time_diff = time_frombeta-time_frommom;
+
+  return inRange(time_diff,rsrc_timediff);
+}
+bool eventcut::rsrc_vtzdiffcut(const std::unique_ptr<clas12::clas12reader>& c12, int j)
+{
+  auto electrons=c12->getByID(11);
+  double vtze = electrons[0]->par()->getVz();  
+  auto leadnucleons=c12->getByID(cutmap[l_pid].count);
+  double vtzr = leadnucleons[j]->par()->getVz();  
+
+  return inRange(vtze-vtzr,rsrc_vtzdiff);
 }
 
 

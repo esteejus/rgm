@@ -28,6 +28,7 @@ using namespace clas12;
 const double c = 29.9792458;
 
 void printProgress(double percentage);
+bool pointsToBand(double theta,double phi,double z_m);
 
 void Usage()
 {
@@ -84,16 +85,25 @@ int main(int argc, char ** argv)
   /////////////////////////////////////
   //Lead Proton Checks
   /////////////////////////////////////
+  TH1D * h_xB_Lead = new TH1D("xB_Lead","x_{B} Lead;x_{B};Counts",100,0.0,2.0);
+  hist_list_1.push_back(h_xB_Lead);
+  TH1D * h_Q2_Lead = new TH1D("Q2_Lead","Q^{2} Lead;Q^{2};Counts",100,0.0,5.0);
+  hist_list_1.push_back(h_Q2_Lead);
+  TH2D * h_xB_Q2_Lead = new TH2D("xB_Q2_Lead","x_{B} vs. Q^{2} Lead;x_{B};Q^{2};Counts",100,0.0,2.0,100,0.0,5.0);
+  hist_list_2.push_back(h_xB_Q2_Lead);
+
   TH1D * h_theta_p_Lead = new TH1D("theta_p_Lead","#theta_{p,Lead};#theta_{p,Lead};Counts",180,0,180);
   hist_list_1.push_back(h_theta_p_Lead);
+  TH1D * h_mom_p_Lead = new TH1D("mom_p_Lead","p_{p,Lead};p_{p,Lead};Counts",100,0,4);
+  hist_list_1.push_back(h_mom_p_Lead);
+  TH1D * h_phi_p_Lead = new TH1D("phi_p_Lead","#phi_{p,Lead};#phi_{p,Lead};Counts",180,-180,180);
+  hist_list_1.push_back(h_phi_p_Lead);
   TH1D * h_theta_pq_Lead = new TH1D("theta_pq_Lead","#theta_{pq} Lead;#theta_{pq};Counts",180,0,90);
   hist_list_1.push_back(h_theta_pq_Lead);
   TH2D * h_mom_theta_p_Lead = new TH2D("mom_theta_p_Lead","#p_{p,Lead} vs. #theta_{p,Lead} ;#p_{p,Lead};#theta_{p,Lead}",100,0,4,100,0,135);
   hist_list_2.push_back(h_mom_theta_p_Lead);
   TH1D * h_phi_e_p_Lead = new TH1D("phi_e_p_Lead","|#phi_{e} - #phi_{p,Lead}|;|#phi_{e} - #phi_{p,Lead}|,Counts",100,120,180);
   hist_list_1.push_back(h_phi_e_p_Lead);
-  TH1D * h_xB_Lead = new TH1D("xB_Lead","x_{B} Lead;x_{B};Counts",100,0.0,2.0);
-  hist_list_1.push_back(h_xB_Lead);
   TH2D * h_vtz_e_vtz_p_Lead = new TH2D("vtz_e_vtz_p_Lead","Electron Z Vertex vs. Proton Z Vertex;vertex e;vertex p",100,-15,15,100,-15,15);
   hist_list_2.push_back(h_vtz_e_vtz_p_Lead);
 
@@ -125,17 +135,26 @@ int main(int argc, char ** argv)
   TH2D * h_mmiss_momT_p_Lead = new TH2D("mmiss_momT_p_Lead","m_{miss} vs. p_{p,T,Lead} Lead;m_{miss};p_{p,T,Lead};Counts",100,0.4,1.4,100,0,2.5);
   hist_list_2.push_back(h_mmiss_momT_p_Lead);
 
+  /////////////////////////////////////
+  //Points to BAND information
+  /////////////////////////////////////
+  TH1D * h_pmiss_BAND = new TH1D("pmiss_BAND","p_{miss} BAND;p_{miss};Counts",100,0,1.5);
+  hist_list_1.push_back(h_pmiss_BAND);
+  TH1D * h_thetamiss_BAND = new TH1D("thetamiss_BAND","#theta_{miss} BAND;#theta_{miss};Counts",100,145,180);
+  hist_list_1.push_back(h_thetamiss_BAND);
+  TH1D * h_mmiss_BAND = new TH1D("mmiss_BAND","m_{miss} BAND;m_{miss};Counts",100,0.4,1.4);
+  hist_list_1.push_back(h_mmiss_BAND);  
 
   /////////////////////////////////////
   //Lead SRC Proton Checks
   /////////////////////////////////////
   TH1D * h_xB_SRC = new TH1D("xB_SRC","x_{B} SRC;x_{B};Counts",100,1.0,2.0);
   hist_list_1.push_back(h_xB_SRC);
-  TH1D * h_Q2_SRC = new TH1D("Q2_SRC","Q^{2} SRC;Q^{2};Counts",100,1.0,3.0);
+  TH1D * h_Q2_SRC = new TH1D("Q2_SRC","Q^{2} SRC;Q^{2};Counts",100,0.0,7.0);
   hist_list_1.push_back(h_Q2_SRC);
   TH1D * h_W_SRC = new TH1D("W_SRC","W SRC;W;Counts",100,0.0,1.0);
   hist_list_1.push_back(h_W_SRC);
-  TH1D * h_pmiss_SRC = new TH1D("pmiss_SRC","p_{miss} SRC;p_{miss};Counts",100,0,1.5);
+  TH1D * h_pmiss_SRC = new TH1D("pmiss_SRC","p_{miss} SRC;p_{miss};Counts",50,0,1.5);
   hist_list_1.push_back(h_pmiss_SRC);
   TH1D * h_mmiss_SRC = new TH1D("mmiss_SRC","m_{miss} SRC;m_{miss};Counts",100,0.4,1.4);
   hist_list_1.push_back(h_mmiss_SRC);
@@ -157,37 +176,64 @@ int main(int argc, char ** argv)
   /////////////////////////////////////
   //Recoil Nucleons
   /////////////////////////////////////
-  TH1D * h_p_2_AllRec = new TH1D("p_2_AllRec","p All Recoils;p_2",50,0,1.5);
-  hist_list_1.push_back(h_p_2_AllRec);
-  TH1D * h_chiSq_rec_AllRec = new TH1D("chiSq_rec_AllRec","#chi^{2}_{rec} All Recoils;#chi^{2}_{rec}",50,-5,5);
-  hist_list_1.push_back(h_chiSq_rec_AllRec);
-  TH1D * h_vtz_ep_delta_AllRec = new TH1D("vtz_ep_delta_AllRec","#Delta Vertex (e^{-} and p_{Rec});#Delta Vertex;Counts",50,-5,5);
-  hist_list_1.push_back(h_vtz_ep_delta_AllRec);
-  TH1D * h_timediff_p_AllRec = new TH1D("timediff_p_AllRec","ToF-ToF_{|p|} ;ToF-ToF_{|p|};Counts",50,-2,2);
-  hist_list_1.push_back(h_timediff_p_AllRec);
-  TH2D * h_mom_beta_rec_AllRec = new TH2D("mom_beta_rec_AllRec","p_{rec} vs. #beta_{rec} ;p_{rec};#beta_{rec}",50,0,4,100,0.7,1);
-  hist_list_2.push_back(h_mom_beta_rec_AllRec);
   TH1D * h_count_AllRec = new TH1D("count_AllRec","Number of Recoils;Multiplicity",5,-0.5,4.5);
   hist_list_1.push_back(h_count_AllRec);
+  TH1D * h_p_rec_AllRec = new TH1D("p_rec_AllRec","p All Recoils;p_{rec}",50,0,3);
+  hist_list_1.push_back(h_p_rec_AllRec);
+  TH1D * h_theta_rec_AllRec = new TH1D("theta_rec_AllRec","Theta All Recoils;#theta_{rec}",100,0,135);
+  hist_list_1.push_back(h_theta_rec_AllRec);
+  TH1D * h_phi_rec_AllRec = new TH1D("phi_rec_AllRec","Phi All Recoils;#phi_{rec}",90,-180,180);
+  hist_list_1.push_back(h_phi_rec_AllRec);
+  TH2D * h_phi_theta_rec_AllRec = new TH2D("phi_theta_rec_AllRec","#phi_{rec} vs. #theta_{rec} ;#phi_{rec};#theta_{rec}",90,-180,180,50,0,135);
+  hist_list_2.push_back(h_phi_theta_rec_AllRec);
+  TH2D * h_mom_theta_rec_AllRec = new TH2D("mom_theta_rec_AllRec","p_{rec} vs. #theta_{rec} ;p_{rec};#theta_{rec}",50,0,3,50,0,135);
+  hist_list_2.push_back(h_mom_theta_rec_AllRec);
+
+  TH1D * h_vtz_rec_AllRec = new TH1D("vtz_rec_AllRec","Proton Z Vertex;vertex;Counts",100,-10,10);
+  hist_list_1.push_back(h_vtz_rec_AllRec);
+  TH1D * h_vtz_erec_delta_AllRec = new TH1D("vtz_erec_delta_AllRec","#Delta Vertex (e^{-} and p_{rec});#Delta Vertex;Counts",50,-5,5);
+  hist_list_1.push_back(h_vtz_erec_delta_AllRec);
+  TH2D * h_vtz_e_vtz_rec_AllRec = new TH2D("vtz_e_vtz_rec_AllRec","Electron Z Vertex vs. Proton Recoil Z Vertex;vertex e;vertex p",100,-10,10,100,-10,10);
+  hist_list_2.push_back(h_vtz_e_vtz_rec_AllRec);
+  TH1D * h_chiSq_rec_AllRec = new TH1D("chiSq_rec_AllRec","#chi^{2}_{rec} All Recoils;#chi^{2}_{rec}",50,-10,10);
+  hist_list_1.push_back(h_chiSq_rec_AllRec);
+  TH1D * h_timediff_rec_AllRec = new TH1D("timediff_rec_AllRec","ToF-ToF_{|p|} Recoils;ToF-ToF_{|p|};Counts",50,-2,2);
+  hist_list_1.push_back(h_timediff_rec_AllRec);
+  TH2D * h_mom_beta_rec_AllRec = new TH2D("mom_beta_rec_AllRec","p_{rec} vs. #beta_{rec} ;p_{rec};#beta_{rec}",50,0,4,100,0.0,1);
+  hist_list_2.push_back(h_mom_beta_rec_AllRec);
+
+  TH2D * h_chiSq_rec_p_rec_AllRec = new TH2D("chiSq_rec_p_rec_AllRec","#chi^{2}_{rec} vs. p_{rec} All Recoils;#chi^{2}_{rec};p_{rec}",100,-20,20,100,0,4);
+  hist_list_2.push_back(h_chiSq_rec_p_rec_AllRec);
+  TH2D * h_timediff_rec_p_rec_AllRec = new TH2D("timediff_rec_p_rec_AllRec","ToF-ToF_{|p|} vs. p_{rec} All Recoils;ToF-ToF_{|p|};p_{rec}",100,-20,20,100,0,4);
+  hist_list_2.push_back(h_timediff_rec_p_rec_AllRec);
+  TH2D * h_chiSq_rec_vtzdiff_rec_AllRec = new TH2D("chiSq_rec_vtzdiff_rec_AllRec","#chi^{2}_{rec} vs. #Delta Vertex All Recoils;#chi^{2}_{rec};#Delta Vertex",100,-20,20,100,-15,15);
+  hist_list_2.push_back(h_chiSq_rec_vtzdiff_rec_AllRec);
+  TH2D * h_chiSq_rec_timediff_rec_AllRec = new TH2D("chiSq_rec_timediff_rec_AllRec","#chi^{2}_{rec} vs. ToF-ToF_{|p|} All Recoils;#chi^{2}_{rec};ToF-ToF_{|p|}",100,-20,20,100,-10,10);
+  hist_list_2.push_back(h_chiSq_rec_vtzdiff_rec_AllRec);
+  TH2D * h_p_rec_vtzdiff_rec_AllRec = new TH2D("p_rec_vtzdiff_rec_AllRec","p_{rec} vs. #Delta Vertex All Recoils;p_{rec};#Delta Vertex",100,0,4,100,-15,15);
+  hist_list_2.push_back(h_p_rec_vtzdiff_rec_AllRec);
+
 
   /////////////////////////////////////
   //Recoil SRC Nucleons
   /////////////////////////////////////
   TH1D * h_p_2_Rec = new TH1D("p_2_Rec","p_{rec};p_{rec};Counts",50,0,1.5);
   hist_list_1.push_back(h_p_2_Rec);
+  TH1D * h_pmiss_Rec = new TH1D("pmiss_Rec","p_{miss} Rec;p_{miss};Counts",50,0,1.5);
+  hist_list_1.push_back(h_pmiss_Rec);
   TH1D * h_p_rel_Rec = new TH1D("p_rel_Rec","p_{rel};p_{rel};Counts",50,0,1.5);
   hist_list_1.push_back(h_p_rel_Rec);
-  TH1D * h_p_cm_Rec = new TH1D("p_cm_Rec","p_{C.M.};p_{C.M.};Counts",50,0,0.5);
+  TH1D * h_p_cm_Rec = new TH1D("p_cm_Rec","p_{C.M.};p_{C.M.};Counts",50,0,2.5);
   hist_list_1.push_back(h_p_cm_Rec);
-  TH1D * h_p_t_cm_Rec = new TH1D("p_t_cm_Rec","p_{t,C.M.};p_{t,C.M.};Counts",50,-0.5,0.5);
+  TH1D * h_p_t_cm_Rec = new TH1D("p_t_cm_Rec","p_{t,C.M.};p_{t,C.M.};Counts",50,-1,1);
   hist_list_1.push_back(h_p_t_cm_Rec);
-  TH1D * h_p_y_cm_Rec = new TH1D("p_y_cm_Rec","p_{y,C.M.};p_{y,C.M.};Counts",50,-0.5,0.5);
+  TH1D * h_p_y_cm_Rec = new TH1D("p_y_cm_Rec","p_{y,C.M.};p_{y,C.M.};Counts",50,-1,1);
   hist_list_1.push_back(h_p_y_cm_Rec);
-  TH1D * h_p_x_cm_Rec = new TH1D("p_x_cm_Rec","p_{x,C.M.};p_{x,C.M.};Counts",50,-0.5,0.5);
+  TH1D * h_p_x_cm_Rec = new TH1D("p_x_cm_Rec","p_{x,C.M.};p_{x,C.M.};Counts",50,-1,1);
   hist_list_1.push_back(h_p_x_cm_Rec);
-  TH1D * h_theta_rel_Rec = new TH1D("theta_rel_Rec","#theta_{rel};#theta_{rel};Counts",45,90,180);
+  TH1D * h_theta_rel_Rec = new TH1D("theta_rel_Rec","#theta_{rel};#theta_{rel};Counts",90,0,180);
   hist_list_1.push_back(h_theta_rel_Rec);
-  TH2D * h_p_cm_theta_rel_Rec = new TH2D("p_cm_theta_rel_Rec","p_{C.M.} vs. #theta_{rel};p_{C.M.};#theta_{rel}",50,0,0.5,45,90,180);
+  TH2D * h_p_cm_theta_rel_Rec = new TH2D("p_cm_theta_rel_Rec","p_{C.M.} vs. #theta_{rel};p_{C.M.};#theta_{rel}",50,0,2.5,90,0,180);
   hist_list_2.push_back(h_p_cm_theta_rel_Rec);
 
 
@@ -256,10 +302,14 @@ int main(int argc, char ** argv)
       double vtz_p = protons[index_L]->par()->getVz();
 
       h_theta_p_Lead->Fill(theta_L,weight);
+      h_mom_p_Lead->Fill(p_L.Mag(),weight);
+      h_phi_p_Lead->Fill(phi_L,weight);
       h_theta_pq_Lead->Fill(theta_Lq,weight);
       h_mom_theta_p_Lead->Fill(p_L.Mag(),theta_L,weight);
       h_phi_e_p_Lead->Fill(phi_diff,weight);
       h_xB_Lead->Fill(xB,weight);
+      h_Q2_Lead->Fill(QSq,weight);
+      h_xB_Q2_Lead->Fill(xB,QSq,weight);
       h_vtz_e_vtz_p_Lead->Fill(vtz_e,vtz_p,weight);
       
       h_pmiss_Lead->Fill(p_miss.Mag(),weight);
@@ -275,6 +325,15 @@ int main(int argc, char ** argv)
       h_mmiss_theta_p_Lead->Fill(mmiss,theta_L,weight);
       h_mmiss_mom_p_Lead->Fill(mmiss,p_L.Mag(),weight);
       h_mmiss_momT_p_Lead->Fill(mmiss,p_L.Perp(),weight);
+
+      
+      if((p_miss.Theta()>(M_PI/2)) && pointsToBand(p_miss.Theta(),p_miss.Phi(),vtz_p)){
+	if(p_miss.Mag()>0.2){
+	  h_pmiss_BAND->Fill(p_miss.Mag(),weight);
+	  h_thetamiss_BAND->Fill(theta_miss,weight);
+	  h_mmiss_BAND->Fill(mmiss,weight);
+	}
+      }
         
   /////////////////////////////////////
   //Lead SRC Proton Checks
@@ -302,18 +361,39 @@ int main(int argc, char ** argv)
       for(int j = 0; j < protons.size(); j++){
 	if(j==index_L){continue;}
 	double mom = protons[j]->getP();
+	double theta = protons[j]->getTheta()*180/M_PI;
+	double phi = protons[j]->getPhi()*180/M_PI;
+	double vtz_p = protons[j]->par()->getVz();
 	double beta_p = protons[j]->par()->getBeta();
 	double path_p = protons[j]->getPath();
 	double beta_frommom_p = mom/sqrt(mom*mom + mN*mN);
 	double time_frommom_p = path_p / (c*beta_frommom_p);
+
+	double chi = protons[j]->par()->getChi2Pid();
+
 	double time_frombeta_p = path_p / (c*beta_p);
 	double time_diff = time_frombeta_p-time_frommom_p;
 
-	h_p_2_AllRec->Fill(mom,weight);
-	h_chiSq_rec_AllRec->Fill(protons[j]->par()->getChi2Pid(),weight);
-	h_vtz_ep_delta_AllRec->Fill(vtz_e-protons[j]->par()->getVz(),weight);
-	h_timediff_p_AllRec->Fill(time_diff,weight);
+	h_p_rec_AllRec->Fill(mom,weight);
+	h_theta_rec_AllRec->Fill(theta,weight);
+	h_phi_rec_AllRec->Fill(phi,weight);
+	h_phi_theta_rec_AllRec->Fill(phi,theta,weight);
+	h_mom_theta_rec_AllRec->Fill(mom,theta,weight);
+
+	h_vtz_rec_AllRec->Fill(vtz_p,weight);
+	h_vtz_erec_delta_AllRec->Fill(vtz_e-vtz_p,weight);
+	h_vtz_e_vtz_rec_AllRec->Fill(vtz_e,vtz_p,weight);
+	h_chiSq_rec_AllRec->Fill(chi,weight);
+	h_timediff_rec_AllRec->Fill(time_diff,weight);
 	h_mom_beta_rec_AllRec->Fill(protons[j]->getP(),protons[j]->par()->getBeta(),weight);
+
+
+	h_chiSq_rec_p_rec_AllRec->Fill(chi,mom,weight);
+	h_timediff_rec_p_rec_AllRec->Fill(time_diff,mom,weight);
+	h_chiSq_rec_vtzdiff_rec_AllRec->Fill(chi,vtz_e-vtz_p,weight);
+	h_chiSq_rec_timediff_rec_AllRec->Fill(chi,time_diff,weight);
+	h_p_rec_vtzdiff_rec_AllRec->Fill(mom,vtz_e-vtz_p,weight);
+	
       }
       h_count_AllRec->Fill(protons.size()-1,weight);
 
@@ -322,6 +402,7 @@ int main(int argc, char ** argv)
   /////////////////////////////////////
       int index_R = myCut.recoilSRCnucleoncut(c12,index_L);
       if(index_R < 0){ continue; }
+      //h_vtz_e_vtz_rec_AllRec->Fill(vtz_e,protons[index_R]->par()->getVz(),weight);      
       TVector3 p_2;
       p_2.SetMagThetaPhi(protons[index_R]->getP(),protons[index_R]->getTheta(),protons[index_R]->getPhi());
       TVector3 p_rel = p_1-p_2;
@@ -334,8 +415,8 @@ int main(int argc, char ** argv)
       TVector3 vy = p_2.Cross(p_q).Unit();
       TVector3 vx = vt.Cross(vy);
       
-      
       h_p_2_Rec->Fill(protons[index_R]->getP(),weight);
+      h_pmiss_Rec->Fill(p_miss.Mag(),weight);
       h_p_rel_Rec->Fill(p_rel.Mag(),weight);
       h_p_cm_Rec->Fill(p_cm.Mag(),weight);
       h_p_t_cm_Rec->Fill(p_cm.Dot(vt),weight);
@@ -346,14 +427,6 @@ int main(int argc, char ** argv)
       
   }
   cout<<counter<<endl;
-
-  outFile->cd();
-  for(int i=0; i<hist_list_1.size(); i++){
-    hist_list_1[i]->Write();
-  }
-  for(int i=0; i<hist_list_2.size(); i++){
-    hist_list_2[i]->Write();
-  }
 
 
   /////////////////////////////////////////////////////
@@ -392,17 +465,27 @@ int main(int argc, char ** argv)
 
   myCanvas->Divide(2,3);
   myCanvas->cd(1);
+  h_xB_Lead->Draw();
+  myCanvas->cd(2);
+  h_Q2_Lead->Draw();
+  myCanvas->cd(3);
+  h_xB_Q2_Lead->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(2,3);
+  myCanvas->cd(1);
   h_theta_p_Lead->Draw();
   myCanvas->cd(2);
-  h_theta_pq_Lead->Draw();
+  h_mom_p_Lead->Draw();
   myCanvas->cd(3);
-  h_mom_theta_p_Lead->Draw("colz");
+  h_phi_p_Lead->Draw();
   myCanvas->cd(4);
-  h_phi_e_p_Lead->Draw();
+  h_theta_pq_Lead->Draw();
   myCanvas->cd(5);
-  h_xB_Lead->Draw();
+  h_mom_theta_p_Lead->Draw("colz");
   myCanvas->cd(6);
-  h_vtz_e_vtz_p_Lead->Draw("colz");
+  h_phi_e_p_Lead->Draw();
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
@@ -415,6 +498,8 @@ int main(int argc, char ** argv)
   h_xB_theta_1q_Lead->Draw("colz");
   myCanvas->cd(4);
   h_Loq_theta_1q_Lead->Draw("colz");
+  myCanvas->cd(5);
+  h_vtz_e_vtz_p_Lead->Draw("colz");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
@@ -443,6 +528,26 @@ int main(int argc, char ** argv)
   myCanvas->Clear();
 
   /////////////////////////////////////
+  //Points to BAND information
+  /////////////////////////////////////
+  myText->cd();
+  text.DrawLatex(0.2,0.9,"(e,e'p_{Lead}->BAND) Cuts:");
+  text.DrawLatex(0.2,0.8,"(e,e'p_{Lead}) Cuts");
+  text.DrawLatex(0.2,0.7,"Lead Points to BAND");
+  myText->Print(fileName,"pdf");
+  myText->Clear();
+
+  myCanvas->Divide(2,3);
+  myCanvas->cd(1);
+  h_pmiss_BAND->Draw();
+  myCanvas->cd(2);
+  h_thetamiss_BAND->Draw();
+  myCanvas->cd(3);
+  h_mmiss_BAND->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  /////////////////////////////////////
   //Lead SRC Proton Checks
   /////////////////////////////////////
   myText->cd();
@@ -465,11 +570,11 @@ int main(int argc, char ** argv)
   myCanvas->cd(2);
   h_Q2_SRC->Draw();
   myCanvas->cd(3);
-  h_W_SRC->Draw();
+  h_mmiss_SRC->Draw();
   myCanvas->cd(4);
   h_pmiss_SRC->Draw();
   myCanvas->cd(5);
-  h_mmiss_SRC->Draw();
+  h_W_SRC->Draw();
   myCanvas->cd(6);
   h_pmiss_theta_miss_SRC->Draw("colz");
   myCanvas->Print(fileName,"pdf");
@@ -504,17 +609,47 @@ int main(int argc, char ** argv)
 
   myCanvas->Divide(2,3);
   myCanvas->cd(1);
-  h_p_2_AllRec->Draw();
-  myCanvas->cd(2);
-  h_chiSq_rec_AllRec->Draw();
-  myCanvas->cd(3);
-  h_vtz_ep_delta_AllRec->Draw();
-  myCanvas->cd(4);
-  h_timediff_p_AllRec->Draw();
-  myCanvas->cd(5);
-  h_mom_beta_rec_AllRec->Draw("colz");
-  myCanvas->cd(6);
   h_count_AllRec->Draw();
+  myCanvas->cd(2);
+  h_p_rec_AllRec->Draw();
+  myCanvas->cd(3);
+  h_theta_rec_AllRec->Draw();
+  myCanvas->cd(4);
+  h_phi_rec_AllRec->Draw();
+  myCanvas->cd(5);
+  h_phi_theta_rec_AllRec->Draw("colz");
+  myCanvas->cd(6);
+  h_mom_theta_rec_AllRec->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(2,3);
+  myCanvas->cd(1);
+  h_vtz_rec_AllRec->Draw();
+  myCanvas->cd(2);
+  h_vtz_erec_delta_AllRec->Draw();
+  myCanvas->cd(3);
+  h_vtz_e_vtz_rec_AllRec->Draw("colz");
+  myCanvas->cd(4);
+  h_chiSq_rec_AllRec->Draw("colz");
+  myCanvas->cd(5);
+  h_timediff_rec_AllRec->Draw();
+  myCanvas->cd(6);
+  h_mom_beta_rec_AllRec->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(2,3);
+  myCanvas->cd(1);
+  h_chiSq_rec_p_rec_AllRec->Draw("colz");
+  myCanvas->cd(2);
+  h_timediff_rec_p_rec_AllRec->Draw("colz");
+  myCanvas->cd(3);
+  h_chiSq_rec_vtzdiff_rec_AllRec->Draw("colz");
+  myCanvas->cd(4);
+  h_chiSq_rec_timediff_rec_AllRec->Draw("colz");
+  myCanvas->cd(5);
+  h_p_rec_vtzdiff_rec_AllRec->Draw("colz");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
@@ -530,6 +665,7 @@ int main(int argc, char ** argv)
     myCut.print_cut_onPDF(text,rsrc_pid,line);
     myCut.print_cut_onPDF(text,rsrc_mom,line);
     myCut.print_cut_onPDF(text,rsrc_chipid,line);
+    myCut.print_cut_onPDF(text,rsrc_vtzdiff,line);
   }
   myText->Print(fileName,"pdf");
   myText->Clear();
@@ -555,6 +691,14 @@ int main(int argc, char ** argv)
   h_theta_rel_Rec->Draw();
   myCanvas->cd(2);
   h_p_cm_theta_rel_Rec->Draw("colz");
+  myCanvas->cd(3);
+  h_pmiss_Rec->Draw();
+  myCanvas->cd(4);
+  TH1D * num = (TH1D*)h_pmiss_Rec->Clone("epp/ep");
+  TH1D * den = (TH1D*)h_pmiss_SRC->Clone("clone");
+  num->Divide(den);
+  hist_list_1.push_back(num);
+  num->Draw();
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
@@ -563,6 +707,13 @@ int main(int argc, char ** argv)
   sprintf(fileName,"%s]",pdfFile);
   myCanvas->Print(fileName,"pdf");
 
+  outFile->cd();
+  for(int i=0; i<hist_list_1.size(); i++){
+    hist_list_1[i]->Write();
+  }
+  for(int i=0; i<hist_list_2.size(); i++){
+    hist_list_2[i]->Write();
+  }
   outFile->Close();
 }
 
@@ -573,5 +724,52 @@ void printProgress(double percentage) {
   int rpad = PBWIDTH - lpad;
   printf("\r%3d%% [%.*s%*s]", val, lpad, PBSTR, rpad, "");
   fflush(stdout);
+}
+
+bool pointsToBand(double theta,double phi,double z_m){
+
+  double inset = 0;//inset distance from edges of BAND in [cm]
+  double z = z_m;
+
+  // Numbers taken from band/src/main/java/org/jlab/rec/band/constants/Parameters.java  
+  double thickness  = 7.3;                                // thickness of each bar (cm)
+  double layerGap[] = {7.94, 7.62, 7.94, 7.62, 7.3};      // gap between center of neighbouring layers (cm), 1-2, 2-3, 3-4, 4-5, 5-6                                                 
+
+  // Numbers taken from clas-band-calib/bin/src/org/clas/fcmon/band/BANDConstants.java  
+  double bandlen[]  = {163.7,201.9,51.2,51.2,201.9};
+
+  // Distance from ideal target to upstream end of BAND                                 
+  // (from BAND survey report, 02/18/2019)                                              
+  double zUpst = (-302.69-302.69-302.57-302.64)/4.; // [cm]                             
+
+  // Distance from ideal target to downstream end of layer 5                            
+  double zDown = (zUpst + 5*thickness) - z_m;
+
+  double rho   = zDown/cos(theta);
+  double xDown = rho*sin(theta)*cos(phi);
+  double yDown = rho*sin(theta)*sin(phi);
+
+  double globalX = (-240.5-240.5+241.0+243.7)/4./10.; // [cm] --> Not using this yet (need to make sure we have the right coordinate system)                                         
+  double globalY = (-211.0+228.1-210.6+228.1)/4./10.; // [cm]
+
+  // Sector boundaries                                                                  
+  double topSec1  = globalY + 13*thickness - inset;
+  double topSec2  = globalY + 10*thickness;
+  double topSec34 = globalY +  3*thickness;
+  double topSec5  = globalY -  3*thickness;
+  double downSec5 = globalY -  5*thickness + inset;
+
+  if( yDown >= topSec1 || yDown <= downSec5 ) return 0;
+
+  if(
+     (yDown < topSec1  && yDown >= topSec2  && fabs(xDown) < bandlen[0]/2. - inset) ||
+     ( (yDown < topSec2  && yDown >= topSec34 && fabs(xDown) < bandlen[1]/2. - inset) &&   !(yDown >= topSec2 - inset && yDown < topSec2  && fabs(xDown) > (bandlen[0]/2.  - inset) ) && !(yDown >= topSec34 && yDown < topSec34 + inset && abs(xDown) < bandlen[1]/2 - bandlen[2] + inset) ) ||
+     (yDown < topSec34 && yDown >= topSec5  && fabs(xDown) < bandlen[1]/2.- inset && fabs(xDown) > (bandlen[1]/2.-bandlen[2] + inset)) ||
+     ( (yDown < topSec5  && yDown >= downSec5 && fabs(xDown) < bandlen[4]/2. - inset) && !(yDown >= topSec5 -inset && yDown < topSec5 + inset && abs(xDown) < bandlen[1]/2 - bandlen[2] + inset) )
+
+      ){
+    return 1;
+    }
+  return 0;
 }
 

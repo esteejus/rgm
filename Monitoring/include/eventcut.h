@@ -25,7 +25,7 @@
 #include "TF1.h"
 #include "TCanvas.h"
 
-enum cutName{e_cuts,e_nphe,e_calv,e_calw,e_SF,e_mom,e_vtze,l_cuts,l_pid,l_scint,l_theta,l_thetalq,l_chipid,l_vtzdiff,l_phidiff,lsrc_cuts,lsrc_Q2,lsrc_xB,lsrc_pmiss,lsrc_mmiss,lsrc_loq,rsrc_cuts,rsrc_pid,rsrc_scint,rsrc_mom,rsrc_chipid,fake};
+enum cutName{e_cuts,e_nphe,e_calv,e_calw,e_SF,e_mom,e_vtze,l_cuts,l_pid,l_scint,l_theta,l_thetalq,l_chipid,l_timediff,l_vtzdiff,l_phidiff,lsrc_cuts,lsrc_Q2,lsrc_xB,lsrc_pmiss,lsrc_mmiss,lsrc_loq,rsrc_cuts,rsrc_pid,rsrc_scint,rsrc_mom,rsrc_chipid,rsrc_timediff,rsrc_vtzdiff,fake};
 
 struct cutInfo{
   bool docut;
@@ -80,6 +80,7 @@ class eventcut{
   bool l_thetacut(const std::unique_ptr<clas12::clas12reader>& c12, int i);
   bool l_thetalqcut(const std::unique_ptr<clas12::clas12reader>& c12, int i);
   bool l_chipidcut(const std::unique_ptr<clas12::clas12reader>& c12, int i);
+  bool l_timediffcut(const std::unique_ptr<clas12::clas12reader>& c12, int i);
   bool l_vtzdiffcut(const std::unique_ptr<clas12::clas12reader>& c12, int i);
   bool l_phidiffcut(const std::unique_ptr<clas12::clas12reader>& c12, int i);
 
@@ -94,10 +95,13 @@ class eventcut{
   bool rsrc_scintcut(const std::unique_ptr<clas12::clas12reader>& c12,int j);
   bool rsrc_momcut(const std::unique_ptr<clas12::clas12reader>& c12,int j);
   bool rsrc_chipidcut(const std::unique_ptr<clas12::clas12reader>& c12,int j);
+  bool rsrc_timediffcut(const std::unique_ptr<clas12::clas12reader>& c12,int j);
+  bool rsrc_vtzdiffcut(const std::unique_ptr<clas12::clas12reader>& c12,int j);
 
   //General Cut
   bool inRange(double x, cutName thisCut);
 
+  const double c = 29.9792458;
   const double mN = 0.939;
   const double mD = 1.8756;
   const int proton_number = 2212;

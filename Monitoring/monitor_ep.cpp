@@ -169,20 +169,20 @@ int main(int argc, char ** argv)
   /////////////////////////////////////
   TH2D * h_mom_beta_hadplus_FTOF = new TH2D("mom_beta_hadplus_FTOF","p vs. #beta FTOF (All +hadrons);p;#beta",100,0,4,100,0.3,1.2);
   hist_list_2.push_back(h_mom_beta_hadplus_FTOF);
-  TH2D * h_mom_beta_hadplus_CTOF = new TH2D("mom_beta_hadplus_CTOF","p vs. #beta CTOF (All +hadrons);p;#beta",100,0,4,100,0.0,20);
+  TH2D * h_mom_beta_hadplus_CTOF = new TH2D("mom_beta_hadplus_CTOF","p vs. #beta CTOF (All +hadrons);p;#beta",100,0,4,100,0.0,5);
   hist_list_2.push_back(h_mom_beta_hadplus_CTOF);
-  TH2D * h_mom_beta_hadplus_CTOF_zoom = new TH2D("mom_beta_hadplus_CTOF_zoom","p vs. #beta CTOF (All +hadrons);p;#beta",100,0,4,100,0.0,4);
+  TH2D * h_mom_beta_hadplus_CTOF_zoom = new TH2D("mom_beta_hadplus_CTOF_zoom","p vs. #beta CTOF (All +hadrons);p;#beta",100,0,4,100,0.0,1.2);
   hist_list_2.push_back(h_mom_beta_hadplus_CTOF_zoom);
 
-  TH2D * h_mom_beta_proton_CTOF_zoom = new TH2D("mom_beta_proton_CTOF","p vs. #beta CTOF (Protons);p;#beta",100,0,4,100,0.0,4);
+  TH2D * h_mom_beta_proton_CTOF_zoom = new TH2D("mom_beta_proton_CTOF","p vs. #beta CTOF (Protons);p;#beta",100,0,4,100,0.0,1.2);
   hist_list_2.push_back(h_mom_beta_proton_CTOF_zoom);
-  TH2D * h_mom_beta_pion_CTOF_zoom = new TH2D("mom_beta_pion_CTOF","p vs. #beta CTOF (Pions);p;#beta",100,0,4,100,0.0,4);
+  TH2D * h_mom_beta_pion_CTOF_zoom = new TH2D("mom_beta_pion_CTOF","p vs. #beta CTOF (Pions);p;#beta",100,0,4,100,0.0,1.2);
   hist_list_2.push_back(h_mom_beta_pion_CTOF_zoom);
-  TH2D * h_mom_beta_kaon_CTOF_zoom = new TH2D("mom_beta_kaon_CTOF","p vs. #beta CTOF (Kaons);p;#beta",100,0,4,100,0.0,4);
+  TH2D * h_mom_beta_kaon_CTOF_zoom = new TH2D("mom_beta_kaon_CTOF","p vs. #beta CTOF (Kaons);p;#beta",100,0,4,100,0.0,1.2);
   hist_list_2.push_back(h_mom_beta_kaon_CTOF_zoom);
-  TH2D * h_mom_beta_deuteron_CTOF_zoom = new TH2D("mom_beta_deuteron_CTOF","p vs. #beta CTOF (Deuterons);p;#beta",100,0,4,100,0.0,4);
+  TH2D * h_mom_beta_deuteron_CTOF_zoom = new TH2D("mom_beta_deuteron_CTOF","p vs. #beta CTOF (Deuterons);p;#beta",100,0,4,100,0.0,1.2);
   hist_list_2.push_back(h_mom_beta_deuteron_CTOF_zoom);
-  TH2D * h_mom_beta_0_CTOF_zoom = new TH2D("mom_beta_0_CTOF","p vs. #beta CTOF (PID=0);p;#beta",100,0,4,100,0.0,4);
+  TH2D * h_mom_beta_0_CTOF_zoom = new TH2D("mom_beta_0_CTOF","p vs. #beta CTOF (PID=0);p;#beta",100,0,4,100,-1.0,1.2);
   hist_list_2.push_back(h_mom_beta_0_CTOF_zoom);
 
   /////////////////////////////////////
@@ -715,6 +715,7 @@ int main(int argc, char ** argv)
   myCanvas->Divide(2,3);
   myCanvas->cd(1);
   h_W->Draw();
+  myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
   /////////////////////////////////////
