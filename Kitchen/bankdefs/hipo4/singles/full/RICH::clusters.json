@@ -1,0 +1,85 @@
+[
+    {
+        "entries": [
+            {
+                "info": "Cluster id", 
+                "name": "id", 
+                "type": "S"
+            }, 
+            {
+                "info": "Cluster size", 
+                "name": "size", 
+                "type": "S"
+            }, 
+            {
+                "info": "Cluster sector", 
+                "name": "sector", 
+                "type": "S"
+            }, 
+            {
+                "info": "Cluster tile", 
+                "name": "tile", 
+                "type": "S"
+            }, 
+            {
+                "info": "Cluster pmt", 
+                "name": "pmt", 
+                "type": "S"
+            }, 
+            {
+                "info": "Cluster charge", 
+                "name": "charge", 
+                "type": "F"
+            }, 
+            {
+                "info": "Cluster time", 
+                "name": "time", 
+                "type": "F"
+            }, 
+            {
+                "info": "Cluster rawtime", 
+                "name": "rawtime", 
+                "type": "F"
+            }, 
+            {
+                "info": "Cluster x", 
+                "name": "x", 
+                "type": "F"
+            }, 
+            {
+                "info": "Cluster y", 
+                "name": "y", 
+                "type": "F"
+            }, 
+            {
+                "info": "Cluster z", 
+                "name": "z", 
+                "type": "F"
+            }, 
+            {
+                "info": "Cluster wtime", 
+                "name": "wtime", 
+                "type": "F"
+            }, 
+            {
+                "info": "Cluster wx", 
+                "name": "wx", 
+                "type": "F"
+            }, 
+            {
+                "info": "Cluster wy", 
+                "name": "wy", 
+                "type": "F"
+            }, 
+            {
+                "info": "Cluster wz", 
+                "name": "wz", 
+                "type": "F"
+            }
+        ], 
+        "group": 21800, 
+        "info": "Reconstructed Clusters in RICH", 
+        "item": 22, 
+        "name": "RICH::clusters"
+    }
+]

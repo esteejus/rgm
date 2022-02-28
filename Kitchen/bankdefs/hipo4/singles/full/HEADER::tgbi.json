@@ -1,0 +1,35 @@
+[
+    {
+        "entries": [
+            {
+                "info": "level1 trigger latch word (16 bits)", 
+                "name": "latch1", 
+                "type": "I"
+            }, 
+            {
+                "info": "helicity interval count", 
+                "name": "helicity_scaler", 
+                "type": "I"
+            }, 
+            {
+                "info": "interrupt time from microsec clock", 
+                "name": "interrupt_time", 
+                "type": "I"
+            }, 
+            {
+                "info": "level2 trigger latch word (16 bits)", 
+                "name": "latch2", 
+                "type": "I"
+            }, 
+            {
+                "info": "level3 trigger word (32 bits)", 
+                "name": "level3", 
+                "type": "I"
+            }
+        ], 
+        "group": 31000, 
+        "info": "TGBI Bank", 
+        "item": 43, 
+        "name": "HEADER::tgbi"
+    }
+]

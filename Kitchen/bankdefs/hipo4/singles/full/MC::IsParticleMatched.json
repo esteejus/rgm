@@ -1,0 +1,40 @@
+[
+    {
+        "entries": [
+            {
+                "info": "MC Particle index, as in tid", 
+                "name": "mcTindex", 
+                "type": "S"
+            }, 
+            {
+                "info": "REC particle index", 
+                "name": "pindex", 
+                "type": "S"
+            }, 
+            {
+                "info": "layers of tracker (mostly)  detectors that a given MCParticle hit. Each layer corresponds to a specific bit in this variable", 
+                "name": "MCLayersTrk", 
+                "type": "L"
+            }, 
+            {
+                "info": "layers of detectors (non tracker) that a givem MCParticle hit. Each layer corresponds to a specific bit in this variable", 
+                "name": "MCLayersNeut", 
+                "type": "L"
+            }, 
+            {
+                "info": "layers of tracker detectors (mostly) that, the matched RecParticle picked hits from", 
+                "name": "RecLayersTrk", 
+                "type": "L"
+            }, 
+            {
+                "info": "layers of detectors (mostly) that, the matched RecParticle picked hits from", 
+                "name": "RecLayersNeut", 
+                "type": "L"
+            }
+        ], 
+        "group": 40, 
+        "info": "MC Particle - Rec Track matching.", 
+        "item": 5, 
+        "name": "MC::IsParticleMatched"
+    }
+]

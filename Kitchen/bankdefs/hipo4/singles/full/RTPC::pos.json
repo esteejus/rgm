@@ -1,0 +1,50 @@
+[
+    {
+        "entries": [
+            {
+                "info": "step", 
+                "name": "step", 
+                "type": "I"
+            }, 
+            {
+                "info": "time (ns)", 
+                "name": "time", 
+                "type": "F"
+            }, 
+            {
+                "info": "energy", 
+                "name": "energy", 
+                "type": "F"
+            }, 
+            {
+                "info": "x position (mm)", 
+                "name": "posx", 
+                "type": "F"
+            }, 
+            {
+                "info": "y position (mm)", 
+                "name": "posy", 
+                "type": "F"
+            }, 
+            {
+                "info": "z position (mm)", 
+                "name": "posz", 
+                "type": "F"
+            }, 
+            {
+                "info": "phi (rad)", 
+                "name": "phi", 
+                "type": "F"
+            }, 
+            {
+                "info": "track id", 
+                "name": "tid", 
+                "type": "I"
+            }
+        ], 
+        "group": 21900, 
+        "info": "Digitized bank for the Radial TPC", 
+        "item": 14, 
+        "name": "RTPC::pos"
+    }
+]

@@ -1,0 +1,100 @@
+[
+    {
+        "entries": [
+            {
+                "info": "id of the coincidence hit", 
+                "name": "id", 
+                "type": "S"
+            }, 
+            {
+                "info": "sector of BAND", 
+                "name": "sector", 
+                "type": "B"
+            }, 
+            {
+                "info": "layer or column id of BAND", 
+                "name": "layer", 
+                "type": "B"
+            }, 
+            {
+                "info": "paddle or row id of BAND", 
+                "name": "component", 
+                "type": "S"
+            }, 
+            {
+                "info": "Geometric mean of L and R ADC", 
+                "name": "energy", 
+                "type": "F"
+            }, 
+            {
+                "info": "Meantime from TDC from L and R hit (ns)", 
+                "name": "time", 
+                "type": "F"
+            }, 
+            {
+                "info": "X coor (cm) of coincidence hit", 
+                "name": "x", 
+                "type": "F"
+            }, 
+            {
+                "info": "Y coor (cm) of coincidence hit", 
+                "name": "y", 
+                "type": "F"
+            }, 
+            {
+                "info": "Z coor (cm) of coincidence hit", 
+                "name": "z", 
+                "type": "F"
+            }, 
+            {
+                "info": "X coor uncertainty (cm) of coincidence hit", 
+                "name": "ex", 
+                "type": "F"
+            }, 
+            {
+                "info": "Y coor uncertainty (cm) of coincidence hit", 
+                "name": "ey", 
+                "type": "F"
+            }, 
+            {
+                "info": "Z coor uncertainty (cm) of coincidence hit", 
+                "name": "ez", 
+                "type": "F"
+            }, 
+            {
+                "info": "Meantime from FADC from L and R hit (ns)", 
+                "name": "timeFadc", 
+                "type": "F"
+            }, 
+            {
+                "info": "Calibrated time difference of L and R on a bar(ns) from TDC", 
+                "name": "difftime", 
+                "type": "F"
+            }, 
+            {
+                "info": "Calibrated time difference of L and R on a bar(ns) from FADC", 
+                "name": "difftimeFadc", 
+                "type": "F"
+            }, 
+            {
+                "info": "index of rawhit from Left PMT, starts at zero", 
+                "name": "indexLpmt", 
+                "type": "S"
+            }, 
+            {
+                "info": "index of rawhit from Right PMT, starts at zero", 
+                "name": "indexRpmt", 
+                "type": "S"
+            }, 
+            {
+                "info": "status of the hit", 
+                "name": "status", 
+                "type": "S"
+            }
+        ], 
+        "group": 22100, 
+        "info": "reconstructed coincidence hits from BAND", 
+        "item": 21, 
+        "name": "BAND::hits"
+    }
+]

@@ -1,0 +1,25 @@
+[
+    {
+        "entries": [
+            {
+                "info": "Beam charge, integrated from beginning of run, DAQ-gated (nano-Coulomb)", 
+                "name": "fcupgated", 
+                "type": "F"
+            }, 
+            {
+                "info": "Beam charge, integrated from beginning of run, ungated (nano-Coulomb)", 
+                "name": "fcup", 
+                "type": "F"
+            }, 
+            {
+                "info": "DAQ livetime during one scaler period", 
+                "name": "livetime", 
+                "type": "F"
+            }
+        ], 
+        "group": 10000, 
+        "info": "Run-integrated, analyzed scalers.", 
+        "item": 14, 
+        "name": "RUN::scaler"
+    }
+]

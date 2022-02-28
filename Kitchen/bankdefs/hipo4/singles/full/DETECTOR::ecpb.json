@@ -1,0 +1,95 @@
+[
+    {
+        "entries": [
+            {
+                "info": "hit sector", 
+                "name": "sector", 
+                "type": "B"
+            }, 
+            {
+                "info": "whole_hit_ID", 
+                "name": "clusterid", 
+                "type": "B"
+            }, 
+            {
+                "info": "total  energy of the hit", 
+                "name": "etot", 
+                "type": "F"
+            }, 
+            {
+                "info": "inner  energy of the hit", 
+                "name": "ein", 
+                "type": "F"
+            }, 
+            {
+                "info": "outter energy of the hit", 
+                "name": "eout", 
+                "type": "F"
+            }, 
+            {
+                "info": "time of the hit", 
+                "name": "time", 
+                "type": "F"
+            }, 
+            {
+                "info": "path of the hit", 
+                "name": "path", 
+                "type": "F"
+            }, 
+            {
+                "info": "x coordinate of the hit", 
+                "name": "x", 
+                "type": "F"
+            }, 
+            {
+                "info": "y coordinate of the hit", 
+                "name": "y", 
+                "type": "F"
+            }, 
+            {
+                "info": "z coordinate of the hit", 
+                "name": "z", 
+                "type": "F"
+            }, 
+            {
+                "info": "second moment of hit pattern", 
+                "name": "m2_hit", 
+                "type": "F"
+            }, 
+            {
+                "info": "third moment of hit pattern", 
+                "name": "m3_hit", 
+                "type": "F"
+            }, 
+            {
+                "info": "fourth moment of hit pattern", 
+                "name": "m4_hit", 
+                "type": "F"
+            }, 
+            {
+                "info": "10000*UI+100*VI+WI", 
+                "name": "innstr", 
+                "type": "I"
+            }, 
+            {
+                "info": "10000*UO+100*VO+WO", 
+                "name": "outstr", 
+                "type": "I"
+            }, 
+            {
+                "info": "quality measure of geometrical tracking", 
+                "name": "chi2", 
+                "type": "F"
+            }, 
+            {
+                "info": "Status word", 
+                "name": "status", 
+                "type": "I"
+            }
+        ], 
+        "group": 31000, 
+        "info": "EC detector bank", 
+        "item": 31, 
+        "name": "DETECTOR::ecpb"
+    }
+]

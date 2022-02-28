@@ -1,0 +1,70 @@
+[
+    {
+        "entries": [
+            {
+                "info": "id of the coincidence hit", 
+                "name": "id", 
+                "type": "S"
+            }, 
+            {
+                "info": "sector of BAND", 
+                "name": "sector", 
+                "type": "B"
+            }, 
+            {
+                "info": "layer or column id of BAND", 
+                "name": "layer", 
+                "type": "B"
+            }, 
+            {
+                "info": "paddle or row id of BAND", 
+                "name": "component", 
+                "type": "S"
+            }, 
+            {
+                "info": "side of bar (L = 0 and R = 1)", 
+                "name": "side", 
+                "type": "S"
+            }, 
+            {
+                "info": "Raw ADC from FADC", 
+                "name": "adc", 
+                "type": "F"
+            }, 
+            {
+                "info": "ADC ampl from FADC", 
+                "name": "ampl", 
+                "type": "F"
+            }, 
+            {
+                "info": "Raw Time (ns) from TDC", 
+                "name": "time", 
+                "type": "F"
+            }, 
+            {
+                "info": "Raw Time (ns) from FADC", 
+                "name": "timeFadc", 
+                "type": "F"
+            }, 
+            {
+                "info": "Raw Time (ns) from TDC corrected for trigger phase", 
+                "name": "timeCorr", 
+                "type": "F"
+            }, 
+            {
+                "info": "index to raw information in BAND::TDC bank", 
+                "name": "indexTdc", 
+                "type": "S"
+            }, 
+            {
+                "info": "index to raw information in BAND::ADC bank", 
+                "name": "indexAdc", 
+                "type": "S"
+            }
+        ], 
+        "group": 22100, 
+        "info": "single PMT hits from BAND", 
+        "item": 22, 
+        "name": "BAND::rawhits"
+    }
+]

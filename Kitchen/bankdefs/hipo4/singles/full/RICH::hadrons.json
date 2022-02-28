@@ -1,0 +1,115 @@
+[
+    {
+        "entries": [
+            {
+                "info": "hadron id", 
+                "name": "id", 
+                "type": "S"
+            }, 
+            {
+                "info": "row in the RICH clusters bank", 
+                "name": "hit_index", 
+                "type": "S"
+            }, 
+            {
+                "info": "row in the REC  particle bank", 
+                "name": "particle_index", 
+                "type": "S"
+            }, 
+            {
+                "info": "Lab theta angle for traced solution", 
+                "name": "traced_the", 
+                "type": "F"
+            }, 
+            {
+                "info": "Lab phi angle for traced solution", 
+                "name": "traced_phi", 
+                "type": "F"
+            }, 
+            {
+                "info": "Lab hitx angle for traced solution", 
+                "name": "traced_hitx", 
+                "type": "F"
+            }, 
+            {
+                "info": "Lab hity angle for traced solution", 
+                "name": "traced_hity", 
+                "type": "F"
+            }, 
+            {
+                "info": "Lab hitz angle for traced solution", 
+                "name": "traced_hitz", 
+                "type": "F"
+            }, 
+            {
+                "info": "time for traced solution", 
+                "name": "traced_time", 
+                "type": "F"
+            }, 
+            {
+                "info": "path for traced solution", 
+                "name": "traced_path", 
+                "type": "F"
+            }, 
+            {
+                "info": "emission aero layer for traced solution", 
+                "name": "traced_ilay", 
+                "type": "S"
+            }, 
+            {
+                "info": "emission aero component for traced solution", 
+                "name": "traced_ico", 
+                "type": "S"
+            }, 
+            {
+                "info": "emission point x for traced solution", 
+                "name": "traced_emix", 
+                "type": "F"
+            }, 
+            {
+                "info": "emission point y for traced solution", 
+                "name": "traced_emiy", 
+                "type": "F"
+            }, 
+            {
+                "info": "emission point z for traced solution", 
+                "name": "traced_emiz", 
+                "type": "F"
+            }, 
+            {
+                "info": "expected EtaC for electron", 
+                "name": "EtaC_ele", 
+                "type": "F"
+            }, 
+            {
+                "info": "expected EtaC for pion", 
+                "name": "EtaC_pi", 
+                "type": "F"
+            }, 
+            {
+                "info": "expected EtaC for kappa", 
+                "name": "EtaC_k", 
+                "type": "F"
+            }, 
+            {
+                "info": "expected EtaC for proton", 
+                "name": "EtaC_pr", 
+                "type": "F"
+            }, 
+            {
+                "info": "expected EtaC minimum ", 
+                "name": "EtaC_min", 
+                "type": "F"
+            }, 
+            {
+                "info": "expected EtaC maximum ", 
+                "name": "EtaC_max", 
+                "type": "F"
+            }
+        ], 
+        "group": 21800, 
+        "info": "Reconstructed Hadrons in RICH", 
+        "item": 32, 
+        "name": "RICH::hadrons"
+    }
+]

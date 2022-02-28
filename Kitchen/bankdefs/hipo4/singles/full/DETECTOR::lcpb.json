@@ -1,0 +1,65 @@
+[
+    {
+        "entries": [
+            {
+                "info": "hit sector", 
+                "name": "sector", 
+                "type": "B"
+            }, 
+            {
+                "info": "hit ID", 
+                "name": "hit_id", 
+                "type": "B"
+            }, 
+            {
+                "info": "total  energy of the hit", 
+                "name": "etot", 
+                "type": "F"
+            }, 
+            {
+                "info": "inner  energy of the hit", 
+                "name": "ein", 
+                "type": "F"
+            }, 
+            {
+                "info": "time of the hit", 
+                "name": "time", 
+                "type": "F"
+            }, 
+            {
+                "info": "path of the hit", 
+                "name": "path", 
+                "type": "F"
+            }, 
+            {
+                "info": "x coordinate of the hit", 
+                "name": "x", 
+                "type": "F"
+            }, 
+            {
+                "info": "y coordinate of the hit", 
+                "name": "y", 
+                "type": "F"
+            }, 
+            {
+                "info": "z coordinate of the hit", 
+                "name": "z", 
+                "type": "F"
+            }, 
+            {
+                "info": "quality measure of geometrical tracking", 
+                "name": "chi2", 
+                "type": "F"
+            }, 
+            {
+                "info": "Status word", 
+                "name": "status", 
+                "type": "I"
+            }
+        ], 
+        "group": 31000, 
+        "info": "LC detector bank", 
+        "item": 34, 
+        "name": "DETECTOR::lcpb"
+    }
+]

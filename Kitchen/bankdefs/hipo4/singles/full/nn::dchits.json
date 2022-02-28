@@ -1,0 +1,20 @@
+[
+    {
+        "entries": [
+            {
+                "info": "track id", 
+                "name": "id", 
+                "type": "B"
+            }, 
+            {
+                "info": "index of the row for DC::tdc bank", 
+                "name": "index", 
+                "type": "S"
+            }
+        ], 
+        "group": 4200, 
+        "info": "index if the track hits in DC tdc bank.", 
+        "item": 2, 
+        "name": "nn::dchits"
+    }
+]

@@ -1,0 +1,45 @@
+[
+    {
+        "entries": [
+            {
+                "info": "Track ID of the hit", 
+                "name": "trkID", 
+                "type": "I"
+            }, 
+            {
+                "info": "cell id", 
+                "name": "id", 
+                "type": "I"
+            }, 
+            {
+                "info": "Time (ns)", 
+                "name": "time", 
+                "type": "F"
+            }, 
+            {
+                "info": "x pos (mm)", 
+                "name": "x", 
+                "type": "F"
+            }, 
+            {
+                "info": "y pos (mm)", 
+                "name": "y", 
+                "type": "F"
+            }, 
+            {
+                "info": "z pos (mm)", 
+                "name": "z", 
+                "type": "F"
+            }, 
+            {
+                "info": "adc", 
+                "name": "adc", 
+                "type": "F"
+            }
+        ], 
+        "group": 21900, 
+        "info": "reconstructed RTPC hits", 
+        "item": 21, 
+        "name": "RTPC::hits"
+    }
+]

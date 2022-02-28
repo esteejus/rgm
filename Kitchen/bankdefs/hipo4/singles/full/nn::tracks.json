@@ -1,0 +1,40 @@
+[
+    {
+        "entries": [
+            {
+                "info": "track id", 
+                "name": "id", 
+                "type": "B"
+            }, 
+            {
+                "info": "x coordinate in tilted coordinates", 
+                "name": "x", 
+                "type": "F"
+            }, 
+            {
+                "info": "y coordinate in tilted coordinates", 
+                "name": "y", 
+                "type": "F"
+            }, 
+            {
+                "info": "tx", 
+                "name": "tx", 
+                "type": "F"
+            }, 
+            {
+                "info": "ty", 
+                "name": "ty", 
+                "type": "F"
+            }, 
+            {
+                "info": "q over p", 
+                "name": "qp", 
+                "type": "F"
+            }
+        ], 
+        "group": 4200, 
+        "info": "track parameters from neural network", 
+        "item": 1, 
+        "name": "nn::tracks"
+    }
+]

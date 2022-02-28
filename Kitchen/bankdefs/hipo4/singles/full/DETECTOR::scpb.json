@@ -1,0 +1,50 @@
+[
+    {
+        "entries": [
+            {
+                "info": "hit sector", 
+                "name": "sector", 
+                "type": "B"
+            }, 
+            {
+                "info": "hit sector", 
+                "name": "paddle", 
+                "type": "B"
+            }, 
+            {
+                "info": "hit ID", 
+                "name": "hit_id", 
+                "type": "B"
+            }, 
+            {
+                "info": "deposited energy", 
+                "name": "edep", 
+                "type": "F"
+            }, 
+            {
+                "info": "time of the hit", 
+                "name": "time", 
+                "type": "F"
+            }, 
+            {
+                "info": "path of the hit", 
+                "name": "path", 
+                "type": "F"
+            }, 
+            {
+                "info": "quality measure of geometrical tracking", 
+                "name": "chi2", 
+                "type": "F"
+            }, 
+            {
+                "info": "Status word", 
+                "name": "status", 
+                "type": "I"
+            }
+        ], 
+        "group": 31000, 
+        "info": "SC detector bank", 
+        "item": 32, 
+        "name": "DETECTOR::scpb"
+    }
+]

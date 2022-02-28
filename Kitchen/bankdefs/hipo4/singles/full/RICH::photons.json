@@ -1,0 +1,175 @@
+[
+    {
+        "entries": [
+            {
+                "info": "id", 
+                "name": "id", 
+                "type": "S"
+            }, 
+            {
+                "info": "reconstructed (0) or expected from pion (1) kaon (2) proton (3) electron (5)", 
+                "name": "type", 
+                "type": "S"
+            }, 
+            {
+                "info": "row in the RICH  hits bank", 
+                "name": "hit_index", 
+                "type": "S"
+            }, 
+            {
+                "info": "row in the RICH  hadron bank", 
+                "name": "hadron_index", 
+                "type": "S"
+            }, 
+            {
+                "info": "time at emission point", 
+                "name": "start_time", 
+                "type": "F"
+            }, 
+            {
+                "info": "Lab theta angle for analytic solution", 
+                "name": "analytic_the", 
+                "type": "F"
+            }, 
+            {
+                "info": "Lab phi angle for analytic solution", 
+                "name": "analytic_phi", 
+                "type": "F"
+            }, 
+            {
+                "info": "path for analytic solution", 
+                "name": "analytic_path", 
+                "type": "F"
+            }, 
+            {
+                "info": "time for analytic solution", 
+                "name": "analytic_time", 
+                "type": "F"
+            }, 
+            {
+                "info": "EtaC angle for analytic solution", 
+                "name": "analytic_EtaC", 
+                "type": "F"
+            }, 
+            {
+                "info": "n for analytic solution", 
+                "name": "analytic_aeron", 
+                "type": "F"
+            }, 
+            {
+                "info": "electron probability for analytic solution", 
+                "name": "analytic_elpr", 
+                "type": "F"
+            }, 
+            {
+                "info": "pion probability for analytic solution", 
+                "name": "analytic_pipr", 
+                "type": "F"
+            }, 
+            {
+                "info": "kaon probability for analytic solution", 
+                "name": "analytic_kpr", 
+                "type": "F"
+            }, 
+            {
+                "info": "proton probability for analytic solution", 
+                "name": "analytic_prpr", 
+                "type": "F"
+            }, 
+            {
+                "info": "background probability for analytic solution", 
+                "name": "analytic_bgpr", 
+                "type": "F"
+            }, 
+            {
+                "info": "Lab theta angle for traced solution", 
+                "name": "traced_the", 
+                "type": "F"
+            }, 
+            {
+                "info": "Lab phi angle for traced solution", 
+                "name": "traced_phi", 
+                "type": "F"
+            }, 
+            {
+                "info": "Lab hitx angle for traced solution", 
+                "name": "traced_hitx", 
+                "type": "F"
+            }, 
+            {
+                "info": "Lab hity angle for traced solution", 
+                "name": "traced_hity", 
+                "type": "F"
+            }, 
+            {
+                "info": "Lab hitz angle for traced solution", 
+                "name": "traced_hitz", 
+                "type": "F"
+            }, 
+            {
+                "info": "path for traced solution", 
+                "name": "traced_path", 
+                "type": "F"
+            }, 
+            {
+                "info": "time for traced solution", 
+                "name": "traced_time", 
+                "type": "F"
+            }, 
+            {
+                "info": "n reflections for traced solution", 
+                "name": "traced_nrfl", 
+                "type": "S"
+            }, 
+            {
+                "info": "n refractions for traced solution", 
+                "name": "traced_nrfr", 
+                "type": "S"
+            }, 
+            {
+                "info": "layer and component of the first reflection for traced solution", 
+                "name": "traced_1rfl", 
+                "type": "S"
+            }, 
+            {
+                "info": "EtaC angle for traced solution", 
+                "name": "traced_EtaC", 
+                "type": "F"
+            }, 
+            {
+                "info": "n for traced solution", 
+                "name": "traced_aeron", 
+                "type": "F"
+            }, 
+            {
+                "info": "electron probability for traced solution", 
+                "name": "traced_elpr", 
+                "type": "F"
+            }, 
+            {
+                "info": "pion probability for traced solution", 
+                "name": "traced_pipr", 
+                "type": "F"
+            }, 
+            {
+                "info": "kaon probability for traced solution", 
+                "name": "traced_kpr", 
+                "type": "F"
+            }, 
+            {
+                "info": "proton probability for traced solution", 
+                "name": "traced_prpr", 
+                "type": "F"
+            }, 
+            {
+                "info": "background probability for traced solution", 
+                "name": "traced_bgpr", 
+                "type": "F"
+            }
+        ], 
+        "group": 21800, 
+        "info": "Reconstructed Photons in RICH", 
+        "item": 33, 
+        "name": "RICH::photons"
+    }
+]

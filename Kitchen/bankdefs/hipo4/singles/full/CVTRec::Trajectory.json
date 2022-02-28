@@ -1,0 +1,70 @@
+[
+    {
+        "entries": [
+            {
+                "info": "id of the track", 
+                "name": "id", 
+                "type": "S"
+            }, 
+            {
+                "info": "id of the detector", 
+                "name": "detector", 
+                "type": "B"
+            }, 
+            {
+                "info": "id of the sector", 
+                "name": "sector", 
+                "type": "B"
+            }, 
+            {
+                "info": "id of the layer", 
+                "name": "layer", 
+                "type": "B"
+            }, 
+            {
+                "info": "track x position at detector surface (cm)", 
+                "name": "x", 
+                "type": "F"
+            }, 
+            {
+                "info": "track y position at detector surface (cm)", 
+                "name": "y", 
+                "type": "F"
+            }, 
+            {
+                "info": "track z position at detector surface (cm)", 
+                "name": "z", 
+                "type": "F"
+            }, 
+            {
+                "info": "local phi at detector surface (rad)", 
+                "name": "phi", 
+                "type": "F"
+            }, 
+            {
+                "info": "local theta at detector surface (rad)", 
+                "name": "theta", 
+                "type": "F"
+            }, 
+            {
+                "info": "local angle with module surface (rad)", 
+                "name": "langle", 
+                "type": "F"
+            }, 
+            {
+                "info": "estimated strip centroid", 
+                "name": "centroid", 
+                "type": "F"
+            }, 
+            {
+                "info": "pathlength of the track from the track vertex to the detector surface (cm)", 
+                "name": "path", 
+                "type": "F"
+            }
+        ], 
+        "group": 20500, 
+        "info": "Trajectory bank", 
+        "item": 29, 
+        "name": "CVTRec::Trajectory"
+    }
+]

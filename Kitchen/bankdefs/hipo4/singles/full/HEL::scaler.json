@@ -1,0 +1,50 @@
+[
+    {
+        "entries": [
+            {
+                "info": "Beam charge from Faraday cup, DAQ-gated (nano-Coulomb)", 
+                "name": "fcupgated", 
+                "type": "F"
+            }, 
+            {
+                "info": "Beam charge from Faraday cup, (nano-Coulomb)", 
+                "name": "fcup", 
+                "type": "F"
+            }, 
+            {
+                "info": "Beam charge from SLM, DAQ-gated (nano-Coulomb)", 
+                "name": "slmgated", 
+                "type": "F"
+            }, 
+            {
+                "info": "Beam charge from SLM (nano-Coulomb)", 
+                "name": "slm", 
+                "type": "F"
+            }, 
+            {
+                "info": "Clock, DAQ-gated", 
+                "name": "clockgated", 
+                "type": "F"
+            }, 
+            {
+                "info": "Clock", 
+                "name": "clock", 
+                "type": "F"
+            }, 
+            {
+                "info": "Helicity state, HWP-corrected", 
+                "name": "helicity", 
+                "type": "B"
+            }, 
+            {
+                "info": "Helicity state", 
+                "name": "helicityRaw", 
+                "type": "B"
+            }
+        ], 
+        "group": 10000, 
+        "info": "Helicity-gated, analyzed scalers.", 
+        "item": 16, 
+        "name": "HEL::scaler"
+    }
+]

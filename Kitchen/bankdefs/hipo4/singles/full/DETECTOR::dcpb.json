@@ -1,0 +1,80 @@
+[
+    {
+        "entries": [
+            {
+                "info": "sector", 
+                "name": "sector", 
+                "type": "B"
+            }, 
+            {
+                "info": "track_ID", 
+                "name": "track_id", 
+                "type": "B"
+            }, 
+            {
+                "info": "x coordinate of track intersection with SC plane", 
+                "name": "x_sc", 
+                "type": "F"
+            }, 
+            {
+                "info": "y coordinate of track intersection with SC plane", 
+                "name": "y_sc", 
+                "type": "F"
+            }, 
+            {
+                "info": "z coordinate of track intersection with SC plane", 
+                "name": "z_sc", 
+                "type": "F"
+            }, 
+            {
+                "info": "X dir cosine at (x_SC,y_SC,z_SC)", 
+                "name": "cx_sc", 
+                "type": "F"
+            }, 
+            {
+                "info": "Y dir cosine at (x_SC,y_SC,z_SC)", 
+                "name": "cy_sc", 
+                "type": "F"
+            }, 
+            {
+                "info": "Z dir cosine at (x_SC,y_SC,z_SC)", 
+                "name": "cz_sc", 
+                "type": "F"
+            }, 
+            {
+                "info": "vertex X after fiting to the beam position", 
+                "name": "x_v", 
+                "type": "F"
+            }, 
+            {
+                "info": "vertex Y after fiting to the beam position", 
+                "name": "y_v", 
+                "type": "F"
+            }, 
+            {
+                "info": "vertex Z after fiting to the beam position", 
+                "name": "z_v", 
+                "type": "F"
+            }, 
+            {
+                "info": "distance from production vertex to the beam", 
+                "name": "r_v", 
+                "type": "F"
+            }, 
+            {
+                "info": "Chisquare of track fitting", 
+                "name": "chi2", 
+                "type": "F"
+            }, 
+            {
+                "info": "Status word", 
+                "name": "status", 
+                "type": "I"
+            }
+        ], 
+        "group": 31000, 
+        "info": "DC detector bank", 
+        "item": 35, 
+        "name": "DETECTOR::dcpb"
+    }
+]

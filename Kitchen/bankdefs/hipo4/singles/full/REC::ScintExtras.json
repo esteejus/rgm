@@ -1,0 +1,25 @@
+[
+    {
+        "entries": [
+            {
+                "info": "Energy deposition per distance travelled (MeV/cm)", 
+                "name": "dedx", 
+                "type": "F"
+            }, 
+            {
+                "info": "cluster size", 
+                "name": "size", 
+                "type": "S"
+            }, 
+            {
+                "info": "cluster layer multiplicity", 
+                "name": "layermult", 
+                "type": "B"
+            }
+        ], 
+        "group": 300, 
+        "info": "Scintillator Cluster Parameters", 
+        "item": 43, 
+        "name": "REC::ScintExtras"
+    }
+]

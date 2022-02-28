@@ -1,0 +1,60 @@
+[
+    {
+        "entries": [
+            {
+                "info": "hit sector", 
+                "name": "sector", 
+                "type": "B"
+            }, 
+            {
+                "info": "hit layer", 
+                "name": "layer", 
+                "type": "B"
+            }, 
+            {
+                "info": "hit strip", 
+                "name": "strip", 
+                "type": "S"
+            }, 
+            {
+                "info": "hit energy", 
+                "name": "energy", 
+                "type": "F"
+            }, 
+            {
+                "info": "hit time", 
+                "name": "time", 
+                "type": "F"
+            }, 
+            {
+                "info": "hit local y coordinate", 
+                "name": "localY", 
+                "type": "F"
+            }, 
+            {
+                "info": "fitted hit residual", 
+                "name": "residual", 
+                "type": "F"
+            }, 
+            {
+                "info": "associated adc index", 
+                "name": "adcIndex", 
+                "type": "S"
+            }, 
+            {
+                "info": "associated cluster index", 
+                "name": "clusterIndex", 
+                "type": "S"
+            }, 
+            {
+                "info": "associated track index", 
+                "name": "trackIndex", 
+                "type": "S"
+            }
+        ], 
+        "group": 20800, 
+        "info": "reconstructed FMT hits", 
+        "item": 21, 
+        "name": "FMT::Hits"
+    }
+]

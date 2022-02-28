@@ -53,3 +53,30 @@ swif-status.py --retry
 You should see an output of each failed job which was resubmitted separated by the reason why each job has failed. 
 
 
+# Updating the ccdb data base for beam offset parameters
+
+
+Example beamoffset.txt file:
+```
+#
+  0            0            0            x-value          y-value          0            0     
+
+```
+All beam offset values must be set to 0 for the initial cook prior to doing the beam offset calibration which the calibration suite can be found here https://github.com/jeffersonlab/clas12-beamspot 
+
+To update the ccdb database with a corresponding beamoffset.txt file one needs to submit from a user account and not clas12-5. Updating the database for an example #runNumber is done by submitting or by editing the file ccdb/modify_table.sh in this repo.
+
+```
+ccdb -c mysql://clas12writer:geom3try@clasdb.jlab.org/clas12 add /geometry/beam/position -r #runNumber -v rgm_fall2021 beamoffset.txt
+
+```
+
+The -r #runNumber flag needs to be specified for a range of run numbers.
+
+```
+-r 15000-15000 (for only run 15000)
+-r 15000-16000 (for a run range 15000-16000)
+-r 15000-      (for run 15000 - to infinity typically used in the initial calibration and is constantly overwritten with progressive calibrations)
+
+```
+

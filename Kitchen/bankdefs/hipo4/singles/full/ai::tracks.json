@@ -1,0 +1,65 @@
+[
+    {
+        "entries": [
+            {
+                "info": "id of the track", 
+                "name": "id", 
+                "type": "B"
+            }, 
+            {
+                "info": "sector of the track", 
+                "name": "sector", 
+                "type": "B"
+            }, 
+            {
+                "info": "cluster ID in superlayer 1", 
+                "name": "c1", 
+                "type": "S"
+            }, 
+            {
+                "info": "cluster ID in superlayer 2", 
+                "name": "c2", 
+                "type": "S"
+            }, 
+            {
+                "info": "cluster ID in superlayer 3", 
+                "name": "c3", 
+                "type": "S"
+            }, 
+            {
+                "info": "cluster ID in superlayer 4", 
+                "name": "c4", 
+                "type": "S"
+            }, 
+            {
+                "info": "cluster ID in superlayer 5", 
+                "name": "c5", 
+                "type": "S"
+            }, 
+            {
+                "info": "cluster ID in superlayer 6", 
+                "name": "c6", 
+                "type": "S"
+            }, 
+            {
+                "info": "momentum of the track", 
+                "name": "p", 
+                "type": "F"
+            }, 
+            {
+                "info": "theta angle of the track", 
+                "name": "theta", 
+                "type": "F"
+            }, 
+            {
+                "info": "phi angle of the track", 
+                "name": "phi", 
+                "type": "F"
+            }
+        ], 
+        "group": 4200, 
+        "info": "tracks identified with AI", 
+        "item": 3, 
+        "name": "ai::tracks"
+    }
+]

@@ -1,0 +1,30 @@
+[
+    {
+        "entries": [
+            {
+                "info": "Electron Beam Energy", 
+                "name": "energy", 
+                "type": "F"
+            }, 
+            {
+                "info": "Torus Magnet current in Amps", 
+                "name": "itorus", 
+                "type": "F"
+            }, 
+            {
+                "info": "Mini-Torus Magnet current in Amps", 
+                "name": "imini", 
+                "type": "F"
+            }, 
+            {
+                "info": "Tagger Magnet current in Amps", 
+                "name": "itag", 
+                "type": "F"
+            }
+        ], 
+        "group": 31000, 
+        "info": "Beam information", 
+        "item": 23, 
+        "name": "EVENT::beam"
+    }
+]

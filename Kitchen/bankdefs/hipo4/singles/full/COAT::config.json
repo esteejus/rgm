@@ -1,0 +1,15 @@
+[
+    {
+        "entries": [
+            {
+                "info": "json character", 
+                "name": "json", 
+                "type": "B"
+            }
+        ], 
+        "group": 10000, 
+        "info": "COATJAVA configuration, e.g. version numbers, CLARA YAML settings", 
+        "item": 17, 
+        "name": "COAT::config"
+    }
+]

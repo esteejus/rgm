@@ -1,0 +1,110 @@
+[
+    {
+        "entries": [
+            {
+                "info": "id", 
+                "name": "id", 
+                "type": "B"
+            }, 
+            {
+                "info": "related row in the RICH::clusters bank (if any)", 
+                "name": "hindex", 
+                "type": "B"
+            }, 
+            {
+                "info": "related row in the REC::Particle bank", 
+                "name": "pindex", 
+                "type": "B"
+            }, 
+            {
+                "info": "aerogel layer of photon emission", 
+                "name": "emilay", 
+                "type": "B"
+            }, 
+            {
+                "info": "aerogel component of photon emission", 
+                "name": "emico", 
+                "type": "B"
+            }, 
+            {
+                "info": "aerogel component of photon entrance point", 
+                "name": "enico", 
+                "type": "B"
+            }, 
+            {
+                "info": "aerogel quadrant of photon emission", 
+                "name": "emqua", 
+                "type": "S"
+            }, 
+            {
+                "info": "track-cluster matching chi2 (if any)", 
+                "name": "mchi2", 
+                "type": "F"
+            }, 
+            {
+                "info": "minimum EtaC selection", 
+                "name": "ch_min", 
+                "type": "F"
+            }, 
+            {
+                "info": "maximum EtaC selection", 
+                "name": "ch_max", 
+                "type": "F"
+            }, 
+            {
+                "info": "maximum delta-time selection", 
+                "name": "dt_max", 
+                "type": "F"
+            }, 
+            {
+                "info": "average Cherenkov angle for direct photons", 
+                "name": "ch_dir", 
+                "type": "F"
+            }, 
+            {
+                "info": "average Cherenkov angle for photons reflected by flat mirrors", 
+                "name": "ch_lat", 
+                "type": "F"
+            }, 
+            {
+                "info": "average Cherenkov angle for photons reflected by spherical mirrors", 
+                "name": "ch_spe", 
+                "type": "F"
+            }, 
+            {
+                "info": "most probable PID choice", 
+                "name": "best_PID", 
+                "type": "B"
+            }, 
+            {
+                "info": "goodness of choice parameter (1=anambiguos, 0=random)", 
+                "name": "RQ_prob", 
+                "type": "F"
+            }, 
+            {
+                "info": "probability to be an electron", 
+                "name": "el_prob", 
+                "type": "F"
+            }, 
+            {
+                "info": "probability to be an pion", 
+                "name": "pi_prob", 
+                "type": "F"
+            }, 
+            {
+                "info": "probability to be an kaon", 
+                "name": "k_prob", 
+                "type": "F"
+            }, 
+            {
+                "info": "probability to be an proton", 
+                "name": "pr_prob", 
+                "type": "F"
+            }
+        ], 
+        "group": 21800, 
+        "info": "Reconstructed Cherenov information per track", 
+        "item": 35, 
+        "name": "RICH::hadCher"
+    }
+]

@@ -1,0 +1,15 @@
+[
+    {
+        "entries": [
+            {
+                "info": "json character", 
+                "name": "json", 
+                "type": "B"
+            }
+        ], 
+        "group": 10000, 
+        "info": "Random trigger filter information", 
+        "item": 15, 
+        "name": "RUN::filter"
+    }
+]

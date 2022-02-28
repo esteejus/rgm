@@ -1,0 +1,80 @@
+[
+    {
+        "entries": [
+            {
+                "info": "id", 
+                "name": "id", 
+                "type": "S"
+            }, 
+            {
+                "info": "related row in the RICH::hits bank", 
+                "name": "hindex", 
+                "type": "S"
+            }, 
+            {
+                "info": "related row in the REC::Particle bank", 
+                "name": "pindex", 
+                "type": "B"
+            }, 
+            {
+                "info": "photon hit pmt", 
+                "name": "pmt", 
+                "type": "S"
+            }, 
+            {
+                "info": "photon hit anode", 
+                "name": "anode", 
+                "type": "B"
+            }, 
+            {
+                "info": "photon hit time", 
+                "name": "time", 
+                "type": "F"
+            }, 
+            {
+                "info": "photon path for analytic solution", 
+                "name": "apath", 
+                "type": "F"
+            }, 
+            {
+                "info": "photon arrival time for analytic solution", 
+                "name": "atime", 
+                "type": "F"
+            }, 
+            {
+                "info": "Cherenkov angle as analytic solution", 
+                "name": "aEtaC", 
+                "type": "F"
+            }, 
+            {
+                "info": "photon path for traced solution", 
+                "name": "tpath", 
+                "type": "F"
+            }, 
+            {
+                "info": "photon arrival time for traced solution", 
+                "name": "ttime", 
+                "type": "F"
+            }, 
+            {
+                "info": "Cherenkov angle as traced solution", 
+                "name": "tEtaC", 
+                "type": "F"
+            }, 
+            {
+                "info": "n reflections for traced solution", 
+                "name": "nrfl", 
+                "type": "B"
+            }, 
+            {
+                "info": "layer and component of the first reflection for traced solution", 
+                "name": "1rfl", 
+                "type": "S"
+            }
+        ], 
+        "group": 21800, 
+        "info": "Reconstructed Cherenov nformation in RICH", 
+        "item": 34, 
+        "name": "RICH::ringCher"
+    }
+]

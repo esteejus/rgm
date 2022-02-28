@@ -1,0 +1,85 @@
+[
+    {
+        "entries": [
+            {
+                "info": "index", 
+                "name": "index", 
+                "type": "S"
+            }, 
+            {
+                "info": "sector", 
+                "name": "sector", 
+                "type": "B"
+            }, 
+            {
+                "info": "region", 
+                "name": "region", 
+                "type": "B"
+            }, 
+            {
+                "info": "cross x-coordinate", 
+                "name": "x", 
+                "type": "F"
+            }, 
+            {
+                "info": "cross y-coordinate", 
+                "name": "y", 
+                "type": "F"
+            }, 
+            {
+                "info": "cross z-coordinate", 
+                "name": "z", 
+                "type": "F"
+            }, 
+            {
+                "info": "cross x-coordinate error", 
+                "name": "err_x", 
+                "type": "F"
+            }, 
+            {
+                "info": "cross y-coordinate error", 
+                "name": "err_y", 
+                "type": "F"
+            }, 
+            {
+                "info": "cross z-coordinate error", 
+                "name": "err_z", 
+                "type": "F"
+            }, 
+            {
+                "info": "cross x-direction (track unit tangent vector at the cross)", 
+                "name": "ux", 
+                "type": "F"
+            }, 
+            {
+                "info": "cross y-direction (track unit tangent vector at the cross)", 
+                "name": "uy", 
+                "type": "F"
+            }, 
+            {
+                "info": "cross z-direction (track unit tangent vector at the cross)", 
+                "name": "uz", 
+                "type": "F"
+            }, 
+            {
+                "info": "index of the  cluster in the Cross", 
+                "name": "cluster1Index", 
+                "type": "S"
+            }, 
+            {
+                "info": "index of the top layer  cluster in the Cross", 
+                "name": "cluster2Index", 
+                "type": "S"
+            }, 
+            {
+                "info": "associated track index", 
+                "name": "trkID", 
+                "type": "S"
+            }
+        ], 
+        "group": 20800, 
+        "info": "reconstructed FMT crosses", 
+        "item": 25, 
+        "name": "FMT::Crosses"
+    }
+]

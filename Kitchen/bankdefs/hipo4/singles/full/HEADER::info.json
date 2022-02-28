@@ -1,0 +1,105 @@
+[
+    {
+        "entries": [
+            {
+                "info": "event status after reconstruction", 
+                "name": "estatus", 
+                "type": "I"
+            }, 
+            {
+                "info": "run number", 
+                "name": "nrun", 
+                "type": "I"
+            }, 
+            {
+                "info": "event number", 
+                "name": "nevt", 
+                "type": "I"
+            }, 
+            {
+                "info": "event type (data or mc)", 
+                "name": "type", 
+                "type": "I"
+            }, 
+            {
+                "info": "number of final reconstructed particles*100 + number of geometrically reconstructed particles", 
+                "name": "npgp", 
+                "type": "I"
+            }, 
+            {
+                "info": "trigger type*10000 + prescale factor for that trigger (event class)", 
+                "name": "trgprs", 
+                "type": "I"
+            }, 
+            {
+                "info": "trigger type", 
+                "name": "trigger", 
+                "type": "I"
+            }, 
+            {
+                "info": "faraday cup gated", 
+                "name": "helicity", 
+                "type": "B"
+            }, 
+            {
+                "info": "faraday cup", 
+                "name": "fc", 
+                "type": "F"
+            }, 
+            {
+                "info": "faraday cup gated", 
+                "name": "fcg", 
+                "type": "F"
+            }, 
+            {
+                "info": "clock gated", 
+                "name": "tg", 
+                "type": "F"
+            }, 
+            {
+                "info": "start time", 
+                "name": "stt", 
+                "type": "F"
+            }, 
+            {
+                "info": "rf time1", 
+                "name": "rf1", 
+                "type": "F"
+            }, 
+            {
+                "info": "rf time2", 
+                "name": "rf2", 
+                "type": "F"
+            }, 
+            {
+                "info": "control rates1", 
+                "name": "con1", 
+                "type": "F"
+            }, 
+            {
+                "info": "control rates2", 
+                "name": "con2", 
+                "type": "F"
+            }, 
+            {
+                "info": "control rates3", 
+                "name": "con3", 
+                "type": "F"
+            }, 
+            {
+                "info": "rastr 1", 
+                "name": "rastr1", 
+                "type": "S"
+            }, 
+            {
+                "info": "rastr 2", 
+                "name": "rastr2", 
+                "type": "S"
+            }
+        ], 
+        "group": 31000, 
+        "info": "Event Header Information", 
+        "item": 1, 
+        "name": "HEADER::info"
+    }
+]

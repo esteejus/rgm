@@ -1,0 +1,30 @@
+[
+    {
+        "entries": [
+            {
+                "info": "1000*i+tagstat where i is the pointer to the TAGR bank. Negative for trigger photon", 
+                "name": "pointer", 
+                "type": "B"
+            }, 
+            {
+                "info": "starttime_TAG at interaction point(s)", 
+                "name": "time", 
+                "type": "F"
+            }, 
+            {
+                "info": "photon Energy", 
+                "name": "energy", 
+                "type": "F"
+            }, 
+            {
+                "info": "starttime_ST - starttimeTAG (ns)", 
+                "name": "dt", 
+                "type": "F"
+            }
+        ], 
+        "group": 31000, 
+        "info": "TGPB Bank", 
+        "item": 42, 
+        "name": "TAGGER::tgpb"
+    }
+]

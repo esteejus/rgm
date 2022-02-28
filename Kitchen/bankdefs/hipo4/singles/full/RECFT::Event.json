@@ -1,0 +1,20 @@
+[
+    {
+        "entries": [
+            {
+                "info": "Undefined", 
+                "name": "category", 
+                "type": "L"
+            }, 
+            {
+                "info": "Event Start Time (ns)", 
+                "name": "startTime", 
+                "type": "F"
+            }
+        ], 
+        "group": 300, 
+        "info": "Event Header Bank, shadowing REC::Event with FT-based start time", 
+        "item": 41, 
+        "name": "RECFT::Event"
+    }
+]
