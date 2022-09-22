@@ -1,5 +1,6 @@
 # Run Group M repository for reconstruction (a.k.a. cooking). 
-This is a brief document of the reconstruction workflow specific to RGM. 
+This is a brief document of the reconstruction workflow specific to RGM. This requires access to the clas12-5 user account which is dedicated to RGM cooking. Access is gained by asking
+Nathan Baltzell <baltzell@jlab.org> and requires generating a public ssh key. See https://git-scm.com/book/en/v2/Git-on-the-Server-Generating-Your-SSH-Public-Key
 
 # Setting up workflow environment on the JLab Farm
 
