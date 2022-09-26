@@ -95,7 +95,7 @@ int main(int argc, char ** argv)
   auto config_c12=chain.GetC12Reader();
   chain.SetReaderTags({0});
   const std::unique_ptr<clas12::clas12reader>& c12=chain.C12ref();
-  //chain.db()->turnOffQADB();                 
+  chain.db()->turnOffQADB();                 
 
         
   /////////////////////////////////////
