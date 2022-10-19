@@ -1,0 +1,10 @@
+Electron Cuts: ON
+e_nphe: 1 100
+e_calv: 14 3000
+e_calw: 14 3000
+e_SF: 0.18 0.28
+e_mom: 1.0 6.0
+e_vtze: -6 1
+Lead Cuts: OFF
+Lead SRC Cuts: OFF
+Recoil SRC Cuts: OFF
