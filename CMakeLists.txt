@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 3.0)
 project(RGM)
-
 set (CLAS12ROOT $ENV{CLAS12ROOT})
 set(include ${CMAKE_SOURCE_DIR}/Analysis/include )
 
