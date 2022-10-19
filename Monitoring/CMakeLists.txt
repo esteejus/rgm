@@ -21,7 +21,6 @@ add_subdirectory(source)
 #add_subdirectory(GCF_tools)
 
 #compile executables in source directory
-
 #foreach(fnameSrc monitor_ep.cpp monitor_epp.cpp monitor_epn.cpp compare_epp.cpp compare_epn.cpp calcium_ratios.cpp compare_calcium.cpp skimmer.cpp skimmer_xB.cpp skimmer_3N.cpp forJosh.cpp skimmer_example.cpp Lead_PID.cpp Proton_PID.cpp skimmer_eppN.cpp)
 foreach(fnameSrc monitor_ep.cpp)
   message(STATUS ${fnameSRC})
