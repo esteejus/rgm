@@ -83,8 +83,17 @@ int main(int argc, char ** argv)
  
   double Ebeam = atof(argv[2]);
 
+  // output file names
   TFile * outFile = new TFile(argv[3],"RECREATE");
   char * pdfFile = argv[4];
+
+  char * basename = argv[3];
+  basename[strlen(basename)-5] = '\0';
+  string theta_name(string(basename) + "_theta.txt");
+  theta_name.c_str();
+  string p_name(string(basename) + "_p.txt");
+  p_name.c_str();
+
   eventcut myCut(Ebeam,argv[5]);
   myCut.print_cuts();
   clas12root::HipoChain chain;
@@ -887,7 +896,7 @@ int main(int argc, char ** argv)
   h_neff_pmiss->GetYaxis()->SetTitle("efficiency");
   h_neff_pmiss->GetYaxis()->SetRangeUser(0.,0.16);
   // print output
-  ofstream outp("d_pn/rgm_2gev/p_d_pCDn.txt");
+  ofstream outp(p_name);
   for (int i=0; i<h_neff_pmiss->GetNbinsX(); i++) {
     outp << h_neff_pmiss->GetXaxis()->GetBinCenter(i) << ' ';
     outp << h_neff_pmiss->GetBinContent(i) << ' ';
@@ -914,7 +923,7 @@ int main(int argc, char ** argv)
   h_neff_thetamiss_ssb->GetYaxis()->SetTitle("efficiency");
   h_neff_thetamiss_ssb->GetYaxis()->SetRangeUser(0.,0.16);
   // print output
-  ofstream outtheta("d_pn/rgm_2gev/theta_d_pCDn.txt");
+  ofstream outtheta(theta_name);
   for (int i=0; i<h_neff_thetamiss_ssb->GetNbinsX(); i++) {
     outtheta << h_neff_thetamiss_ssb->GetXaxis()->GetBinCenter(i) << ' ';
     outtheta << h_neff_thetamiss_ssb->GetBinContent(i) << ' ';
