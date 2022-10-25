@@ -55,7 +55,7 @@ double t_hi = 65;
 
 void Usage()
 {
-  std::cerr << "Usage: ./code <MC =1,Data = 0> <Ebeam(GeV)> <path/to/ouput.root> <path/to/ouput.pdf> <path/to/cutfile.txt> <path/to/input.hipo> \n";
+  std::cerr << "Usage: ./code <MC=1,Data=0> <Ebeam(GeV)> <path/to/output.root> <path/to/output.pdf> <path/to/cutfile.txt> <path/to/input.hipo> \n";
 }
 
 
@@ -76,9 +76,28 @@ int main(int argc, char ** argv)
  
   double Ebeam = atof(argv[2]);
 
+  /*std::string rootPath(argv[3]);
+  rootPath += ".root";
+  const char * fullrootpath = rootPath.c_str();*/
+  /*std::string neff_t_name(argv[3]);
+  neff_t_name[strlen(neff_t_name)-6] = '\0';
+  neff_t_filename = neff_t_name.c_str();*/
+
+
+  
+  // output file names
   TFile * outFile = new TFile(argv[3],"RECREATE");
   char * pdfFile = argv[4];
   eventcut myCut(Ebeam,argv[5]);
+
+  char * basename = argv[3];
+  basename[strlen(basename)-5] = '\0';
+  string theta_name(string(basename) + "_theta.txt");
+  theta_name.c_str();
+  string p_name(string(basename) + "_p.txt");
+  p_name.c_str();
+
+
   myCut.print_cuts();
   clas12root::HipoChain chain;
   for(int k = 6; k < argc; k++){
@@ -88,7 +107,7 @@ int main(int argc, char ** argv)
   auto config_c12=chain.GetC12Reader();
   chain.SetReaderTags({0});
   const std::unique_ptr<clas12::clas12reader>& c12=chain.C12ref();
-  //chain.db()->turnOffQADB();                 
+  chain.db()->turnOffQADB();                 
 
         
   /////////////////////////////////////
@@ -659,7 +678,7 @@ int main(int argc, char ** argv)
   for (int i=0; i<neff_pbins; i++)
   {
     h_pmiss_int1_denom->SetBinContent(i,*(sigd_int1+i));
-std::cout << "int 1, val " << i << " = " << *(sigd_int1+i) << '\n';
+//std::cout << "int 1, val " << i << " = " << *(sigd_int1+i) << '\n';
     h_pmiss_int1_denom->SetBinError(i,sqrt(*(sigd_int1+i)));
   }
 
@@ -679,7 +698,7 @@ std::cout << "int 1, val " << i << " = " << *(sigd_int1+i) << '\n';
   for (int i=0; i<neff_pbins; i++)
   {
     h_pmiss_int2_denom->SetBinContent(i,*(sigd_int2+i));
-std::cout << "int 2, val " << i << " = " << *(sigd_int2+i) << '\n';
+//std::cout << "int 2, val " << i << " = " << *(sigd_int2+i) << '\n';
     h_pmiss_int2_denom->SetBinError(i,sqrt(*(sigd_int2+i)));
   }
 
@@ -700,7 +719,7 @@ std::cout << "int 2, val " << i << " = " << *(sigd_int2+i) << '\n';
   for (int i=0; i<neff_pbins; i++)
   {
     h_pmiss_int3_denom->SetBinContent(i,*(sigd_int3+i));
-std::cout << "int 3, val " << i << " = " << *(sigd_int3+i) << '\n';
+//std::cout << "int 3, val " << i << " = " << *(sigd_int3+i) << '\n';
     h_pmiss_int3_denom->SetBinError(i,sqrt(*(sigd_int3+i)));
   }
 
@@ -1127,7 +1146,7 @@ std::cout << "int 3, val " << i << " = " << *(sigd_int3+i) << '\n';
   h_neff_thetamiss->Draw();
   h_neff_thetamiss->SetStats(0);
   // print output
-  ofstream outtheta("h_epin/theta_hepin.txt");
+  ofstream outtheta(theta_name);
   for (int i=0; i<h_neff_thetamiss->GetNbinsX(); i++) {
     outtheta << h_neff_thetamiss->GetXaxis()->GetBinCenter(i) << ' ' << h_neff_thetamiss->GetBinContent(i) << ' ' << h_neff_thetamiss->GetBinError(i) << '\n';
   }
@@ -1172,7 +1191,7 @@ std::cout << "int 3, val " << i << " = " << *(sigd_int3+i) << '\n';
   h_neff_allt_D->Divide(h_pmiss_allt_denomD);
   h_neff_allt_D->Draw();
   // print output
-  ofstream outallp("h_epin/p_hepin.txt");
+  ofstream outallp(p_name);
   for (int i=0; i<h_neff_allt_D->GetNbinsX(); i++) {
     outallp << h_neff_allt_D->GetXaxis()->GetBinCenter(i) << ' ' << h_neff_allt_D->GetBinContent(i) << ' ' << h_neff_allt_D->GetBinError(i) << '\n';
   }
@@ -1217,7 +1236,7 @@ std::cout << "int 3, val " << i << " = " << *(sigd_int3+i) << '\n';
   leg3->AddEntry(h_neff_int3_D,"60<#theta_{miss}<70","l");
   leg3->Draw();
     // print output
-  ofstream outp("h_epin/p_hepin_int.txt");
+  ofstream outp("neff_out/p_hepin_int.txt");
   for (int i=0; i<h_neff_int1_D->GetNbinsX(); i++) {
     outp << h_neff_int1_D->GetXaxis()->GetBinCenter(i) << ' ';
     outp << h_neff_int1_D->GetBinContent(i) << ' ' << h_neff_int1_D->GetBinError(i) << ' ';
