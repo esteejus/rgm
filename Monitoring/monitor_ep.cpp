@@ -840,7 +840,7 @@ int main(int argc, char ** argv)
   myCanvas->cd(4);
   h_vtz_e_vtz_p_CTOF->Draw("colz");
   myCanvas->cd(5);
-  h_phi_e_p_FTOF->Draw();
+  h_phi_e_p_CTOF->Draw();
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
