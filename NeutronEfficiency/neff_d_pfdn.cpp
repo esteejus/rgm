@@ -48,12 +48,9 @@ double Mdisp_hi = 1.3;
 
 void printProgress(double percentage);
 double get_pin_mmiss(TVector3 p_b, TVector3 p_e, TVector3 ppi);
-Double_t lorentzian(Double_t *x, Double_t *par);
 Double_t signal(Double_t *x, Double_t *par); 
 Double_t mmiss_signal_gauss(Double_t *x, Double_t *par);
-Double_t mmiss_signal_lorentz(Double_t *x, Double_t *par);
-double * hist_projections_landau(TCanvas * can, TH2D * hist2d, int num_hist);
-double * hist_projections_gauss(TCanvas * can, TH2D * hist2d, int num_hist);
+//double * hist_projections_gauss(TCanvas * can, TH2D * hist2d, int num_hist);
 double * hist_projections(TCanvas * can, TH2D * hist2d, int num_hist);
 double * hist_projections_backsub(TCanvas * can, TH2D * hist2d, int num_hist);
 
@@ -652,22 +649,14 @@ int main(int argc, char ** argv)
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
   
-
-  // mmiss in pmiss bins - landau + gaussian
-  myCanvas->Divide(5,4);
-  double * SB_pCAND_landau = hist_projections_landau(myCanvas, h_mmiss_pmissCAND, neff_pbins);
-  std::cout << "Candidates - as a function of pmiss\n";
-  //for (int i=0; i<neff_pbins; i++) { std::cout << "element " << i << " = " << *(SB_pCAND + i) << '\n'; }
-  myCanvas->Print(fileName,"pdf");
-  myCanvas->Clear();
-
+/*
   // mmiss in pmiss bins - gaussian + gaussian
   myCanvas->Divide(5,4);
   double * SB_pCAND_gauss = hist_projections_gauss(myCanvas, h_mmiss_pmissCAND, neff_pbins);
   std::cout << "Candidates - as a function of pmiss\n";
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
-
+*/
   // mmiss in pmiss bins with background subtracted
   myCanvas->Divide(5,4);
   double *Ssub_pCAND = hist_projections_backsub(myCanvas, h_mmiss_pmissCAND,neff_pbins);
@@ -707,38 +696,20 @@ int main(int argc, char ** argv)
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
   
-
-  // mmiss by theta bins - landau + gaussian
-  myCanvas->Divide(5,4);
-  double * SB_tCAND_landau = hist_projections_landau(myCanvas, h_mmiss_thetaCAND, neff_tbins);
-  std::cout << "Candidates - as a function of theta\n";
-  myCanvas->Print(fileName,"pdf");
-  myCanvas->Clear();
-
+/*
   // mmiss by theta bins - gaussian + gaussian
   myCanvas->Divide(5,4);
   double * SB_tCAND_gauss = hist_projections_gauss(myCanvas, h_mmiss_thetaCAND, neff_tbins);
   std::cout << "Candidates - as a function of theta\n";
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
-
+*/
   // mmiss by theta bins - background subtracted
   myCanvas->Divide(5,4);
   double *Ssub_tCAND = hist_projections_backsub(myCanvas, h_mmiss_thetaCAND, neff_tbins);
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
   
-
-
-
-/*  std::cout << '\n' << "pmiss" << '\t' << "detected" << '\t' << "candidates" << '\t' << "efficiency" << '\t' << "error" << '\n';
-  
-  double det02 = h_mmiss_n02->Integral();
-  double cand02 = h_mmiss_sub02->Integral(h_mmiss_sub02->GetXaxis()->FindBin(0.85),h_mmiss_sub02->GetXaxis()->FindBin(1.05));
-  double err02 = pow(1.0/det02 + 1.0/cand02,0.5);
-  std::cout << "0.2-0.4 GeV" << '\t' << det02 << '\t' << cand02 << '\t' << det02/cand02 << '\t' << det02/cand02*err02 << '\n';
-
-*/
 
 
   /////////////////////
@@ -876,34 +847,27 @@ int main(int argc, char ** argv)
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
-
-  // mmiss in pmiss bins - landau + gaussian
-  myCanvas->Divide(5,4);
-  double * SB_pDET_landau = hist_projections_landau(myCanvas, h_mmiss_pmissDET, neff_pbins);
-  std::cout << "Detected - as a function of pmiss\n";
-  myCanvas->Print(fileName,"pdf");
-  myCanvas->Clear();
-
+/*
   // mmiss in pmiss bins - gaussian + gaussian
   myCanvas->Divide(5,4);
   double * SB_pDET_gauss = hist_projections_gauss(myCanvas, h_mmiss_pmissDET, neff_pbins);
   std::cout << "Detected - as a function of pmiss\n";
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
-
+*/
  
   // mmiss in pmiss bins with background subtracted
   myCanvas->Divide(5,4);
   double * Ssub_pDET = hist_projections_backsub(myCanvas, h_mmiss_pmissDET, neff_pbins);
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
- 
+/* 
   // mmiss in pmiss bins with background subtracted
   myCanvas->Divide(5,4);
   double * S_pDET = hist_projections(myCanvas, h_mmiss_pmissDET, neff_pbins);
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
-
+*/
 
   /////////////////////
   // DETECTED NEUTRON
@@ -920,32 +884,25 @@ int main(int argc, char ** argv)
   h_mmiss_thetaDET->Draw("colz");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
- 
-  // mmiss in theta bins - landau + gaussian
-  myCanvas->Divide(5,4);
-  double * SB_tDET_landau = hist_projections_landau(myCanvas, h_mmiss_thetaDET, neff_tbins);
-  std::cout << "Detected - as a function of theta\n";
-  myCanvas->Print(fileName,"pdf");
-  myCanvas->Clear();
-
+/*
   // mmiss in theta bins - gaussian + gaussian
   myCanvas->Divide(5,4);
   double * SB_tDET_gauss = hist_projections_gauss(myCanvas, h_mmiss_thetaDET, neff_tbins);
   std::cout << "Detected - as a function of theta\n";
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
-
+*/
 
   myCanvas->Divide(5,4);
   double * Ssub_tDET = hist_projections_backsub(myCanvas, h_mmiss_thetaDET, neff_tbins);
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
-
+/*
   myCanvas->Divide(5,4);
   double * S_tDET = hist_projections(myCanvas, h_mmiss_thetaDET, neff_tbins);
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
-
+*/
 
   /////////////////////
   // EFFICIENCY RESULTS
@@ -961,34 +918,10 @@ int main(int argc, char ** argv)
   myCanvas->Divide(2,2);
   for (int i=0; i<neff_pbins; i++){
       // NUMERATOR
-      /*// SSB method
-      double nval = h_neff_pmiss_numer_ssb->GetBinContent(i);
-      // find average numerated S/(S+B)-weighted value from 3 fits
-      double n1 = nval*(*(SB_pDET_landau+i)); double n2 = nval*(*(SB_pDET_gauss+i));
-      h_neff_pmiss_numer_ssb->SetBinContent(i,(n1+n2)/2.0);
-      // calculate numerical and systematic error
-      double syserr_n = std::abs(n1-n2); // calculate range of values
-      h_neff_pmiss_numer_ssb->SetBinError(i, std::sqrt( (n1+n2)/2.0 + pow(0.5*syserr_n,2.0) ) );*/
-
       // background subtraction
       h_neff_pmiss_numer_ssb->SetBinContent(i,*(Ssub_pDET+i));
       h_neff_pmiss_numer_ssb->SetBinError(i,std::sqrt(*(Ssub_pDET+i)));
-
-      /*std::cout << "n1 = " << n1 << '\n';
-      std::cout << "n2 = " << n2 << '\n';
-      std::cout << "Stat error: " << (n1+n2)/2.0 << '\n';
-      std::cout << "Syst error: " << 0.5*syserr_n << '\n';*/
-
       // DENOMINATOR
-      /*// SSB method
-      double dval = h_neff_pmiss_denom_ssb->GetBinContent(i);
-      // find average numerated S/(S+B)-weighted value from 3 fits
-      double d1 = dval*(*(SB_pCAND_landau+i)); double d2 = dval*(*(SB_pCAND_gauss+i)); 
-      h_neff_pmiss_denom_ssb->SetBinContent(i,(d1+d2)/2.0);
-      // calculate numerical and systematic error
-      double syserr_d = std::abs(d1-d2); // calculate range of values
-      h_neff_pmiss_denom_ssb->SetBinError(i, std::sqrt( (d1+d2)/2.0 + pow(0.5*syserr_d,2.0) ) );*/
-
       // background subtraction
       h_neff_pmiss_denom_ssb->SetBinContent(i,*(Ssub_pCAND+i));
       h_neff_pmiss_denom_ssb->SetBinError(i,std::sqrt(*(Ssub_pCAND+i)));
@@ -1042,29 +975,10 @@ int main(int argc, char ** argv)
   myCanvas->Divide(2,2);
   for (int i=0; i<neff_tbins; i++){
       // NUMERATOR
-      /*// SSB method
-      double nval = h_neff_thetamiss_numer_ssb->GetBinContent(i);
-      // find average numerated S/(S+B)-weighted value from 3 fits
-      double n1 = nval*(*(SB_tDET_landau+i)); double n2 = nval*(*(SB_tDET_gauss+i)); 
-      h_neff_thetamiss_numer_ssb->SetBinContent(i,(n1+n2)/2.0);
-      // calculate numerical and systematic error
-      double syserr_n = std::abs(n1-n2); // calculate range of values
-      h_neff_thetamiss_numer_ssb->SetBinError(i, std::sqrt( (n1+n2)/2.0 + pow(0.5*syserr_n,2.0) ) );*/
-
       // background subtraction
       h_neff_thetamiss_numer_ssb->SetBinContent(i,*(Ssub_tDET+i));
       h_neff_thetamiss_numer_ssb->SetBinError(i,std::sqrt(*(Ssub_tDET+i)));
-
       // DENOMINATOR
-      /*// SSB method
-      double dval = h_neff_thetamiss_denom_ssb->GetBinContent(i);
-      // find average numerated S/(S+B)-weighted value from 3 fits
-      double d1 = dval*(*(SB_tCAND_landau+i)); double d2 = dval*(*(SB_tCAND_gauss+i)); 
-      h_neff_thetamiss_denom_ssb->SetBinContent(i,(d1+d2)/2.0);
-      // calculate numerical and systematic error
-      double syserr_d = std::abs(d1-d2);// calculate range of values
-      h_neff_thetamiss_denom_ssb->SetBinError(i, std::sqrt( (d1+d2)/2.0 + pow(0.5*syserr_d,2.0) ) );*/
-
       // background subtraction
       h_neff_thetamiss_denom_ssb->SetBinContent(i,*(Ssub_tCAND+i));
       h_neff_thetamiss_denom_ssb->SetBinError(i,std::sqrt(*(Ssub_tCAND+i)));
@@ -1125,35 +1039,12 @@ int main(int argc, char ** argv)
 
 
 
-
-
-Double_t lorentzian(Double_t *x, Double_t *par) { // height, mean, width
-  return (0.5*par[0]*par[2]/TMath::Pi()) / TMath::Max( 1.e-10,(x[0]-par[1])*(x[0]-par[1]) + .25*par[2]*par[2] );
-}
-
-
 Double_t signal(Double_t *x, Double_t *par) { // height, mean, width
   return par[0]*exp(-pow((x[0]-par[1]),2.)/(2*pow(par[2],2.))); 
 }
-
-Double_t landau(Double_t *x, Double_t *par) {
-  return par[0]*TMath::Landau(x[0],par[1],par[2]); 
-}
-
 Double_t mmiss_signal_gauss(Double_t *x, Double_t *par) {
   return signal(x,par) + signal(x,&par[3]);
 }
-
-Double_t mmiss_landau_gauss(Double_t *x, Double_t *par) {
-  return par[0]*TMath::Landau(x[0],par[1],par[2]) + signal(x,&par[3]);
-}
-
-
-Double_t mmiss_signal_lorentz(Double_t *x, Double_t *par) {
-  return signal(x,par) + lorentzian(x,&par[3]);
-}
-
-
 
 
 
@@ -1177,107 +1068,6 @@ double get_pin_mmiss(TVector3 p_b, TVector3 p_e, TVector3 ppi){
   double mmiss = sqrt( (emiss*emiss) - pmiss.Mag2() );
 
   return mmiss;
-}
-
-
-
-double * hist_projections_landau(TCanvas * can, TH2D * hist2d, int num_hist)
-{
-  double p_start_val[num_hist];
-  double x_min = hist2d->GetXaxis()->GetXmin();
-  double x_max = hist2d->GetXaxis()->GetXmax();
-  double y_min = hist2d->GetYaxis()->GetXmin();
-  double y_max = hist2d->GetYaxis()->GetXmin();
-  double dp = (x_max-x_min)/num_hist;
-  double * SSB = new double[num_hist];
-  // plot and fit each graph
-  for (int i=0; i<num_hist; i++)
-  {
-    p_start_val[i] = x_min + i*dp;
-    int bin1 = hist2d->GetXaxis()->FindBin(p_start_val[i]);
-    int bin2 = hist2d->GetXaxis()->FindBin(p_start_val[i]+dp) - 1;
-    // make projection for x interval
-    can->cd(i+1);
-    TH1D * proj = hist2d->ProjectionY("",bin1,bin2,"d");
-    proj->Draw();
-    // fit histogram
-    TF1 * cfit = new TF1("cfit",mmiss_landau_gauss,Mdisp_lo,Mdisp_hi,6);
-    cfit->SetLineColor(kMagenta);
-    cfit->SetParameters(10000,0.94,0.05,1200,1.3,0.1);
-    cfit->SetParLimits(0,0,1000000);
-    cfit->SetParLimits(1,0.9,1.0);
-    cfit->SetParLimits(2,0.02,0.1);
-    cfit->SetParLimits(3,0,1000000);
-    cfit->SetParLimits(4,1.2,1.5);
-    cfit->SetParLimits(5,0,0.3);
-    proj->Fit("cfit");
-    cfit->Draw("same");
-    // separate signal/background
-    Double_t par[6];
-    cfit->GetParameters(par);
-    TF1 * bkfit = new TF1("backfit",signal,Mdisp_lo,Mdisp_hi,3);
-    bkfit->SetLineColor(kBlue);
-    bkfit->SetParameters(&par[3]);
-    bkfit->Draw("same");
-    TF1 * sgfit = new TF1("sgfit",landau,Mdisp_lo,Mdisp_hi,3);
-    sgfit->SetLineColor(kGreen);
-    sgfit->SetParameters(par);
-    sgfit->Draw("same");
-    // print S and B
-    SSB[i] = sgfit->Integral(Mlow,Mhigh)/cfit->Integral(Mlow,Mhigh); // S/(S+B)
-  }
-  return SSB;
-}
-
-
-
-
-double * hist_projections_gauss(TCanvas * can, TH2D * hist2d, int num_hist)
-{
-  double p_start_val[num_hist];
-  double x_min = hist2d->GetXaxis()->GetXmin();
-  double x_max = hist2d->GetXaxis()->GetXmax();
-  double y_min = hist2d->GetYaxis()->GetXmin();
-  double y_max = hist2d->GetYaxis()->GetXmin();
-  double dp = (x_max-x_min)/num_hist;
-  double * SSB = new double[num_hist];
-  // plot and fit each graph
-  for (int i=0; i<num_hist; i++)
-  {
-    p_start_val[i] = x_min + i*dp;
-    int bin1 = hist2d->GetXaxis()->FindBin(p_start_val[i]);
-    int bin2 = hist2d->GetXaxis()->FindBin(p_start_val[i]+dp) - 1;
-    // make projection for x interval
-    can->cd(i+1);
-    TH1D * proj = hist2d->ProjectionY("",bin1,bin2,"d");
-    proj->Draw();
-    // fit histogram
-    TF1 * cfit = new TF1("cfit",mmiss_signal_gauss,Mdisp_lo,Mdisp_hi,6);
-    cfit->SetLineColor(kMagenta);
-    cfit->SetParameters(10000,0.94,0.05,1200,1.3,0.1);
-    cfit->SetParLimits(0,0,1000000);
-    cfit->SetParLimits(1,0.9,1.0);
-    cfit->SetParLimits(2,0.02,0.1);
-    cfit->SetParLimits(3,0,1000000);
-    cfit->SetParLimits(4,1.2,1.5);
-    cfit->SetParLimits(5,0,0.3);
-    proj->Fit("cfit");
-    cfit->Draw("same");
-    // separate signal/background
-    Double_t par[6];
-    cfit->GetParameters(par);
-    TF1 * bkfit = new TF1("backfit",signal,Mdisp_lo,Mdisp_hi,3);
-    bkfit->SetLineColor(kBlue);
-    bkfit->SetParameters(&par[3]);
-    bkfit->Draw("same");
-    TF1 * sgfit = new TF1("sgfit",signal,Mdisp_lo,Mdisp_hi,3);
-    sgfit->SetLineColor(kGreen);
-    sgfit->SetParameters(par);
-    sgfit->Draw("same");
-    // print S and B
-    SSB[i] = sgfit->Integral(Mlow,Mhigh)/cfit->Integral(Mlow,Mhigh); // S/(S+B)
-  }
-  return SSB;
 }
 
 
