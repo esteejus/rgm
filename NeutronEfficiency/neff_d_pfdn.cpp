@@ -50,8 +50,6 @@ void printProgress(double percentage);
 double get_pin_mmiss(TVector3 p_b, TVector3 p_e, TVector3 ppi);
 Double_t signal(Double_t *x, Double_t *par); 
 Double_t mmiss_signal_gauss(Double_t *x, Double_t *par);
-//double * hist_projections_gauss(TCanvas * can, TH2D * hist2d, int num_hist);
-double * hist_projections(TCanvas * can, TH2D * hist2d, int num_hist);
 double * hist_projections_backsub(TCanvas * can, TH2D * hist2d, int num_hist, bool subtract_bk);
 
 
@@ -649,15 +647,6 @@ int main(int argc, char ** argv)
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
   
-/*
-  // mmiss in pmiss bins - gaussian + gaussian
-  myCanvas->Divide(5,4);
-  double * SB_pCAND_gauss = hist_projections_gauss(myCanvas, h_mmiss_pmissCAND, neff_pbins);
-  std::cout << "Candidates - as a function of pmiss\n";
-  myCanvas->Print(fileName,"pdf");
-  myCanvas->Clear();
-*/
-
 
   // mmiss in pmiss bins
   myCanvas->Divide(5,4);
@@ -704,15 +693,6 @@ int main(int argc, char ** argv)
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
   
-/*
-  // mmiss by theta bins - gaussian + gaussian
-  myCanvas->Divide(5,4);
-  double * SB_tCAND_gauss = hist_projections_gauss(myCanvas, h_mmiss_thetaCAND, neff_tbins);
-  std::cout << "Candidates - as a function of theta\n";
-  myCanvas->Print(fileName,"pdf");
-  myCanvas->Clear();
-*/
-
 
   // mmiss by theta bins
   myCanvas->Divide(5,4);
@@ -863,15 +843,6 @@ int main(int argc, char ** argv)
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
-/*
-  // mmiss in pmiss bins - gaussian + gaussian
-  myCanvas->Divide(5,4);
-  double * SB_pDET_gauss = hist_projections_gauss(myCanvas, h_mmiss_pmissDET, neff_pbins);
-  std::cout << "Detected - as a function of pmiss\n";
-  myCanvas->Print(fileName,"pdf");
-  myCanvas->Clear();
-*/
-
 
   // mmiss in pmiss bins
   myCanvas->Divide(5,4);
@@ -884,13 +855,8 @@ int main(int argc, char ** argv)
   double * Ssub_pDET = hist_projections_backsub(myCanvas, h_mmiss_pmissDET, neff_pbins, true);
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
-/* 
-  // mmiss in pmiss bins with background subtracted
-  myCanvas->Divide(5,4);
-  double * S_pDET = hist_projections(myCanvas, h_mmiss_pmissDET, neff_pbins);
-  myCanvas->Print(fileName,"pdf");
-  myCanvas->Clear();
-*/
+
+
 
   /////////////////////
   // DETECTED NEUTRON
@@ -907,14 +873,6 @@ int main(int argc, char ** argv)
   h_mmiss_thetaDET->Draw("colz");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
-/*
-  // mmiss in theta bins - gaussian + gaussian
-  myCanvas->Divide(5,4);
-  double * SB_tDET_gauss = hist_projections_gauss(myCanvas, h_mmiss_thetaDET, neff_tbins);
-  std::cout << "Detected - as a function of theta\n";
-  myCanvas->Print(fileName,"pdf");
-  myCanvas->Clear();
-*/
 
   myCanvas->Divide(5,4);
   hist_projections_backsub(myCanvas, h_mmiss_thetaDET, neff_tbins, false);
@@ -925,12 +883,8 @@ int main(int argc, char ** argv)
   double * Ssub_tDET = hist_projections_backsub(myCanvas, h_mmiss_thetaDET, neff_tbins, true);
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
-/*
-  myCanvas->Divide(5,4);
-  double * S_tDET = hist_projections(myCanvas, h_mmiss_thetaDET, neff_tbins);
-  myCanvas->Print(fileName,"pdf");
-  myCanvas->Clear();
-*/
+
+
 
   /////////////////////
   // EFFICIENCY RESULTS
@@ -1085,19 +1039,6 @@ void printProgress(double percentage) {
 }
 
 
-double get_pin_mmiss(TVector3 p_b, TVector3 p_e, TVector3 ppi){
-
-  double Ebeam = p_b.Mag();
-  double Ee = p_e.Mag();
-  double Epi = sqrt(ppi.Mag2() + m_piplus*m_piplus);
-  double emiss = Ebeam - Ee + mp - Epi;
-  TVector3 pmiss = p_b - p_e - ppi;
-
-  double mmiss = sqrt( (emiss*emiss) - pmiss.Mag2() );
-
-  return mmiss;
-}
-
 
 
 // input: 2d histogram of missing mass vs either momentum or theta
@@ -1164,32 +1105,4 @@ std::cout << par[3] << '\t' << par[4] << '\t' << par[5] << endl;
   }
   return S;
 }
-
-
-// make histogram projections, fit to 2 Gaussians
-
-double * hist_projections(TCanvas * can, TH2D * hist2d, int num_hist)
-{
-  double p_start_val[num_hist];
-  double x_min = hist2d->GetXaxis()->GetXmin();
-  double x_max = hist2d->GetXaxis()->GetXmax();
-  //double y_min = hist2d->GetYaxis()->GetXmin();
-  //double y_max = hist2d->GetYaxis()->GetXmin();
-  double dp = (x_max-x_min)/num_hist;
-  double * Ssub = new double[num_hist];
-  // plot and fit each graph
-  for (int i=0; i<num_hist; i++)
-  {
-    p_start_val[i] = x_min + i*dp;
-    int bin1 = hist2d->GetXaxis()->FindBin(p_start_val[i]);
-    int bin2 = hist2d->GetXaxis()->FindBin(p_start_val[i]+dp);
-    // make projection for x interval
-    can->cd(i+1);
-    TH1D * proj = hist2d->ProjectionY("",bin1,bin2,"d");
-    proj->Draw();
-    Ssub[i] = proj->Integral(proj->GetXaxis()->FindBin(Mlow),proj->GetXaxis()->FindBin(Mhigh));
-  }
-  return Ssub;
-}
-
 
