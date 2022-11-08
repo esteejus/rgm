@@ -3,6 +3,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <iomanip>
 #include <chrono>
 #include <vector>
 #include <typeinfo>
@@ -35,6 +36,10 @@ const double m_piplus = 0.13957039;
 // efficiency constants
 int neff_pbins = 20;
 int neff_tbins = 20;
+int pgrid_x = ceil(sqrt(neff_pbins));
+int pgrid_y = ceil((double)neff_pbins/(double)pgrid_x);
+int tgrid_x = ceil(sqrt(neff_tbins));
+int tgrid_y = ceil((double)neff_tbins/(double)tgrid_x);
 double Mlow = 0.85;
 double Mhigh = 1.05;
 double theta_lo = 40;  // 40 for CD p
@@ -54,7 +59,7 @@ Double_t signal(Double_t *x, Double_t *par);
 Double_t mmiss_signal_gauss(Double_t *x, Double_t *par);
 Double_t mmiss_signal_poly(Double_t *x, Double_t *par);
 Double_t mmiss_signal_lorentz(Double_t *x, Double_t *par);
-double * hist_projections(TCanvas * can, TH2D * hist2d, int num_hist);
+double * hist_projections(TCanvas * can, TH2D * hist2d, int num_hist, char v);
 
 
 
@@ -642,10 +647,8 @@ int main(int argc, char ** argv)
   
 
   // mmiss in pmiss bins - landau + gaussian
-  myCanvas->Divide(5,4);
-  double * SB_pCAND_ = hist_projections(myCanvas, h_mmiss_pmissCAND, neff_pbins);
-  std::cout << "Candidates - as a function of pmiss\n";
-  //for (int i=0; i<neff_pbins; i++) { std::cout << "element " << i << " = " << *(SB_pCAND + i) << '\n'; }
+  myCanvas->Divide(pgrid_x,pgrid_y);
+  double * SB_pCAND_ = hist_projections(myCanvas, h_mmiss_pmissCAND, neff_pbins, 'p');
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
@@ -685,22 +688,12 @@ int main(int argc, char ** argv)
   
 
   // mmiss by theta bins - landau + gaussian
-  myCanvas->Divide(5,4);
-  double * SB_tCAND = hist_projections(myCanvas, h_mmiss_thetaCAND, neff_tbins);
+  myCanvas->Divide(tgrid_x,tgrid_y);
+  double * SB_tCAND = hist_projections(myCanvas, h_mmiss_thetaCAND, neff_tbins, 't');
   std::cout << "Candidates - as a function of theta\n";
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
-
-
-/*  std::cout << '\n' << "pmiss" << '\t' << "detected" << '\t' << "candidates" << '\t' << "efficiency" << '\t' << "error" << '\n';
-  
-  double det02 = h_mmiss_n02->Integral();
-  double cand02 = h_mmiss_sub02->Integral(h_mmiss_sub02->GetXaxis()->FindBin(0.85),h_mmiss_sub02->GetXaxis()->FindBin(1.05));
-  double err02 = pow(1.0/det02 + 1.0/cand02,0.5);
-  std::cout << "0.2-0.4 GeV" << '\t' << det02 << '\t' << cand02 << '\t' << det02/cand02 << '\t' << det02/cand02*err02 << '\n';
-
-*/
 
 
   /////////////////////
@@ -840,8 +833,8 @@ int main(int argc, char ** argv)
 
 
   // mmiss in pmiss bins - landau + gaussian
-  myCanvas->Divide(5,4);
-  double * SB_pDET = hist_projections(myCanvas, h_mmiss_pmissDET, neff_pbins);
+  myCanvas->Divide(pgrid_x,pgrid_y);
+  double * SB_pDET = hist_projections(myCanvas, h_mmiss_pmissDET, neff_pbins, 'p');
   std::cout << "Detected - as a function of pmiss\n";
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
@@ -865,8 +858,8 @@ int main(int argc, char ** argv)
   myCanvas->Clear();
  
   // mmiss in theta bins - landau + gaussian
-  myCanvas->Divide(5,4);
-  double * SB_tDET = hist_projections(myCanvas, h_mmiss_thetaDET, neff_tbins);
+  myCanvas->Divide(tgrid_x,tgrid_y);
+  double * SB_tDET = hist_projections(myCanvas, h_mmiss_thetaDET, neff_tbins, 't');
   std::cout << "Detected - as a function of theta\n";
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
@@ -1009,7 +1002,7 @@ double get_pin_mmiss(TVector3 p_b, TVector3 p_e, TVector3 ppi){
 
 
 
-double * hist_projections(TCanvas * can, TH2D * hist2d, int num_hist)
+double * hist_projections(TCanvas * can, TH2D * hist2d, int num_hist, char v)
 {
   double p_start_val[num_hist];
   double x_min = hist2d->GetXaxis()->GetXmin();
@@ -1024,9 +1017,35 @@ double * hist_projections(TCanvas * can, TH2D * hist2d, int num_hist)
     p_start_val[i] = x_min + i*dp;
     int bin1 = hist2d->GetXaxis()->FindBin(p_start_val[i]);
     int bin2 = hist2d->GetXaxis()->FindBin(p_start_val[i]+dp) - 1;
+
     // make projection for x interval
     can->cd(i+1);
     TH1D * proj = hist2d->ProjectionY("",bin1,bin2,"d");
+
+    // create name of missing mass histogram for current momentum/theta interval
+    std::ostringstream sObj1, sObj2;
+    std::string leftTitle = "Missing Mass in ("; std::string midTitle = ",";
+    std::string rightTitle;
+    if (v=='p')
+    {
+      rightTitle = ") GeV/c";
+      sObj1 << std::fixed << std::setprecision(3) << p_start_val[i];
+      sObj2 << std::fixed << std::setprecision(3) << p_start_val[i] + dp;
+    }
+    else if (v=='t')
+    {
+      rightTitle = ") deg";
+      sObj1 << std::fixed << std::setprecision(0) << p_start_val[i];
+      sObj2 << std::fixed << std::setprecision(0) << p_start_val[i] + dp;
+    }
+    else
+    {
+      std::cout << "Invalid projection variable for missing mass\n";
+    }
+    std::string result = leftTitle + sObj1.str() + midTitle + sObj2.str() + rightTitle;
+    proj->SetTitle(result.c_str());
+
+    // draw
     proj->Draw();
     SSB[i] = proj->Integral(Mlow,Mhigh);
   }

@@ -3,6 +3,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <iomanip>
 #include <chrono>
 #include <vector>
 #include <typeinfo>
@@ -35,6 +36,10 @@ const double m_piplus = 0.13957039;
 // efficiency constants
 int neff_pbins = 10;
 int neff_tbins = 10;
+int pgrid_x = ceil(sqrt(neff_pbins));
+int pgrid_y = ceil((double)neff_pbins/(double)pgrid_x);
+int tgrid_x = ceil(sqrt(neff_tbins));
+int tgrid_y = ceil((double)neff_tbins/(double)tgrid_x);
 double Mlow = 0.85;
 double Mhigh = 1.05;
 double theta_lo = 90;  // 40 for CD p
@@ -50,7 +55,7 @@ void printProgress(double percentage);
 double get_pin_mmiss(TVector3 p_b, TVector3 p_e, TVector3 ppi);
 Double_t signal(Double_t *x, Double_t *par); 
 Double_t mmiss_signal_gauss(Double_t *x, Double_t *par);
-double * hist_projections_backsub(TCanvas * can, TH2D * hist2d, int num_hist, bool subtract_bk);
+double * hist_projections_backsub(TCanvas * can, TH2D * hist2d, int num_hist, bool subtract_bk, char v);
 
 
 
@@ -230,12 +235,9 @@ int main(int argc, char ** argv)
   /////////////////////////////////////
   TH1D * h_neff_pmiss_numer_ssb = new TH1D("neff_pm_numer_ssb","Neutrons;p_{miss} (GeV/c);Counts",neff_pbins,0.25,1);
   hist_list_1.push_back(h_neff_pmiss_numer_ssb);
-  TH1D * h_neff_pmiss_numer_corr = new TH1D("neff_pm_corr","Neutrons;p_{miss} (GeV/c);Counts",neff_pbins,0.25,1);
-  hist_list_1.push_back(h_neff_pmiss_numer_corr);
   TH1D * h_neff_pmiss_denom_ssb = new TH1D("neff_pm_denom_ssb","Neutron Candidates;p_{miss} (GeV/c);Counts",neff_pbins,0.25,1);
   hist_list_1.push_back(h_neff_pmiss_denom_ssb);
-  TH1D * h_neff_pmiss_denom_corr = new TH1D("neff_pm_denom_corr","Neutron Candidates (Background Subtracted);p_{miss} (GeV/c);Counts (corrected)",neff_pbins,0.25,1);
-  hist_list_1.push_back(h_neff_pmiss_denom_corr);
+
 
 
 
@@ -244,12 +246,8 @@ int main(int argc, char ** argv)
   /////////////////////////////////////
   TH1D * h_neff_thetamiss_denom_ssb = new TH1D("neff_tm_denom_ssb","Neutron Candidates;#theta_{miss} (deg);Counts",neff_tbins,theta_lo,theta_hi);
   hist_list_1.push_back(h_neff_thetamiss_denom_ssb);
-  TH1D * h_neff_thetamiss_denom_corr = new TH1D("neff_tm_denom_corr","Neutron Candidates;#theta_{miss} (deg);Counts",neff_tbins,theta_lo,theta_hi);
-  hist_list_1.push_back(h_neff_thetamiss_denom_corr);
   TH1D * h_neff_thetamiss_numer_ssb = new TH1D("neff_tm_numer_ssb","Detected Neutrons;#theta_{miss} (deg);Counts",neff_tbins,theta_lo,theta_hi);
   hist_list_1.push_back(h_neff_thetamiss_numer_ssb);
-  TH1D * h_neff_thetamiss_numer_corr = new TH1D("neff_tm_numer_corr","Detected Neutrons;#theta_{miss} (deg);Counts",neff_tbins,theta_lo,theta_hi);
-  hist_list_1.push_back(h_neff_thetamiss_numer_corr);
 
 
   for(int i=0; i<hist_list_1.size(); i++){
@@ -370,11 +368,11 @@ int main(int argc, char ** argv)
     h_mmiss_theta->Fill(thetamiss,mmiss,weight);
     h_mmiss_thetaCAND->Fill(thetamiss,mmiss,weight);
 
-    for (int i=0; i<neff_pbins; i++){
+    /*for (int i=0; i<neff_pbins; i++){
       if (mmiss>Mlow && mmiss<Mhigh) { h_neff_pmiss_denom_ssb->Fill(pmiss.Mag(),weight);}  }
 
     for (int i=0; i<neff_tbins; i++){
-      if (mmiss>Mlow && mmiss<Mhigh) { h_neff_thetamiss_denom_ssb->Fill(thetamiss,weight);}  }
+      if (mmiss>Mlow && mmiss<Mhigh) { h_neff_thetamiss_denom_ssb->Fill(thetamiss,weight);}  }*/
 
 
     // REQUIRE A NEUTRON HERE
@@ -649,14 +647,14 @@ int main(int argc, char ** argv)
   
 
   // mmiss in pmiss bins
-  myCanvas->Divide(5,4);
-  hist_projections_backsub(myCanvas, h_mmiss_pmissCAND, neff_pbins, 0);
+  myCanvas->Divide(pgrid_x,pgrid_y);
+  hist_projections_backsub(myCanvas, h_mmiss_pmissCAND, neff_pbins, 0, 'p');
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
   // mmiss in pmiss bins with background subtracted
-  myCanvas->Divide(5,4);
-  double *Ssub_pCAND = hist_projections_backsub(myCanvas, h_mmiss_pmissCAND, neff_pbins, 1);
+  myCanvas->Divide(pgrid_x,pgrid_y);
+  double *Ssub_pCAND = hist_projections_backsub(myCanvas, h_mmiss_pmissCAND, neff_pbins, 1, 'p');
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
@@ -695,14 +693,14 @@ int main(int argc, char ** argv)
   
 
   // mmiss by theta bins
-  myCanvas->Divide(5,4);
-  hist_projections_backsub(myCanvas, h_mmiss_thetaCAND, neff_tbins, false);
+  myCanvas->Divide(tgrid_x,tgrid_y);
+  hist_projections_backsub(myCanvas, h_mmiss_thetaCAND, neff_tbins, false, 't');
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
   // mmiss by theta bins - background subtracted
-  myCanvas->Divide(5,4);
-  double *Ssub_tCAND = hist_projections_backsub(myCanvas, h_mmiss_thetaCAND, neff_tbins, true);
+  myCanvas->Divide(tgrid_x,tgrid_y);
+  double *Ssub_tCAND = hist_projections_backsub(myCanvas, h_mmiss_thetaCAND, neff_tbins, true, 't');
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
   
@@ -845,14 +843,14 @@ int main(int argc, char ** argv)
 
 
   // mmiss in pmiss bins
-  myCanvas->Divide(5,4);
-  hist_projections_backsub(myCanvas, h_mmiss_pmissDET, neff_pbins, false);
+  myCanvas->Divide(pgrid_x,pgrid_y);
+  hist_projections_backsub(myCanvas, h_mmiss_pmissDET, neff_pbins, false, 'p');
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
  
   // mmiss in pmiss bins with background subtracted
-  myCanvas->Divide(5,4);
-  double * Ssub_pDET = hist_projections_backsub(myCanvas, h_mmiss_pmissDET, neff_pbins, true);
+  myCanvas->Divide(pgrid_x,pgrid_y);
+  double * Ssub_pDET = hist_projections_backsub(myCanvas, h_mmiss_pmissDET, neff_pbins, true, 'p');
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
@@ -874,13 +872,13 @@ int main(int argc, char ** argv)
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
-  myCanvas->Divide(5,4);
-  hist_projections_backsub(myCanvas, h_mmiss_thetaDET, neff_tbins, false);
+  myCanvas->Divide(tgrid_x,tgrid_y);
+  hist_projections_backsub(myCanvas, h_mmiss_thetaDET, neff_tbins, false, 't');
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
-  myCanvas->Divide(5,4);
-  double * Ssub_tDET = hist_projections_backsub(myCanvas, h_mmiss_thetaDET, neff_tbins, true);
+  myCanvas->Divide(tgrid_x,tgrid_y);
+  double * Ssub_tDET = hist_projections_backsub(myCanvas, h_mmiss_thetaDET, neff_tbins, true, 't');
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
@@ -896,7 +894,7 @@ int main(int argc, char ** argv)
   myText->Clear();
 
 
-  // efficiency vs pmiss using S/(S+B) filling
+  // efficiency vs pmiss using background-subtracted numerator and denominator
   myCanvas->Divide(2,2);
   for (int i=0; i<neff_pbins; i++){
       // NUMERATOR
@@ -932,28 +930,7 @@ int main(int argc, char ** argv)
 
 
 
-
-  // efficiency vs pmiss using background subtraction
-  myCanvas->Divide(2,2);
-  for (int i=0; i<neff_tbins; i++){
-    h_neff_pmiss_numer_corr->SetBinContent(i,*(Ssub_pDET+i));
-    h_neff_pmiss_denom_corr->SetBinContent(i,*(Ssub_pCAND+i));
-  }
-  myCanvas->cd(1);
-  h_neff_pmiss_numer_corr->Draw();
-  myCanvas->cd(2);
-  h_neff_pmiss_denom_corr->Draw();
-  myCanvas->cd(3);
-  TH1D * h_neff_pmiss_corr = (TH1D*)h_neff_pmiss_numer_corr->Clone();
-  h_neff_pmiss_corr->Divide(h_neff_pmiss_denom_corr);
-  h_neff_pmiss_corr->Draw();
-  h_neff_pmiss_corr->GetYaxis()->SetTitle("corrected efficiency");
-  h_neff_pmiss_corr->GetYaxis()->SetRangeUser(0.,0.16);
-  myCanvas->Print(fileName,"pdf");
-  myCanvas->Clear();
-
-
-  // efficiency vs theta using S/(S+B) filling
+  // efficiency vs theta using background-subtracted numerator and denominator
   myCanvas->Divide(2,2);
   for (int i=0; i<neff_tbins; i++){
       // NUMERATOR
@@ -987,25 +964,6 @@ int main(int argc, char ** argv)
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
-
-  // efficiency vs theta using background subtraction
-  myCanvas->Divide(2,2);
-  for (int i=0; i<neff_tbins; i++){
-    h_neff_thetamiss_numer_corr->SetBinContent(i,*(Ssub_tDET+i));
-    h_neff_thetamiss_denom_corr->SetBinContent(i,*(Ssub_tCAND+i));
-  }
-  myCanvas->cd(1);
-  h_neff_thetamiss_numer_corr->Draw();
-  myCanvas->cd(2);
-  h_neff_thetamiss_denom_corr->Draw();
-  myCanvas->cd(3);
-  TH1D * h_neff_thetamiss_corr = (TH1D*)h_neff_thetamiss_numer_corr->Clone();
-  h_neff_thetamiss_corr->Divide(h_neff_thetamiss_denom_corr);
-  h_neff_thetamiss_corr->Draw();
-  h_neff_thetamiss_corr->GetYaxis()->SetTitle("efficiency");
-  h_neff_thetamiss_corr->GetYaxis()->SetRangeUser(0.,0.16);
-  myCanvas->Print(fileName,"pdf");
-  myCanvas->Clear();
 
 
 
@@ -1046,7 +1004,7 @@ void printProgress(double percentage) {
 // output: interval of missing mass peak from Mlow to Mhigh
 // if subtract_bk = False, the missing mass histograms will be fit to the sum of 2 Gaussians (signal + background)
 // if subtract_bk = True, the background fit will be subtracted from the missing mass histogram, and the signal fit displayed
-double * hist_projections_backsub(TCanvas * can, TH2D * hist2d, int num_hist, bool subtract_bk)
+double * hist_projections_backsub(TCanvas * can, TH2D * hist2d, int num_hist, bool subtract_bk, char v)
 {
   double p_start_val[num_hist];
   double x_min = hist2d->GetXaxis()->GetXmin();
@@ -1056,13 +1014,37 @@ double * hist_projections_backsub(TCanvas * can, TH2D * hist2d, int num_hist, bo
   // plot and fit each graph
   for (int i=0; i<num_hist; i++)
   {
+    // set momentum/theta interval for this missing mass projection
     p_start_val[i] = x_min + i*dp;
     int bin1 = hist2d->GetXaxis()->FindBin(p_start_val[i]);
     int bin2 = hist2d->GetXaxis()->FindBin(p_start_val[i]+dp);
     // make projection for x interval
     can->cd(i+1);
     TH1D * proj = hist2d->ProjectionY("",bin1,bin2,"d");
-    //proj->Draw();
+
+    // create name of missing mass histogram for current momentum/theta interval
+    std:ostringstream sObj1, sObj2;
+    std::string leftTitle = "Missing Mass in ("; std::string midTitle = ",";
+    std::string rightTitle;
+    if (v=='p')
+    {
+      rightTitle = ") GeV/c";
+      sObj1 << std::fixed << std::setprecision(3) << p_start_val[i];
+      sObj2 << std::fixed << std::setprecision(3) << p_start_val[i] + dp;
+    }
+    else if (v=='t')
+    {
+      rightTitle = ") deg";
+      sObj1 << std::fixed << std::setprecision(0) << p_start_val[i];
+      sObj2 << std::fixed << std::setprecision(0) << p_start_val[i] + dp;
+    }
+    else
+    {
+      std::cout << "Invalid projection variable for missing mass\n";
+    }
+    std::string result = leftTitle + sObj1.str() + midTitle + sObj2.str() + rightTitle;
+    proj->SetTitle(result.c_str());
+
     // fit histogram to Gaussian (signal) + Gaussian (background)
     TF1 * cfit = new TF1("cfit",mmiss_signal_gauss,Mdisp_lo,Mdisp_hi,6);
     cfit->SetLineColor(kMagenta);
@@ -1079,7 +1061,6 @@ double * hist_projections_backsub(TCanvas * can, TH2D * hist2d, int num_hist, bo
     // fit background
     Double_t par[6];
     cfit->GetParameters(par);
-std::cout << par[3] << '\t' << par[4] << '\t' << par[5] << endl;
     TF1 * bkfit = new TF1("backfit",signal,Mdisp_lo,Mdisp_hi,3);
     //bkfit->SetLineColor(kBlue);
     bkfit->SetParameters(&par[3]);

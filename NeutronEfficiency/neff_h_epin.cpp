@@ -3,6 +3,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <iomanip>
 #include <chrono>
 #include <vector>
 #include <typeinfo>
@@ -36,7 +37,7 @@ Double_t background_poly(Double_t *x, Double_t *par);
 Double_t signal(Double_t *x, Double_t *par); 
 Double_t mmiss_signal_gauss(Double_t *x, Double_t *par);
 Double_t mmiss_signal_poly(Double_t *x, Double_t *par);
-double * hist_projections(TCanvas * can, TH2D * hist2d, int num_hist);
+double * hist_projections(TCanvas * can, TH2D * hist2d, int num_hist, char v);
 
 // theta ranges
 double t1 = 40;
@@ -48,6 +49,10 @@ double t5 = 80;
 // misc
 int neff_pbins = 16;
 int neff_tbins = 16;
+int pgrid_x = ceil(sqrt(neff_pbins));
+int pgrid_y = ceil((double)neff_pbins/(double)pgrid_x);
+int tgrid_x = ceil(sqrt(neff_tbins));
+int tgrid_y = ceil((double)neff_tbins/(double)tgrid_x);
 double p_lo = 0.2;
 double p_hi = 1.1;
 double t_lo = 40;
@@ -669,8 +674,8 @@ int main(int argc, char ** argv)
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
-  myCanvas->Divide(4,4);
-  double * sigd_int1 = hist_projections(myCanvas,h_mmiss_pmiss_int1_denom,neff_pbins);
+  myCanvas->Divide(pgrid_x,pgrid_y);
+  double * sigd_int1 = hist_projections(myCanvas,h_mmiss_pmiss_int1_denom,neff_pbins, 'p');
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
@@ -689,8 +694,8 @@ int main(int argc, char ** argv)
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
-  myCanvas->Divide(4,4);
-  double * sigd_int2 = hist_projections(myCanvas,h_mmiss_pmiss_int2_denom,neff_pbins);
+  myCanvas->Divide(pgrid_x,pgrid_y);
+  double * sigd_int2 = hist_projections(myCanvas,h_mmiss_pmiss_int2_denom,neff_pbins, 'p');
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
@@ -709,9 +714,9 @@ int main(int argc, char ** argv)
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
-  myCanvas->Divide(4,4);
+  myCanvas->Divide(pgrid_x,pgrid_y);
   myCanvas->cd(1);
-  double * sigd_int3 = hist_projections(myCanvas,h_mmiss_pmiss_int3_denom,neff_pbins);
+  double * sigd_int3 = hist_projections(myCanvas,h_mmiss_pmiss_int3_denom,neff_pbins, 'p');
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
@@ -759,9 +764,9 @@ int main(int argc, char ** argv)
   myCanvas->Clear();
 
 
-  myCanvas->Divide(4,4);
+  myCanvas->Divide(tgrid_x,tgrid_y);
   myCanvas->cd(1);
-  double * sigd_t = hist_projections(myCanvas,h_mmiss_theta_denom,neff_tbins);
+  double * sigd_t = hist_projections(myCanvas,h_mmiss_theta_denom,neff_tbins, 't');
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
@@ -928,8 +933,8 @@ int main(int argc, char ** argv)
   myCanvas->Clear();
 
   // all angles
-  myCanvas->Divide(4,4);
-  double * justhereforthehist = hist_projections(myCanvas,h_mmiss_pmiss_allt_numer,neff_pbins);
+  myCanvas->Divide(pgrid_x,pgrid_y);
+  double * justhereforthehist = hist_projections(myCanvas,h_mmiss_pmiss_allt_numer,neff_pbins, 'p');
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
@@ -940,8 +945,8 @@ int main(int argc, char ** argv)
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
-  myCanvas->Divide(4,4);
-  double * sign_int1 = hist_projections(myCanvas,h_mmiss_pmiss_int1_numer,neff_pbins);
+  myCanvas->Divide(pgrid_x,pgrid_y);
+  double * sign_int1 = hist_projections(myCanvas,h_mmiss_pmiss_int1_numer,neff_pbins, 'p');
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
@@ -959,8 +964,8 @@ int main(int argc, char ** argv)
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
-  myCanvas->Divide(4,4);
-  double * sign_int2 = hist_projections(myCanvas,h_mmiss_pmiss_int2_numer,neff_pbins);
+  myCanvas->Divide(pgrid_x,pgrid_y);
+  double * sign_int2 = hist_projections(myCanvas,h_mmiss_pmiss_int2_numer,neff_pbins, 'p');
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
@@ -978,8 +983,8 @@ int main(int argc, char ** argv)
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
-  myCanvas->Divide(4,4);
-  double * sign_int3 = hist_projections(myCanvas,h_mmiss_pmiss_int3_numer,neff_pbins);
+  myCanvas->Divide(pgrid_x,pgrid_y);
+  double * sign_int3 = hist_projections(myCanvas,h_mmiss_pmiss_int3_numer,neff_pbins, 'p');
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
@@ -1015,8 +1020,8 @@ int main(int argc, char ** argv)
   myCanvas->Clear();
 
 
-  myCanvas->Divide(4,4);
-  hist_projections(myCanvas,h_mmiss_theta_numer,neff_tbins);
+  myCanvas->Divide(tgrid_x,tgrid_y);
+  hist_projections(myCanvas,h_mmiss_theta_numer,neff_tbins, 't');
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
@@ -1307,7 +1312,7 @@ double get_pin_mmiss(TVector3 p_b, TVector3 p_e, TVector3 ppi){
 }
 
 
-double * hist_projections(TCanvas * can, TH2D * hist2d, int num_hist)
+double * hist_projections(TCanvas * can, TH2D * hist2d, int num_hist, char v)
 {
   double p_start_val[num_hist];
   double x_min = hist2d->GetXaxis()->GetXmin();
@@ -1319,10 +1324,35 @@ double * hist_projections(TCanvas * can, TH2D * hist2d, int num_hist)
     p_start_val[i] = x_min + i*dp;
     int bin1 = hist2d->GetXaxis()->FindBin(p_start_val[i]);
     int bin2 = hist2d->GetXaxis()->FindBin(p_start_val[i]+dp) - 1;
-std::cout << "bin 2 = " << bin2 << '\n';
+
     // make projection for x interval
     can->cd(i+1);
     TH1D * proj = hist2d->ProjectionY("",bin1,bin2,"d");
+
+    // create name of missing mass histogram for current momentum/theta interval
+    std::ostringstream sObj1, sObj2;
+    std::string leftTitle = "Missing Mass in ("; std::string midTitle = ",";
+    std::string rightTitle;
+    if (v=='p')
+    {
+      rightTitle = ") GeV/c";
+      sObj1 << std::fixed << std::setprecision(3) << p_start_val[i];
+      sObj2 << std::fixed << std::setprecision(3) << p_start_val[i] + dp;
+    }
+    else if (v=='t')
+    {
+      rightTitle = ") deg";
+      sObj1 << std::fixed << std::setprecision(0) << p_start_val[i];
+      sObj2 << std::fixed << std::setprecision(0) << p_start_val[i] + dp;
+    }
+    else
+    {
+      std::cout << "Invalid projection variable for missing mass\n";
+    }
+    std::string result = leftTitle + sObj1.str() + midTitle + sObj2.str() + rightTitle;
+    proj->SetTitle(result.c_str());
+
+    // draw
     proj->Draw();
     S[i] = proj->Integral(proj->GetXaxis()->FindBin(0.85),proj->GetXaxis()->FindBin(1.05));
   }
