@@ -63,6 +63,7 @@ int main(int argc, char ** argv)
   }
   auto config_c12=chain.GetC12Reader();
   chain.SetReaderTags({0});
+  //auto ctof_hits = config_c12->addBank("CTOF::hits");
   const std::unique_ptr<clas12::clas12reader>& c12=chain.C12ref();
   chain.db()->turnOffQADB();
   
@@ -194,7 +195,6 @@ int main(int argc, char ** argv)
   TH1D * h_timediff_n_ECAL = new TH1D("timediff_n_ECAL","ToF-ToF_{|n|} ;ToF-ToF_{|n|};Counts",100,-0.2,0.2);
   hist_list_1.push_back(h_timediff_n_ECAL);
 
-
   TH2D * h_mom_theta_n_ECAL[6];
   for(int i=0; i<6; i++){
     sprintf(temp_name,"mom_theta_n_%d",i+1);
@@ -202,6 +202,13 @@ int main(int argc, char ** argv)
     h_mom_theta_n_ECAL[i] = new TH2D(temp_name,temp_title,100,0.1,2,100,3,40);
     hist_list_2.push_back(h_mom_theta_n_ECAL[i]);
   }
+
+
+  // extra bank info
+  TH2D * h_dedx_ECAL = new TH2D("dedx_ECAL","Energy Deposition;#beta#gamma = p/m;dE/dx (MeV/cm)",100,0.1,1.5,100,1,20);
+  hist_list_2.push_back(h_dedx_ECAL);
+  TH2D * h_cluster_ECAL = new TH2D("cluster_ECAL","Cluster Size and Multiplicity;Cluster Size;Cluster Multiplicity",10,0,10,10,0,10);
+  hist_list_2.push_back(h_cluster_ECAL);
 
   /////////////////////////////////////
   //CND Neutron Information
@@ -230,6 +237,20 @@ int main(int argc, char ** argv)
   hist_list_1.push_back(h_timediff_n_CND);
   TH2D * h_mom_theta_n_CND = new TH2D("mom_theta_n_CND","p_{n} vs. #theta_{n} ;p_{n};#theta_{n}",100,0,2,100,35,145);
   hist_list_2.push_back(h_mom_theta_n_CND);
+
+  // extra bank info
+  TH2D * h_dedx_CND = new TH2D("dedx_CND","Energy Deposition;#beta#gamma = p/m;dE/dx (MeV/cm)",100,0.1,1.5,100,1,20);
+  hist_list_2.push_back(h_dedx_CND);
+  TH2D * h_cluster_CND = new TH2D("cluster_CND","Cluster Size and Multiplicity;Cluster Size;Cluster Multiplicity",10,0,10,10,0,10);
+  hist_list_2.push_back(h_cluster_CND);
+
+
+  /////////////////////////////////////
+  //CND Neutron Compared to Pmiss
+  /////////////////////////////////////
+  TH2D * h_pn_pmiss = new TH2D("pn_pmiss","Neutron Momentum vs Missing Momentum;Missing Momentum (GeV/c);Neutron Momentum (GeV/c)",100,0,2,100,0,2);
+  hist_list_2.push_back(h_pn_pmiss);
+
 
 /*
   /////////////////////////////////////
@@ -481,13 +502,8 @@ int main(int argc, char ** argv)
         bool CND2 = (neutrons[j]->sci(clas12::CND2)->getDetector() == 3);
         bool CND3 = (neutrons[j]->sci(clas12::CND3)->getDetector() == 3);
 
-        if(PCAL || ECin || ECout){
-          nn_ECAL += 1;
-        }
-
-        if(CND){
-          nn_CND += 1;
-        }
+        if(PCAL || ECin || ECout)  { nn_ECAL += 1; }
+        if(CND)                    { nn_CND += 1; }
 
         // "good neutrons" start here
         if (beta_frommom_n==0) {continue;}
@@ -525,9 +541,18 @@ int main(int argc, char ** argv)
 	  h_timediff_n_CND->Fill(time_frommom_n-time_frombeta_n,weight);
 	  
 	  h_mom_theta_n_CND->Fill(p_n.Mag(),theta_n,weight);
+
+          // extra bank info
+          double dedx = neutrons[j]->sci(clas12::CND1)->getDedx() + neutrons[j]->sci(clas12::CND2)->getDedx() + neutrons[j]->sci(clas12::CND3)->getDedx();
+          double csize = neutrons[j]->sci(clas12::CND1)->getSize() + neutrons[j]->sci(clas12::CND2)->getSize() + neutrons[j]->sci(clas12::CND3)->getSize();
+          double layermult = neutrons[j]->sci(clas12::CND1)->getLayermulti() + neutrons[j]->sci(clas12::CND2)->getLayermulti() + neutrons[j]->sci(clas12::CND3)->getLayermulti();
+
+          h_dedx_CND->Fill(p_n.Mag()/mN,dedx,weight);
+//std::cout << p_n.Mag()/mN << '\t' << dedx << '\n';
+          h_cluster_CND->Fill(csize,layermult,weight);
+//std::cout << c12->getBank(ctof_hits)->getInt(0,0) << endl;
+//std::cout << neutrons[j]->sci(clas12::CND1)->getLayermulti() << '\t' << neutrons[j]->sci(clas12::CND2)->getLayermulti() << '\t' << neutrons[j]->sci(clas12::CND3)->getLayermulti() << '\t' << neutrons[j]->sci(clas12::CND)->getLayermulti() << '\n';
 	}
-
-
 
 
       }
@@ -538,6 +563,44 @@ int main(int argc, char ** argv)
   /////////////////////////////////////
   //ECAL and CND "Good Neutrons"
   /////////////////////////////////////
+  if (protons.size()!=1) {continue;}
+
+  TVector3 p_p;
+  p_p.SetMagThetaPhi(protons[0]->getP(),protons[0]->getTheta(),protons[0]->getPhi());
+  TVector3 p_miss = p_p - p_q;
+  double theta_pm = p_miss.Theta()*180 / M_PI;
+
+
+  for(int j = 0; j < neutrons.size(); j++){
+	TVector3 p_n;
+	p_n.SetMagThetaPhi(neutrons[j]->getP(),neutrons[j]->getTheta(),neutrons[j]->getPhi());
+	double E_n = sqrt(mN*mN + p_n.Mag2());
+	double theta_n = p_n.Theta() * 180 / M_PI;
+	double phi_n = p_n.Phi() * 180 / M_PI;
+	double beta_frommom_n = p_n.Mag()/E_n;
+
+        bool CND1 = (neutrons[j]->sci(clas12::CND1)->getDetector() == 3);
+        bool CND2 = (neutrons[j]->sci(clas12::CND2)->getDetector() == 3);
+        bool CND3 = (neutrons[j]->sci(clas12::CND3)->getDetector() == 3);
+
+        // "good neutrons" start here
+        if (beta_frommom_n==0) {continue;}
+        if (theta_n==0) {continue;}
+        if (phi_n==0) {continue;}
+        if (p_n.Mag()<0.2) {continue;}
+        if (theta_n<40 || theta_n>140) {continue;}
+        // require pmiss to be as expected
+        if (p_miss.Mag()<0.2) {continue;}
+        if (theta_pm<40 || theta_pm>140) {continue;}
+
+
+        if(CND){
+          h_pn_pmiss->Fill(p_miss.Mag(),p_n.Mag(),weight);
+        }
+
+  }
+
+  
 
 
 
@@ -858,6 +921,28 @@ int main(int argc, char ** argv)
   h_mom_theta_n_CND->Draw("colz");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
+
+  myCanvas->Divide(2,2);
+  myCanvas->cd(1);
+  myCanvas->SetLogy();
+  h_dedx_CND->Draw("colz");
+  myCanvas->cd(2);
+  h_cluster_CND->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+
+  /////////////////////////////////////
+  //CND Neutron Compared to Pmiss
+  /////////////////////////////////////
+  myCanvas->Divide(2,2);
+  myCanvas->cd(1);
+  h_pn_pmiss->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+
+
 
 /*  /////////////////////////////////////
   //Lead Neutron ECAL Checks
