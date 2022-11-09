@@ -91,21 +91,6 @@ int main(int argc, char ** argv)
   TH1D * h_sector = new TH1D("sector","ECAL Sector;Sector;Counts",6,1,7);
   hist_list_1.push_back(h_sector);
 
-  TH2D * h_Vcal_EoP[6];
-  for(int i=0; i<6; i++){
-    sprintf(temp_name,"Vcal_EoP_%d",i+1);
-    sprintf(temp_title,"ECAL V coordinate vs. Sampling Fraction Sector=%d;ECAL V coordinate;Sampling Fraction",i+1);
-    h_Vcal_EoP[i] = new TH2D(temp_name,temp_title,60,0,30,100,0.1,0.35);
-    hist_list_2.push_back(h_Vcal_EoP[i]);
-  }
-
-  TH2D * h_Wcal_EoP[6];
-  for(int i=0; i<6; i++){
-    sprintf(temp_name,"Wcal_EoP_%d",i+1);
-    sprintf(temp_title,"ECAL W coordinate vs. Sampling Fraction Sector=%d;ECAL W coordinate;Sampling Fraction",i+1);
-    h_Wcal_EoP[i] = new TH2D(temp_name,temp_title,60,0,30,100,0.1,0.35);
-    hist_list_2.push_back(h_Wcal_EoP[i]);
-  }
 
   /////////////////////////////////////
   //Electron Pid and Vertex
@@ -116,13 +101,7 @@ int main(int argc, char ** argv)
   TH1D * h_vtz_e = new TH1D("vtz_e","Electron Z Vertex;vertex;Counts",100,-10,10);
   hist_list_1.push_back(h_vtz_e);
 
-  TH2D * h_mom_EoP[6];
-  for(int i=0; i<6; i++){
-    sprintf(temp_name,"mom_EoP_%d",i+1);
-    sprintf(temp_title,"p_{e} vs. Sampling Faction Sector=%d;Momentum;Theta",i+1);
-    h_mom_EoP[i] = new TH2D(temp_name,temp_title,100,0,7,100,0.1,0.35);
-    hist_list_2.push_back(h_mom_EoP[i]);
-  }
+
   
   /////////////////////////////////////
   //Electron Kinematics  
@@ -131,8 +110,6 @@ int main(int argc, char ** argv)
   hist_list_1.push_back(h_xB);
   TH1D * h_QSq = new TH1D("QSq","Q^{2};Q^{2};Counts",100,0,3);
   hist_list_1.push_back(h_QSq);
-  TH1D * h_W = new TH1D("W","W;W",100,0.5,2);
-  hist_list_1.push_back(h_W);
   TH1D * h_WSq = new TH1D("WSq","W^{2};W^{2}",100,0,7);
   hist_list_1.push_back(h_WSq);
   TH2D * h_xB_QSq = new TH2D("xB_QSq","x_{B} vs. Q^{2} ;x_{B};Q^{2}",100,0,2,100,0,3);
@@ -194,8 +171,8 @@ int main(int argc, char ** argv)
   /////////////////////////////////////
   //ECAL Neutron Information
   /////////////////////////////////////
-  TH2D * h_dbeta_n_ECAL = new TH2D("dbeta_n_ECAL","#Delta #beta vs Momentum;Momentun (GeV/c);#beta_{meas} - p/sqrt(p^{2}+m^{2})",100,0,3,100,-0.2,0.2);
-  hist_list_2.push_back(h_dbeta_n_ECAL);
+  TH2D * h_nsize_ECAL = new TH2D("nsize_ECAL","Number of Neutrons in ECAL;Number of PID 2112;Neutrons with Valid Momentum",10,0,10,10,0,10);
+  hist_list_2.push_back(h_nsize_ECAL);
 
   TH1D * h_vtz_n_ECAL = new TH1D("vtz_n_ECAL","Neutron Z Vertex;vertex;Counts",100,-10,10);
   hist_list_1.push_back(h_vtz_n_ECAL);
@@ -210,27 +187,27 @@ int main(int argc, char ** argv)
   hist_list_1.push_back(h_theta_n_ECAL);
   TH1D * h_theta_nq_ECAL = new TH1D("theta_nq_ECAL","#theta_{nq};#theta_{nq};Counts",100,0,80);
   hist_list_1.push_back(h_theta_nq_ECAL);
-  TH2D * h_phi_theta_n_ECAL = new TH2D("phi_theta_n_ECAL","#phi_{n} vs. #theta_{n} ;#phi_{n};#theta_{n}",100,-180,180,100,5,45);
+  TH2D * h_phi_theta_n_ECAL = new TH2D("phi_theta_n_ECAL","#phi_{n} vs. #theta_{n} ;#phi_{n};#theta_{n}",100,-180,180,100,3,40);
   hist_list_2.push_back(h_phi_theta_n_ECAL);
-  TH2D * h_mom_beta_n_ECAL = new TH2D("mom_beta_n_ECAL","p_{n} vs. #beta_{n} ;p_{n};#beta_{n}",100,0,4,100,0.3,1);
+  TH2D * h_mom_beta_n_ECAL = new TH2D("mom_beta_n_ECAL","p_{n} vs. #beta_{n} ;p_{n};#beta_{n}",100,0.1,3,100,0.1,1);
   hist_list_2.push_back(h_mom_beta_n_ECAL);
-  TH1D * h_timediff_n_ECAL = new TH1D("timediff_n_ECAL","ToF-ToF_{|n|} ;ToF-ToF_{|n|};Counts",100,-2,2);
+  TH1D * h_timediff_n_ECAL = new TH1D("timediff_n_ECAL","ToF-ToF_{|n|} ;ToF-ToF_{|n|};Counts",100,-0.2,0.2);
   hist_list_1.push_back(h_timediff_n_ECAL);
 
 
   TH2D * h_mom_theta_n_ECAL[6];
   for(int i=0; i<6; i++){
-    sprintf(temp_name,"mom_theta_p_%d",i+1);
+    sprintf(temp_name,"mom_theta_n_%d",i+1);
     sprintf(temp_title,"p_{n} vs. #theta_{n} Sector=%d;Momentum;Theta",i+1);
-    h_mom_theta_n_ECAL[i] = new TH2D(temp_name,temp_title,100,0,4,100,5,50);
+    h_mom_theta_n_ECAL[i] = new TH2D(temp_name,temp_title,100,0.1,2,100,3,40);
     hist_list_2.push_back(h_mom_theta_n_ECAL[i]);
   }
 
   /////////////////////////////////////
   //CND Neutron Information
   /////////////////////////////////////
-  TH2D * h_dbeta_n_CND = new TH2D("dbeta_n_CND","#Delta #beta vs Momentum;Momentun (GeV/c);#beta_{meas} - p/sqrt(p^{2}+m^{2})",100,0,3,100,-0.2,0.2);
-  hist_list_2.push_back(h_dbeta_n_CND);
+  TH2D * h_nsize_CND = new TH2D("nsize_CND","Number of Neutrons in ECAL;Number of Neutrons;Neutrons with Valid Momentum",10,0,10,10,0,10);
+  hist_list_2.push_back(h_nsize_CND);
 
   TH1D * h_vtz_n_CND = new TH1D("vtz_n_CND","Neutron Z Vertex;vertex;Counts",100,-10,10);
   hist_list_1.push_back(h_vtz_n_CND);
@@ -245,13 +222,13 @@ int main(int argc, char ** argv)
   hist_list_1.push_back(h_theta_n_CND);
   TH1D * h_theta_nq_CND = new TH1D("theta_nq_CND","#theta_{nq};#theta_{nq};Counts",100,0,80);
   hist_list_1.push_back(h_theta_nq_CND);
-  TH2D * h_phi_theta_n_CND = new TH2D("phi_theta_n_CND","#phi_{n} vs. #theta_{n} ;#phi_{n};#theta_{n}",100,-180,180,100,20,140);
+  TH2D * h_phi_theta_n_CND = new TH2D("phi_theta_n_CND","#phi_{n} vs. #theta_{n} ;#phi_{n};#theta_{n}",100,-180,180,100,35,145);
   hist_list_2.push_back(h_phi_theta_n_CND);
-  TH2D * h_mom_beta_n_CND = new TH2D("mom_beta_n_CND","p_{n} vs. #beta_{n} ;p_{n};#beta_{n}",100,0,4,100,0.3,1);
+  TH2D * h_mom_beta_n_CND = new TH2D("mom_beta_n_CND","p_{n} vs. #beta_{n} ;p_{n};#beta_{n}",100,0.1,2,100,0.1,1);
   hist_list_2.push_back(h_mom_beta_n_CND);
-  TH1D * h_timediff_n_CND = new TH1D("timediff_n_CND","ToF-ToF_{|n|} ;ToF-ToF_{|n|};Counts",100,-2,2);
+  TH1D * h_timediff_n_CND = new TH1D("timediff_n_CND","ToF-ToF_{|n|} ;ToF-ToF_{|n|};Counts",100,-0.2,0.2);
   hist_list_1.push_back(h_timediff_n_CND);
-  TH2D * h_mom_theta_n_CND = new TH2D("mom_theta_n_CND","p_{n} vs. #theta_{n} ;p_{n};#theta_{n}",100,0,4,100,30,135);
+  TH2D * h_mom_theta_n_CND = new TH2D("mom_theta_n_CND","p_{n} vs. #theta_{n} ;p_{n};#theta_{n}",100,0,2,100,35,145);
   hist_list_2.push_back(h_mom_theta_n_CND);
 
 /*
@@ -391,12 +368,11 @@ int main(int argc, char ** argv)
       int esector = electrons[0]->getSector();
       h_sector->Fill(esector,weight);
 
-      h_Vcal_EoP[esector-1]->Fill(electrons[0]->cal(PCAL)->getLv(),EoP_e,weight);
-      h_Wcal_EoP[esector-1]->Fill(electrons[0]->cal(PCAL)->getLw(),EoP_e,weight);
+
   /////////////////////////////////////
   //Electron Pid
   /////////////////////////////////////
-      h_mom_EoP[esector-1]->Fill(p_e.Mag(),EoP_e,weight);
+
       h_nphe->Fill(nphe,weight);
       h_vtz_e->Fill(vtz_e,weight);
 
@@ -417,7 +393,6 @@ int main(int argc, char ** argv)
       h_xB->Fill(xB,weight);
       h_QSq->Fill(QSq,weight);
       h_WSq->Fill(WSq,weight);
-      h_W->Fill(sqrt(WSq),weight);
       h_xB_QSq->Fill(xB,QSq,weight);
       h_xB_WSq->Fill(xB,WSq,weight);
       h_QSq_WSq->Fill(QSq,WSq,weight);
@@ -446,10 +421,6 @@ int main(int argc, char ** argv)
         bool CND1 = (allParticles[j]->sci(clas12::CND1)->getDetector() == 3);
         bool CND2 = (allParticles[j]->sci(clas12::CND2)->getDetector() == 3);
         bool CND3 = (allParticles[j]->sci(clas12::CND3)->getDetector() == 3);
-	//bool ECAL1A = (allParticles[j]->sci(clas12::ECAL1A)->getDetector() == 12);
-	//bool ECAL1B = (allParticles[j]->sci(clas12::ECAL1B)->getDetector() == 12);
-	//bool ECAL2 = (allParticles[j]->sci(clas12::ECAL2)->getDetector() == 12);
-	//bool CND = (allParticles[j]->sci(clas12::CND)->getDetector() == 4);
 
 	if(PCAL || ECin || ECout){
 	  h_mom_beta_hadplus_ECAL->Fill(allParticles[j]->getP(),allParticles[j]->par()->getBeta(),weight);
@@ -485,6 +456,8 @@ int main(int argc, char ** argv)
   /////////////////////////////////////
   //ECAL and CND Neutron Information
   /////////////////////////////////////
+      int nn_ECAL = 0; int nn_CND = 0; int nn_ECAL_good = 0; int nn_CND_good = 0;
+
       for(int j = 0; j < neutrons.size(); j++){
 	TVector3 p_n;
 	p_n.SetMagThetaPhi(neutrons[j]->getP(),neutrons[j]->getTheta(),neutrons[j]->getPhi());
@@ -496,12 +469,10 @@ int main(int argc, char ** argv)
 	double phi_diff = get_phi_diff(p_e,p_n);
 	double vtz_n = neutrons[j]->par()->getVz();
 
-
 	double path_n = neutrons[j]->getPath();
 	double beta_frommom_n = p_n.Mag()/E_n;
 	double time_frommom_n = path_n / (c*beta_frommom_n);
 	double time_frombeta_n = path_n / (c*beta_n);
-        double dbeta = neutrons[j]->par()->getBeta() - p_n.Mag()/sqrt(p_n.Mag2()+mN*mN);
 
 	bool PCAL = (neutrons[j]->cal(clas12::PCAL)->getDetector() == 7);
 	bool ECin = (neutrons[j]->cal(clas12::ECIN)->getDetector() == 7);
@@ -510,13 +481,22 @@ int main(int argc, char ** argv)
         bool CND2 = (neutrons[j]->sci(clas12::CND2)->getDetector() == 3);
         bool CND3 = (neutrons[j]->sci(clas12::CND3)->getDetector() == 3);
 
-	//bool ECAL1A = (protons[j]->sci(clas12::ECAL1A)->getDetector() == 12);
-	//bool ECAL1B = (protons[j]->sci(clas12::ECAL1B)->getDetector() == 12);
-	//bool ECAL2 = (protons[j]->sci(clas12::ECAL2)->getDetector() == 12);
-	//bool CND = (protons[j]->sci(clas12::CND)->getDetector() == 4);
+        if(PCAL || ECin || ECout){
+          nn_ECAL += 1;
+        }
+
+        if(CND){
+          nn_CND += 1;
+        }
+
+        // "good neutrons" start here
+        if (beta_frommom_n==0) {continue;}
+        if (theta_n==0) {continue;}
+        if (phi_n==0) {continue;}
+        if (p_n.Mag()==0) {continue;}
 
 	if(PCAL || ECin || ECout){
-	  h_dbeta_n_ECAL->Fill(p_n.Mag(),dbeta,weight);
+          nn_ECAL_good += 1;
 	  h_vtz_n_ECAL->Fill(vtz_n,weight);
 	  h_vtz_e_vtz_n_ECAL->Fill(vtz_e,vtz_n,weight);
 	  h_phi_e_n_ECAL->Fill(phi_diff,weight);
@@ -531,7 +511,9 @@ int main(int argc, char ** argv)
 	}
 
 	if(CND){
-	  h_dbeta_n_CND->Fill(p_n.Mag(),dbeta,weight);
+          if (theta_n<40 || theta_n>140) {continue;}
+
+          nn_CND_good += 1;
 	  h_vtz_n_CND->Fill(vtz_n,weight);
 	  h_vtz_e_vtz_n_CND->Fill(vtz_e,vtz_n,weight);
 	  h_phi_e_n_CND->Fill(phi_diff,weight);
@@ -544,7 +526,20 @@ int main(int argc, char ** argv)
 	  
 	  h_mom_theta_n_CND->Fill(p_n.Mag(),theta_n,weight);
 	}
+
+
+
+
       }
+      h_nsize_ECAL->Fill(nn_ECAL,nn_ECAL_good,weight);
+      h_nsize_CND->Fill(nn_CND,nn_CND_good,weight);
+
+
+  /////////////////////////////////////
+  //ECAL and CND "Good Neutrons"
+  /////////////////////////////////////
+
+
 
 /*  /////////////////////////////////////
   //Lead Neutron Checks
@@ -659,45 +654,19 @@ int main(int argc, char ** argv)
   myText->Print(fileName,"pdf");
   myText->Clear();
   
-  myCanvas->Divide(2,3);
+  myCanvas->Divide(2,2);
   myCanvas->cd(1);
   h_phi_theta->Draw("colz");
   myCanvas->cd(2);
   h_sector->Draw();
-  myCanvas->Print(fileName,"pdf");
-  myCanvas->Clear();  
-
-  myCanvas->Divide(2,3);
-  for(int i = 0; i < 6; i++){
-    myCanvas->cd(i+1);
-    h_Vcal_EoP[i]->Draw("colz");  
-  }
-  myCanvas->Print(fileName,"pdf");
-  myCanvas->Clear();  
-
-  myCanvas->Divide(2,3);
-  for(int i = 0; i < 6; i++){
-    myCanvas->cd(i+1);
-    h_Wcal_EoP[i]->Draw("colz");  
-  }
-  myCanvas->Print(fileName,"pdf");
-  myCanvas->Clear();  
-
-  myCanvas->Divide(2,3);
-  myCanvas->cd(1);
+  myCanvas->cd(3);
   h_nphe->Draw();
-  myCanvas->cd(2);
+  myCanvas->cd(4);
   h_vtz_e->Draw();
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();  
 
-  myCanvas->Divide(2,3);
-  for(int i = 0; i < 6; i++){
-    myCanvas->cd(i+1);
-    h_mom_EoP[i]->Draw("colz");  
-  }
-  myCanvas->Print(fileName,"pdf");
-  myCanvas->Clear();  
+
 
   /////////////////////////////////////
   //Electron Kinematics  
@@ -740,11 +709,7 @@ int main(int argc, char ** argv)
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();  
 
-  myCanvas->Divide(2,3);
-  myCanvas->cd(1);
-  h_W->Draw();
-  myCanvas->Print(fileName,"pdf");
-  myCanvas->Clear();
+
 
   /////////////////////////////////////
   //Electron Kinematics with SRC kinematics
@@ -816,7 +781,11 @@ int main(int argc, char ** argv)
 
   myCanvas->Divide(2,2);
   myCanvas->cd(1);
-  h_dbeta_n_ECAL->Draw("colz");
+  h_nsize_ECAL->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(2,2);
   myCanvas->cd(2);
   h_vtz_n_ECAL->Draw();
   myCanvas->cd(3);
@@ -860,7 +829,11 @@ int main(int argc, char ** argv)
 
   myCanvas->Divide(2,2);
   myCanvas->cd(1);
-  h_dbeta_n_CND->Draw("colz");
+  h_nsize_CND->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(2,2);
   myCanvas->cd(2);
   h_vtz_n_CND->Draw();
   myCanvas->cd(3);
