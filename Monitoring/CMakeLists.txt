@@ -21,7 +21,7 @@ add_subdirectory(source)
 #add_subdirectory(GCF_tools)
 
 #compile executables in source directory
-foreach(fnameSrc monitor_ep.cpp monitor_epp.cpp monitor_epn.cpp monitorPID.cpp compare.cpp compare_epp.cpp compare_epn.cpp neff_h_epin.cpp neff_d_pcdn.cpp neff_d_pfdn.cpp)
+foreach(fnameSrc monitor_ep.cpp monitor_en.cpp monitor_epp.cpp monitor_epn.cpp monitorPID.cpp compare.cpp compare_epp.cpp compare_epn.cpp neff_h_epin.cpp neff_d_pcdn.cpp neff_d_pfdn.cpp benchmark.cpp)
   message(STATUS ${fnameSRC})
   string (REPLACE ".cpp" "" fnameExe ${fnameSrc})
   add_executable(${fnameExe} ${fnameSrc})
