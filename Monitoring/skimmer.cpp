@@ -69,6 +69,7 @@ int main(int argc, char ** argv)
   //now get reference to (unique)ptr for accessing data in loop
   //this will point to the correct place when file changes
   const std::unique_ptr<clas12::clas12reader>& c12=chain.C12ref();
+  chain.db()->turnOffQADB();
   int counter = 0;
   int cutcounter = 0;
   
