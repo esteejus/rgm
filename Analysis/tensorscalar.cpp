@@ -105,7 +105,8 @@ int main(int argc, char ** argv)
   TH2D * h_betap = new TH2D("beta_p","#beta vs Momentum;Momentum (GeV/c);#beta",100,0,3,100,0,1.2);
   hist_list_2.push_back(h_betap);
 
-
+  TH1D * h_pmiss_pL = new TH1D("pmiss_pL","Missing Momentum (e,e'p_{Lead});p_{miss} (GeV/c);Counts",30,0,1);
+  hist_list_1.push_back(h_pmiss_pL);
   TH2D * h_pangles = new TH2D("pangles","Proton angles;#phi;#theta",90,-180,180,60,0,60);
   hist_list_2.push_back(h_pangles);
   TH2D * h_pq = new TH2D("pq","#theta_{p,q} vs p/q;p/q;#theta_{pq}",100,0,2,100,0,100);
@@ -126,6 +127,15 @@ int main(int argc, char ** argv)
   hist_list_1.push_back(h_psize);
   TH1D * h_pcos0 = new TH1D("pcos0","Cosine of #theta_{pmiss,pp}",100,-1.1,1.1);
   hist_list_1.push_back(h_pcos0);
+  TH1D * h_prec_p = new TH1D("prec_p","Recoil Proton Momentum",100,0,2);
+  hist_list_1.push_back(h_prec_p);
+  TH2D * h_prec_angles = new TH2D("prec_angles","Recoil Proton Angular Distribution;phi (deg);theta (deg)",360,-180,180,180,0,180);
+  hist_list_2.push_back(h_prec_angles);
+
+  TH2D * h_pp_pmiss = new TH2D("pp_pmiss","Proton Momentum vs Missing Momentum;p_{miss} (GeV/c);Proton Momentum (GeV/c)",100,0,1.5,100,0,1.5);
+  hist_list_2.push_back(h_pp_pmiss);
+  TH2D * h_pptheta = new TH2D("pptheta","Proton #theta vs Momentum;#theta_{p};Momentum (GeV/c)",180,0,180,50,0,1.5);
+  hist_list_2.push_back(h_pptheta);
 
 
   /////////////////////////////////////
@@ -135,6 +145,13 @@ int main(int argc, char ** argv)
   hist_list_1.push_back(h_nsize);
   TH1D * h_ncos0 = new TH1D("ncos0","Cosine of #theta_{pmiss,pn}",100,-1.1,1.1);
   hist_list_1.push_back(h_ncos0);
+  TH1D * h_nrec_p = new TH1D("nrec_p","Recoil Neutron Momentum",100,0,2);
+  hist_list_1.push_back(h_nrec_p);
+  TH2D * h_nrec_angles = new TH2D("nrec_angles","Recoil Neutron Angular Distribution;phi (deg);theta (deg)",48,-180,180,180,0,180);
+  hist_list_2.push_back(h_nrec_angles);
+
+  TH2D * h_pn_pmiss = new TH2D("pn_pmiss","Neutron Momentum vs Missing Momentum;p_{miss} (GeV/c);Neutron Momentum (GeV/c)",100,0,1.5,100,0,1.5);
+  hist_list_2.push_back(h_pn_pmiss);
   TH2D * h_nptheta = new TH2D("nptheta","Neutron #theta vs Momentum;#theta_{n};Momentum (GeV/c)",180,0,180,50,0,1.5);
   hist_list_2.push_back(h_nptheta);
 
@@ -151,6 +168,11 @@ int main(int argc, char ** argv)
   hist_list_1.push_back(h_pmiss_pn);
   TH1D * h_pmiss_pn_corr = new TH1D("pmiss_pn_corr","Missing Momentum (e,e'p_{SRC}n_{rec}) (efficiency corrected);p_{miss} (GeV/c);Counts",30,0,1);
   hist_list_1.push_back(h_pmiss_pn_corr);
+
+  TH1D * h_pn = new TH1D("pn","Momentum (e,e'p_{SRC}n_{rec});p_{n} (GeV/c);Counts",30,0,1);
+  hist_list_1.push_back(h_pn);
+  TH1D * h_pn_corr = new TH1D("pn_corr","Momentum (e,e'p_{SRC}n_{rec}) (efficiency corrected);p_{n} (GeV/c);Counts",30,0,1);
+  hist_list_1.push_back(h_pn_corr);
 
 
   /////////////////////////////////////
@@ -197,8 +219,6 @@ int main(int argc, char ** argv)
     if(isMC){weight=c12->mcevent()->getWeight();}
     TVector3 p_b(0,0,Ebeam);
 
-    
-
 
     // initial cuts
     if (prot.size()<1) {continue;}
@@ -228,13 +248,35 @@ int main(int argc, char ** argv)
     h_nphe->Fill(nphe,weight);
     h_vtz_e->Fill(vtz_e,weight);
 
+
+
+    //// LEAD PROTON ////
+    // LEAD PROTON - FTOF
+
+    for (int k=0; k<prot.size(); k++)
+    {
+      // proton kinematics
+      TVector3 pL;
+      pL.SetMagThetaPhi(prot[k]->getP(),prot[k]->getTheta(),prot[k]->getPhi());
+      double vzlead = prot[k]->par()->getVz();
+      double chi2pid = prot[k]->par()->getChi2Pid();
+      double ltheta = prot[k]->getTheta()*180./M_PI;
+      double lphi = prot[k]->getPhi()*180./M_PI;
+      double theta_pq = pL.Angle(q) * 180./M_PI;
+      double mmiss = get_mmiss(pb,pe,pL);
+      double dbetap = prot[k]->par()->getBeta() - pL.Mag()/sqrt(pL.Mag2()+mp*mp);
+      // lead histos
+      h_vtzdiff_ep->Fill(vze-vzlead,weight);
+      h_chi2pid->Fill(chi2pid,weight);
+      h_dbetap->Fill(pL.Mag(),dbetap,weight);
+      h_betap->Fill(pL.Mag(),prot[k]->par()->getBeta(),weight);
+    }
+
+
     // I need code here to figure out which proton is lead
     // cutfile_ts.txt - proton in FTOF, 0<ltheta<45, 0<theta_pq<25, -3<chipid<3, -3<vtz_diff<3
     int lead = myCut.leadnucleoncut(c12);
     if (lead<0) {continue;}
-
-//// LEAD PROTON ////
-    // LEAD PROTON - FTOF
 
     TVector3 pL;
     pL.SetMagThetaPhi(prot[lead]->getP(),prot[lead]->getTheta(),prot[lead]->getPhi());
@@ -248,41 +290,42 @@ int main(int argc, char ** argv)
 
 
 
-    // lead histos
-    h_vtzdiff_ep->Fill(vze-vzlead,weight);
-    h_chi2pid->Fill(chi2pid,weight);
-    h_dbetap->Fill(pL.Mag(),dbetap,weight);
-    h_betap->Fill(pL.Mag(),prot[lead]->par()->getBeta(),weight);
-
     if ((vze-vzlead)<-3. || (vze-vzlead)>3.) {continue;}
     if (dbetap<-0.05 || dbetap>0.05) {continue;}
     if (chi2pid<-3.0 || chi2pid>3.0) {continue;}
 
-    h_pangles->Fill(lphi,ltheta,weight);
 
-
-//// PMISS ////
+    //// PMISS ////
     TVector3 pmiss = pL - q;
     double pm_theta = pmiss.Theta()*180./M_PI;
 
 
     h_pmisstheta->Fill(pm_theta,weight);
+    h_pmiss_pL->Fill(pmiss.Mag(),weight);
 
     if (pm_theta<40.0 || pm_theta>140.0) {continue;}
-    if (pmiss.Mag()<0.2) {continue;}
+    //if (pmiss.Mag()<0.2) {continue;}
+    h_pangles->Fill(lphi,ltheta,weight);
+
 
 
     h_pq->Fill(pL.Mag()/q.Mag(),theta_pq,weight);
-    h_mmiss->Fill(mmiss,weight);
+
     h_q2_xb->Fill(xB,Q2,weight);
+
 
 
     // lead SRC cuts
 
+    if (pmiss.Mag()<0.3) {continue;}
     if (xB<1.1) {continue;}
     if (Q2<1.5) {continue;}
-    if (mmiss<0.8 || mmiss>1.2) {continue;}
     if (pL.Mag()/q.Mag()<0.62 || pL.Mag()/q.Mag()>0.96) {continue;}
+
+    // fill e'p(SRC) histogram
+    h_mmiss->Fill(mmiss,weight);
+
+    if (mmiss<0.8 || mmiss>1.1) {continue;}
 
 
     h_pmiss_p->Fill(pmiss.Mag(),weight);
@@ -304,17 +347,26 @@ int main(int argc, char ** argv)
       // recoil p must be in CTOF
       bool is_CTOF = prot[i]->sci(CTOF)->getDetector()==4;
       if (!is_CTOF) {continue;}
-      // close in angular to pmiss
+      // get momenta/angles of recoil candidates
+      h_prec_p->Fill(p_recp.Mag(),weight);
+      h_prec_angles->Fill(p_recp.Phi()*180./M_PI,p_recp.Theta()*180./M_PI,weight);
+      h_pptheta->Fill(p_recp.Theta()*180./M_PI,pmiss.Mag(),weight);
+      if (p_recp.Mag()<0.2) {continue;}
+      if (p_recp.Theta()*180./M_PI<40 || p_recp.Theta()*180./M_PI>140) {continue;}
+      // close in angle to pmiss
       p_vecX.SetXYZ( prot[i]->par()->getPx(), prot[i]->par()->getPy(), prot[i]->par()->getPz() );
       p_cos0 = pmiss.Dot(p_vecX) / (pmiss.Mag() * p_vecX.Mag());
       h_pcos0->Fill(p_cos0);
-      if (p_cos0>-0.8) {continue;}
+      //if (p_cos0>-0.8) {continue;} // not needed?
       // fast recoil
-      if (p_recp.Mag()>0.2) {rec_p=i;}
+      h_pp_pmiss->Fill(pmiss.Mag(),p_recp.Mag(),weight);
+      rec_p = i;
     }
 
+    if (rec_p<0) {continue;}
+
     // fill histo
-    if (rec_p>-1) {h_pmiss_pp->Fill(pmiss.Mag(),weight);}
+    h_pmiss_pp->Fill(pmiss.Mag(),weight);
 
 
 //// RECOIL N ////
@@ -322,6 +374,7 @@ int main(int argc, char ** argv)
     //if (rec_p>-1) {continue;} // note: only look for recoil n if no recoil p was found
     int rec_n = -1;
     h_nsize->Fill(neut.size(),weight);
+    if (neut.size()<1) {continue;}
     TVector3 p_recn;
     TVector3 n_vecX;
     double n_cos0;
@@ -334,26 +387,33 @@ int main(int argc, char ** argv)
       bool is_CND2 = neut[i]->sci(CND2)->getDetector()==3;
       bool is_CND3 = neut[i]->sci(CND3)->getDetector()==3;
       if (!is_CND1 && !is_CND2 && !is_CND3) {continue;}
-      // close in angular to pmiss
+      // get momenta/angles of recoil candidates
+      h_nrec_p->Fill(p_recn.Mag(),weight);
+      h_nrec_angles->Fill(p_recn.Phi()*180./M_PI,p_recn.Theta()*180./M_PI,weight);
+      h_nptheta->Fill(pm_theta,pmiss.Mag(),weight);
+      if (p_recn.Mag()<0.2) {continue;}
+      if (p_recn.Theta()*180./M_PI<40 || p_recn.Theta()*180./M_PI>140) {continue;}
+      // close in angle to pmiss
       n_vecX.SetXYZ( neut[i]->par()->getPx(), neut[i]->par()->getPy(), neut[i]->par()->getPz() );
       n_cos0 = pmiss.Dot(n_vecX) / (pmiss.Mag() * n_vecX.Mag());
       h_ncos0->Fill(n_cos0);
-      if (n_cos0>-0.8) {continue;}
-      // fast recoil
-      if (p_recn.Mag()>0.2) {rec_n=i;}
+      //if (n_cos0>-0.8) {continue;} // not needed?
+      // compared to pmiss
+      h_pn_pmiss->Fill(pmiss.Mag(),p_recn.Mag(),weight);
+      rec_n = i;
     }
 
+    if (rec_n<0) {continue;}
+
     // fill histo
-    double neff = 0.16 - 0.1333*pmiss.Mag();
-    if (rec_n>-1) {h_pmiss_pn->Fill(pmiss.Mag(),weight);}
-    if (rec_n>-1) {h_pmiss_pn_corr->Fill(pmiss.Mag(),weight/neff);}
-
-
-    h_nptheta->Fill(pm_theta,pmiss.Mag(),weight);
-    
-    
-
-
+    TVector3 pn;
+    pn.SetXYZ( neut[rec_n]->par()->getPx(), neut[rec_n]->par()->getPy(), neut[rec_n]->par()->getPz() );
+    double neff = 0.1;
+    //double neff = 0.16 - 0.1333*pmiss.Mag();
+    h_pmiss_pn->Fill(pmiss.Mag(),weight);
+    h_pmiss_pn_corr->Fill(pmiss.Mag(),weight/neff);
+    h_pn->Fill(pn.Mag(),weight);
+    h_pn_corr->Fill(pn.Mag(),weight/neff);
 
   }
 
@@ -455,7 +515,7 @@ int main(int argc, char ** argv)
 
 
   myCanvas->Divide(2,2);
-  myCanvas->cd(1);  h_pmiss_p->Draw("colz");
+  myCanvas->cd(1);  h_pmiss_pL->Draw("colz");
   myCanvas->cd(2);  h_pmisstheta->Draw();
   myCanvas->cd(3);  h_pangles->Draw("colz");
   myCanvas->Print(fileName,"pdf");
@@ -471,8 +531,7 @@ int main(int argc, char ** argv)
 
   myCanvas->Divide(2,2);
   myCanvas->cd(1);  h_pq->Draw("colz");
-  myCanvas->cd(2);  h_mmiss->Draw();
-  myCanvas->cd(3);  h_q2_xb->Draw("colz");
+  myCanvas->cd(2);  h_q2_xb->Draw("colz");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
@@ -494,10 +553,27 @@ int main(int argc, char ** argv)
   myText->Clear();
 
   myCanvas->Divide(2,2);
-  myCanvas->cd(1);  h_psize->Draw();
-  myCanvas->cd(2);  h_pcos0->Draw();
+  myCanvas->cd(1);  h_pmiss_p->Draw();
+  myCanvas->cd(2);  h_mmiss->Draw();
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
+
+
+  myCanvas->Divide(2,2);
+  myCanvas->cd(1);  h_psize->Draw();
+  myCanvas->cd(2);  h_pcos0->Draw();
+  myCanvas->cd(3);  h_prec_p->Draw();
+  myCanvas->cd(4);  h_prec_angles->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(2,2);
+  myCanvas->cd(1);  h_pp_pmiss->Draw("colz");
+  myCanvas->cd(2);  h_pptheta->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+
 
   myText->cd();
   text.DrawLatex(0.2,0.9,"Recoil neutrons");
@@ -509,9 +585,17 @@ int main(int argc, char ** argv)
   myCanvas->Divide(2,2);
   myCanvas->cd(1);  h_nsize->Draw();
   myCanvas->cd(2);  h_ncos0->Draw();
-  myCanvas->cd(4);  h_nptheta->Draw("colz");
+  myCanvas->cd(3);  h_nrec_p->Draw();
+  myCanvas->cd(4);  h_nrec_angles->Draw("colz");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
+
+  myCanvas->Divide(2,2);
+  myCanvas->cd(1);  h_pn_pmiss->Draw("colz");
+  myCanvas->cd(2);  h_nptheta->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
 
   myText->cd();
   text.DrawLatex(0.2,0.9,"Recoil cuts:");
@@ -526,7 +610,7 @@ int main(int argc, char ** argv)
 
 
   myCanvas->Divide(1,1);
-  myCanvas->cd(1);  h_pmiss_p->Draw();
+  myCanvas->cd(1);  h_pmiss_p->Draw("colz");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
@@ -546,6 +630,7 @@ int main(int argc, char ** argv)
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
+
   myCanvas->Divide(2,2);
   myCanvas->cd(1);  h_pmiss_pp->Draw();
   myCanvas->cd(2);  h_pmiss_pn_corr->Draw();
@@ -559,6 +644,48 @@ int main(int argc, char ** argv)
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
+
+  myCanvas->Divide(2,2);
+  myCanvas->cd(1);  h_pmiss_pp->Draw();
+  myCanvas->cd(2);  h_pn->Draw();
+  myCanvas->cd(3);
+  TH1D * h_pp_p = (TH1D*)h_pmiss_pp->Clone();
+  h_pp_p->Divide(h_pmiss_p);
+  h_pp_p->Draw();
+  h_pp_p->GetYaxis()->SetTitle("pp/p");
+  myCanvas->cd(4);
+  TH1D * h_pn_p = (TH1D*)h_pn->Clone();
+  h_pn_p->Divide(h_pmiss_p);
+  h_pn_p->Draw();
+  h_pn_p->GetYaxis()->SetTitle("pn/p");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+
+  myCanvas->Divide(2,2);
+  myCanvas->cd(1);  h_pmiss_pp->Draw();
+  myCanvas->cd(2);  h_pn_corr->Draw();
+  myCanvas->cd(3);  h_pmiss_pp_p->Draw();
+  h_pmiss_pp_p->GetYaxis()->SetTitle("pp/p");
+  myCanvas->cd(4);
+  TH1D * h_pn_p_corr = (TH1D*)h_pn_corr->Clone();
+  h_pn_p_corr->Divide(h_pmiss_p);
+  h_pn_p_corr->Draw();
+  h_pn_p_corr->GetYaxis()->SetTitle("pn/p");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  TH1D * h_pp_pn = (TH1D*)h_pmiss_pp->Clone();
+  h_pp_pn->Divide(h_pmiss_pn_corr);
+  h_pp_pn->Scale(0.5);
+  h_pp_pn->Draw();
+  h_pp_pn->GetYaxis()->SetTitle("pp/2pn");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
 
 
 
