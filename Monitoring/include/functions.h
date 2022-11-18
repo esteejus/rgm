@@ -19,7 +19,7 @@
 #include <TCanvas.h>
 #include <TStyle.h>
 
-#include "clas12reader.h"
+//#include "clas12reader.h"
 #include "HipoChain.h"
 
 #include "TF1.h"
