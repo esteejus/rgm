@@ -254,6 +254,18 @@ int main(int argc, char ** argv)
   hist_list_1.push_back(h_neff_thetamiss_numer_ssb);
 
 
+  /////////////////////////////////////
+  //Histos: 2d efficiency stuff
+  /////////////////////////////////////
+  TH2D * h_cand2d = new TH2D("cand2d","Neutron Candidates;p_{miss} (GeV/c);#theta_{miss} (degrees)",15,0.2,1.2,30,40,140);
+  hist_list_2.push_back(h_cand2d);
+  TH2D * h_det2d = new TH2D("det2d","Detected Neutrons;p_{miss} (GeV/c);#theta_{miss} (degrees)",15,0.2,1.2,30,40,140);
+  hist_list_2.push_back(h_det2d);
+
+
+
+
+
   for(int i=0; i<hist_list_1.size(); i++){
     hist_list_1[i]->Sumw2();
     hist_list_1[i]->GetXaxis()->CenterTitle();
@@ -377,6 +389,8 @@ int main(int argc, char ** argv)
 
     if (mmiss>Mlow && mmiss<Mhigh) { h_neff_pmiss_denom_ssb->Fill(pmiss.Mag(),weight);}
     if (mmiss>Mlow && mmiss<Mhigh) { h_neff_thetamiss_denom_ssb->Fill(thetamiss,weight);}
+
+if (mmiss>Mlow && mmiss<Mhigh) {h_cand2d->Fill(pmiss.Mag(),thetamiss,weight);}
 
 
     // REQUIRE A NEUTRON HERE
@@ -506,15 +520,16 @@ int main(int argc, char ** argv)
     h_pmiss_pn_cutbkg->Fill(pn.Mag(),pmiss.Mag(),weight); // CTOF p only
     h_pmiss_theta_cutbkg->Fill(n_theta,pmiss.Mag(),weight);
 
-    
 
     h_mmiss_pmissDET->Fill(pmiss.Mag(),mmiss,weight);
     h_mmiss_thetaDET->Fill(thetamiss,mmiss,weight);
 
 
-
     if (mmiss>Mlow && mmiss<Mhigh)  { h_neff_pmiss_numer_ssb->Fill(pmiss.Mag(),weight); }
     if (mmiss>Mlow && mmiss<Mhigh) { h_neff_thetamiss_numer_ssb->Fill(thetamiss,weight); }
+
+if (mmiss>Mlow && mmiss<Mhigh) {h_det2d->Fill(pmiss.Mag(),thetamiss,weight);}
+
 
   }
 
@@ -923,6 +938,37 @@ int main(int argc, char ** argv)
     outtheta << h_neff_thetamiss_ssb->GetBinError(i) << '\n';
   }
   outtheta.close();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+
+
+  // 2D EFFICIENCY
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_cand2d->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_det2d->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  TH2D * h_eff2d = (TH2D*)h_det2d->Clone();
+  h_eff2d->Divide(h_cand2d);
+  h_eff2d->Draw("colz");
+  h_eff2d->SetMaximum(0.20);
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_eff2d->Draw("surf1");
+  h_eff2d->SetMaximum(0.20);
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
