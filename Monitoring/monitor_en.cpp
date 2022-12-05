@@ -64,18 +64,52 @@ int main(int argc, char ** argv)
   auto config_c12=chain.GetC12Reader();
   chain.SetReaderTags({0});
 
+  // CND::hits
   auto cnd_hits = config_c12->addBank("CND::hits");
   auto cnd_hit_id = config_c12->getBankOrder(cnd_hits,"id");
+  auto cnd_hit_status = config_c12->getBankOrder(cnd_hits,"status");
+  auto cnd_hit_trkID = config_c12->getBankOrder(cnd_hits,"trkID");
+  auto cnd_hit_sector = config_c12->getBankOrder(cnd_hits,"sector");
   auto cnd_hit_layer = config_c12->getBankOrder(cnd_hits,"layer");
+  auto cnd_hit_component = config_c12->getBankOrder(cnd_hits,"component");
   auto cnd_hit_energy = config_c12->getBankOrder(cnd_hits,"energy");
+  auto cnd_hit_time = config_c12->getBankOrder(cnd_hits,"time");
+  auto cnd_hit_energy_unc = config_c12->getBankOrder(cnd_hits,"energy_unc");
+  auto cnd_hit_time_unc = config_c12->getBankOrder(cnd_hits,"time_unc");
   auto cnd_hit_x = config_c12->getBankOrder(cnd_hits,"x");
   auto cnd_hit_y = config_c12->getBankOrder(cnd_hits,"y");
   auto cnd_hit_z = config_c12->getBankOrder(cnd_hits,"z");
-  auto cnd_hit_xcvt = config_c12->getBankOrder(cnd_hits,"tx");
-  auto cnd_hit_E = config_c12->getBankOrder(cnd_hits,"energy");
+  auto cnd_hit_x_unc = config_c12->getBankOrder(cnd_hits,"x_unc");
+  auto cnd_hit_y_unc = config_c12->getBankOrder(cnd_hits,"y_unc");
+  auto cnd_hit_z_unc = config_c12->getBankOrder(cnd_hits,"z_unc");
+  auto cnd_hit_tx = config_c12->getBankOrder(cnd_hits,"tx");
+  auto cnd_hit_ty = config_c12->getBankOrder(cnd_hits,"ty");
+  auto cnd_hit_tz = config_c12->getBankOrder(cnd_hits,"tz");
+  auto cnd_hit_tlength = config_c12->getBankOrder(cnd_hits,"tlength");
+  auto cnd_hit_pathlength = config_c12->getBankOrder(cnd_hits,"pathlength");
+  auto cnd_hit_indexLadc = config_c12->getBankOrder(cnd_hits,"indexLadc");
+  auto cnd_hit_indexRadc = config_c12->getBankOrder(cnd_hits,"indexRadc");
+  auto cnd_hit_indexLtdc = config_c12->getBankOrder(cnd_hits,"indexLtdc");
+  auto cnd_hit_indexRtdc = config_c12->getBankOrder(cnd_hits,"indexRtdc");
 
+  // CND::clusters
   auto cnd_clusters = config_c12->addBank("CND::clusters");
+  auto cnd_clusters_id = config_c12->getBankOrder(cnd_clusters,"id");
+  auto cnd_clusters_sector = config_c12->getBankOrder(cnd_clusters,"sector");
+  auto cnd_clusters_layer = config_c12->getBankOrder(cnd_clusters,"layer");
+  auto cnd_clusters_component = config_c12->getBankOrder(cnd_clusters,"component");
   auto cnd_clusters_nhits = config_c12->getBankOrder(cnd_clusters,"nhits");
+  auto cnd_clusters_energy = config_c12->getBankOrder(cnd_clusters,"energy");
+  auto cnd_clusters_x = config_c12->getBankOrder(cnd_clusters,"x");
+  auto cnd_clusters_y = config_c12->getBankOrder(cnd_clusters,"y");
+  auto cnd_clusters_z = config_c12->getBankOrder(cnd_clusters,"z");
+  auto cnd_clusters_time = config_c12->getBankOrder(cnd_clusters,"time");
+  auto cnd_clusters_status = config_c12->getBankOrder(cnd_clusters,"status");
+
+
+
+
+  // REC::ScintExtras
   
 
   const std::unique_ptr<clas12::clas12reader>& c12=chain.C12ref();
@@ -149,15 +183,13 @@ int main(int argc, char ** argv)
   hist_list_2.push_back(h_mom_beta_neutron_ECAL_zoom);
   TH2D * h_mom_beta_photon_ECAL_zoom = new TH2D("mom_beta_photon_ECAL","p vs. #beta ECAL (Photons);p;#beta",100,0,2.5,100,0.0,1.2);
   hist_list_2.push_back(h_mom_beta_photon_ECAL_zoom);
-  TH2D * h_mom_beta_0_ECAL_zoom = new TH2D("mom_beta_0_ECAL","p vs. #beta ECAL (PID=0);p;#beta",100,0,2.5,100,-1.0,1.2);
-  hist_list_2.push_back(h_mom_beta_0_ECAL_zoom);
+
 
   TH2D * h_mom_beta_neutron_CND_zoom = new TH2D("mom_beta_neutron_CND","p vs. #beta CND (Neutrons);p;#beta",100,0,2.5,100,0.0,1.2);
   hist_list_2.push_back(h_mom_beta_neutron_CND_zoom);
   TH2D * h_mom_beta_photon_CND_zoom = new TH2D("mom_beta_photon_CND","p vs. #beta CND (Photons);p;#beta",100,0,2.5,100,0.0,1.2);
   hist_list_2.push_back(h_mom_beta_photon_CND_zoom);
-  TH2D * h_mom_beta_0_CND_zoom = new TH2D("mom_beta_0_CND","p vs. #beta CND (PID=0);p;#beta",100,0,2.5,100,-1.0,1.2);
-  hist_list_2.push_back(h_mom_beta_0_CND_zoom);
+
 
 
   /////////////////////////////////////
@@ -222,8 +254,11 @@ int main(int argc, char ** argv)
   hist_list_2.push_back(h_mom_beta_n_CND);
   TH1D * h_timediff_n_CND = new TH1D("timediff_n_CND","ToF-ToF_{|n|} ;ToF-ToF_{|n|};Counts",100,-0.1,0.1);
   hist_list_1.push_back(h_timediff_n_CND);
-  TH2D * h_mom_theta_n_CND = new TH2D("mom_theta_n_CND","p_{n} vs. #theta_{n} ;p_{n};#theta_{n}",100,0.2,2,100,35,145);
+  TH2D * h_mom_theta_n_CND = new TH2D("mom_theta_n_CND","p_{n} vs. #theta_{n} ;p_{n};#theta_{n}",100,0.2,1.5,100,35,145);
   hist_list_2.push_back(h_mom_theta_n_CND);
+  TH2D * h_phi_mom_n_CND = new TH2D("phi_mom_n_CND","#phi_{n} vs p_{n};#phi_{n};p_{n}",48,-180,180,100,0.2,1.5);
+  hist_list_2.push_back(h_phi_mom_n_CND);
+
 
   // extra bank info REC::ScintExtras
   TH2D * h_dedx_CND = new TH2D("dedx_CND","Energy Deposition;#beta#gamma = p/m;dE/dx (MeV/cm)",100,0.1,1.5,100,1,20);
@@ -231,13 +266,45 @@ int main(int argc, char ** argv)
   TH2D * h_cluster_CND = new TH2D("cluster_CND","Cluster Size and Multiplicity;Cluster Size;Cluster Multiplicity",10,0,10,10,0,10);
   hist_list_2.push_back(h_cluster_CND);
 
+
+
   // extra bank info CND::hits
+  TH1D * h_sec = new TH1D("hit_sector","Sector of CND hit",48,0,48);
+  hist_list_1.push_back(h_sec);
+  TH1D * h_lay = new TH1D("hit_layer","Layer of CND hit",48,0,48);
+  hist_list_1.push_back(h_lay);
+  TH2D * h_sec_lay = new TH2D("hit_sector_layer","Hit Sector vs Layer;Sector;Layer",24,0,24,5,0,4);
+  hist_list_2.push_back(h_sec_lay);
+  //TH1D * h_Eunc = new TH1D("Eunc","Energy deposition uncertainty of hit (MeV)",100,0,50);
+  //hist_list_1.push_back(h_Eunc);
+  //TH1D * h_tunc = new TH1D("tunc","Hit time uncertainty (ns)",100,0,50);
+  //hist_list_1.push_back(h_tunc);
+  TH1D * h_x = new TH1D("hit_x","Hit position x;x (cm);Counts",50,-50,50);
+  hist_list_1.push_back(h_x);
+  TH1D * h_x_unc = new TH1D("hit_x_unc","Hit position x uncertainty;x uncertainty (cm);Counts",50,0,5);
+  hist_list_1.push_back(h_x_unc);
+  TH1D * h_y = new TH1D("hit_y","Hit position y;y (cm);Counts",50,-50,50);
+  hist_list_1.push_back(h_y);
+  TH1D * h_y_unc = new TH1D("hit_y_unc","Hit position y uncertainty;y uncertainty (cm);Counts",50,0,5);
+  hist_list_1.push_back(h_y_unc);
+  TH1D * h_z = new TH1D("hit_z","Hit position z;z (cm);Counts",50,-50,50);
+  hist_list_1.push_back(h_z);
+  TH1D * h_z_unc = new TH1D("hit_z_unc","Hit position z uncertainty;z uncertainty (cm);Counts",50,0,5);
+  hist_list_1.push_back(h_z_unc);
+
+
   TH2D * h_hits_xy = new TH2D("hits_xy","Hit positions in CND;x (cm);y (cm)",100,-50,50,100,-50,50);
   hist_list_2.push_back(h_hits_xy);
   TH1D * h_hitE = new TH1D("hitE","CND Hit Energy Deposition;Hit Energy (MeV);Counts",100,0,100);
   hist_list_1.push_back(h_hitE);
   TH2D * h_xx = new TH2D("xx","X position from CND vs CVT;X coordinate of CND hit;X coordinate of hit from CVT info",100,-50,50,100,-50,50);
   hist_list_2.push_back(h_xx);
+  TH2D * h_path_t = new TH2D("patht","Track Path: Entrance to Exit vs. Vertex;Path length from entrance to exit through hit;Path length from vertex",100,0,30,100,0,120);
+  hist_list_2.push_back(h_path_t);
+  //TH2D * h_adc_LR = new TH2D("adc_LR","ADC Index: Left vs Right;L adc index;R adc index",100,0,50,100,0,50);
+  //hist_list_2.push_back(h_adc_LR);
+  //TH2D * h_tdc_LR = new TH2D("tdc_LR","ADC Index: Left vs Right;L tdc index;R tdc index",100,0,50,100,0,50);
+  //hist_list_2.push_back(h_tdc_LR);
 
   
   // extra bank info CND::clusters
@@ -248,10 +315,14 @@ int main(int argc, char ** argv)
   /////////////////////////////////////
   //CND Neutron Compared to Pmiss
   /////////////////////////////////////
+  TH2D * h_pn_angles = new TH2D("pn_angles","Angular Separation between Proton and Neutron (before cut);#Delta#phi = #phi_{p} - #phi_{n};#Delta#theta = #theta_{p} - #theta_{n}",360,-180,180,360,-180,180);
+  hist_list_2.push_back(h_pn_angles);
   TH2D * h_pn_pmiss = new TH2D("pn_pmiss","Neutron Momentum vs Missing Momentum;Missing Momentum (GeV/c);Neutron Momentum (GeV/c)",100,0,2,100,0,2);
   hist_list_2.push_back(h_pn_pmiss);
   TH1D * h_cos0 = new TH1D("cos0","Angle between p_{n} and p_{miss};cos #theta_{pn,pmiss};Counts",100,-1.1,1.1);
   hist_list_1.push_back(h_cos0);
+  TH2D * h_theta_phi_p = new TH2D("theta_phi_p","Proton Theta vs Phi;#phi_{p};#theta_{n}",360,-180,180,180,0,180);
+  hist_list_2.push_back(h_theta_phi_p);
 
 
 
@@ -354,9 +425,6 @@ int main(int argc, char ** argv)
           if(PID==22){
             h_mom_beta_photon_ECAL_zoom->Fill(allParticles[j]->getP(),allParticles[j]->par()->getBeta(),weight);
           }
-          if(PID==0){
-            h_mom_beta_0_ECAL_zoom->Fill(allParticles[j]->getP(),allParticles[j]->par()->getBeta(),weight);
-          }
 	}
 	if(CND1 || CND2 || CND3){
  	  
@@ -366,9 +434,6 @@ int main(int argc, char ** argv)
 	  }
 	  if(PID==22){
 	    h_mom_beta_photon_CND_zoom->Fill(allParticles[j]->getP(),allParticles[j]->par()->getBeta(),weight);  
-	  }
-	  if(PID==0){
-	    h_mom_beta_0_CND_zoom->Fill(allParticles[j]->getP(),allParticles[j]->par()->getBeta(),weight);  
 	  }
 	}
 
@@ -435,6 +500,7 @@ int main(int argc, char ** argv)
 	  h_timediff_n_CND->Fill(time_frommom_n-time_frombeta_n,weight);
 	  
 	  h_mom_theta_n_CND->Fill(p_n.Mag(),theta_n,weight);
+          h_phi_mom_n_CND->Fill(phi_n,p_n.Mag(),weight);
 
 
           
@@ -459,13 +525,47 @@ int main(int argc, char ** argv)
 
       // CND::hits banks info
       for (auto iRow=0; iRow < c12->getBank(cnd_hits)->getRows(); iRow++){
+        // define variables
+        int sector = c12->getBank(cnd_hits)->getInt(cnd_hit_sector,iRow);
+        int layer = c12->getBank(cnd_hits)->getInt(cnd_hit_layer,iRow);
+        double E = c12->getBank(cnd_hits)->getFloat(cnd_hit_energy,iRow);
+        double time = c12->getBank(cnd_hits)->getFloat(cnd_hit_time,iRow);
+        double E_unc = c12->getBank(cnd_hits)->getFloat(cnd_hit_energy_unc,iRow); // zero
+        double t_unc = c12->getBank(cnd_hits)->getFloat(cnd_hit_time_unc,iRow); // zero
         double x = c12->getBank(cnd_hits)->getFloat(cnd_hit_x,iRow);
         double y = c12->getBank(cnd_hits)->getFloat(cnd_hit_y,iRow);
-        double x_cvt = c12->getBank(cnd_hits)->getFloat(cnd_hit_xcvt,iRow);
-        double E = c12->getBank(cnd_hits)->getFloat(cnd_hit_E,iRow);
+        double z = c12->getBank(cnd_hits)->getFloat(cnd_hit_z,iRow);
+        double x_unc = c12->getBank(cnd_hits)->getFloat(cnd_hit_x_unc,iRow);
+        double y_unc = c12->getBank(cnd_hits)->getFloat(cnd_hit_y_unc,iRow);
+        double z_unc = c12->getBank(cnd_hits)->getFloat(cnd_hit_z_unc,iRow);
+        double x_cvt = c12->getBank(cnd_hits)->getFloat(cnd_hit_tx,iRow);
+        double y_cvt = c12->getBank(cnd_hits)->getFloat(cnd_hit_ty,iRow);
+        double z_cvt = c12->getBank(cnd_hits)->getFloat(cnd_hit_tz,iRow);
+        double tlength = c12->getBank(cnd_hits)->getFloat(cnd_hit_tlength,iRow);
+        double pathlength = c12->getBank(cnd_hits)->getFloat(cnd_hit_pathlength,iRow);
+        int indexLadc = c12->getBank(cnd_hits)->getFloat(cnd_hit_indexLadc,iRow); // zero
+        int indexRadc = c12->getBank(cnd_hits)->getFloat(cnd_hit_indexRadc,iRow); // zero
+        int indexLtdc = c12->getBank(cnd_hits)->getFloat(cnd_hit_indexLtdc,iRow); // zero
+        int indexRtdc = c12->getBank(cnd_hits)->getFloat(cnd_hit_indexRtdc,iRow); // zero
+
+
+        // fill histograms
+        h_sec_lay->Fill(sector,layer,weight);
+
         h_hits_xy->Fill(x,y,weight);
         h_hitE->Fill(E,weight);
         h_xx->Fill(x,x_cvt,weight);
+        h_x->Fill(x,weight);
+        h_y->Fill(y,weight);
+        h_z->Fill(z,weight);
+        h_x_unc->Fill(x_unc,weight);
+        h_y_unc->Fill(y_unc,weight);
+        h_z_unc->Fill(z_unc,weight);
+        //h_Eunc->Fill(E_unc,weight);
+        //h_tunc->Fill(t_unc,weight);
+        h_path_t->Fill(tlength,pathlength,weight);
+        //h_adc_LR->Fill(indexLadc,indexRadc,weight);
+        //h_tdc_LR->Fill(indexLtdc,indexRtdc,weight);
       }
 
       // CND::clusters banks info
@@ -501,9 +601,6 @@ int main(int argc, char ** argv)
   double theta_pm = p_miss.Theta()*180 / M_PI;
 
 
-
-
-
   for(int j = 0; j < neutrons.size(); j++){
 	TVector3 p_n;
 	p_n.SetMagThetaPhi(neutrons[j]->getP(),neutrons[j]->getTheta(),neutrons[j]->getPhi());
@@ -513,24 +610,31 @@ int main(int argc, char ** argv)
 	double beta_frommom_n = p_n.Mag()/E_n;
         double cos0 = p_miss.Dot(p_n) / (p_miss.Mag()*p_n.Mag());
 
+        double dphi_pn = protons[0]->getPhi()*180./M_PI - phi_n;
+        double dtheta_pn = protons[0]->getTheta()*180./M_PI - theta_n;
+
         bool CND1 = (neutrons[j]->sci(clas12::CND1)->getDetector() == 3);
         bool CND2 = (neutrons[j]->sci(clas12::CND2)->getDetector() == 3);
         bool CND3 = (neutrons[j]->sci(clas12::CND3)->getDetector() == 3);
 
-        // "good neutrons" start here
+        // cuts to get good neutrons
         if (beta_frommom_n==0) {continue;}
         if (theta_n==0) {continue;}
         if (phi_n==0) {continue;}
         if (p_n.Mag()<0.2) {continue;}
         if (theta_n<40 || theta_n>140) {continue;}
+
         // require pmiss to be as expected
         if (p_miss.Mag()<0.2) {continue;}
         if (theta_pm<40 || theta_pm>140) {continue;}
 
-
+        // "good neutrons" start here
         if(CND){
+          h_pn_angles->Fill( dphi_pn , dtheta_pn , weight);
+          if (dtheta_pn>-15) {continue;}
           h_pn_pmiss->Fill(p_miss.Mag(),p_n.Mag(),weight);
           h_cos0->Fill(cos0,weight);
+          h_theta_phi_p->Fill(p_p.Theta()*180./M_PI,p_p.Phi()*180./M_PI,weight);
         }
 
   }
@@ -636,7 +740,7 @@ int main(int argc, char ** argv)
   myText->Print(fileName,"pdf");  
   myText->Clear();
 
-  myCanvas->Divide(2,3);
+  myCanvas->Divide(2,2);
   myCanvas->cd(1);
   h_mom_beta_neutron_ECAL_zoom->Draw("colz");
   myCanvas->cd(2);
@@ -645,10 +749,6 @@ int main(int argc, char ** argv)
   h_mom_beta_photon_ECAL_zoom->Draw("colz");
   myCanvas->cd(4);
   h_mom_beta_photon_CND_zoom->Draw("colz");
-  myCanvas->cd(5);
-  h_mom_beta_0_ECAL_zoom->Draw("colz");
-  myCanvas->cd(6);
-  h_mom_beta_0_CND_zoom->Draw("colz");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
@@ -718,12 +818,22 @@ int main(int argc, char ** argv)
   h_theta_n_CND->Draw();
   myCanvas->cd(2);
   h_theta_nq_CND->Draw();
-  myCanvas->cd(3);
-  h_phi_theta_n_CND->Draw("colz");
-  myCanvas->cd(4);
-  h_mom_theta_n_CND->Draw("colz");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
+
+  myCanvas->Divide(2,2);
+  myCanvas->cd(1);
+  h_phi_theta_n_CND->Draw("colz");
+  myCanvas->cd(2);
+  h_mom_theta_n_CND->Draw("colz");
+  myCanvas->cd(3);
+  h_phi_mom_n_CND->Draw("colz");
+  myCanvas->cd(4);
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+
+
 
 
 
@@ -740,11 +850,44 @@ int main(int argc, char ** argv)
 
   myCanvas->Divide(2,2);
   myCanvas->cd(1);
-  h_hits_xy->Draw("colz");
+  h_sec_lay->Draw("colz");
   myCanvas->cd(2);
-  h_hitE->Draw();
+  h_hits_xy->Draw("colz");
   myCanvas->cd(3);
+  h_hitE->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(2,2);
+  myCanvas->cd(1);
   h_xx->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(2,3);
+  myCanvas->cd(1),
+  h_x->Draw();
+  myCanvas->cd(2);
+  h_x_unc->Draw();
+  myCanvas->cd(3);
+  h_y->Draw();
+  myCanvas->cd(4);
+  h_y_unc->Draw();
+  myCanvas->cd(5);
+  h_z->Draw();
+  myCanvas->cd(6);
+  h_z_unc->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(2,2);
+  myCanvas->cd(1);
+  h_path_t->Draw("colz");
+  myCanvas->cd(2);
+  myCanvas->cd(3);
+  //h_adc_LR->Draw("colz");
+  myCanvas->cd(4);
+  //h_tdc_LR->Draw("colz");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
@@ -790,6 +933,10 @@ int main(int argc, char ** argv)
   h_pn_pmiss->Draw("colz");
   myCanvas->cd(2);
   h_cos0->Draw();
+  myCanvas->cd(3);
+  h_pn_angles->Draw("colz");
+  myCanvas->cd(4);
+  h_theta_phi_p->Draw("colz");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
