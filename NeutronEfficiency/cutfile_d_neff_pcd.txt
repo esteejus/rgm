@@ -4,7 +4,7 @@ e_calv: 14 3000
 e_calw: 14 3000
 e_SF: 0.18 0.28
 e_mom: 1.0 6.0
-e_vtze: -6 0
+e_vtze: -6 6
 Lead Cuts: ON
 l_pid: Proton
 l_scint: CTOF
