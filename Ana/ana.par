@@ -1,0 +1,9 @@
+##########
+#CLAS12 analysis cuts and parameters file
+#########
+pid_cuts	2212:0:2	#proton chi2pid cut
+pid_cuts	 211:0:1	#pi+ chi2pid cut
+pid_cuts	-211:0:3	#pi- chi2pid cut
+vertex_cut	z:-6:-1	#vertex z cut min:max
+vertex_cut	x:-6:6	
+vertex_cut	y:-6:6	
