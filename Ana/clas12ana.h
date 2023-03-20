@@ -46,8 +46,10 @@ TVector3 rotate(TVector3 vec, int sector)
    void Init();
    void InitCuts();
    void readInputParam(const char* inFile);
-   void readEcalPar(const char* filename);
+   void readEcalPPar(const char* filename);
+   void readEcalSFPar(const char* filename);
    void printParams();
+
    void InitDebugPlots();
    void WriteDebugPlots();
    void Clear();
@@ -60,6 +62,7 @@ TVector3 rotate(TVector3 vec, int sector)
    //   void pidCuts(std::vector<region_part_ptr> &particles);
    //   void pidCuts(std::vector<std::vector<region_part_ptr>> &particles);
 
+   void setEcalPCuts(bool flag = true)     {f_ecalPCuts = flag;}; //option to have several cuts
    void setEcalSFCuts(bool flag = true)    {f_ecalSFCuts = flag;}; //option to have several cuts
    void setDCEdgeCuts(bool flag = true)    {f_DCEdgeCuts = flag;};
    void setEcalEdgeCuts(bool flag = true){f_ecalEdgeCuts = flag;};
@@ -125,7 +128,8 @@ TVector3 rotate(TVector3 vec, int sector)
    void debugByPid(region_part_ptr p);
 
    bool EcalEdgeCuts(region_part_ptr p);
-   bool checkEcalCuts(region_part_ptr p);
+   bool checkEcalPCuts(region_part_ptr p);
+   bool checkEcalSFCuts(region_part_ptr p);
    bool checkPidCut(region_part_ptr p);
    bool checkVertex(region_part_ptr p);
    bool checkVertexCorrelation(region_part_ptr el,region_part_ptr p);
@@ -166,9 +170,11 @@ TVector3 rotate(TVector3 vec, int sector)
    std::vector<region_part_ptr> recoil_proton;
 
    //prototype function for fitting ECAL electron cuts
-   TF1 *ecal_fcn[2][7]; //0 upper 1 lower fiducial
-   double ecal_fcn_par[7][6]; //sector, parameter
-   int sigma_cut = 4;
+   TF1 *ecal_p_fcn[2][7]; //0 upper 1 lower fiducial
+   TF1 *ecal_sf_fcn[2][7]; //0 upper 1 lower fiducial
+   double ecal_p_fcn_par[7][6]; //sector, parameter
+   double ecal_sf_fcn_par[7][6]; //sector, parameter
+   int sigma_cut = 5;
    //vector to hold constants of function for each particle type
    //  vector<cutpar> dc_cuts; 
    //  vector<cutpar> ecal_cuts; 
@@ -178,6 +184,7 @@ TVector3 rotate(TVector3 vec, int sector)
    //vector<cutpar> vertex_cuts;
 
    bool f_ecalSFCuts         = false;
+   bool f_ecalPCuts          = false;
    bool f_ecalEdgeCuts       = false;
    bool f_DCEdgeCuts         = false;
    bool f_pidCuts            = false;
@@ -236,8 +243,10 @@ TVector3 rotate(TVector3 vec, int sector)
 
 
 
-   TH2D *sf_debug_b[7] = {nullptr};
-   TH2D *sf_debug_a[7] = {nullptr};
+   TH2D *sf_e_debug_b[7] = {nullptr};
+   TH2D *sf_e_debug_a[7] = {nullptr};
+   TH2D *sf_p_debug_b[7] = {nullptr};
+   TH2D *sf_p_debug_a[7] = {nullptr};
 
    TH2D *pid_cd_debug = new TH2D("pid_cd_debug","PID Uncut CD",100,0,3,100,0,1.2);
    TH2D *pid_fd_debug = new TH2D("pid_fd_debug","PID Uncut FD",100,0,5,100,0,1.2);
@@ -325,6 +334,7 @@ TVector3 rotate(TVector3 vec, int sector)
 	   int sector = (*el)->getSector();
 	   double el_mom = (*el)->getP();
 	   double el_sf = getSF(*el);
+	   double el_pcal_energy = (*el)->cal(PCAL)->getEnergy();
 
 	   double ecin_v = (*el)->cal(ECIN)->getLv();
 	   double ecin_w = (*el)->cal(ECIN)->getLw();
@@ -344,7 +354,11 @@ TVector3 rotate(TVector3 vec, int sector)
 	       sf_w_pcal_debug->Fill(pcal_w,el_sf);
 
 	       if(sector <= 6 && sector >= 1)
-		 sf_debug_b[sector]->Fill(el_mom,el_sf); 
+		 {
+		   sf_e_debug_b[sector]->Fill(el_pcal_energy,el_sf); 
+		   sf_p_debug_b[sector]->Fill(el_mom,el_sf); 
+		 }
+
 	       fillDCdebug(*el,dc_hit_map_b);
 	     }
 
@@ -354,7 +368,11 @@ TVector3 rotate(TVector3 vec, int sector)
 	       el = electrons_det.erase(el);
 
 
-	   if(!checkEcalCuts(*el) && f_ecalSFCuts)       //ECAL SF cuts
+	   if(!checkEcalSFCuts(*el) && f_ecalSFCuts)       //ECAL SF cuts
+	     {
+	       el = electrons_det.erase(el);
+	     }
+	   else if(!checkEcalPCuts(*el) && f_ecalPCuts)       //ECAL SF cuts
 	     {
 	       el = electrons_det.erase(el);
 	     }
@@ -374,7 +392,10 @@ TVector3 rotate(TVector3 vec, int sector)
 	     {
 	       //DEBUG plots
 	       if(debug_plots && sector <= 6 && sector >= 1)
-		 sf_debug_a[sector]->Fill(el_mom,el_sf);
+		 {
+		   sf_e_debug_a[sector]->Fill((*el)->cal(PCAL)->getEnergy(),el_sf);
+		   sf_p_debug_a[sector]->Fill(el_mom,el_sf);
+		 }
 
 	       el_vz_debug->Fill( (*el)->par()->getVz());
 
@@ -507,12 +528,12 @@ void clas12ana::plotDebug()
   for(int i = 1; i <=6; i++)
     {   
       c1->cd(i);
-      sf_debug_b[i]->Draw("colz");
+      sf_p_debug_b[i]->Draw("colz");
     }
   for(int i = 7; i <=12; i++)
     {   
       c1->cd(i);
-      sf_debug_a[i]->Draw("colz");
+      sf_p_debug_a[i]->Draw("colz");
     }
 
 
@@ -521,19 +542,36 @@ void clas12ana::plotDebug()
 
 void clas12ana::InitCuts()
 {
- 
+  cout<<"PARAMETERS for SF vs Ecal cuts"<<endl;
    for(int i = 1; i < 7; i++)
     {
       for(int j = 0; j < 6; j++)
 	{
-	  cout<<"sector "<<i <<" j "<<j<<" par "<<ecal_fcn_par[i][j]<<endl;
-	  ecal_fcn[0][i]->SetParameter(j,ecal_fcn_par[i][j]);
-	  ecal_fcn[1][i]->SetParameter(j,ecal_fcn_par[i][j]);
+	  cout<<"sector "<<i <<" j "<<j<<" par "<<ecal_sf_fcn_par[i][j]<<endl;
+	  ecal_sf_fcn[0][i]->SetParameter(j,ecal_sf_fcn_par[i][j]);
+	  ecal_sf_fcn[1][i]->SetParameter(j,ecal_sf_fcn_par[i][j]);
 	}
 
-      ecal_fcn[1][i]->SetParameter(6,sigma_cut);
-      ecal_fcn[1][i]->SetParameter(6,sigma_cut);
+      ecal_sf_fcn[0][i]->SetParameter(6,sigma_cut);
+      ecal_sf_fcn[1][i]->SetParameter(6,sigma_cut);
     }
+
+
+   cout<<"PARAMETERS for SF vs P cuts"<<endl;
+   for(int i = 1; i < 7; i++)
+    {
+      for(int j = 0; j < 6; j++)
+	{
+	  cout<<"sector "<<i <<" j "<<j<<" par "<<ecal_p_fcn_par[i][j]<<endl;
+	  ecal_p_fcn[0][i]->SetParameter(j,ecal_p_fcn_par[i][j]);
+	  ecal_p_fcn[1][i]->SetParameter(j,ecal_p_fcn_par[i][j]);
+	}
+
+      ecal_p_fcn[0][i]->SetParameter(6,sigma_cut);
+      ecal_p_fcn[1][i]->SetParameter(6,sigma_cut);
+    }
+
+
 
 }
 
@@ -543,8 +581,11 @@ void clas12ana::Init()
 {
       for(int i = 0; i < 7; i++)
 	{
-	  ecal_fcn[0][i] = new TF1(Form("ecal_fcn_0_%d",i),"[0] + [1]/sqrt(x) + [2]/x - [6]* ([3] + [4]/sqrt(x) + [5]/x)",0,10);
-	  ecal_fcn[1][i] = new TF1(Form("ecal_fcn_1_%d",i),"[0] + [1]/sqrt(x) + [2]/x + [6]* ([3] + [4]/sqrt(x) + [5]/x)",0,10);
+	  ecal_sf_fcn[0][i] = new TF1(Form("ecal_sf_fcn_0_%d",i),"[0] + [1]/x + [2]/pow(x,2) - [6]*( [3] + [4]/x + [5]/pow(x,2))",0,1.5);
+	  ecal_sf_fcn[1][i] = new TF1(Form("ecal_sf_fcn_1_%d",i),"[0] + [1]/x + [2]/pow(x,2) + [6]*( [3] + [4]/x + [5]/pow(x,2))",0,1.5);
+
+	  ecal_p_fcn[0][i] = new TF1(Form("ecal_p_fcn_0_%d",i),"[0] + [1]/x + [2]/pow(x,2) - [6]*( [3] + [4]/x + [5]/pow(x,2))",0,10);
+	  ecal_p_fcn[1][i] = new TF1(Form("ecal_p_fcn_1_%d",i),"[0] + [1]/x + [2]/pow(x,2) + [6]*( [3] + [4]/x + [5]/pow(x,2))",0,10);
 	}
 
   for(int i = 0; i < 7; i++)
@@ -552,10 +593,13 @@ void clas12ana::Init()
       for(int j = 0; j < 6; j++)
 	{
 	  if(j == 3)
-	    ecal_fcn_par[i][j] = 9999; 
+	    {
+	      ecal_sf_fcn_par[i][j] = 9999; 
+	      ecal_p_fcn_par[i][j] = 9999; 
+	    }
 
-	  ecal_fcn_par[i][j] = 0;
-
+	  ecal_sf_fcn_par[i][j] = 0;
+	  ecal_p_fcn_par[i][j] = 0;
 	}
     }
 
@@ -608,23 +652,26 @@ bool clas12ana::EcalEdgeCuts(region_part_ptr p)
 }
 
 
-bool clas12ana::checkEcalCuts(region_part_ptr p)
+bool clas12ana::checkEcalSFCuts(region_part_ptr p)
 {
   //true if inside cut
 
   if(p->par()->getPid() == 11)
     {
       double sampling_frac = getSF(p);
+      double energy =  p->cal(PCAL)->getEnergy();
+      //      double energy =  p->cal(ECIN)->getEnergy() +  p->cal(ECOUT)->getEnergy();
+
       int sector = p->getSector();
       
       //Turn on for functional form 
-      //      double sf_max_cut = ecal_fcn[1][sector]->Eval(p->par()->getP() );
-      //      double sf_min_cut = ecal_fcn[0][sector]->Eval(p->par()->getP() );
+      double sf_max_cut = ecal_sf_fcn[1][sector]->Eval(energy);
+      double sf_min_cut = ecal_sf_fcn[0][sector]->Eval(energy);
       //      cout<<"sf cut "<<sf_max_cut<<" "<<sf_min_cut<< " "<< sampling_frac <<" mom "<<p->par()->getP()<<endl;
       //      cout<<ecal_fcn[0][sector]->GetParameter(0)<<" "<<ecal_fcn[0][sector]->GetParameter(1)<<" "<<ecal_fcn[0][sector]->GetParameter(2)<<" sector "<<sector<<endl;
 
-      double sf_max_cut = .28;
-      double sf_min_cut = .2;
+      //      double sf_max_cut = .28;
+      //      double sf_min_cut = .2;
       
       if(sampling_frac < sf_max_cut && sampling_frac > sf_min_cut)
 	return true;
@@ -636,6 +683,37 @@ bool clas12ana::checkEcalCuts(region_part_ptr p)
   else
     return false;
 }
+
+
+bool clas12ana::checkEcalPCuts(region_part_ptr p)
+{
+  //true if inside cut
+
+  if(p->par()->getPid() == 11)
+    {
+      double sampling_frac = getSF(p);
+      int sector = p->getSector();
+      
+      //Turn on for functional form 
+      double sf_max_cut = ecal_p_fcn[1][sector]->Eval(p->par()->getP() );
+      double sf_min_cut = ecal_p_fcn[0][sector]->Eval(p->par()->getP() );
+      //      cout<<"sf cut "<<sf_max_cut<<" "<<sf_min_cut<< " "<< sampling_frac <<" mom "<<p->par()->getP()<<endl;
+      //      cout<<ecal_fcn[0][sector]->GetParameter(0)<<" "<<ecal_fcn[0][sector]->GetParameter(1)<<" "<<ecal_fcn[0][sector]->GetParameter(2)<<" sector "<<sector<<endl;
+
+      //      double sf_max_cut = .28;
+      //      double sf_min_cut = .2;
+      
+      if(sampling_frac < sf_max_cut && sampling_frac > sf_min_cut)
+	return true;
+
+      else
+	return false;
+    }
+  
+  else
+    return false;
+}
+
 
 
 double clas12ana::getSF(region_part_ptr p)
@@ -721,7 +799,7 @@ void clas12ana::pidCuts(std::vector<region_part_ptr> &particles)
 }
 */
 
-void clas12ana::readEcalPar(const char* filename)
+void clas12ana::readEcalSFPar(const char* filename)
 {
   int num_par = 6; 
   ifstream infile;
@@ -746,7 +824,46 @@ void clas12ana::readEcalPar(const char* filename)
 	  for(int j = 0; j < num_par; j++)
 	    {	 
 	      ss >> parameter;
-	      ecal_fcn_par[i][j] = parameter;
+	      ecal_sf_fcn_par[i][j] = parameter;
+	    }
+	}
+
+
+      InitCuts();
+    }
+  else
+    std::cout<<"ECal parameter files does not exist!!!"<<endl;
+
+
+}
+
+
+void clas12ana::readEcalPPar(const char* filename)
+{
+  int num_par = 6; 
+  ifstream infile;
+  infile.open(filename);
+
+  if (infile.is_open())
+    {  
+      string tp;
+
+      //remove 3 lines of header                                                                   
+      for(int i = 0; i < 2; i++)
+	getline(infile, tp);
+      cout<<tp<<endl;
+
+
+      for(int i = 1; i < 7; i++)
+	{
+	  getline(infile, tp);  //read data from file object and put it into string.       
+          stringstream ss(tp);
+          double parameter;
+	  //get parameters for a given sector
+	  for(int j = 0; j < num_par; j++)
+	    {	 
+	      ss >> parameter;
+	      ecal_p_fcn_par[i][j] = parameter;
 	    }
 	}
 
@@ -1110,9 +1227,11 @@ void clas12ana::debugByPid(region_part_ptr p)
 
    for(int i = 1; i <= 6; i++)
      {
-       sf_debug_b[i] = new TH2D(Form("sf_debug_b_sector_%d",i),Form("Sampling Fraction Before Cuts Sector_%d",i),100,0,6,100,0,.4);
-       sf_debug_a[i] = new TH2D(Form("sf_debug_a_sector_%d",i),Form("Sampling Fraction  After Cuts Sector_%d",i),100,0,6,100,0,.4);
+       sf_p_debug_b[i] = new TH2D(Form("sf_p_debug_b_sector_%d",i),Form("Sampling Fraction Before Cuts Sector_%d",i),100,0,6,100,0,.4);
+       sf_p_debug_a[i] = new TH2D(Form("sf_p_debug_a_sector_%d",i),Form("Sampling Fraction  After Cuts Sector_%d",i),100,0,6,100,0,.4);
 
+       sf_e_debug_b[i] = new TH2D(Form("sf_e_debug_b_sector_%d",i),Form("Sampling Fraction Before Cuts Sector_%d",i),100,0,1.5,100,0,.4);
+       sf_e_debug_a[i] = new TH2D(Form("sf_e_debug_a_sector_%d",i),Form("Sampling Fraction  After Cuts Sector_%d",i),100,0,1.5,100,0,.4);
      }
 
 
@@ -1138,15 +1257,18 @@ void clas12ana::debugByPid(region_part_ptr p)
 
    for(int i = 1; i <= 6; i++)
      {
-       sf_debug_b[i]->Write();
-       sf_debug_a[i]->Write();
-
+       sf_p_debug_b[i]->Write();
+       sf_p_debug_a[i]->Write();
+       sf_e_debug_b[i]->Write();
+       sf_e_debug_a[i]->Write();
      }
 
    for(int i = 1; i <= 6; i++)
      {
-       ecal_fcn[0][i]->Write();
-       ecal_fcn[1][i]->Write();
+       ecal_sf_fcn[0][i]->Write();
+       ecal_sf_fcn[1][i]->Write();
+       ecal_p_fcn[0][i]->Write();
+       ecal_p_fcn[1][i]->Write();
      }
 
    for(int i = 1; i <= 3; i++)
