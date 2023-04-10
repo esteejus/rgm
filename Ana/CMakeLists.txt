@@ -15,14 +15,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ROOT_CXX_FLAGS} -O0 -ggdb")
 #add_subdirectory(source)
 
 # compile executables in source directory
-foreach(fnameSrc example_ana.cpp)
-  message(STATUS ${fnameSRC})
-  string (REPLACE ".cpp" "" fnameExe ${fnameSrc})
-  add_executable(${fnameExe} ${fnameSrc})
-  target_link_libraries(${fnameExe} ${ROOT_LIBRARIES} -lEG -lClas12Banks -lHipo4 -lClas12Root -L${CLAS12ROOT}/lib -L${CLAS12ROOT}/ccdb/lib )
-endforeach()
-
-foreach(fnameSrc skim_events.cpp)
+foreach(fnameSrc example_ana.cpp andrew.cpp)
   message(STATUS ${fnameSRC})
   string (REPLACE ".cpp" "" fnameExe ${fnameSrc})
   add_executable(${fnameExe} ${fnameSrc})
