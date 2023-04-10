@@ -15,7 +15,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ROOT_CXX_FLAGS} -O0 -ggdb")
 #add_subdirectory(source)
 
 # compile executables in source directory
-foreach(fnameSrc example_ana.cpp andrew.cpp)
+foreach(fnameSrc example_ana.cpp)
   message(STATUS ${fnameSRC})
   string (REPLACE ".cpp" "" fnameExe ${fnameSrc})
   add_executable(${fnameExe} ${fnameSrc})
