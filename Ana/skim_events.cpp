@@ -16,6 +16,7 @@
 #include <TStyle.h>
 #include <TDatabasePDG.h>
 #include "HipoChain.h"
+#include "HipoChainWriter.h"
 #include "clas12ana.h"
 
 using namespace std;
@@ -31,6 +32,7 @@ void Usage()
   std::cerr << "Usage: ./testAna inputfiles.hipo outputfile.root \n\n\n";
 
 }
+
 
 
 int main(int argc, char ** argv)
@@ -56,12 +58,13 @@ int main(int argc, char ** argv)
   clasAna.readInputParam("ana.par");
   clasAna.readEcalSFPar("paramsSF_40Ca_x2.dat");
   clasAna.readEcalPPar("paramsPI_40Ca_x2.dat");
+
   clasAna.printParams();
 
 
-
-  clas12root::HipoChain chain;
+  clas12root::HipoChainWriter chain(outFile);
   chain.Add(inFile);
+
   chain.SetReaderTags({0});
   chain.db()->turnOffQADB();
   auto config_c12=chain.GetC12Reader();
@@ -91,34 +94,29 @@ int main(int argc, char ** argv)
 
   TH1D *q2_h = new TH1D("q2_h","Q^2 ",1000,0, 4);
   TH1D *xb_h = new TH1D("xb_h","x_B ",1000,0, 4);
-  TH1D *px_com = new TH1D("px_com","Px COM",1000,-1000,1000);
-  TH1D *py_com = new TH1D("py_com","Py COM",1000,-1000,1000);
-  TH1D *pz_com = new TH1D("pz_com","Pz COM",1000,-1000,1000);
+  TH1D *px_com = new TH1D("px_com","Px COM",1000,-500,500);
+  TH1D *py_com = new TH1D("py_com","Py COM",1000,-500,500);
+  TH1D *pz_com = new TH1D("pz_com","Pz COM",1000,-500,500);
 
   TH1D *epp_h = new TH1D("epp_h","(e,e'pp)",100,0,2);
   TH1D *ep_h  = new TH1D("ep_h","(e,e'p)",100,0,2);
 
-  TH1D *missm = new TH1D("missm","Missing mass",100,0.5,1.5);
 
   clasAna.setEcalSFCuts();
-  clasAna.setEcalPCuts();
   clasAna.setEcalEdgeCuts();
   clasAna.setPidCuts();
-  //  clasAna.setVertexCuts();
-  //  clasAna.setVertexCorrCuts();
+  clasAna.setVertexCuts();
+  clasAna.setVertexCorrCuts();
   //  clasAna.setDCEdgeCuts();
   
   clasAna.setVzcuts(-6,1);
-  //clasAna.setVertexCorrCuts(-3,1);
+  clasAna.setVertexCorrCuts(-3,1);
 
 
 
 
   while(chain.Next())
     {
-
-      double weight = c12->mcevent()->getWeight(); //used if MC events have a weight 
-
       //Display completed  
       counter++;
 
@@ -127,83 +125,20 @@ int main(int argc, char ** argv)
       auto protons = clasAna.getByPid(2212);
 
 
-      if(electrons.size() == 1 && protons.size() >= 1)
+      if(electrons.size() == 1)
 	{
-	  SetLorentzVector(el,electrons[0]);
-	  //	  SetLorentzVector(ptr,protons[0]);
-
-	  TLorentzVector q = beam - el; //photon  4-vector            
-          double q2        = -q.M2(); // Q^2
-          double x_b       = q2/(2 * mass_p * (beam.E() - el.E()) ); //x-borken
-
-	  double miss_p_l = 0;
-	  double miss_m   = 0;
-	  double theta_pq = 0;
-	  double p_q      = 0;
-	  double x_prime  = 0;
-
-	  q2_h->Fill(q2);
-	  xb_h->Fill(x_b);
+          SetLorentzVector(el,electrons[0]);
 
 	  clasAna.getLeadRecoilSRC(beam,target,el);
 	  auto lead    = clasAna.getLeadSRC();
 	  auto recoil  = clasAna.getRecoilSRC();
 
 	  if(lead.size() == 1)
-	    {
-
-
-	      SetLorentzVector(lead_ptr,lead[0]);
-	      TLorentzVector miss = beam + target - el - lead_ptr; //photon  4-vector            
-	      //	      if(lead_ptr.P() > 1)
-	      //		continue;
-
-	      ep_h->Fill(miss.P());
-
-
-	      if(recoil.size() == 1)
-		{
-		  missm->Fill(miss.M());
-
-		  SetLorentzVector(recoil_ptr,recoil[0]);
-		  auto com_vec = clasAna.getCOM(lead_ptr,recoil_ptr,q);
-		  
-		  px_com->Fill(com_vec.X(),weight);
-		  py_com->Fill(com_vec.Y(),weight);
-		  pz_com->Fill(com_vec.Z(),weight);
-
-		  epp_h->Fill(miss.P());
-		  
-		}
-	    }
-	  
+	    chain.WriteEvent();
 
 	}
 
     }
-
-  missm->Draw();
-  //  pid_fd_debug->Write();
-
-  clasAna.WriteDebugPlots();
-
-  TFile *f = new TFile(outFile,"RECREATE");
-
-  f->cd();
-
-
-  q2_h->Write();
-  xb_h->Write();
-
-  px_com->Write();
-  py_com->Write();
-  pz_com->Write();
-
-  ep_h->Write();
-  epp_h->Write();
-  missm->Write();
-
-  f->Close();
 
 
   return 0;
