@@ -415,7 +415,7 @@ TVector3 rotate(TVector3 vec, int sector)
    if(electrons_det.size() == 1) //good trigger electron
      {
 
-       setByPid(electrons_det[0]); //set good trigger electron
+       //       setByPid(electrons_det[0]); //set good trigger electron
 
        if(debug_plots)
 	 fillDCdebug(electrons_det[0],dc_hit_map_a); //electron DC hit debug maps
@@ -433,8 +433,8 @@ TVector3 rotate(TVector3 vec, int sector)
 	     }
 
 
-	   //neutrals don't follow cuts below, skip them 
-	   if((*p)->par()->getCharge() == 0)
+	   //neutrals and electrons don't follow cuts below, skip them 
+	   if((*p)->par()->getCharge() == 0 || (*p)->par()->getPid() == 11 )
 	     {
 	       setByPid(*p);
 	       ++p; //itterate 
@@ -486,6 +486,7 @@ TVector3 rotate(TVector3 vec, int sector)
 	   else 	   //itterate 
 	     {
 	       setByPid(*p);
+
 	       if(debug_plots)
 		 {
 		   if((*p)->par()->getCharge() != 0 && (*p)->par()->getPid() != 11)
