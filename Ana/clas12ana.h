@@ -44,7 +44,8 @@ TVector3 rotate(TVector3 vec, int sector)
      };
 
    void Init();
-   void InitCuts();
+   void InitSFEcalCuts();
+   void InitSFPCuts();
    void readInputParam(const char* inFile);
    void readEcalPPar(const char* filename);
    void readEcalSFPar(const char* filename);
@@ -174,7 +175,7 @@ TVector3 rotate(TVector3 vec, int sector)
    TF1 *ecal_sf_fcn[2][7]; //0 upper 1 lower fiducial
    double ecal_p_fcn_par[7][6]; //sector, parameter
    double ecal_sf_fcn_par[7][6]; //sector, parameter
-   int sigma_cut = 5;
+   int sigma_cut = 3;
    //vector to hold constants of function for each particle type
    //  vector<cutpar> dc_cuts; 
    //  vector<cutpar> ecal_cuts; 
@@ -324,7 +325,7 @@ TVector3 rotate(TVector3 vec, int sector)
  void clas12ana::Run(const std::unique_ptr<clas12::clas12reader>& c12)
  {
    Clear();
-
+ 
    auto particles = c12->getDetParticles(); //particles is now a std::vector of particles for this event
    auto electrons_det = c12->getByID(11);
 
@@ -541,7 +542,7 @@ void clas12ana::plotDebug()
 }
 
 
-void clas12ana::InitCuts()
+void clas12ana::InitSFEcalCuts()
 {
   cout<<"PARAMETERS for SF vs Ecal cuts"<<endl;
    for(int i = 1; i < 7; i++)
@@ -556,8 +557,12 @@ void clas12ana::InitCuts()
       ecal_sf_fcn[0][i]->SetParameter(6,sigma_cut);
       ecal_sf_fcn[1][i]->SetParameter(6,sigma_cut);
     }
+}
 
 
+
+void clas12ana::InitSFPCuts()
+{
    cout<<"PARAMETERS for SF vs P cuts"<<endl;
    for(int i = 1; i < 7; i++)
     {
@@ -571,7 +576,6 @@ void clas12ana::InitCuts()
       ecal_p_fcn[0][i]->SetParameter(6,sigma_cut);
       ecal_p_fcn[1][i]->SetParameter(6,sigma_cut);
     }
-
 
 
 }
@@ -830,7 +834,7 @@ void clas12ana::readEcalSFPar(const char* filename)
 	}
 
 
-      InitCuts();
+      InitSFEcalCuts();
     }
   else
     std::cout<<"ECal parameter files does not exist!!!"<<endl;
@@ -869,7 +873,7 @@ void clas12ana::readEcalPPar(const char* filename)
 	}
 
 
-      InitCuts();
+      InitSFPCuts();
     }
   else
     std::cout<<"ECal parameter files does not exist!!!"<<endl;
