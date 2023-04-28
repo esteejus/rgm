@@ -26,7 +26,7 @@ foreach(fnameSrc eventcut_old.cpp)
 endforeach()
 
 ## compile exacutables 
-foreach(fnameSrc example_code.cpp backup_tensorscalar.cpp tensorscalar.cpp tensorscalar_mc.cpp) 
+foreach(fnameSrc example_code.cpp tensorscalar.cpp tensorscalar_mc.cpp) 
   message(STATUS ${fnameSRC})
   string (REPLACE ".cpp" "" fnameExe ${fnameSrc})
   add_executable(${fnameExe} ${fnameSrc})
