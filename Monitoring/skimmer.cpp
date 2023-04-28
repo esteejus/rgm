@@ -72,6 +72,90 @@ int main(int argc, char ** argv)
   chain.db()->turnOffQADB();
   int counter = 0;
   int cutcounter = 0;
+
+
+
+// CND hits
+auto cnd_hits = config_c12->addBank("CND::hits");
+auto cnd_id = config_c12->getBankOrder(cnd_hits,"id");
+auto cnd_status = config_c12->getBankOrder(cnd_hits,"status");
+auto cnd_trkID = config_c12->getBankOrder(cnd_hits,"trkID");
+auto cnd_sector = config_c12->getBankOrder(cnd_hits,"sector");
+auto cnd_layer = config_c12->getBankOrder(cnd_hits,"layer");
+auto cnd_component = config_c12->getBankOrder(cnd_hits,"component");
+auto cnd_energy = config_c12->getBankOrder(cnd_hits,"energy");
+auto cnd_time = config_c12->getBankOrder(cnd_hits,"time");
+auto cnd_energy_unc = config_c12->getBankOrder(cnd_hits,"energy_unc");
+auto cnd_time_unc = config_c12->getBankOrder(cnd_hits,"time_unc");
+auto cnd_x = config_c12->getBankOrder(cnd_hits,"x");
+auto cnd_y = config_c12->getBankOrder(cnd_hits,"y");
+auto cnd_z = config_c12->getBankOrder(cnd_hits,"z");
+auto cnd_x_unc = config_c12->getBankOrder(cnd_hits,"x_unc");
+auto cnd_y_unc = config_c12->getBankOrder(cnd_hits,"y_unc");
+auto cnd_z_unc = config_c12->getBankOrder(cnd_hits,"z_unc");
+auto cnd_tx = config_c12->getBankOrder(cnd_hits,"tx");
+auto cnd_ty = config_c12->getBankOrder(cnd_hits,"ty");
+auto cnd_tz = config_c12->getBankOrder(cnd_hits,"tz");
+auto cnd_tlength = config_c12->getBankOrder(cnd_hits,"tlength");
+auto cnd_pathlength = config_c12->getBankOrder(cnd_hits,"pathlength");
+auto cnd_indexLadc = config_c12->getBankOrder(cnd_hits,"indexLadc");
+auto cnd_indexRadc = config_c12->getBankOrder(cnd_hits,"indexRadc");
+auto cnd_indexLtdc = config_c12->getBankOrder(cnd_hits,"indexLtdc");
+auto cnd_indexRtdc = config_c12->getBankOrder(cnd_hits,"indexRtdc");
+
+// CND adc/tdc
+auto cnd_adc = config_c12->addBank("CND::adc");
+auto cnd_tdc = config_c12->addBank("CND::tdc");
+
+// CND clusters
+auto cnd_clusters = config_c12->addBank("CND::clusters");
+auto clust_id = config_c12->getBankOrder(cnd_clusters,"id");
+auto clust_sector = config_c12->getBankOrder(cnd_clusters,"sector");
+auto clust_layer = config_c12->getBankOrder(cnd_clusters,"layer");
+auto clust_component = config_c12->getBankOrder(cnd_clusters,"component");
+auto clust_nhits = config_c12->getBankOrder(cnd_clusters,"nhits");
+auto clust_energy = config_c12->getBankOrder(cnd_clusters,"energy");
+auto clust_x = config_c12->getBankOrder(cnd_clusters,"x");
+auto clust_y = config_c12->getBankOrder(cnd_clusters,"y");
+auto clust_z = config_c12->getBankOrder(cnd_clusters,"z");
+auto clust_time = config_c12->getBankOrder(cnd_clusters,"time");
+auto clust_status = config_c12->getBankOrder(cnd_clusters,"status");
+auto clust_size = config_c12->getBankOrder(cnd_clusters,"size");
+
+
+
+// CTOF hits
+auto ctof_hits = config_c12->addBank("CTOF::hits");
+auto ctof_id = config_c12->getBankOrder(ctof_hits,"id");
+auto ctof_layer = config_c12->getBankOrder(ctof_hits,"layer");
+auto ctof_sector = config_c12->getBankOrder(ctof_hits,"sector");
+auto ctof_component = config_c12->getBankOrder(ctof_hits,"component");
+auto ctof_energy = config_c12->getBankOrder(ctof_hits,"energy");
+auto ctof_x = config_c12->getBankOrder(ctof_hits,"x");
+auto ctof_y = config_c12->getBankOrder(ctof_hits,"y");
+auto ctof_z = config_c12->getBankOrder(ctof_hits,"z");
+
+// CTOF adc/tdc
+auto ctof_adc = config_c12->addBank("CTOF::adc");
+auto ctof_tdc = config_c12->addBank("CTOF::tdc");
+
+// CTOF clusters
+auto ctof_clusters = config_c12->addBank("CTOF::clusters");
+auto ctof_clus_suze = config_c12->getBankOrder(ctof_clusters,"size");
+auto ctof_clus_sector = config_c12->getBankOrder(ctof_clusters,"sector");
+auto ctof_clus_layer = config_c12->getBankOrder(ctof_clusters,"layer");
+auto ctof_clus_component = config_c12->getBankOrder(ctof_clusters,"component");
+auto ctof_clus_energy = config_c12->getBankOrder(ctof_clusters,"energy");
+auto ctof_clus_time = config_c12->getBankOrder(ctof_clusters,"time");
+
+
+// ScintExtras
+auto scintextras = config_c12->addBank("RECHB::ScintExtras");
+auto scint_dedx = config_c12->getBankOrder(scintextras,"dedx");
+auto scint_size = config_c12->getBankOrder(scintextras,"size");
+auto scint_layermult = config_c12->getBankOrder(scintextras,"layermult");
+
+
   
 
   while(chain.Next()==true){
