@@ -1,0 +1,21 @@
+Electron Cuts: ON
+e_nphe: 1 100
+e_calv: 14 3000
+e_calw: 14 3000
+e_SF: 0.18 0.28
+e_mom: 0.5 6.0
+Lead Cuts: ON
+l_pid: Proton
+l_scint: FTOF
+l_theta: 5.0 40.0
+l_chipid: -3.0 3.0
+l_vtzdiff: -4.0 4.0
+Lead SRC Cuts: OFF
+lsrc_xB: 1.1 2.0
+lsrc_pmiss: 0.3 3.0
+lsrc_mmiss: 0.8 1.1
+lsrc_loq: 0.62 1.1
+Recoil SRC Cuts: OFF
+rsrc_pid: Neutron
+rsrc_scint: CND
+rsrc_chipid: -99999 99999
