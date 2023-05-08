@@ -238,7 +238,7 @@ int main(int argc, char ** argv)
   hist_list_2.push_back(h_pmiss_pn);
   TH2D * h_beta_pmiss = new TH2D("beta_pmiss","Beta vs Pmiss;Pmiss (GeV/c);Beta",100,0,1.5,100,0,1);
   hist_list_2.push_back(h_beta_pmiss);
-  TH1D * h_cos0 = new TH1D("cos0","cos #theta_{pmiss,pneutron};cos #theta;Counts",50,-1.05,1.05);
+  TH1D * h_cos0 = new TH1D("cos0","cos #theta_{pmiss,pneutron};cos #theta;Counts",30,-1.05,1.05);
   hist_list_1.push_back(h_cos0);
   TH1D * h_dphi = new TH1D("dphi","#Delta #phi = #phi_{pmiss} - #phi_{n};#Delta #phi;Counts",48,-180,180);
   hist_list_1.push_back(h_dphi);
@@ -680,6 +680,12 @@ if (mmiss>0.85 && mmiss<1.05) {h_det2d->Fill(pmiss.Mag(),thetamiss,weight);} // 
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
+  // all angles
+  myCanvas->Divide(pgrid_x,pgrid_y);
+  double * justhereforthehist0 = hist_projections(myCanvas,h_mmiss_pmiss_allt_denom,neff_pbins, 'p');
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
   // theta interval 1
   myCanvas->Divide(1,1);
   myCanvas->cd(1);
@@ -742,18 +748,24 @@ if (mmiss>0.85 && mmiss<1.05) {h_det2d->Fill(pmiss.Mag(),thetamiss,weight);} // 
   }
 
   // denominator - all theta intervals
-  myCanvas->Divide(2,2);
+  myCanvas->Divide(1,1);
   myCanvas->cd(1);
   h_pmiss_int1_denom->Draw();
-  myCanvas->cd(2);
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
   h_pmiss_int2_denom->Draw();
-  myCanvas->cd(3);
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+  
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
   h_pmiss_int3_denom->Draw();
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
-
-  
 
 
   ///////////////////////////
@@ -856,23 +868,31 @@ if (mmiss>0.85 && mmiss<1.05) {h_det2d->Fill(pmiss.Mag(),thetamiss,weight);} // 
   myText->Clear();
 
 
-  myCanvas->Divide(2,2);
+  myCanvas->Divide(1,1);
   myCanvas->cd(1);
   h_pmiss_pn->Draw("colz");
   TF1 * line = new TF1("line","x",0,2);
   line->Draw("same");
-  myCanvas->cd(3);
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
   h_beta_pmiss->Draw("colz");
   h_beta_pmiss->SetStats(0);
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
 
-  myCanvas->Divide(2,1);
+  myCanvas->Divide(1,1);
   myCanvas->cd(1);
   h_cos0->Draw();
   h_cos0->SetStats(0);
-  myCanvas->cd(2);
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
   h_dphi->Draw();
   h_dphi->SetStats(0);
   myCanvas->Print(fileName,"pdf");
@@ -1009,17 +1029,23 @@ if (mmiss>0.85 && mmiss<1.05) {h_det2d->Fill(pmiss.Mag(),thetamiss,weight);} // 
   }
 
   // numerator - all theta intervals
-  myCanvas->Divide(2,2);
+  myCanvas->Divide(1,1);
   myCanvas->cd(1);
   h_pmiss_int1_numer->Draw();
-  myCanvas->cd(2);
-  h_pmiss_int2_numer->Draw();
-  myCanvas->cd(3);
-  h_pmiss_int3_numer->Draw();
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_pmiss_int2_numer->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
 
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_pmiss_int3_numer->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
 
   myText->cd();
   text.DrawLatex(0.2,0.9,"Theta numerator");
@@ -1103,20 +1129,28 @@ if (mmiss>0.85 && mmiss<1.05) {h_det2d->Fill(pmiss.Mag(),thetamiss,weight);} // 
   myCanvas->Clear();
 
 
-  myCanvas->Divide(2,2);
+  myCanvas->Divide(1,1);
   myCanvas->cd(1);
   TH1D * h_neff_pmiss_int1 = (TH1D*)h_pmiss_int1_numer->Clone();
   h_neff_pmiss_int1->Divide(h_pmiss_int1_denom);
   h_neff_pmiss_int1->SetLineColor(kMagenta);
   h_neff_pmiss_int1->GetYaxis()->SetRangeUser(0,0.16);
   h_neff_pmiss_int1->Draw();
-  myCanvas->cd(2);
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
   TH1D * h_neff_pmiss_int2 = (TH1D*)h_pmiss_int2_numer->Clone();
   h_neff_pmiss_int2->Divide(h_pmiss_int2_denom);
   h_neff_pmiss_int2->SetLineColor(kGreen);
   h_neff_pmiss_int2->GetYaxis()->SetRangeUser(0,0.16);
   h_neff_pmiss_int2->Draw();
-  myCanvas->cd(3);
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
   TH1D * h_neff_pmiss_int3 = (TH1D*)h_pmiss_int3_numer->Clone();
   h_neff_pmiss_int3->Divide(h_pmiss_int3_denom);
   h_neff_pmiss_int3->SetLineColor(kBlue);
@@ -1131,7 +1165,12 @@ if (mmiss>0.85 && mmiss<1.05) {h_det2d->Fill(pmiss.Mag(),thetamiss,weight);} // 
   h_neff_pmiss_int1->Draw();
   h_neff_pmiss_int2->Draw("same");
   h_neff_pmiss_int3->Draw("same");
+  h_neff_pmiss_int1->SetStats(0);
+  h_neff_pmiss_int2->SetStats(0);
+  h_neff_pmiss_int3->SetStats(0);
+  h_neff_pmiss_int3->GetXaxis()->SetRangeUser(0,1);
   h_neff_pmiss_int3->GetYaxis()->SetRangeUser(0,0.16);
+  h_neff_pmiss_int3->SetTitle("Neutron Efficiency in #theta Ranges");
   h_neff_pmiss_int3->SetStats(0);
   TLegend * leg2 = new TLegend(0.65,0.75,0.89,0.89);
   leg2->SetTextFont(72);
@@ -1149,10 +1188,14 @@ if (mmiss>0.85 && mmiss<1.05) {h_det2d->Fill(pmiss.Mag(),thetamiss,weight);} // 
 
 
   // efficiency as a function of theta miss
-  myCanvas->Divide(2,1);
+  myCanvas->Divide(1,1);
   myCanvas->cd(1);
   h_neff_thetamiss_denom->Draw();
-  myCanvas->cd(2);
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
   h_neff_thetamiss_numer->Draw();
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
@@ -1215,7 +1258,6 @@ if (mmiss>0.85 && mmiss<1.05) {h_det2d->Fill(pmiss.Mag(),thetamiss,weight);} // 
   }
   outallp.close();
 
-
   myCanvas->cd(2);
   TH1D * h_neff_int1_D = (TH1D*)h_pmiss_int1_numerD->Clone();
   h_neff_int1_D->Divide(h_pmiss_int1_denomD);
@@ -1231,12 +1273,20 @@ if (mmiss>0.85 && mmiss<1.05) {h_det2d->Fill(pmiss.Mag(),thetamiss,weight);} // 
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
+
+  myCanvas->Divide(1,1);
+  h_neff_allt_D->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+
   // original method
   myCanvas->Divide(1,1);
   myCanvas->cd(1);
   h_neff_int1_D->SetLineColor(kGreen);
   h_neff_int1_D->SetStats(0);
   h_neff_int1_D->GetYaxis()->SetRangeUser(0,0.16);
+  h_neff_int1_D->SetTitle("Neutron Efficiency in #theta Ranges");
   h_neff_int1_D->Draw();
   h_neff_int2_D->SetLineColor(kBlue);
   h_neff_int2_D->SetStats(0);

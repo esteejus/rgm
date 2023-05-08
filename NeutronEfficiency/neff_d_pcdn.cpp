@@ -586,18 +586,26 @@ if (mmiss>Mlow && mmiss<Mhigh) {h_det2d->Fill(pmiss.Mag(),thetamiss,weight);}
   myText->Print(fileName,"pdf");
   myText->Clear();
 
-  myCanvas->Divide(2,2);
+  myCanvas->Divide(1,1);
   myCanvas->cd(1);
   h_pvertex->Draw();
-  myCanvas->cd(2);
-  h_dbetap->Draw("colz");
-  myCanvas->cd(3);
-  h_pchipid->Draw();
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear(); 
 
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_dbetap->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear(); 
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_pchipid->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear(); 
   
-  
+
+
   /////////////////////
   // NEUTRALS
   /////////////////////
@@ -738,20 +746,31 @@ if (mmiss>Mlow && mmiss<Mhigh) {h_det2d->Fill(pmiss.Mag(),thetamiss,weight);}
   myCanvas->Clear(); 
 
 
-  myCanvas->Divide(2,2);
+  myCanvas->Divide(1,1);
   myCanvas->cd(1);
   h_pmiss_pn->Draw("colz");
   TF1 * line = new TF1("line","x",0,2);
   line->Draw("same");
-  myCanvas->cd(2);
-  h_tof->Draw();
-  myCanvas->cd(3);
-  h_nangles->Draw("colz");
-  myCanvas->cd(4);
-  h_dtheta_dphi->Draw("colz");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear(); 
 
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_tof->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear(); 
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_nangles->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_dtheta_dphi->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear(); 
 
 
   myCanvas->Divide(1,1);
@@ -787,43 +806,73 @@ if (mmiss>Mlow && mmiss<Mhigh) {h_det2d->Fill(pmiss.Mag(),thetamiss,weight);}
 
 
 
-  myCanvas->Divide(2,2);
+  myCanvas->Divide(1,1);
   myCanvas->cd(1);
   h_pmiss_pn_cut->Draw("colz");
   line->Draw("same");
-  myCanvas->cd(2);
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
   h_mmiss_withn->Draw("colz");
-  myCanvas->cd(4);
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
   h_pmiss_theta->Draw("colz");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
-  myCanvas->Divide(2,2);
+
+  myCanvas->Divide(1,1);
   myCanvas->cd(1);
   h_pmiss_pn_sig->Draw("colz");
   line->Draw("same");
-  myCanvas->cd(2);
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
   h_pmiss_pn_bkg->Draw("colz");
   line->Draw("same");
-  myCanvas->cd(3);
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
   h_dp_p_sig->Draw("colz");
-  myCanvas->cd(4);
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
   h_dp_p_bkg->Draw("colz");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
 
-  myCanvas->Divide(2,2);
+
+
+  myCanvas->Divide(1,1);
   myCanvas->cd(1);
   h_theta_np->Draw();
-  myCanvas->cd(2);
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
   h_pmiss_pn_cutbkg->Draw("colz"); // CTOF p only
-  myCanvas->cd(3);
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
   h_pmiss_theta_cutbkg->Draw("colz");
   h_pmiss_theta_cutbkg->SetStats(0);
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
-
 
 
 
@@ -915,6 +964,12 @@ if (mmiss>Mlow && mmiss<Mhigh) {h_det2d->Fill(pmiss.Mag(),thetamiss,weight);}
   myCanvas->Clear();
 
 
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_neff_pmiss->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
 
 
 
@@ -940,6 +995,14 @@ if (mmiss>Mlow && mmiss<Mhigh) {h_det2d->Fill(pmiss.Mag(),thetamiss,weight);}
   outtheta.close();
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
+
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_neff_thetamiss_ssb->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
 
 
 
