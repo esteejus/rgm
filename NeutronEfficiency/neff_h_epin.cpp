@@ -277,9 +277,9 @@ int main(int argc, char ** argv)
   /////////////////////////////////////
   //Histos: 2d efficiency stuff
   /////////////////////////////////////
-  TH2D * h_cand2d = new TH2D("cand2d","Neutron Candidates;p_{miss} (GeV/c);#theta_{miss} (degrees)",15,0.2,1.2,10,40,70);
+  TH2D * h_cand2d = new TH2D("cand2d","Neutron Candidates;p_{miss} (GeV/c);#theta_{miss} (degrees)",10,0.2,1.2,6,40,70);
   hist_list_2.push_back(h_cand2d);
-  TH2D * h_det2d = new TH2D("det2d","Detected Neutrons;p_{miss} (GeV/c);#theta_{miss} (degrees)",15,0.2,1.2,10,40,70);
+  TH2D * h_det2d = new TH2D("det2d","Detected Neutrons;p_{miss} (GeV/c);#theta_{miss} (degrees)",10,0.2,1.2,6,40,70);
   hist_list_2.push_back(h_det2d);
 
 
@@ -439,7 +439,8 @@ if (mmiss>0.85 && mmiss<1.05) {h_cand2d->Fill(pmiss.Mag(),thetamiss,weight);}
         bool is_CND1 = neut[i]->sci(CND1)->getDetector()==3;
         bool is_CND2 = neut[i]->sci(CND2)->getDetector()==3;
         bool is_CND3 = neut[i]->sci(CND3)->getDetector()==3;
-        if (!is_CND1 && !is_CND2 && !is_CND3) {continue;}
+        bool is_CTOF = neut[i]->sci(CTOF)->getDetector()==4;
+        if (!is_CND1 && !is_CND2 && !is_CND3 && !is_CTOF) {continue;}
   
         // in expected theta range? if no - skip to next neutron in event
         double n_theta = neut[i]->getTheta()*180./M_PI;
@@ -468,7 +469,8 @@ if (mmiss>0.85 && mmiss<1.05) {h_cand2d->Fill(pmiss.Mag(),thetamiss,weight);}
     bool is_CND1 = neut[pick]->sci(CND1)->getDetector()==3;
     bool is_CND2 = neut[pick]->sci(CND2)->getDetector()==3;
     bool is_CND3 = neut[pick]->sci(CND3)->getDetector()==3;
-    if (!is_CND1 && !is_CND2 && !is_CND3) {continue;}
+    bool is_CTOF = neut[pick]->sci(CTOF)->getDetector()==4;
+    if (!is_CND1 && !is_CND2 && !is_CND3 && !is_CTOF) {continue;}
 
     // Neutron kinematics
     double n_theta = neut[pick]->getTheta()*180./M_PI;
@@ -490,6 +492,11 @@ if (mmiss>0.85 && mmiss<1.05) {h_cand2d->Fill(pmiss.Mag(),thetamiss,weight);}
     {
       tof_n = neut[pick]->sci(CND3)->getTime() - ts;
       path = neut[pick]->sci(CND3)->getPath();
+    }
+    else if (is_CTOF)
+    {
+      tof_n = neut[pick]->sci(CTOF)->getTime() - ts;
+      path = neut[pick]->sci(CTOF)->getPath();
     }
     if (tof_n<0) {continue;}
     TVector3 pn;
@@ -1346,6 +1353,33 @@ if (mmiss>0.85 && mmiss<1.05) {h_det2d->Fill(pmiss.Mag(),thetamiss,weight);} // 
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
+/*  // plot cross sections
+  TGraph *grEff[n_tmiss_cut];
+  TMultigraph *mgEff = new TMultiGraph();
+  TLegend* legendEff = new TLegend[40,45,50,60];
+*/
+
+  myCanvas->Divide(3,2);
+  //myCanvas->cd(1);
+  auto legend = new TLegend(0.8,0.8,0.8,0.8);
+std::cout << "starting loop\n";
+  for (int i=0; i<h_eff2d->GetNbinsY(); i++)
+  {
+myCanvas->cd(i+1);
+std::cout << "i = " << i << std::endl;
+    TH1D * proj1 = h_eff2d->ProjectionX("",i,i+1,"d"); // overflow/underflow?
+    proj1->SetTitle("Efficiency");
+    proj1->Draw();
+    //legend->AddEntry(proj1,Form("%.2f",h_eff2d->GetYaxis()->GetBinCenter(i)));
+    //legend->Draw();
+  }
+  
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+  
+
+
+
 
 
 
@@ -1403,6 +1437,25 @@ double get_pin_mmiss(TVector3 p_b, TVector3 p_e, TVector3 ppi){
 
   return mmiss;
 }
+
+
+/*double func_neff_fit(double *x, double *par)
+{
+  // par[0] = linear transition in pmiss
+  // par[1] = linear transition in thetamiss
+  // par[2] = low pmiss slope
+  // par[3] = high pmiss slope
+  // par[4] = low thetamiss slope
+  // par[5] = high thetamiss slope
+  double p = x[0];
+  double t = x[1];
+  double neff_value = 0;
+  if      (p<par[0] && t<par[1])
+  else if (p<par[0] && t>par[1])
+  else if (p>par[0] && t<par[1])
+  else if (p>par[0] && t>par[1])
+  return value;
+}*/
 
 
 double * hist_projections(TCanvas * can, TH2D * hist2d, int num_hist, char v)
