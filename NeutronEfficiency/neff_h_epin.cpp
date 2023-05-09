@@ -230,6 +230,7 @@ int main(int argc, char ** argv)
   hist_list_2.push_back(h_nangles);
   TH2D * h_mmiss_beta = new TH2D("mmiss_beta","Missing Mass vs Beta p(e,e'#pi^{+})n;Beta;Missing Mass (GeV/c^{2})",100,0,0.9,100,0,1.5);
   hist_list_2.push_back(h_mmiss_beta);
+  TH1D * h_energy = new TH1D("energy","Neutron Energy Deposition",100,0,100);
 
   /////////////////////////////////////
   //Histos: good neutrons
@@ -376,7 +377,7 @@ int main(int argc, char ** argv)
     if (p_pip.Mag() > 3.) {continue;}
     if (pitheta>35.) {continue;}
 
-    // Missing Mass and energy deposition
+    // Missing Mass and missing momentum
     TVector3 p_e;
     TVector3 p_b(0,0,Ebeam);
     p_e.SetMagThetaPhi(elec[0]->getP(),elec[0]->getTheta(),elec[0]->getPhi());
@@ -394,11 +395,9 @@ int main(int argc, char ** argv)
     if (pmiss.Mag() > 1.2) {continue;} // beta=0.8  // previoulsy 1.2528
 
     h_mmiss_theta_denom->Fill(thetamiss,mmiss,weight);
+    h_mmiss_cand->Fill(mmiss,weight);   
 
 
-
-
-   h_mmiss_cand->Fill(mmiss,weight);   
 
     if (mmiss>0.85 && mmiss<1.05)
     {
@@ -410,14 +409,14 @@ int main(int argc, char ** argv)
       else if (thetamiss>t2 && thetamiss<t3) {h_pmiss_int2_denomD->Fill(pmiss.Mag(),weight);}
       else if (thetamiss>t3 && thetamiss<t4) {h_pmiss_int3_denomD->Fill(pmiss.Mag(),weight);}
 
+      h_mmiss_pmiss_allt_denom->Fill(pmiss.Mag(),mmiss,weight);
+      if (thetamiss>t1 && thetamiss<t2) {h_mmiss_pmiss_int1_denom->Fill(pmiss.Mag(),mmiss,weight);}
+      else if (thetamiss>t2 && thetamiss<t3) {h_mmiss_pmiss_int2_denom->Fill(pmiss.Mag(),mmiss,weight);}
+      else if (thetamiss>t3 && thetamiss<t4) {h_mmiss_pmiss_int3_denom->Fill(pmiss.Mag(),mmiss,weight);}
+
+      h_cand2d->Fill(pmiss.Mag(),thetamiss,weight);
+
     }
-
-
-    h_mmiss_pmiss_allt_denom->Fill(pmiss.Mag(),mmiss,weight);
-    if (thetamiss>t1 && thetamiss<t2) {h_mmiss_pmiss_int1_denom->Fill(pmiss.Mag(),mmiss,weight);}
-    else if (thetamiss>t2 && thetamiss<t3) {h_mmiss_pmiss_int2_denom->Fill(pmiss.Mag(),mmiss,weight);}
-    else if (thetamiss>t3 && thetamiss<t4) {h_mmiss_pmiss_int3_denom->Fill(pmiss.Mag(),mmiss,weight);}
-if (mmiss>0.85 && mmiss<1.05) {h_cand2d->Fill(pmiss.Mag(),thetamiss,weight);}
 
 
     // REQUIRE A NEUTRON HERE
@@ -478,25 +477,31 @@ if (mmiss>0.85 && mmiss<1.05) {h_cand2d->Fill(pmiss.Mag(),thetamiss,weight);}
     double beta_n = neut[pick]->par()->getBeta();
     double tof_n = 0;
     double path = 0;
+    double energy = 0;
     if (is_CND1)
     {
       tof_n = neut[pick]->sci(CND1)->getTime() - ts;
       path = neut[pick]->sci(CND1)->getPath();
+      energy = neut[pick]->sci(CND1)->getEnergy();
+      
     }
     else if (is_CND2)
     {
       tof_n = neut[pick]->sci(CND2)->getTime() - ts;
       path = neut[pick]->sci(CND2)->getPath();
+      energy = neut[pick]->sci(CND2)->getEnergy();
     }
     else if (is_CND3)
     {
       tof_n = neut[pick]->sci(CND3)->getTime() - ts;
       path = neut[pick]->sci(CND3)->getPath();
+      energy = neut[pick]->sci(CND3)->getEnergy();
     }
     else if (is_CTOF)
     {
       tof_n = neut[pick]->sci(CTOF)->getTime() - ts;
       path = neut[pick]->sci(CTOF)->getPath();
+      energy = neut[pick]->sci(CTOF)->getEnergy();
     }
     if (tof_n<0) {continue;}
     TVector3 pn;
@@ -511,6 +516,7 @@ if (mmiss>0.85 && mmiss<1.05) {h_cand2d->Fill(pmiss.Mag(),thetamiss,weight);}
 
     // neutron histos
     h_tof->Fill(tof_n,weight);
+    h_energy->Fill(energy,weight);
     h_nangles->Fill(n_phi,n_theta,weight);
     h_mmiss_beta->Fill(beta_n,mmiss,weight);
 
@@ -535,11 +541,15 @@ if (mmiss>0.85 && mmiss<1.05) {h_cand2d->Fill(pmiss.Mag(),thetamiss,weight);}
     h_p_phi->Fill(n_phi,pn.Mag(),weight);
     //h_pmiss_theta->Fill(neut[pick]->getTheta()*180./M_PI,pmiss.Mag(),weight);
     h_pmiss_thetamiss->Fill(thetamiss,pmiss.Mag(),weight);
-if (mmiss>0.85 && mmiss<1.05) {h_det2d->Fill(pmiss.Mag(),thetamiss,weight);} // actual detected neutrons
+
     h_pmiss_pn_cut->Fill(pn.Mag(),pmiss.Mag(),weight);
     h_mmiss_withn->Fill(mmiss,weight);
+
+
     if (mmiss>0.85 && mmiss<1.05)
     {
+      h_det2d->Fill(pmiss.Mag(),thetamiss,weight); // actually detected neutrons
+
       h_neff_thetamiss_numer->Fill(thetamiss,weight);
       h_neff_phimiss_numer->Fill(pmiss.Phi()*180/M_PI);
       h_neff_pmiss_numer->Fill(pmiss.Mag(),weight);
@@ -548,14 +558,12 @@ if (mmiss>0.85 && mmiss<1.05) {h_det2d->Fill(pmiss.Mag(),thetamiss,weight);} // 
       else if (thetamiss>t2 && thetamiss<t3) {h_pmiss_int2_numerD->Fill(pmiss.Mag(),weight);}
       else if (thetamiss>t3 && thetamiss<t4) {h_pmiss_int3_numerD->Fill(pmiss.Mag(),weight);}
 
+      h_mmiss_pmiss_allt_numer->Fill(pmiss.Mag(),mmiss,weight);
+      if (thetamiss>t1 && thetamiss<t2) {h_mmiss_pmiss_int1_numer->Fill(pmiss.Mag(),mmiss,weight);}
+      else if (thetamiss>t2 && thetamiss<t3) {h_mmiss_pmiss_int2_numer->Fill(pmiss.Mag(),mmiss,weight);}
+      else if (thetamiss>t3 && thetamiss<t4) {h_mmiss_pmiss_int3_numer->Fill(pmiss.Mag(),mmiss,weight);}
+
     }
-
-
-    h_mmiss_pmiss_allt_numer->Fill(pmiss.Mag(),mmiss,weight);
-    if (thetamiss>t1 && thetamiss<t2) {h_mmiss_pmiss_int1_numer->Fill(pmiss.Mag(),mmiss,weight);}
-    else if (thetamiss>t2 && thetamiss<t3) {h_mmiss_pmiss_int2_numer->Fill(pmiss.Mag(),mmiss,weight);}
-    else if (thetamiss>t3 && thetamiss<t4) {h_mmiss_pmiss_int3_numer->Fill(pmiss.Mag(),mmiss,weight);}
-
 
   }
 
@@ -852,12 +860,16 @@ if (mmiss>0.85 && mmiss<1.05) {h_det2d->Fill(pmiss.Mag(),thetamiss,weight);} // 
 
   myCanvas->Divide(1,1);
   myCanvas->cd(1);
-  h_tof->Draw("colz");
+  h_tof->Draw();
   h_tof->SetStats(0);
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
-
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_energy->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
 
 
   // all neutrons
