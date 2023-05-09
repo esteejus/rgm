@@ -409,14 +409,15 @@ int main(int argc, char ** argv)
       else if (thetamiss>t2 && thetamiss<t3) {h_pmiss_int2_denomD->Fill(pmiss.Mag(),weight);}
       else if (thetamiss>t3 && thetamiss<t4) {h_pmiss_int3_denomD->Fill(pmiss.Mag(),weight);}
 
-      h_mmiss_pmiss_allt_denom->Fill(pmiss.Mag(),mmiss,weight);
-      if (thetamiss>t1 && thetamiss<t2) {h_mmiss_pmiss_int1_denom->Fill(pmiss.Mag(),mmiss,weight);}
-      else if (thetamiss>t2 && thetamiss<t3) {h_mmiss_pmiss_int2_denom->Fill(pmiss.Mag(),mmiss,weight);}
-      else if (thetamiss>t3 && thetamiss<t4) {h_mmiss_pmiss_int3_denom->Fill(pmiss.Mag(),mmiss,weight);}
-
       h_cand2d->Fill(pmiss.Mag(),thetamiss,weight);
 
     }
+
+    // does not need mmiss cut - for demonstration only (not eff calculation)
+    h_mmiss_pmiss_allt_denom->Fill(pmiss.Mag(),mmiss,weight);
+    if (thetamiss>t1 && thetamiss<t2) {h_mmiss_pmiss_int1_denom->Fill(pmiss.Mag(),mmiss,weight);}
+    else if (thetamiss>t2 && thetamiss<t3) {h_mmiss_pmiss_int2_denom->Fill(pmiss.Mag(),mmiss,weight);}
+    else if (thetamiss>t3 && thetamiss<t4) {h_mmiss_pmiss_int3_denom->Fill(pmiss.Mag(),mmiss,weight);}
 
 
     // REQUIRE A NEUTRON HERE
@@ -503,7 +504,14 @@ int main(int argc, char ** argv)
       path = neut[pick]->sci(CTOF)->getPath();
       energy = neut[pick]->sci(CTOF)->getEnergy();
     }
+
+    // tof and energy cuts
+    h_tof->Fill(tof_n,weight);
+    h_energy->Fill(energy,weight);
     if (tof_n<0) {continue;}
+    if (energy<3) {continue;}
+
+
     TVector3 pn;
     pn.SetMagThetaPhi(neut[pick]->getP(),neut[pick]->getTheta(),neut[pick]->getPhi());
 
@@ -515,8 +523,7 @@ int main(int argc, char ** argv)
     double dphi = pmiss.Phi()*180./M_PI - neut[pick]->getPhi()*180./M_PI;
 
     // neutron histos
-    h_tof->Fill(tof_n,weight);
-    h_energy->Fill(energy,weight);
+
     h_nangles->Fill(n_phi,n_theta,weight);
     h_mmiss_beta->Fill(beta_n,mmiss,weight);
 
@@ -557,13 +564,13 @@ int main(int argc, char ** argv)
       if (thetamiss>t1 && thetamiss<t2) {h_pmiss_int1_numerD->Fill(pmiss.Mag(),weight);}
       else if (thetamiss>t2 && thetamiss<t3) {h_pmiss_int2_numerD->Fill(pmiss.Mag(),weight);}
       else if (thetamiss>t3 && thetamiss<t4) {h_pmiss_int3_numerD->Fill(pmiss.Mag(),weight);}
-
-      h_mmiss_pmiss_allt_numer->Fill(pmiss.Mag(),mmiss,weight);
-      if (thetamiss>t1 && thetamiss<t2) {h_mmiss_pmiss_int1_numer->Fill(pmiss.Mag(),mmiss,weight);}
-      else if (thetamiss>t2 && thetamiss<t3) {h_mmiss_pmiss_int2_numer->Fill(pmiss.Mag(),mmiss,weight);}
-      else if (thetamiss>t3 && thetamiss<t4) {h_mmiss_pmiss_int3_numer->Fill(pmiss.Mag(),mmiss,weight);}
-
     }
+
+    // does not need mmiss cut - for demonstration only (not eff calculation)
+    h_mmiss_pmiss_allt_numer->Fill(pmiss.Mag(),mmiss,weight);
+    if (thetamiss>t1 && thetamiss<t2) {h_mmiss_pmiss_int1_numer->Fill(pmiss.Mag(),mmiss,weight);}
+    else if (thetamiss>t2 && thetamiss<t3) {h_mmiss_pmiss_int2_numer->Fill(pmiss.Mag(),mmiss,weight);}
+    else if (thetamiss>t3 && thetamiss<t4) {h_mmiss_pmiss_int3_numer->Fill(pmiss.Mag(),mmiss,weight);}
 
   }
 
