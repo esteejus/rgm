@@ -395,7 +395,8 @@ int main(int argc, char ** argv)
         bool is_CND1 = neut[i]->sci(CND1)->getDetector()==3;
         bool is_CND2 = neut[i]->sci(CND2)->getDetector()==3;
         bool is_CND3 = neut[i]->sci(CND3)->getDetector()==3;
-        if (!is_CND1 && !is_CND2 && !is_CND3) {continue;}
+        bool is_CTOF = neut[i]->sci(CTOF)->getDetector()==4;
+        if (!is_CND1 && !is_CND2 && !is_CND3 && !is_CTOF) {continue;}
 
         // in expected theta range? if no - skip to next neutron in event
         double n_theta = neut[i]->getTheta()*180./M_PI;
@@ -429,6 +430,7 @@ int main(int argc, char ** argv)
     bool is_CND1 = neut[pick]->sci(CND1)->getDetector()==3;
     bool is_CND2 = neut[pick]->sci(CND2)->getDetector()==3;
     bool is_CND3 = neut[pick]->sci(CND3)->getDetector()==3;
+    bool is_CTOF = neut[pick]->sci(CTOF)->getDetector()==4;
     double n_theta = neut[pick]->getTheta()*180./M_PI;
     double beta_n = neut[pick]->par()->getBeta();
     double n_phi = neut[pick]->getPhi()*180./M_PI;
@@ -453,6 +455,12 @@ int main(int argc, char ** argv)
       tof_n = neut[pick]->sci(CND3)->getTime() - ts;
       path = neut[pick]->sci(CND3)->getPath();
       edep = neut[pick]->sci(CND3)->getEnergy();
+    }
+    else if (is_CTOF)
+    {
+      tof_n = neut[pick]->sci(CTOF)->getTime() - ts;
+      path = neut[pick]->sci(CTOF)->getPath();
+      edep = neut[pick]->sci(CTOF)->getEnergy();
     }
     if (tof_n<0) {continue;} //{std::cout << "Look out - negative TOF!/n";}
 
