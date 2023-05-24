@@ -37,7 +37,6 @@ int main(int argc, char ** argv) {
   // arg 2: keep good
   bool keep_good = false;
   if(atoi(argv[2])==1){keep_good=true;}
-std::cout << "keep good = " << keep_good << '\n';
 
   // arg 3: proton in Forward Detector or Central Detector
   char pDet = argv[3][0];
@@ -133,68 +132,88 @@ std::cout << "keep good = " << keep_good << '\n';
 
   // proton stuff
   TH1D * h_psize = new TH1D("psize","Number of Protons in Event",10,0,10);
+    hist_list_1.push_back(h_psize);
   TH2D * h_dbeta_p = new TH2D("dbeta_p","#Delta #beta vs proton momentum",50,0,3,50,-0.2,0.2);
-    h_dbeta_p->SetOption("colz");
+    hist_list_2.push_back(h_dbeta_p);
+
 
   // neutron stuff
   TH1D * h_nsize = new TH1D("nsize","Number of Neutrons in Event",10,0,10);
+    hist_list_1.push_back(h_nsize);
 
 
   // reconstructed momentum
   TH2D * h_pangles = new TH2D("pangles","Proton Angles;phi;theta",48,-180,180,45,0,180);
-    h_pangles->SetOption("colz");
+    hist_list_2.push_back(h_pangles);
   TH2D * h_nangles = new TH2D("nangles","Neutron Angles;phi;theta",48,-180,180,45,0,180);
-    h_nangles->SetOption("colz");
+    hist_list_2.push_back(h_nangles);
   TH1D * h_pxminuspx = new TH1D("pxminuspx","px_{n}-px_{miss};Counts",100,-0.5,0.5);
+    hist_list_1.push_back(h_pxminuspx);
   TH1D * h_pyminuspy = new TH1D("pyminuspy","py_{n}-py_{miss};Counts",100,-0.5,0.5);
+    hist_list_1.push_back(h_pyminuspy);
   TH1D * h_pzminuspz = new TH1D("pzminuspz","pz_{n}-pz_{miss};Counts",100,-0.5,0.5);
+    hist_list_1.push_back(h_pzminuspz);
   TH1D * h_pminusp = new TH1D("pminusp","p_{n}-p_{gen};Counts",100,-0.5,0.5);
+    hist_list_1.push_back(h_pminusp);
   TH2D * h_pvsp = new TH2D("pvsp","Momentum Resolution;p_{miss} (GeV/c);p_{measured} (GeV/c)",100,0,1,100,0,1);
-    h_pvsp->SetOption("colz");
+    hist_list_2.push_back(h_pvsp);
   TH1D * h_cos0 = new TH1D("cos0","Cosine of angle between generated and reconstructed p",50,-1.1,1.1);
+    hist_list_1.push_back(h_cos0);
   TH2D * h_dpp = new TH2D("dpp","Momentum Resolution;p_{generated} (GeV/c);#Delta p/p",100,0,1,100,-0.4,0.4);
-    h_dpp->SetOption("colz");
+    hist_list_2.push_back(h_dpp);
   TH1D * h_energy = new TH1D("energy","Neutron Energy Deposition;Energy (MeV);Counts",100,0,50);
+    hist_list_1.push_back(h_energy);
   TH2D * h_sec_phi = new TH2D("sec_phi","Sector vs Phi of CND hits;phi (deg);Sector",90,0,360,25,0,25);
-    h_sec_phi->SetOption("colz");
+    hist_list_2.push_back(h_sec_phi);
   TH1D * h_mmiss = new TH1D("mmiss","Missing Mass",50,0.5,1.5);
+    hist_list_1.push_back(h_mmiss);
   TH2D * h_mmiss_xb = new TH2D("mmiss_xb","Missing Mass vs x_{B}",50,0,3,50,0.5,1.5);
-    h_mmiss_xb->SetOption("colz");
+    hist_list_2.push_back(h_mmiss_xb);
   TH2D * h_theta_beta = new TH2D("theta_beta","Neutron theta vs beta;#beta;#theta",50,-0.1,1.1,55,35,145);
-    h_theta_beta->SetOption("colz");
+    hist_list_2.push_back(h_theta_beta);
   TH2D * h_p_theta = new TH2D("p_theta","Neutron Momentum vs Theta;#theta;p (GeV/c)",55,35,145,50,0,1.2);
-    h_p_theta->SetOption("colz");
+    hist_list_2.push_back(h_p_theta);
   TH2D * h_pmiss_thetamiss = new TH2D("pmiss_thetamiss","pmiss vs #theta_{pmiss};#theta_{pmiss};pmiss",90,0,180,50,0,1.2);
-    h_pmiss_thetamiss->SetOption("colz");
+    hist_list_2.push_back(h_pmiss_thetamiss);
   TH2D * h_thetapn_pp = new TH2D("thetapn_pp","#theta_{pn} vs p_{p};p_{p} (GeV/c);#theta_{pn}",40,0,1,40,0,180);
-    h_thetapn_pp->SetOption("colz");
+    hist_list_2.push_back(h_thetapn_pp);
+  TH2D * h_radiusz = new TH2D("radius_z","Radius vs z;z;Radius (cm)",80,-70,70,100,25,40);
+    hist_list_2.push_back(h_radiusz);
 
 
   // good n / bad n set
   TH2D * h_nangles2 = new TH2D("nangles2","Neutron Angles;phi;theta",48,-180,180,45,0,180);
-    h_nangles2->SetOption("colz");
+    hist_list_2.push_back(h_nangles2);
   TH1D * h_pxminuspx2 = new TH1D("pxminuspx2","px_{n}-px_{miss};Counts",100,-0.5,0.5);
+    hist_list_1.push_back(h_pxminuspx2);
   TH1D * h_pyminuspy2 = new TH1D("pyminuspy2","py_{n}-py_{miss};Counts",100,-0.5,0.5);
+    hist_list_1.push_back(h_pyminuspy2);
   TH1D * h_pzminuspz2 = new TH1D("pzminuspz2","pz_{n}-pz_{miss};Counts",100,-0.5,0.5);
+    hist_list_1.push_back(h_pzminuspz2);
   TH1D * h_pminusp2 = new TH1D("pminusp2","p_{n}-p_{gen};Counts",100,-0.5,0.5);
+    hist_list_1.push_back(h_pminusp2);
   TH2D * h_pvsp2 = new TH2D("pvsp2","Momentum Resolution;p_{miss} (GeV/c);p_{measured} (GeV/c)",100,0,1,100,0,1);
-    h_pvsp2->SetOption("colz");
+    hist_list_2.push_back(h_pvsp2);
   TH1D * h_cos02 = new TH1D("cos02","Cosine of angle between generated and reconstructed p",50,-1.1,1.1);
+    hist_list_1.push_back(h_cos02);
   TH2D * h_dpp2 = new TH2D("dpp2","Momentum Resolution;p_{generated} (GeV/c);#Delta p/p",100,0,1,100,-0.4,0.4);
-    h_dpp2->SetOption("colz");
+    hist_list_2.push_back(h_dpp2);
   TH1D * h_mmiss2 = new TH1D("mmiss2","Missing Mass",50,0.5,1.5);
+    hist_list_1.push_back(h_mmiss2);
   TH2D * h_mmiss_xb2 = new TH2D("mmiss_xb2","Missing Mass vs x_{B}",50,0,3,50,0.5,1.5);
-    h_mmiss_xb2->SetOption("colz");
+    hist_list_2.push_back(h_mmiss_xb2);
   TH1D * h_energy2 = new TH1D("energy2","Neutron Energy Deposition;Energy (MeV);Counts",100,0,50);
+    hist_list_1.push_back(h_energy2);
   TH2D * h_theta_beta2 = new TH2D("theta_beta2","Neutron theta vs beta;#beta;#theta",50,-0.1,1.1,55,35,145);
-    h_theta_beta2->SetOption("colz");
+    hist_list_2.push_back(h_theta_beta2);
   TH2D * h_p_theta2 = new TH2D("p_theta2","Neutron Momentum vs Theta;#theta;p (GeV/c)",55,35,145,50,0,1.2);
-    h_p_theta2->SetOption("colz");
+    hist_list_2.push_back(h_p_theta2);
   TH2D * h_pmiss_thetamiss2 = new TH2D("pmiss_thetamiss2","pmiss vs #theta_{pmiss};#theta_{pmiss};pmiss",90,0,180,50,0,1.2);
-    h_pmiss_thetamiss2->SetOption("colz");
+    hist_list_2.push_back(h_pmiss_thetamiss2);
   TH2D * h_thetapn_pp2 = new TH2D("thetapn_pp2","#theta_{pn} vs p_{p};p_{p} (GeV/c);#theta_{pn}",40,0,1,40,0,180);
-    h_thetapn_pp2->SetOption("colz");
-
+    hist_list_2.push_back(h_thetapn_pp2);
+  TH2D * h_radiusz2 = new TH2D("radius_z2","Radius vs z;z;Radius (cm)",80,-70,70,100,25,40);
+    hist_list_2.push_back(h_radiusz2);
 
 
 const double mP = 0.93828;
@@ -412,13 +431,13 @@ int numevent = 0;
       if (pn.Mag()<0.2) {continue;}
       if (energy<3) {continue;}
       //if (pmiss.Theta()*180./M_PI<40 || pmiss.Theta()*180./M_PI>140) {continue;}
-      if (pmiss.Mag()<0.2 || pmiss.Mag()>1.2) {continue;}
+      if (pmiss.Mag()<0.3 || pmiss.Mag()>1.2) {continue;}
     
       //if (xB<0.6) {continue;}
       double cos0 = pmiss.Dot(pn) / (pmiss.Mag()*pn.Mag());
     
     
-      // fill histos
+      // fill histos for neutron PID before good/bad selection
       h_nangles->Fill(pn.Phi()*180./M_PI,n_theta);
       h_cos0->Fill(pmiss.Dot(pn) / (pmiss.Mag()*pn.Mag()));
       h_pxminuspx->Fill(pn_x-pmiss.X());
@@ -434,7 +453,8 @@ int numevent = 0;
       h_p_theta->Fill(n_theta,pn.Mag());
       h_pmiss_thetamiss->Fill(pmiss.Theta()*180./M_PI,pmiss.Mag());
       h_thetapn_pp->Fill(pp.Mag(),pp.Angle(pn)*180./M_PI);
-    
+      h_radiusz->Fill(z,pow(x*x+y*y,0.5));
+   //std::cout << x << '\t' <<  pow(x*x+y*y,0.5) << endl;
     
   // CND & CTOF NEARBY HITS
   int hits_nearby7 = 0; int ctof_nearby7 = 0;
@@ -471,7 +491,6 @@ int numevent = 0;
       ctof_energy7 = ctof_energy7 + rec_energy;
     }
   }
-//std::cout << '\n';
 
 
 
@@ -526,15 +545,13 @@ int numevent = 0;
 
   // Determine whether to write to "good neutron" or "bad neutron" file
 
-  //bool good_N = (cos0<-0.9 && p.Mag()>0.1 && abs(pn_x-pmiss.X())/pmiss.X()<0.2 && abs(pn_y-pmiss.Y())/pmiss.Y()<0.2 && abs(pn_z-pmiss.Z())/pmiss.Z()<0.2 && abs(pn.Mag()-pmiss.Mag())/pmiss.Mag()<0.1);
   bool good_N = (cos0>0.9 && abs(pmiss.Mag()-pn.Mag())<0.1 && mmiss< 1.05);
 
-  //bool bad_N =  (cos0>-0.8 || abs(pn_x-pmiss.X())>0.2 || abs(pn_y-pmiss.Y())>0.2 || abs(pn_z-pmiss.Z())>0.2 || abs(pn.Mag()-pmiss.Mag())>0.2);
-  //bool bad_N = (cos0<0.8 && abs(pmiss.Mag()-pn.Mag())>0.2);// && mmiss>1.15);
+  bool bad_N = (cos0<0.8 && abs(pmiss.Mag()-pn.Mag())>0.2); // shown in paris
   //bool bad_N = (mmiss>0.8 && mmiss<1.05 && (pmiss.Theta()*180./M_PI<40 || pmiss.Theta()*180./M_PI>140));  // Justin's idea
   //bool bad_N = (pmiss.Theta()*180./M_PI<40 || pmiss.Theta()*180./M_PI>140);
-  bool bad_N = !good_N;
-  //bool bad_N = (prot.size()==1 && piminus.size()==1 && neut.size()>0);
+  //bool bad_N = !good_N;
+  //bool bad_N = (prot.size()==2 && piminus.size()==1); // no stats
 
   bool keep_this_one = keep_good ? good_N : bad_N;
 
@@ -568,6 +585,7 @@ int numevent = 0;
   h_p_theta2->Fill(n_theta,pn.Mag());
   h_pmiss_thetamiss2->Fill(pmiss.Theta()*180./M_PI,pmiss.Mag());
   h_thetapn_pp2->Fill(pp.Mag(),pp.Angle(pn)*180./M_PI);
+  h_radiusz2->Fill(z,pow(x*x+y*y,0.5));
   }
 
   }  // closes neutron loop
@@ -587,13 +605,14 @@ int numevent = 0;
     hist_list_1[i]->Write();
   }
   for(int i=0; i<hist_list_2.size(); i++) {
+    hist_list_2[i]->SetOption("colz");
     hist_list_2[i]->Write();
   }
 
   std::cout << '\n' <<counter << " events counted!\n\n";
 
 
-
+/*
   // write histograms
   h_psize->Write();
   h_pxminuspx->Write();
@@ -631,7 +650,7 @@ int numevent = 0;
   h_p_theta2->Write();
   h_pmiss_thetamiss2->Write();
   h_thetapn_pp2->Write();
-
+*/
 
   outtxt.close();
   ntree->Write();
