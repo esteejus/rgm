@@ -161,7 +161,7 @@ int main(int argc, char ** argv) {
     hist_list_1.push_back(h_cos0);
   TH2D * h_dpp = new TH2D("dpp","Momentum Resolution;p_{generated} (GeV/c);#Delta p/p",100,0,1,100,-0.4,0.4);
     hist_list_2.push_back(h_dpp);
-  TH1D * h_energy = new TH1D("energy","Neutron Energy Deposition;Energy (MeV);Counts",100,0,50);
+  TH1D * h_energy = new TH1D("energy","Neutron Energy Deposition;Energy (MeV);Counts",100,0,25);
     hist_list_1.push_back(h_energy);
   TH2D * h_sec_phi = new TH2D("sec_phi","Sector vs Phi of CND hits;phi (deg);Sector",90,0,360,25,0,25);
     hist_list_2.push_back(h_sec_phi);
@@ -179,6 +179,15 @@ int main(int argc, char ** argv) {
     hist_list_2.push_back(h_thetapn_pp);
   TH2D * h_radiusz = new TH2D("radius_z","Radius vs z;z;Radius (cm)",80,-70,70,100,25,40);
     hist_list_2.push_back(h_radiusz);
+  TH1D * h_tof = new TH1D("tof","Time of Flight",100,-10,20);
+    hist_list_1.push_back(h_tof);
+  TH2D * h_andrew = new TH2D("andrew","(p_{miss}-p_{n})/p_{miss} vs #theta_{n,miss};(p_{miss}-p_{n})/p_{miss};#theta_{n,miss}",100,-3,1,90,0,180);
+    hist_list_2.push_back(h_andrew);
+  TH2D * h_Edep_beta = new TH2D("Edep_beta","Energy deposition vs #beta;#beta;E_{dep}",50,0,1,50,0,100);
+    hist_list_2.push_back(h_Edep_beta);
+  TH1D * h_p_all = new TH1D("p_all","Momentum",100,0,1.2);
+    hist_list_1.push_back(h_p_all);
+
 
 
   // good n / bad n set
@@ -202,7 +211,7 @@ int main(int argc, char ** argv) {
     hist_list_1.push_back(h_mmiss2);
   TH2D * h_mmiss_xb2 = new TH2D("mmiss_xb2","Missing Mass vs x_{B}",50,0,3,50,0.5,1.5);
     hist_list_2.push_back(h_mmiss_xb2);
-  TH1D * h_energy2 = new TH1D("energy2","Neutron Energy Deposition;Energy (MeV);Counts",100,0,50);
+  TH1D * h_energy2 = new TH1D("energy2","Neutron Energy Deposition;Energy (MeV);Counts",100,0,25);
     hist_list_1.push_back(h_energy2);
   TH2D * h_theta_beta2 = new TH2D("theta_beta2","Neutron theta vs beta;#beta;#theta",50,-0.1,1.1,55,35,145);
     hist_list_2.push_back(h_theta_beta2);
@@ -214,6 +223,14 @@ int main(int argc, char ** argv) {
     hist_list_2.push_back(h_thetapn_pp2);
   TH2D * h_radiusz2 = new TH2D("radius_z2","Radius vs z;z;Radius (cm)",80,-70,70,100,25,40);
     hist_list_2.push_back(h_radiusz2);
+  TH1D * h_tof2 = new TH1D("tof2","Time of Flight",100,-10,20);
+    hist_list_1.push_back(h_tof2);
+  TH2D * h_andrew2 = new TH2D("andrew2","(p_{miss}-p_{n})/p_{miss} vs #theta_{n,miss};(p_{miss}-p_{n})/p_{miss};#theta_{n,miss}",100,-3,1,90,0,180);
+    hist_list_2.push_back(h_andrew2);
+  TH2D * h_Edep_beta2 = new TH2D("Edep_beta2","Energy deposition vs #beta;#beta;E_{dep}",50,0,1,50,0,100);
+    hist_list_2.push_back(h_Edep_beta2);
+  TH1D * h_p_cut = new TH1D("p_cut","Momentum",100,0,1.2);
+    hist_list_1.push_back(h_p_cut);
 
 
 const double mP = 0.93828;
@@ -245,7 +262,7 @@ int numevent = 0;
     for (int i=0; i<allParticles.size(); i++)
     {
       int pid = allParticles[i]->par()->getPid();
-      if (pid!=2112 && pid!=11 && pid!=2212 && pid!=0 && pid!=22 && pid!=211) {trash=1;}
+      if (pid!=2112 && pid!=11 && pid!=2212 && pid!=0 && pid!=22) {trash=1;}
     }
     if (trash==1) {continue;}
 
@@ -415,37 +432,48 @@ int numevent = 0;
       double Ep = sqrt(mN*mN + pp.Mag2());
       double Emiss = Ebeam + mD - pe.Mag() - Ep;
       double mmiss = sqrt((Emiss*Emiss) - pmiss.Mag2());
+      double cos0 = pmiss.Dot(pn) / (pmiss.Mag()*pn.Mag());
     
       // calculate layer multiplicity by hand
       layermult=0; // default to 0 for CTOF
       if (is_CND1) {layermult = layermult+1;}
       if (is_CND2) {layermult = layermult+1;}
       if (is_CND3) {layermult = layermult+1;}
-    
-    
-    
-      // BASIC NEUTRONS CUTS
-      double n_theta = pn.Theta()*180./M_PI;
-      if (n_theta<40 || n_theta>140) {continue;}
+     
+      // ESSENTIAL NEUTRONS CUTS
       if (pn_x==0 || pn_y==0 || pn_z==0) {continue;}
-      if (pn.Mag()<0.2) {continue;}
-      if (energy<3) {continue;}
-      //if (pmiss.Theta()*180./M_PI<40 || pmiss.Theta()*180./M_PI>140) {continue;}
-      if (pmiss.Mag()<0.3 || pmiss.Mag()>1.2) {continue;}
+      if (pmiss.Mag()<0.2 || pmiss.Mag()>1.25) {continue;} // 0.2-1.2
+      if (pmiss.Theta()*180./M_PI<40 || pmiss.Theta()*180./M_PI>135) {continue;}
+
+      double n_theta = pn.Theta()*180./M_PI;
+      //if (n_theta<40 || n_theta>135) {continue;} //40-140
+
+      //if (pn.Mag()<0.2) {continue;}
+
+
+
+      if (mmiss<0.7 || mmiss>1.2) {continue;}
+      if (time<0 || time>20) {continue;}
+      if (energy<12) {continue;}
+
+      // ADDITIONAL NEUTRON CUTS
+      h_nangles->Fill(pn.Phi()*180./M_PI,n_theta);
+      h_energy->Fill(energy);
+      h_tof->Fill(time);
+      h_Edep_beta->Fill(neut[i]->getBeta(),energy);
+      //if (energy<3) {continue;}
     
       //if (xB<0.6) {continue;}
-      double cos0 = pmiss.Dot(pn) / (pmiss.Mag()*pn.Mag());
+
     
     
       // fill histos for neutron PID before good/bad selection
-      h_nangles->Fill(pn.Phi()*180./M_PI,n_theta);
       h_cos0->Fill(pmiss.Dot(pn) / (pmiss.Mag()*pn.Mag()));
       h_pxminuspx->Fill(pn_x-pmiss.X());
       h_pyminuspy->Fill(pn_y-pmiss.Y());
       h_pzminuspz->Fill(pn_z-pmiss.Z());
       h_pminusp->Fill(pn.Mag()-pmiss.Mag());
       h_pvsp->Fill(pmiss.Mag(),pn.Mag());
-      h_energy->Fill(energy);
       h_dpp->Fill(pmiss.Mag(),(pmiss.Mag()-pn.Mag())/pmiss.Mag());
       h_mmiss->Fill(mmiss);
       h_mmiss_xb->Fill(xB,mmiss);
@@ -454,7 +482,9 @@ int numevent = 0;
       h_pmiss_thetamiss->Fill(pmiss.Theta()*180./M_PI,pmiss.Mag());
       h_thetapn_pp->Fill(pp.Mag(),pp.Angle(pn)*180./M_PI);
       h_radiusz->Fill(z,pow(x*x+y*y,0.5));
-   //std::cout << x << '\t' <<  pow(x*x+y*y,0.5) << endl;
+      h_andrew->Fill((pmiss.Mag()-pn.Mag())/pmiss.Mag(),pn.Angle(pmiss)*180./M_PI);
+      h_p_all->Fill(pmiss.Mag());
+
     
   // CND & CTOF NEARBY HITS
   int hits_nearby7 = 0; int ctof_nearby7 = 0;
@@ -533,8 +563,11 @@ int numevent = 0;
   }
 
 
-
-
+  // physics cuts
+  if (angle_diff<30) {continue;}
+  //if (hits_nearby7>2) {continue;}
+  if (size>1) {continue;}
+  if (ctof_nearby7>2) {continue;}
 
 
 //////////////////////////
@@ -545,9 +578,10 @@ int numevent = 0;
 
   // Determine whether to write to "good neutron" or "bad neutron" file
 
-  bool good_N = (cos0>0.9 && abs(pmiss.Mag()-pn.Mag())<0.1 && mmiss< 1.05);
-
-  bool bad_N = (cos0<0.8 && abs(pmiss.Mag()-pn.Mag())>0.2); // shown in paris
+  //bool good_N = (cos0>0.9 && abs(pmiss.Mag()-pn.Mag())<0.1);
+  bool good_N = pn.Angle(pmiss)*180/M_PI<40 && abs((pmiss.Mag()-pn.Mag())/pmiss.Mag())<0.5;
+  bool bad_N = !good_N;
+  //bool bad_N = (cos0<0.8 || abs(pmiss.Mag()-pn.Mag())>0.2) && mmiss<1.05; // shown in paris
   //bool bad_N = (mmiss>0.8 && mmiss<1.05 && (pmiss.Theta()*180./M_PI<40 || pmiss.Theta()*180./M_PI>140));  // Justin's idea
   //bool bad_N = (pmiss.Theta()*180./M_PI<40 || pmiss.Theta()*180./M_PI>140);
   //bool bad_N = !good_N;
@@ -586,7 +620,15 @@ int numevent = 0;
   h_pmiss_thetamiss2->Fill(pmiss.Theta()*180./M_PI,pmiss.Mag());
   h_thetapn_pp2->Fill(pp.Mag(),pp.Angle(pn)*180./M_PI);
   h_radiusz2->Fill(z,pow(x*x+y*y,0.5));
+  h_tof2->Fill(time);
+  h_andrew2->Fill((pmiss.Mag()-pn.Mag())/pmiss.Mag(),pn.Angle(pmiss)*180./M_PI);
+  h_Edep_beta2->Fill(neut[i]->getBeta(),energy);
+  h_p_cut->Fill(pmiss.Mag());
+
   }
+
+
+
 
   }  // closes neutron loop
 
@@ -611,46 +653,6 @@ int numevent = 0;
 
   std::cout << '\n' <<counter << " events counted!\n\n";
 
-
-/*
-  // write histograms
-  h_psize->Write();
-  h_pxminuspx->Write();
-  h_pyminuspy->Write();
-  h_pzminuspz->Write();
-  h_pminusp->Write();
-  h_pvsp->Write();
-  h_pangles->Write();
-  h_nangles->Write();
-  h_cos0->Write();
-  h_energy->Write();
-  h_dpp->Write();
-  h_mmiss->Write();
-  h_mmiss_xb->Write();
-  h_dbeta_p->Write();
-  h_theta_beta->Write();
-  h_p_theta->Write();
-  h_pmiss_thetamiss->Write();
-  h_thetapn_pp->Write();
-
-
-
-  h_nangles2->Write();
-  h_cos02->Write();
-  h_pxminuspx2->Write();
-  h_pyminuspy2->Write();
-  h_pzminuspz2->Write();
-  h_pminusp2->Write();
-  h_pvsp2->Write();
-  h_dpp2->Write();
-  h_mmiss2->Write();
-  h_mmiss_xb2->Write();
-  h_energy2->Write();
-  h_theta_beta2->Write();
-  h_p_theta2->Write();
-  h_pmiss_thetamiss2->Write();
-  h_thetapn_pp2->Write();
-*/
 
   outtxt.close();
   ntree->Write();
