@@ -23,6 +23,8 @@ void Usage() {
   std::cerr << "Usage: ./D_getfeatures Ebeam proton-detector(F/D) output-root output-txt keep_good input-hipo\n";
 }
 
+double getCVTdiff(std::vector<region_part_ptr> &allParticles, TVector3 &pn);
+
 int main(int argc, char ** argv) {
 
   if(argc<7) {
@@ -526,41 +528,8 @@ int numevent = 0;
 
 
   // CVT TRACKS
-  double hit12_phi = 180;
-  double angle_diff = 360;
+  double angle_diff = getCVTdiff(allParticles, pn);
 
-  for (int j=0; j<allParticles.size(); j++)
-  {
-    // want k=1,3,5,7,12
-    TVector3 traj1( allParticles[j]->traj(CVT,1)->getX(), allParticles[j]->traj(CVT,1)->getY(), allParticles[j]->traj(CVT,1)->getZ() ); 
-    TVector3 traj3( allParticles[j]->traj(CVT,3)->getX(), allParticles[j]->traj(CVT,3)->getY(), allParticles[j]->traj(CVT,3)->getZ() );
-    TVector3 traj5( allParticles[j]->traj(CVT,5)->getX(), allParticles[j]->traj(CVT,5)->getY(), allParticles[j]->traj(CVT,5)->getZ() );
-    TVector3 traj7( allParticles[j]->traj(CVT,7)->getX(), allParticles[j]->traj(CVT,7)->getY(), allParticles[j]->traj(CVT,7)->getZ() );
-    TVector3 traj12( allParticles[j]->traj(CVT,12)->getX(), allParticles[j]->traj(CVT,12)->getY(), allParticles[j]->traj(CVT,12)->getZ() );
-
-
-    if (traj12.X()==0 || traj12.Y()==0 || traj12.Z()==0) {continue;}
-
-    // take the track that is closest in angle to the neutron hit
-    if ( (pn.Angle(traj12)*180./M_PI) < angle_diff )
-    {
-      hit12_phi = pn.Angle(traj12)*180./M_PI;
-      angle_diff = hit12_phi;
-    }
-
-
-    double drdz = 0;
-    double r_t1 = traj1.X()*traj1.X() + traj1.Y()*traj1.Y();
-    double r_t3 = traj3.X()*traj3.X() + traj3.Y()*traj3.Y();
-    double r_t5 = traj5.X()*traj5.X() + traj5.Y()*traj5.Y();
-    double r_t7 = traj7.X()*traj7.X() + traj7.Y()*traj7.Y();
-    double r_t12 = traj12.X()*traj12.X() + traj12.Y()*traj12.Y();
-    /*drdz = drdz + (r_t1 - r_t3) / (traj1.Z() - traj3.Z());
-    drdz = drdz + (r_t3 - r_t5) / (traj3.Z() - traj5.Z());
-    drdz = drdz + (r_t5 - r_t7) / (traj5.Z() - traj7.Z());
-    drdz = drdz + (r_t7 - r_t12) / (traj7.Z() - traj12.Z());*/
-
-  }
 
 
   // physics cuts
@@ -659,3 +628,46 @@ int numevent = 0;
   f->Close();
 
 }  // closes main function
+
+
+
+
+
+double getCVTdiff(std::vector<region_part_ptr> &allParticles, TVector3 &pn)
+{
+  double hit12_phi = 180;
+  double angle_diff = 360;
+
+  for (int j=0; j<allParticles.size(); j++)
+  {
+    // want k=1,3,5,7,12
+    TVector3 traj1( allParticles[j]->traj(CVT,1)->getX(), allParticles[j]->traj(CVT,1)->getY(), allParticles[j]->traj(CVT,1)->getZ() ); 
+    TVector3 traj3( allParticles[j]->traj(CVT,3)->getX(), allParticles[j]->traj(CVT,3)->getY(), allParticles[j]->traj(CVT,3)->getZ() );
+    TVector3 traj5( allParticles[j]->traj(CVT,5)->getX(), allParticles[j]->traj(CVT,5)->getY(), allParticles[j]->traj(CVT,5)->getZ() );
+    TVector3 traj7( allParticles[j]->traj(CVT,7)->getX(), allParticles[j]->traj(CVT,7)->getY(), allParticles[j]->traj(CVT,7)->getZ() );
+    TVector3 traj12( allParticles[j]->traj(CVT,12)->getX(), allParticles[j]->traj(CVT,12)->getY(), allParticles[j]->traj(CVT,12)->getZ() );
+
+
+    if (traj12.X()==0 || traj12.Y()==0 || traj12.Z()==0) {continue;}
+
+    // take the track that is closest in angle to the neutron hit
+    if ( (pn.Angle(traj12)*180./M_PI) < angle_diff )
+    {
+      hit12_phi = pn.Angle(traj12)*180./M_PI;
+      angle_diff = hit12_phi;
+    }
+
+    /*double drdz = 0;
+    double r_t1 = traj1.X()*traj1.X() + traj1.Y()*traj1.Y();
+    double r_t3 = traj3.X()*traj3.X() + traj3.Y()*traj3.Y();
+    double r_t5 = traj5.X()*traj5.X() + traj5.Y()*traj5.Y();
+    double r_t7 = traj7.X()*traj7.X() + traj7.Y()*traj7.Y();
+    double r_t12 = traj12.X()*traj12.X() + traj12.Y()*traj12.Y();
+    drdz = drdz + (r_t1 - r_t3) / (traj1.Z() - traj3.Z());
+    drdz = drdz + (r_t3 - r_t5) / (traj3.Z() - traj5.Z());
+    drdz = drdz + (r_t5 - r_t7) / (traj5.Z() - traj7.Z());
+    drdz = drdz + (r_t7 - r_t12) / (traj7.Z() - traj12.Z());*/
+  }
+
+  return angle_diff;
+}
