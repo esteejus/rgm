@@ -20,7 +20,7 @@ using namespace std;
 using namespace clas12;
 
 void Usage() {
-  std::cerr << "Usage: ./D_getfeatures Ebeam proton-detector(F/D) output-root output-txt keep_good input-hipo\n";
+  std::cerr << "Usage: ./D_getfeatures keep_good Ebeam proton-detector(F/D) output-root output-txt input-hipo\n";
 }
 
 double getCVTdiff(std::vector<region_part_ptr> &allParticles, TVector3 &pn);
@@ -373,7 +373,7 @@ int numevent = 0;
         z =      neut[i]->sci(CND1)->getZ();
         dedx =   neut[i]->sci(CND1)->getDedx();
         size =   neut[i]->sci(CND1)->getSize();
-        layermult = neut[i]->sci(CND1)->getLayermulti();
+        //layermult = neut[i]->sci(CND1)->getLayermulti();
       }
       
       if (is_CND3)
@@ -391,7 +391,7 @@ int numevent = 0;
         z =      neut[i]->sci(CND3)->getZ();
         dedx =   neut[i]->sci(CND3)->getDedx();
         size =   neut[i]->sci(CND3)->getSize();
-        layermult = neut[i]->sci(CND3)->getLayermulti();
+        //layermult = neut[i]->sci(CND3)->getLayermulti();
       }
       
       if (is_CND2)
@@ -409,7 +409,7 @@ int numevent = 0;
         z =      neut[i]->sci(CND2)->getZ();
         dedx =   neut[i]->sci(CND2)->getDedx();
         size =   neut[i]->sci(CND2)->getSize();
-        layermult = neut[i]->sci(CND2)->getLayermulti();
+        //layermult = neut[i]->sci(CND2)->getLayermulti();
       }
       // PROBLEM: this gives preference to 2nd-layer hits
       if (!is_CND1 && !is_CND2 && !is_CND3)
@@ -426,8 +426,8 @@ int numevent = 0;
         z =      neut[i]->sci(CTOF)->getZ();
         dedx =   energy/3; // getDedx() is 0 (true for sim - is it also true for data?)
         size = neut[i]->sci(CTOF)->getSize();
-        layermult = layermult + 1;
-        layermult = neut[i]->sci(CTOF)->getLayermulti();
+        //layermult = layermult + 1;
+        //layermult = neut[i]->sci(CTOF)->getLayermulti();
       }
 
       double n_phi = pn.Phi()*180./M_PI;
@@ -561,6 +561,7 @@ int numevent = 0;
   if (keep_this_one)
   {
     // all neutrons - print features
+    outtxt << pmiss.Mag() << ' ';
     outtxt << energy << ' ';
     outtxt << layermult << ' '; //outtxt << z << ' ';
     outtxt << size << ' '; //outtxt << beta << ' ';
@@ -626,6 +627,8 @@ int numevent = 0;
   outtxt.close();
   ntree->Write();
   f->Close();
+
+  return 0;
 
 }  // closes main function
 
