@@ -15,7 +15,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ROOT_CXX_FLAGS} -O0 -ggdb")
 
 #add_subdirectory(source)
 
-foreach (fname D_getfeatures.cpp)
+foreach (fname D_getfeatures.cpp N_getfeatures.cpp)
   message(STATUS ${fname})
   string (REPLACE ".cpp" "" fnameExe ${fname})
   add_executable(${fnameExe} ${fname})
