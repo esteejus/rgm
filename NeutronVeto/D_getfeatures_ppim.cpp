@@ -93,7 +93,6 @@ int main(int argc, char ** argv) {
 
 
   Int_t nhits;
-  // double energy;
   double px, py, pz;
   Int_t sec[100] = {-1};
   Int_t lay[100] = {-1};
@@ -148,6 +147,14 @@ int main(int argc, char ** argv) {
     hist_list_1.push_back(h_psize);
   TH2D * h_dbeta_p = new TH2D("dbeta_p","#Delta #beta vs proton momentum",50,0,3,50,-0.2,0.2);
     hist_list_2.push_back(h_dbeta_p);
+
+  // pion stuff
+  TH2D * h_dbeta_pi = new TH2D("dbeta_pi","#Delta #beta vs proton momentum",50,0,3,50,-0.2,0.2);
+    hist_list_2.push_back(h_dbeta_pi);
+  TH1D * h_dvz_pi = new TH1D("dvz_pi","Vertex z difference between pi- and e",100,-10,10);
+    hist_list_1.push_back(h_dvz_pi);
+  TH2D * h_piangles = new TH2D("piangles","Pi- Angles;phi;theta",48,-180,180,45,0,180);
+    hist_list_2.push_back(h_piangles);
 
 
   // neutron stuff
@@ -247,6 +254,7 @@ int main(int argc, char ** argv) {
 
 
 const double mP = 0.93828;
+const double mPi = 0.13957;
 const double mN = 0.939;
 const double mD = 1.8756;
 
@@ -270,8 +278,9 @@ int numevent = 0;
     auto piminus = c12->getByID(-211);
     auto allParticles=c12->getDetParticles();
     if (elec.size()!=1) {continue;}
-    if (prot.size()!=1) {continue;}
+    if (prot.size()<1) {continue;}
     if (neut.size()<1) {continue;}
+    if (piminus.size()<1) {continue;}
     event = c12->runconfig()->getEvent() << '\n';
 
     // reject particles with the wrong PID
@@ -279,7 +288,8 @@ int numevent = 0;
     for (int i=0; i<allParticles.size(); i++)
     {
       int pid = allParticles[i]->par()->getPid();
-      if (pid!=2112 && pid!=11 && pid!=2212 && pid!=0 && pid!=22) {trash=1;}
+      if (pid!=2112 && pid!=11 && pid!=2212 && pid!=0 && pid!=22 && pid!=-211) {trash=1;}
+      //if (pid!=2112 && pid!=11 && pid!=2212 && pid!=-211) {trash=1;}
     }
     if (trash==1) {continue;}
 
@@ -335,17 +345,43 @@ int numevent = 0;
 
 
 //////////////////////////
+//////    PIONS    ///////
+//////////////////////////
+    TVector3 ppi(0.,0.,0.);
+    int pi_index = -1;
+    for (int i=0; i<piminus.size(); i++)
+    {
+      ppi.SetMagThetaPhi(piminus[i]->getP(),piminus[i]->getTheta(),piminus[i]->getPhi());
+      double dbeta_pi = piminus[i]->par()->getBeta() - ppi.Mag()/sqrt(ppi.Mag2()+mPi*mPi);
+      h_dbeta_pi->Fill(ppi.Mag(),dbeta_pi);
+      double vzpi = piminus[i]->par()->getVz();
+      h_dvz_pi->Fill(vzpi-vze);
+      double pi_theta = ppi.Theta()*180./M_PI;
+      if (ppi.Mag()<0.3) {continue;}
+      if (dbeta_pi<-0.05 || dbeta_pi>0.05) {continue;}
+      if ((vzpi-vze)<-4. || (vzpi-vze)>4.) {continue;}
+      pi_index = i;
+    }
+    if (pi_index<0) {continue;}
+
+    ppi.SetMagThetaPhi(piminus[pi_index]->getP(),piminus[pi_index]->getTheta(),piminus[pi_index]->getPhi());
+    double pi_theta = ppi.Theta()*180./M_PI;
+    h_piangles->Fill(ppi.Phi()*180./M_PI,pi_theta);
+
+
+
+//////////////////////////
 //  MISSING MOMENTUM    //
 //////////////////////////
 
     // missing momentum
-    TVector3 pmiss = pq-pp;
+    TVector3 pmiss = pq-pp-ppi;
     if (pmiss.Mag()<0.2 || pmiss.Mag()>1.25) {continue;} // 0.2-1.2
     if (pmiss.Theta()*180./M_PI<40 || pmiss.Theta()*180./M_PI>135) {continue;}
-    double Ep = sqrt(mN*mN + pp.Mag2());
-    double Emiss = Ebeam + mD - pe.Mag() - Ep;
-    double mmiss = sqrt((Emiss*Emiss) - pmiss.Mag2());
-    if (mmiss<0.7 || mmiss>1.2) {continue;}
+    double Ep = pow(mP*mP+pp.Mag2(),0.5);
+    double Epi = pow(mPi*mPi+ppi.Mag2(),0.5);
+    double mmiss = pow( pow( (nu + mD - Ep - Epi), 2.) - pmiss.Mag2() , 0.5);
+    if (mmiss>1.1) {continue;}
 
 //////////////////////////
 ////     NEUTRONS    /////
@@ -451,11 +487,10 @@ int numevent = 0;
       }
 
       double n_phi = pn.Phi()*180./M_PI;
-
       double cos0 = pmiss.Dot(pn) / (pmiss.Mag()*pn.Mag());
     
       // calculate layer multiplicity by hand
-      // default to 0 for CTOF
+      layermult=0; // default to 0 for CTOF
       if (is_CND1) {layermult = layermult+1;}
       if (is_CND2) {layermult = layermult+1;}
       if (is_CND3) {layermult = layermult+1;}
@@ -465,14 +500,16 @@ int numevent = 0;
 
 
       double n_theta = pn.Theta()*180./M_PI;
-      //if (n_theta<40 || n_theta>135) {continue;} //40-140
+      if (n_theta<40 || n_theta>135) {continue;} //40-140
 
-      //if (pn.Mag()<0.2) {continue;}
+      if (pn.Mag()<0.2) {continue;}
 
 
 
-      if (time<0 || time>20) {continue;}
-      if (energy<12) {continue;}
+      //if (mmiss<0.7 || mmiss>1.2) {continue;}
+      //if (time<0 || time>20) {continue;}
+      //if (energy<12) {continue;}
+      if (energy<3) {continue;}
 
       // ADDITIONAL NEUTRON CUTS
       h_nangles->Fill(pn.Phi()*180./M_PI,n_theta);
@@ -562,8 +599,9 @@ int numevent = 0;
 
   //bool good_N = (cos0>0.9 && abs(pmiss.Mag()-pn.Mag())<0.1);
   bool good_N = pn.Angle(pmiss)*180/M_PI<40 && abs((pmiss.Mag()-pn.Mag())/pmiss.Mag())<0.5;
-  bool bad_N = !good_N;
-
+  //bool bad_N = !good_N;
+  //bool bad_N = (prot.size()==1 && piminus.size()==1);
+  bool bad_N = good_N;
   //bool bad_N = (cos0<0.8 || abs(pmiss.Mag()-pn.Mag())>0.2) && mmiss<1.05; // shown in paris
   //bool bad_N = (mmiss>0.8 && mmiss<1.05 && (pmiss.Theta()*180./M_PI<40 || pmiss.Theta()*180./M_PI>140));  // Justin's idea
   //bool bad_N = (pmiss.Theta()*180./M_PI<40 || pmiss.Theta()*180./M_PI>140);
