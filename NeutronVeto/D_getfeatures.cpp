@@ -98,8 +98,8 @@ int main(int argc, char ** argv) {
   Int_t sec[100] = {-1};
   Int_t lay[100] = {-1};
   int event;
-  double energy, cluster_energy7, ctof_energy7, angle_diff;
-  int layermult, size, hits_nearby7, ctof_nearby7;
+  double energy, cnd_energy, ctof_energy, angle_diff;
+  int layermult, size, cnd_hits, ctof_hits;
 /*  ntree->Branch("px",&px,"momentum x/D");
   ntree->Branch("py",&py,"momentum y/D");
   ntree->Branch("pz",&pz,"momentum z/D");
@@ -111,10 +111,10 @@ int main(int argc, char ** argv) {
   ntree->Branch("energy",&energy,"energy/D");
   ntree->Branch("layermult",&layermult,"layermult/I");
   ntree->Branch("size",&size,"size/I");
-  ntree->Branch("hits_nearby7",&hits_nearby7,"hits_nearby7/I");
-  ntree->Branch("cluster_energy7",&cluster_energy7,"cluster_energy7/D");
-  ntree->Branch("ctof_energy7",&ctof_energy7,"ctof_energy7/D");
-  ntree->Branch("ctof_nearby7",&ctof_nearby7,"ctof_nearby7/I");
+  ntree->Branch("cnd_hits",&cnd_hits,"cnd_hits/I");
+  ntree->Branch("cnd_energy",&cnd_energy,"cnd_energy/D");
+  ntree->Branch("ctof_energy",&ctof_energy,"ctof_energy/D");
+  ntree->Branch("ctof_hits",&ctof_hits,"ctof_hits/I");
   ntree->Branch("angle_diff",&angle_diff,"angle_diff/D");
 
 
@@ -258,8 +258,8 @@ int numevent = 0;
   {
 
     // initialize features
-    energy = 0; cluster_energy7 = 0; ctof_energy7 = 0; angle_diff = 180;
-    layermult = -1; size = 0; hits_nearby7 = 0; ctof_nearby7 = 0;
+    energy = 0; cnd_energy = 0; ctof_energy = 0; angle_diff = 180;
+    layermult = -1; size = 0; cnd_hits = 0; ctof_hits = 0;
 
     // identify particles from REC::Particle
     //if (!myCut.electroncut(c12)) {continue;}
@@ -517,23 +517,23 @@ int numevent = 0;
 
     if (rec_detector==3 && (abs(rec_sector-sector)<3)) // hits in CND
     {
-      hits_nearby7 = hits_nearby7 + c12->getBank(rec_scintx)->getInt(scint_size,j) ;
-      cluster_energy7 = cluster_energy7 + rec_energy;
+      cnd_hits = cnd_hits + c12->getBank(rec_scintx)->getInt(scint_size,j) ;
+      cnd_energy = cnd_energy + rec_energy;
     }
     else if (rec_detector==3 && (abs(rec_sector-sector)>21)) // hits in CND, boundary
     {
-      hits_nearby7 = hits_nearby7 + c12->getBank(rec_scintx)->getInt(scint_size,j);
-      cluster_energy7 = cluster_energy7 + rec_energy;
+      cnd_hits = cnd_hits + c12->getBank(rec_scintx)->getInt(scint_size,j);
+      cnd_energy = cnd_energy + rec_energy;
     }
     else if (rec_detector==4 && (abs(rec_component-2*sector)<3)) // hits in CTOF //technically asymmetric
     {
-      ctof_nearby7 = ctof_nearby7 + c12->getBank(rec_scintx)->getInt(scint_size,j) ;
-      ctof_energy7 = ctof_energy7 + rec_energy;
+      ctof_hits = ctof_hits + c12->getBank(rec_scintx)->getInt(scint_size,j) ;
+      ctof_energy = ctof_energy + rec_energy;
     }
     else if (rec_detector==4 && abs(rec_component-2*sector)>44) // hits in CTOF, boundary //technically asymmetric
     {
-      ctof_nearby7 = ctof_nearby7 + c12->getBank(rec_scintx)->getInt(scint_size,j) ;
-      ctof_energy7 = ctof_energy7 + rec_energy;
+      ctof_hits = ctof_hits + c12->getBank(rec_scintx)->getInt(scint_size,j) ;
+      ctof_energy = ctof_energy + rec_energy;
     }
   }
 
@@ -547,9 +547,9 @@ int numevent = 0;
 
   // physics cuts
   //if (angle_diff<30) {continue;}
-  //if (hits_nearby7>2) {continue;}
+  //if (cnd_hits>2) {continue;}
   //if (size>1) {continue;}
-  //if (ctof_nearby7>2) {continue;}
+  //if (ctof_hits>2) {continue;}
 
 
 //////////////////////////
@@ -579,10 +579,10 @@ int numevent = 0;
     outtxt << energy << ' ';
     outtxt << layermult << ' '; //outtxt << z << ' ';
     outtxt << size << ' '; //outtxt << beta << ' ';
-    outtxt << hits_nearby7 << ' ';
-    outtxt << cluster_energy7 << ' ';
-    outtxt << ctof_energy7 << ' ';
-    outtxt << ctof_nearby7 << ' ';
+    outtxt << cnd_hits << ' ';
+    outtxt << cnd_energy << ' ';
+    outtxt << ctof_energy << ' ';
+    outtxt << ctof_hits << ' ';
     //outtxt << abs(hit12_phi-n_phi) << ' ';
     outtxt << angle_diff << ' ';
     outtxt << '\n';
