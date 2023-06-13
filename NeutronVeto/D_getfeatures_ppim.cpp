@@ -73,24 +73,6 @@ int main(int argc, char ** argv) {
   char temp_title[100];
 
 
-  // charge is 0 for neutrons and 1 for protons
-  /*TString hipo_name = "2gev_hipo/" + outName + ".hipo"; 
-  clas12root::HipoChainWriter chain(hipo_name.Data()); // output hipo
-  chain.Add(inName.Data()); // input hipo file
-
-
-  */
-
-
-  // create output root file and tree
-  /*TString root_name = "2gev_root/" + outName + ".root";
-  TFile * f = new TFile(root_name.Data(),"RECREATE");
-  TTree * ntree = new TTree("T","NeutronTree");
-
-  // create output txt file
-  TString txt_name = "2gev_txt/" + outName + ".txt";
-  ofstream outtxt(txt_name.Data());*/
-
 
   Int_t nhits;
   double px, py, pz;
@@ -99,14 +81,6 @@ int main(int argc, char ** argv) {
   int event;
   double energy, cnd_energy, ctof_energy, angle_diff;
   int layermult, size, cnd_hits, ctof_hits;
-/*  ntree->Branch("px",&px,"momentum x/D");
-  ntree->Branch("py",&py,"momentum y/D");
-  ntree->Branch("pz",&pz,"momentum z/D");
-  ntree->Branch("nhits",&nhits,"number of hits/I");
-  ntree->Branch("sec",sec,"sec[10]/I");
-  ntree->Branch("lay",lay,"lay[10]/I");
-  ntree->Branch("energy",&energy,"energy/D");
-  ntree->Branch("event",&event,"event/I");*/
   ntree->Branch("energy",&energy,"energy/D");
   ntree->Branch("layermult",&layermult,"layermult/I");
   ntree->Branch("size",&size,"size/I");
@@ -429,7 +403,6 @@ int numevent = 0;
         z =      neut[i]->sci(CND1)->getZ();
         dedx =   neut[i]->sci(CND1)->getDedx();
         size =   neut[i]->sci(CND1)->getSize();
-        //layermult = neut[i]->sci(CND1)->getLayermulti();
       }
       
       if (is_CND3)
@@ -447,7 +420,6 @@ int numevent = 0;
         z =      neut[i]->sci(CND3)->getZ();
         dedx =   neut[i]->sci(CND3)->getDedx();
         size =   neut[i]->sci(CND3)->getSize();
-        //layermult = neut[i]->sci(CND3)->getLayermulti();
       }
       
       if (is_CND2)
@@ -465,7 +437,6 @@ int numevent = 0;
         z =      neut[i]->sci(CND2)->getZ();
         dedx =   neut[i]->sci(CND2)->getDedx();
         size =   neut[i]->sci(CND2)->getSize();
-        //layermult = neut[i]->sci(CND2)->getLayermulti();
       }
       // PROBLEM: this gives preference to 2nd-layer hits
       if (!is_CND1 && !is_CND2 && !is_CND3)
@@ -482,8 +453,6 @@ int numevent = 0;
         z =      neut[i]->sci(CTOF)->getZ();
         dedx =   energy/3; // getDedx() is 0 (true for sim - is it also true for data?)
         size = neut[i]->sci(CTOF)->getSize();
-        //layermult = layermult + 1;
-        //layermult = neut[i]->sci(CTOF)->getLayermulti();
       }
 
       double n_phi = pn.Phi()*180./M_PI;

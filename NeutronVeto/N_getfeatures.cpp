@@ -66,25 +66,6 @@ int main(int argc, char ** argv)
   char temp_title[100];
 
 
-/*  // charge is 0 for neutrons and 1 for protons
-  TString hipo_name = "bknd_hipo/" + outName + ".hipo"; 
-  clas12root::HipoChainWriter chain(hipo_name.Data()); // output hipo
-  chain.Add(inName.Data()); // input hipo file
-  chain.SetReaderTags({0});
-  chain.db()->turnOffQADB();
-
-  auto config_c12=chain.GetC12Reader();
-
-
-  // create output root file and tree
-  TString root_name = "bknd_root/" + outName + ".root";
-  TFile * f = new TFile(root_name.Data(),"RECREATE");
-  TTree * ntree = new TTree("T","NeutronTree");
-
-  // create output txt file
-  TString txt_name = "bknd_txt/" + outName + ".txt";
-  ofstream outtxt(txt_name.Data());*/
-
 
   Int_t nhits;
   double px, py, pz; //double energy;
@@ -94,15 +75,6 @@ int main(int argc, char ** argv)
   int event;
   double energy, cnd_energy, ctof_energy, angle_diff;
   int layermult, size, cnd_hits, ctof_hits;
-  //int sec, lay, event;
-  /*ntree->Branch("px",&px,"momentum x/D");
-  ntree->Branch("py",&py,"momentum y/D");
-  ntree->Branch("pz",&pz,"momentum z/D");
-  ntree->Branch("nhits",&nhits,"number of hits/I");
-  ntree->Branch("sec",sec,"sec[10]/I");
-  ntree->Branch("lay",lay,"lay[10]/I");
-  ntree->Branch("energy",&energy,"energy/D");
-  ntree->Branch("event",&event,"event/I");*/
   ntree->Branch("energy",&energy,"energy/D");
   ntree->Branch("layermult",&layermult,"layermult/I");
   ntree->Branch("size",&size,"size/I");
@@ -120,79 +92,6 @@ int main(int argc, char ** argv)
   auto mc_px = config_c12->getBankOrder(mc_p,"px");
   auto mc_py = config_c12->getBankOrder(mc_p,"py");
   auto mc_pz = config_c12->getBankOrder(mc_p,"pz");
-
-
-/*  // CND hits
-  auto cnd_hits = config_c12->addBank("CND::hits");
-  auto cnd_id = config_c12->getBankOrder(cnd_hits,"id");
-  auto cnd_status = config_c12->getBankOrder(cnd_hits,"status");
-  auto cnd_trkID = config_c12->getBankOrder(cnd_hits,"trkID");
-  auto cnd_sector = config_c12->getBankOrder(cnd_hits,"sector");
-  auto cnd_layer = config_c12->getBankOrder(cnd_hits,"layer");
-  auto cnd_component = config_c12->getBankOrder(cnd_hits,"component");
-  auto cnd_energy = config_c12->getBankOrder(cnd_hits,"energy");
-  auto cnd_time = config_c12->getBankOrder(cnd_hits,"time");
-  auto cnd_energy_unc = config_c12->getBankOrder(cnd_hits,"energy_unc");
-  auto cnd_time_unc = config_c12->getBankOrder(cnd_hits,"time_unc");
-  auto cnd_x = config_c12->getBankOrder(cnd_hits,"x");
-  auto cnd_y = config_c12->getBankOrder(cnd_hits,"y");
-  auto cnd_z = config_c12->getBankOrder(cnd_hits,"z");
-  auto cnd_x_unc = config_c12->getBankOrder(cnd_hits,"x_unc");
-  auto cnd_y_unc = config_c12->getBankOrder(cnd_hits,"y_unc");
-  auto cnd_z_unc = config_c12->getBankOrder(cnd_hits,"z_unc");
-  auto cnd_tx = config_c12->getBankOrder(cnd_hits,"tx");
-  auto cnd_ty = config_c12->getBankOrder(cnd_hits,"ty");
-  auto cnd_tz = config_c12->getBankOrder(cnd_hits,"tz");
-  auto cnd_tlength = config_c12->getBankOrder(cnd_hits,"tlength");
-  auto cnd_pathlength = config_c12->getBankOrder(cnd_hits,"pathlength");
-  auto cnd_indexLadc = config_c12->getBankOrder(cnd_hits,"indexLadc");
-  auto cnd_indexRadc = config_c12->getBankOrder(cnd_hits,"indexRadc");
-  auto cnd_indexLtdc = config_c12->getBankOrder(cnd_hits,"indexLtdc");
-  auto cnd_indexRtdc = config_c12->getBankOrder(cnd_hits,"indexRtdc");
-
-  // CND adc/tdc
-  auto cnd_adc = config_c12->addBank("CND::adc");
-  auto cnd_tdc = config_c12->addBank("CND::tdc");
-
-  // CND clusters
-  auto cnd_clusters = config_c12->addBank("CND::clusters");
-  auto clust_id = config_c12->getBankOrder(cnd_clusters,"id");
-  auto clust_sector = config_c12->getBankOrder(cnd_clusters,"sector");
-  auto clust_layer = config_c12->getBankOrder(cnd_clusters,"layer");
-  auto clust_component = config_c12->getBankOrder(cnd_clusters,"component");
-  auto clust_nhits = config_c12->getBankOrder(cnd_clusters,"nhits");
-  auto clust_energy = config_c12->getBankOrder(cnd_clusters,"energy");
-  auto clust_x = config_c12->getBankOrder(cnd_clusters,"x");
-  auto clust_y = config_c12->getBankOrder(cnd_clusters,"y");
-  auto clust_z = config_c12->getBankOrder(cnd_clusters,"z");
-  auto clust_time = config_c12->getBankOrder(cnd_clusters,"time");
-  auto clust_status = config_c12->getBankOrder(cnd_clusters,"status");
-  auto clust_size = config_c12->getBankOrder(cnd_clusters,"size");
-
-  // CTOF hits
-  auto ctof_hits = config_c12->addBank("CTOF::hits");
-  auto ctof_id = config_c12->getBankOrder(ctof_hits,"id");
-  auto ctof_layer = config_c12->getBankOrder(ctof_hits,"layer");
-  auto ctof_sector = config_c12->getBankOrder(ctof_hits,"sector");
-  auto ctof_component = config_c12->getBankOrder(ctof_hits,"component");
-  auto ctof_energy = config_c12->getBankOrder(ctof_hits,"energy");
-  auto ctof_x = config_c12->getBankOrder(ctof_hits,"x");
-  auto ctof_y = config_c12->getBankOrder(ctof_hits,"y");
-  auto ctof_z = config_c12->getBankOrder(ctof_hits,"z");
-
-  // CTOF adc/tdc
-  auto ctof_adc = config_c12->addBank("CTOF::adc");
-  auto ctof_tdc = config_c12->addBank("CTOF::tdc");
-
-  // CTOF clusters
-  auto ctof_clusters = config_c12->addBank("CTOF::clusters");
-  auto ctof_clus_size = config_c12->getBankOrder(ctof_clusters,"size");
-  auto ctof_clus_sector = config_c12->getBankOrder(ctof_clusters,"sector");
-  auto ctof_clus_layer = config_c12->getBankOrder(ctof_clusters,"layer");
-  auto ctof_clus_component = config_c12->getBankOrder(ctof_clusters,"component");
-  auto ctof_clus_energy = config_c12->getBankOrder(ctof_clusters,"energy");
-  auto ctof_clus_time = config_c12->getBankOrder(ctof_clusters,"time"); // try this one!!!
-  auto ctof_clus_status = config_c12->getBankOrder(ctof_clusters,"status");*/
 
   // REC::Scintillator
   auto rec_scint = config_c12->addBank("REC::Scintillator");
@@ -359,7 +258,6 @@ int numevent = 0;
       y =      nucl[i]->sci(CND1)->getY();
       z =      nucl[i]->sci(CND1)->getZ();
       size =   nucl[i]->sci(CND1)->getSize();
-      //layermult = nucl[i]->sci(CND1)->getLayermulti();
     }
 
     if (is_CND3)
@@ -375,7 +273,6 @@ int numevent = 0;
       y =      nucl[i]->sci(CND3)->getY();
       z =      nucl[i]->sci(CND3)->getZ();
       size =   nucl[i]->sci(CND3)->getSize();
-      //layermult = nucl[i]->sci(CND3)->getLayermulti();
     }
 
     if (is_CND2)
@@ -391,7 +288,6 @@ int numevent = 0;
       y =      nucl[i]->sci(CND2)->getY();
       z =      nucl[i]->sci(CND2)->getZ();
       size =   nucl[i]->sci(CND2)->getSize();
-      //layermult = nucl[i]->sci(CND2)->getLayermulti();
     }
     // PROBLEM: this gives preference to 2nd-layer hits
     if (!is_CND1 && !is_CND2 && !is_CND3)
@@ -407,7 +303,6 @@ int numevent = 0;
       y =      nucl[i]->sci(CTOF)->getY();
       z =      nucl[i]->sci(CTOF)->getZ();
       size =   nucl[i]->sci(CTOF)->getSize();
-      //layermult = nucl[i]->sci(CTOF)->getLayermulti();
     }
 
 
@@ -430,117 +325,6 @@ int numevent = 0;
 
 if (energy<3) {continue;}
 
-
-
-
-/*    // CTOF BANK INFO
-    double ctof_event_energy = 0;
-    bool ctof_hit_match = 0;
-    int ctof_hit_component = -1;
-    int ctof_nearby = 0; // CHECK THAT THIS IS CALCULATED CORRECTLY!!!
-    //double ctof_neutron_angle = 0; // HOW TO CHECK FOR SMALLEST?
-    for (int j=0; j<c12->getBank(ctof_hits)->getRows(); j++)
-    {
-      if (c12->getBank(ctof_hits)->getRows()==0) {continue;}
-      ctof_hit_component = c12->getBank(ctof_hits)->getInt(ctof_component,j);
-      //check nonzero, just in expected range
-      if (abs(sector*2-ctof_hit_component)<3) // ADD BOUNDARY CONDITION
-      {
-        ctof_hit_match = 1;
-        ctof_event_energy = ctof_event_energy + c12->getBank(ctof_hits)->getFloat(ctof_energy,j);
-        ctof_nearby = ctof_nearby + 1;
-      }
-      else if (abs(sector*2-ctof_hit_component)>44)
-      {
-        ctof_hit_match = 1;
-        ctof_event_energy = ctof_event_energy + c12->getBank(ctof_hits)->getFloat(ctof_energy,j);
-        ctof_nearby = ctof_nearby + 1;
-      }
-      // check if there is a ctof hit in a sector corresponding to the cnd hit
-    }
-
-
-    // CTOF CLUSTERS INFO
-    double ctofclus_event_energy = 0;
-    int ctofclus_component = -1;
-    int ctofclus_nearby = 0;
-    double ctof_time = 0;
-
-    for (int j=0; j<c12->getBank(ctof_clusters)->getRows(); j++)
-    {
-      if (c12->getBank(ctof_clusters)->getRows()==0) {continue;}
-
-      ctofclus_component = c12->getBank(ctof_clusters)->getInt(ctof_clus_component,j);
-      if (abs(sector*2-ctofclus_component)<3)
-      {
-        ctofclus_event_energy = ctofclus_event_energy + c12->getBank(ctof_clusters)->getFloat(ctof_clus_energy,j);
-        ctofclus_nearby = ctofclus_nearby + 1;
-        ctof_time = ctof_time + c12->getBank(ctof_clusters)->getFloat(ctof_clus_time,j);
-      }
-      else if (abs(sector*2-ctofclus_component)>44)
-      {
-        ctofclus_event_energy = ctofclus_event_energy + c12->getBank(ctof_clusters)->getFloat(ctof_clus_energy,j);
-        ctofclus_nearby = ctofclus_nearby + 1;
-        ctof_time = ctof_time + c12->getBank(ctof_clusters)->getFloat(ctof_clus_time,j);
-      }
-    }
-    if (ctofclus_nearby>0) {ctof_time = ctof_time/ctofclus_nearby;}
-
-
-
-    // CND CLUSTERS BANK INFO
-    int hits_nearby7 = 0;
-    double cluster_energy7 = 0;
-    int layer_width = 0;
-    int sector_depth = 0;
-
-    for (int j=0; j<c12->getBank(cnd_clusters)->getRows(); j++)
-    {
-      int cluster_sector = c12->getBank(cnd_clusters)->getInt(clust_sector,j);
-      int cluster_layer = c12->getBank(cnd_clusters)->getInt(clust_layer,j);
-      // count nearby hit and nearby energy
-      if (abs(cluster_sector-sector)<4)
-      {
-        hits_nearby7 = hits_nearby7 + 1;
-        cluster_energy7 = cluster_energy7 + c12->getBank(cnd_clusters)->getFloat(clust_energy,j);
-      }
-      else if (abs(cluster_sector-sector)>20)
-      {
-        hits_nearby7 = hits_nearby7 + 1;
-        cluster_energy7 = cluster_energy7 + c12->getBank(cnd_clusters)->getFloat(clust_energy,j);
-      }
-
-      // measure width of response in neutron layer
-      if (abs(cluster_sector-sector)<3 && cluster_layer==layer) { layer_width = layer_width + 1; }
-      else if (abs(cluster_sector-sector)==22 && cluster_layer==layer) { layer_width = layer_width + 1; }
-      else if (abs(cluster_sector-sector)==23 && cluster_layer==layer) { layer_width = layer_width + 1; }
-
-      // count how many layers in sector have response
-      if (cluster_sector==sector)  { sector_depth = sector_depth + 1; }
-    }
-
-
-
-
-    // CND hits (not only clusters) near neutron
-    int cndhits_nearby7 = 0;
-    double cndhits_energy7 = 0;
-    for (int j=0; j<c12->getBank(cnd_hits)->getRows(); j++)
-    {
-      int cndhits_sector = c12->getBank(cnd_hits)->getInt(cnd_sector,j);
-      int cndhits_layer = c12->getBank(cnd_hits)->getInt(cnd_layer,j);
-      // count nearby hit and nearby energy
-      if (abs(cndhits_sector-sector)<3)  // ADD BOUNDARY CONDITION!!
-      {
-        cndhits_nearby7 = cndhits_nearby7 + 1;
-        cndhits_energy7 = cndhits_energy7 + c12->getBank(cnd_hits)->getFloat(cnd_energy,j);
-      }
-      if (abs(cndhits_sector-sector)>21)
-      {
-        cndhits_nearby7 = cndhits_nearby7 + 1;
-        cndhits_energy7 = cndhits_energy7 + c12->getBank(cnd_hits)->getFloat(cnd_energy,j);
-      }
-    }*/
 
 
     // CND & CTOF HEARBY HITS
@@ -607,71 +391,6 @@ if (energy<3) {continue;}
       }
 
     }
-
-
-
-/*    // CND & CTOF NEARBY HITS (FROM REC::SCINTILLATOR)
-    int hits_nearby7 = 0; int ctof_nearby7 = 0;
-    double cluster_energy7 = 0; double ctof_energy7 = 0;
-    for (int j=0; j<c12->getBank(rec_scint)->getRows(); j++)
-    {
-      int rec_detector = c12->getBank(rec_scint)->getInt(scint_detector,j);
-      if (rec_detector!=3 && rec_detector!=4) {continue;}
-
-      int rec_sector = c12->getBank(rec_scint)->getInt(scint_sector,j);
-      int rec_layer = c12->getBank(rec_scint)->getInt(scint_layer,j);
-      int rec_component = c12->getBank(rec_scint)->getFloat(scint_component,j);
-      double rec_energy = c12->getBank(rec_scint)->getFloat(scint_energy,j);
-
-      if (rec_detector==3 && (abs(rec_sector-sector)<3)) // hits in CND
-      {
-        hits_nearby7 = hits_nearby7 + 1;
-        cluster_energy7 = cluster_energy7 + rec_energy;
-      }
-      else if (rec_detector==3 && (abs(rec_sector-sector)>21)) // hits in CND, boundary
-      {
-        hits_nearby7 = hits_nearby7 + 1;
-        cluster_energy7 = cluster_energy7 + rec_energy;
-      }
-      else if (rec_detector==4 && (abs(rec_component-2*sector)<3)) // hits in CTOF //technically asymmetric
-      {
-        ctof_nearby7 = ctof_nearby7 + 1;
-        ctof_energy7 = ctof_energy7 + rec_energy;
-      }
-      else if (rec_detector==4 && (abs(rec_component-2*sector)>44)) // hits in CTOF, boundary //technically asymmetric
-      {
-        ctof_nearby7 = ctof_nearby7 + 1;
-        ctof_energy7 = ctof_energy7 + rec_energy;
-      }
-    }*/
-
-
-
-/*    // CVT TRACKS
-    //std::cout << "new event\n";
-    for (int j=0; j<allParticles.size(); j++)
-    {
-      //TVector3 traj1( allParticles[j]->traj(CVT,1)->getX(), allParticles[j]->traj(CVT,1)->getY(), allParticles[j]->traj(CVT,1) );
-      for (int k=1; k<13; k++)
-      {
-        //std::cout << "k = " << k << '\t';
-        if (allParticles[j]->traj(CVT,k)->getLayer()!=0)
-        {
-          //if (allParticles[j]->traj(CVT,k)->getX()<1 || allParticles[j]->traj(CVT,k)->getX()>30) {continue;}
-          //std::cout << "particle here\n";
-          //std::cout << pow( pow(allParticles[j]->traj(CVT,k)->getX(),2) + pow(allParticles[j]->traj(CVT,k)->getY(),2), 0.5) << '\n';
-          //if (allParticles[j]->trk(CVT)->getDetector()!=5) {continue;}
-          //std::cout << allParticles[j]->trk(CVT)->getSector() << '\n';
-          //std::cout << allParticles[j]->traj(CVT,k)->getDetector() << '\n';
-          std::cout << allParticles[j]->traj(CVT,k)->getCx() << '\t';
-          std::cout << allParticles[j]->traj(CVT,k)->getCy() << '\t';
-          std::cout << allParticles[j]->traj(CVT,k)->getCz() << '\t';
-          std::cout << pow( pow(allParticles[j]->traj(CVT,k)->getCx(),2) + pow(allParticles[j]->traj(CVT,k)->getCy(),2) + pow(allParticles[j]->traj(CVT,k)->getCz(),2)  ,0.5) << '\n';
-        }
-      }
-        //std::cout << '\n';
-    }
-//std::cout << '\n';*/
 
 
 
