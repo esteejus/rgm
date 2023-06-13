@@ -87,20 +87,30 @@ int main(int argc, char ** argv)
 
 
   Int_t nhits;
-  double px, py, pz, energy, time, path;
+  double px, py, pz, time, path; //double energy;
   //Float_t energy[100] = {-1};
   Int_t sec[100] = {-1};
   Int_t lay[100] = {-1};
   int event;
+  double energy, cluster_energy7, ctof_energy7, angle_diff;
+  int layermult, size, hits_nearby7, ctof_nearby7;
   //int sec, lay, event;
-  ntree->Branch("px",&px,"momentum x/D");
+  /*ntree->Branch("px",&px,"momentum x/D");
   ntree->Branch("py",&py,"momentum y/D");
   ntree->Branch("pz",&pz,"momentum z/D");
   ntree->Branch("nhits",&nhits,"number of hits/I");
   ntree->Branch("sec",sec,"sec[10]/I");
   ntree->Branch("lay",lay,"lay[10]/I");
   ntree->Branch("energy",&energy,"energy/D");
-  ntree->Branch("event",&event,"event/I");
+  ntree->Branch("event",&event,"event/I");*/
+  ntree->Branch("energy",&energy,"energy/D");
+  ntree->Branch("layermult",&layermult,"layermult/I");
+  ntree->Branch("size",&size,"size/I");
+  ntree->Branch("hits_nearby7",&hits_nearby7,"hits_nearby7/I");
+  ntree->Branch("cluster_energy7",&cluster_energy7,"cluster_energy7/D");
+  ntree->Branch("ctof_energy7",&ctof_energy7,"ctof_energy7/D");
+  ntree->Branch("ctof_nearby7",&ctof_nearby7,"ctof_nearby7/I");
+  ntree->Branch("angle_diff",&angle_diff,"angle_diff/D");
   
   
 
@@ -247,6 +257,11 @@ int numevent = 0;
   while(chain.Next())
   {
 
+    // initialize features
+    energy = 0; cluster_energy7 = 0; ctof_energy7 = 0; angle_diff = 180;
+    layermult = 0; size = 0; hits_nearby7 = 0; ctof_nearby7 = 0;
+
+
     // define particles
     TVector3 p_g(0.,0.,0.);
     TVector3 p(0.,0.,0.);
@@ -323,12 +338,11 @@ int numevent = 0;
 
     // put REC::Scintillator information
     int status = -1;
-    int layermult = -1;
-    double time, n_energy, path, x, y, z;
+    layermult = -1;
+    double time, path, x, y, z;
     //int sector = -1; int layer = -1; int component = -1;
     int sector = 0; int layer = 0; int component = 0;
     double beta = nucl[i]->par()->getBeta();
-    int size = -1;
 
 
     // same as cluster information
@@ -338,7 +352,7 @@ int numevent = 0;
       layer =  nucl[i]->sci(CND1)->getLayer();
       component =  nucl[i]->sci(CND1)->getComponent();
       time =   nucl[i]->sci(CND1)->getTime() - starttime;
-      n_energy = nucl[i]->sci(CND1)->getEnergy();
+      energy = nucl[i]->sci(CND1)->getEnergy();
       path =   nucl[i]->sci(CND1)->getPath();
       status = nucl[i]->sci(CND1)->getStatus();
       x =      nucl[i]->sci(CND1)->getX();
@@ -354,7 +368,7 @@ int numevent = 0;
       layer =  nucl[i]->sci(CND3)->getLayer();
       component =  nucl[i]->sci(CND3)->getComponent();
       time =   nucl[i]->sci(CND3)->getTime() - starttime;
-      n_energy = nucl[i]->sci(CND3)->getEnergy();
+      energy = nucl[i]->sci(CND3)->getEnergy();
       path =   nucl[i]->sci(CND3)->getPath();
       status = nucl[i]->sci(CND3)->getStatus();
       x =      nucl[i]->sci(CND3)->getX();
@@ -370,7 +384,7 @@ int numevent = 0;
       layer =  nucl[i]->sci(CND2)->getLayer();
       component =  nucl[i]->sci(CND2)->getComponent();
       time =   nucl[i]->sci(CND2)->getTime() - starttime;
-      n_energy = nucl[i]->sci(CND2)->getEnergy();
+      energy = nucl[i]->sci(CND2)->getEnergy();
       path =   nucl[i]->sci(CND2)->getPath();
       status = nucl[i]->sci(CND2)->getStatus();
       x =      nucl[i]->sci(CND2)->getX();
@@ -386,7 +400,7 @@ int numevent = 0;
       layer =  0;
       component = 1; // value doesn't matter - not used
       time =   nucl[i]->sci(CTOF)->getTime() - starttime;
-      n_energy = nucl[i]->sci(CTOF)->getEnergy();
+      energy = nucl[i]->sci(CTOF)->getEnergy();
       path =   nucl[i]->sci(CTOF)->getPath();
       //status = nucl[i]->sci(CTOF)->getStatus();
       x =      nucl[i]->sci(CTOF)->getX();
@@ -398,7 +412,6 @@ int numevent = 0;
 
 
     // calculate layer multiplicity by hand
-    layermult = 0;
     if (is_CND1) {layermult = layermult+1;}
     if (is_CND2) {layermult = layermult+1;}
     if (is_CND3) {layermult = layermult+1;}
@@ -415,7 +428,7 @@ int numevent = 0;
     h_energy->Fill(energy,weight);
 
 
-if (n_energy<3) {continue;}
+if (energy<3) {continue;}
 
 
 
@@ -531,9 +544,6 @@ if (n_energy<3) {continue;}
 
 
     // CND & CTOF HEARBY HITS
-    int hits_nearby7 = 0; int ctof_nearby7 = 0;
-    double cluster_energy7 = 0; double ctof_energy7 = 0;
-    
     for (int j=0; j<c12->getBank(rec_scint)->getRows(); j++)
     {
       int rec_detector = c12->getBank(rec_scint)->getInt(scint_detector,j);
@@ -543,6 +553,7 @@ if (n_energy<3) {continue;}
       int rec_layer = c12->getBank(rec_scint)->getInt(scint_layer,j);
       int rec_component = c12->getBank(rec_scint)->getInt(scint_component,j);
       double rec_energy = c12->getBank(rec_scint)->getFloat(scint_energy,j);
+      // note - rec_energy sometimes comes out insanely big
       
       if (rec_detector==3 && (abs(rec_sector-sector)<3)) // hits in CND
       {
@@ -571,7 +582,6 @@ if (n_energy<3) {continue;}
 
     // CVT Tracks - does basically nothing, almost no tracks are formed
     double hit12_phi = 180;
-    double angle_diff = 360;
     for (int j=0; j<allParticles.size(); j++)
     {
       TVector3 traj1( allParticles[j]->traj(CVT,1)->getX(), allParticles[j]->traj(CVT,1)->getY(), allParticles[j]->traj(CVT,1)->getZ() );
@@ -669,7 +679,8 @@ if (n_energy<3) {continue;}
     // Determine whether to write to "good nucleon" or "bad nucleon" file
     double cos0 = p_g.Dot(p) / (p_g.Mag()*p.Mag());
     bool good_N = (cos0>0.9 && p.Mag()>0.2 && abs(px-px_g)/px_g<0.2 && abs(py-py_g)/py_g<0.2 && abs(pz-pz_g)/pz_g<0.2 && abs(p.Mag()-p_g.Mag())/p_g.Mag()<0.1);
-    bool bad_N = (p.Mag()>0.2);// (cos0<0.8 || abs(px-px_g)>0.2 || abs(py-py_g)>0.2 || abs(pz-pz_g)>0.2 || abs(p.Mag()-p_g.Mag())>0.2);
+    //bool bad_N = (p.Mag()>0.2);
+    bool bad_N = (cos0<0.8 || abs(px-px_g)>0.2 || abs(py-py_g)>0.2 || abs(pz-pz_g)>0.2 || abs(p.Mag()-p_g.Mag())>0.2);
 
 
     bool keep_this_one = (charge==0) ? good_N : bad_N;
@@ -678,7 +689,7 @@ if (n_energy<3) {continue;}
     {
       // all nucleons - print features
       outtxt << p_g.Mag() << ' ';
-      outtxt << n_energy << ' ';
+      outtxt << energy << ' ';
       outtxt << layermult << ' '; //////outtxt << z << ' ';
       outtxt << size << ' ';  /////outtxt << beta << ' ';
       outtxt << hits_nearby7 << ' ';
