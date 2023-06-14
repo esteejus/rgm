@@ -52,6 +52,7 @@ int main(int argc, char ** argv)
   const std::unique_ptr<clas12::clas12reader>& c12=chain.C12ref();
   chain.db()->turnOffQADB();
 
+
   // prepare histograms
   vector<TH1*> hist_list_1;
   vector<TH2*> hist_list_2;
@@ -151,8 +152,6 @@ int main(int argc, char ** argv)
 
 
 
-int numevent = 0;
-  //while(chain.Next() && numevent<20)
   while(chain.Next())
   {
 
@@ -169,7 +168,8 @@ int numevent = 0;
 
     // identify particles from REC::Particle
     auto elec=c12->getByID(11);
-    auto nucl= (charge==0) ? c12->getByID(2112) : c12->getByID(2212);
+    //auto nucl= (charge==0) ? c12->getByID(2112) : c12->getByID(2212);
+    auto nucl = c12->getByID(2112);
     auto allParticles = c12->getDetParticles();
     double weight = c12->mcevent()->getWeight();
     if (elec.size()!=1) {continue;}
@@ -198,8 +198,6 @@ int numevent = 0;
     double max_cos0 = 0.5;
 
 
-  //std::cout << "number of neutrons " << nucl.size() << endl;
-  numevent = numevent + 1;
   double starttime = c12->event()->getStartTime();
 
 
@@ -221,7 +219,7 @@ int numevent = 0;
     if (p.Mag()<0.2) {continue;}
     if (p_g.Mag()<0.2) {continue;}
     if (p_g.Theta()*180./M_PI<40 || p_g.Theta()*180./M_PI>135) {continue;}
-    //if (n_theta<40 || n_theta>135) {continue;}
+    if (n_theta<40 || n_theta>135) {continue;}
     bool is_CD = nucl[i]->getRegion()==CD;
     if (!is_CD) {continue;}
 
@@ -230,14 +228,9 @@ int numevent = 0;
     bool is_CND2 = (nucl[i]->sci(CND2)->getLayer()==2);
     bool is_CND3 = (nucl[i]->sci(CND3)->getLayer()==3);
 
-    int num_hits_inc = 0;
-    if (is_CND1) {num_hits_inc = num_hits_inc + 1;}
-    if (is_CND2) {num_hits_inc = num_hits_inc + 1;}
-    if (is_CND3) {num_hits_inc = num_hits_inc + 1;}  
 
     // put REC::Scintillator information
     int status = -1;
-    layermult = -1;
     double time, path, x, y, z;
     //int sector = -1; int layer = -1; int component = -1;
     int sector = 0; int layer = 0; int component = 0;
@@ -398,7 +391,7 @@ if (energy<3) {continue;}
     // Determine whether to write to "good nucleon" or "bad nucleon" file
     double cos0 = p_g.Dot(p) / (p_g.Mag()*p.Mag());
     bool good_N = (cos0>0.9 && p.Mag()>0.2 && abs(px-px_g)/px_g<0.2 && abs(py-py_g)/py_g<0.2 && abs(pz-pz_g)/pz_g<0.2 && abs(p.Mag()-p_g.Mag())/p_g.Mag()<0.1);
-    bool bad_N = cos0>0.7 && (p.Mag()>0.2) && abs(p.Mag()-p_g.Mag())/p_g.Mag()<0.2;
+    bool bad_N = p.Mag()>0.2;//cos0>0.7 && (p.Mag()>0.2) && abs(p.Mag()-p_g.Mag())/p_g.Mag()<0.2;
     //bool bad_N = (cos0<0.8 || abs(px-px_g)>0.2 || abs(py-py_g)>0.2 || abs(pz-pz_g)>0.2 || abs(p.Mag()-p_g.Mag())>0.2);
 
 
@@ -417,6 +410,9 @@ if (energy<3) {continue;}
       outtxt << ctof_hits << ' ';
       outtxt << angle_diff << ' ';
       outtxt << '\n';
+
+
+      ntree->Fill();
     }
 
 
@@ -426,7 +422,7 @@ if (energy<3) {continue;}
     //chain.WriteEvent();
     // THIS WRITES ALL n AND p, NOT JUST GOOD N AND BAD N
     // set features to default values, then cut if not good n/bad n
-    ntree->Fill();
+    //ntree->Fill();
 
     counter++;
 
