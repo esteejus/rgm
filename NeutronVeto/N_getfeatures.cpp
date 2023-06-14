@@ -89,7 +89,6 @@ int main(int argc, char ** argv)
 
   // MC banks
   auto mc_p = config_c12->addBank("MC::Particle");
-  auto mc_pid = config_c12->getBankOrder(mc_p,"pid");
   auto mc_px = config_c12->getBankOrder(mc_p,"px");
   auto mc_py = config_c12->getBankOrder(mc_p,"py");
   auto mc_pz = config_c12->getBankOrder(mc_p,"pz");
@@ -104,13 +103,10 @@ int main(int argc, char ** argv)
 
   // ScintExtras
   auto rec_scintx = config_c12->addBank("REC::ScintExtras");
-  auto scint_dedx = config_c12->getBankOrder(rec_scintx,"dedx");
+  //auto scint_dedx = config_c12->getBankOrder(rec_scintx,"dedx");
   auto scint_size = config_c12->getBankOrder(rec_scintx,"size");
-  auto scint_layermult = config_c12->getBankOrder(rec_scintx,"layermult");
+  //auto scint_layermult = config_c12->getBankOrder(rec_scintx,"layermult");
   
-
-
-
  
   int counter = 0;
 
@@ -168,8 +164,7 @@ int main(int argc, char ** argv)
 
     // identify particles from REC::Particle
     auto elec=c12->getByID(11);
-    //auto nucl= (charge==0) ? c12->getByID(2112) : c12->getByID(2212);
-    auto nucl = c12->getByID(2112);
+    auto nucl = c12->getByID(2112); // looking for neutrons in e'n and e'p simulations
     auto allParticles = c12->getDetParticles();
     double weight = c12->mcevent()->getWeight();
     if (elec.size()!=1) {continue;}
@@ -193,9 +188,6 @@ int main(int argc, char ** argv)
     p_g.SetXYZ(px_g,py_g,pz_g);
     h_pg_theta->Fill(p_g.Theta()*180./M_PI);
 
-    // read reconstructed nucleon PID and momentum
-    int n0 = -1;
-    double max_cos0 = 0.5;
 
 
   double starttime = c12->event()->getStartTime();
@@ -219,7 +211,6 @@ int main(int argc, char ** argv)
     if (p.Mag()<0.2) {continue;}
     if (p_g.Mag()<0.2) {continue;}
     if (p_g.Theta()*180./M_PI<40 || p_g.Theta()*180./M_PI>135) {continue;}
-    if (n_theta<40 || n_theta>135) {continue;}
     bool is_CD = nucl[i]->getRegion()==CD;
     if (!is_CD) {continue;}
 
@@ -230,10 +221,8 @@ int main(int argc, char ** argv)
 
 
     // put REC::Scintillator information
-    int status = -1;
-    double time, path, x, y, z;
-    //int sector = -1; int layer = -1; int component = -1;
-    int sector = 0; int layer = 0; int component = 0;
+    double time;
+    int sector = 0; int component = 0;
     double beta = nucl[i]->par()->getBeta();
 
 
@@ -241,60 +230,32 @@ int main(int argc, char ** argv)
     if (is_CND1)
     {
       sector = nucl[i]->sci(CND1)->getSector();
-      layer =  nucl[i]->sci(CND1)->getLayer();
-      component =  nucl[i]->sci(CND1)->getComponent();
-      time =   nucl[i]->sci(CND1)->getTime() - starttime;
+      //time =   nucl[i]->sci(CND1)->getTime() - starttime;
       energy = nucl[i]->sci(CND1)->getEnergy();
-      path =   nucl[i]->sci(CND1)->getPath();
-      status = nucl[i]->sci(CND1)->getStatus();
-      x =      nucl[i]->sci(CND1)->getX();
-      y =      nucl[i]->sci(CND1)->getY();
-      z =      nucl[i]->sci(CND1)->getZ();
       size =   nucl[i]->sci(CND1)->getSize();
     }
 
     if (is_CND3)
     {
       sector = nucl[i]->sci(CND3)->getSector();
-      layer =  nucl[i]->sci(CND3)->getLayer();
-      component =  nucl[i]->sci(CND3)->getComponent();
-      time =   nucl[i]->sci(CND3)->getTime() - starttime;
+      //time =   nucl[i]->sci(CND3)->getTime() - starttime;
       energy = nucl[i]->sci(CND3)->getEnergy();
-      path =   nucl[i]->sci(CND3)->getPath();
-      status = nucl[i]->sci(CND3)->getStatus();
-      x =      nucl[i]->sci(CND3)->getX();
-      y =      nucl[i]->sci(CND3)->getY();
-      z =      nucl[i]->sci(CND3)->getZ();
       size =   nucl[i]->sci(CND3)->getSize();
     }
 
     if (is_CND2)
     {
       sector = nucl[i]->sci(CND2)->getSector();
-      layer =  nucl[i]->sci(CND2)->getLayer();
-      component =  nucl[i]->sci(CND2)->getComponent();
-      time =   nucl[i]->sci(CND2)->getTime() - starttime;
+      //time =   nucl[i]->sci(CND2)->getTime() - starttime;
       energy = nucl[i]->sci(CND2)->getEnergy();
-      path =   nucl[i]->sci(CND2)->getPath();
-      status = nucl[i]->sci(CND2)->getStatus();
-      x =      nucl[i]->sci(CND2)->getX();
-      y =      nucl[i]->sci(CND2)->getY();
-      z =      nucl[i]->sci(CND2)->getZ();
       size =   nucl[i]->sci(CND2)->getSize();
     }
     // PROBLEM: this gives preference to 2nd-layer hits
     if (!is_CND1 && !is_CND2 && !is_CND3)
     {
       sector = (nucl[i]->sci(CTOF)->getComponent())/2; // rounded down, ctof component mapped onto cnd sector
-      layer =  0;
-      component = 1; // value doesn't matter - not used
-      time =   nucl[i]->sci(CTOF)->getTime() - starttime;
+      //time =   nucl[i]->sci(CTOF)->getTime() - starttime;
       energy = nucl[i]->sci(CTOF)->getEnergy();
-      path =   nucl[i]->sci(CTOF)->getPath();
-      //status = nucl[i]->sci(CTOF)->getStatus();
-      x =      nucl[i]->sci(CTOF)->getX();
-      y =      nucl[i]->sci(CTOF)->getY();
-      z =      nucl[i]->sci(CTOF)->getZ();
       size =   nucl[i]->sci(CTOF)->getSize();
     }
 
@@ -391,8 +352,7 @@ if (energy<3) {continue;}
     // Determine whether to write to "good nucleon" or "bad nucleon" file
     double cos0 = p_g.Dot(p) / (p_g.Mag()*p.Mag());
     bool good_N = (cos0>0.9 && p.Mag()>0.2 && abs(px-px_g)/px_g<0.2 && abs(py-py_g)/py_g<0.2 && abs(pz-pz_g)/pz_g<0.2 && abs(p.Mag()-p_g.Mag())/p_g.Mag()<0.1);
-    bool bad_N = p.Mag()>0.2;//cos0>0.7 && (p.Mag()>0.2) && abs(p.Mag()-p_g.Mag())/p_g.Mag()<0.2;
-    //bool bad_N = (cos0<0.8 || abs(px-px_g)>0.2 || abs(py-py_g)>0.2 || abs(pz-pz_g)>0.2 || abs(p.Mag()-p_g.Mag())>0.2);
+    bool bad_N = cos0>0.7 && (p.Mag()>0.2) && abs(p.Mag()-p_g.Mag())/p_g.Mag()<0.2;
 
 
     bool keep_this_one = (charge==0) ? good_N : bad_N;
@@ -418,11 +378,6 @@ if (energy<3) {continue;}
 
 
   } // end loop over nucleons
-
-    //chain.WriteEvent();
-    // THIS WRITES ALL n AND p, NOT JUST GOOD N AND BAD N
-    // set features to default values, then cut if not good n/bad n
-    //ntree->Fill();
 
     counter++;
 
@@ -476,26 +431,14 @@ double getCVTdiff(std::vector<region_part_ptr> &allParticles, TVector3 &pn)
     TVector3 traj7( allParticles[j]->traj(CVT,7)->getX(), allParticles[j]->traj(CVT,7)->getY(), allParticles[j]->traj(CVT,7)->getZ() );
     TVector3 traj12( allParticles[j]->traj(CVT,12)->getX(), allParticles[j]->traj(CVT,12)->getY(), allParticles[j]->traj(CVT,12)->getZ() );
 
+    if (traj12.X()==0 || traj12.Y()==0 || traj12.Z()==0) {continue;}
 
-  if (traj12.X()==0 || traj12.Y()==0 || traj12.Z()==0) {continue;}
-
-  // take the track that is closest in angle to the neutron hit
-  if ( (pn.Angle(traj12)*180./M_PI) < angle_diff )
-  {
-    hit12_phi = pn.Angle(traj12)*180./M_PI;
-    angle_diff = hit12_phi;
-  }
-
-  /*double drdz = 0;
-  double r_t1 = traj1.X()*traj1.X() + traj1.Y()*traj1.Y();
-  double r_t3 = traj3.X()*traj3.X() + traj3.Y()*traj3.Y();
-  double r_t5 = traj5.X()*traj5.X() + traj5.Y()*traj5.Y();
-  double r_t7 = traj7.X()*traj7.X() + traj7.Y()*traj7.Y();
-  double r_t12 = traj12.X()*traj12.X() + traj12.Y()*traj12.Y();
-  drdz = drdz + (r_t1 - r_t3) / (traj1.Z() - traj3.Z());
-  drdz = drdz + (r_t3 - r_t5) / (traj3.Z() - traj5.Z());
-  drdz = drdz + (r_t5 - r_t7) / (traj5.Z() - traj7.Z());
-  drdz = drdz + (r_t7 - r_t12) / (traj7.Z() - traj12.Z());*/
+    // take the track that is closest in angle to the neutron hit
+    if ( (pn.Angle(traj12)*180./M_PI) < angle_diff )
+    {
+      hit12_phi = pn.Angle(traj12)*180./M_PI;
+      angle_diff = hit12_phi;
+    }
   }
 
    return angle_diff;

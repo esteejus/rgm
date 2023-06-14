@@ -103,14 +103,7 @@ int main(int argc, char ** argv) {
   auto rec_scintx = config_c12->addBank("REC::ScintExtras");
   auto scint_size = config_c12->getBankOrder(rec_scintx,"size");
   
-
-  // other banks
-  auto rec_part = config_c12->addBank("REC::Particle");
-
- 
   int counter = 0;
-  //auto& c12=chain.C12ref();
-
 
 
   // histos
@@ -163,8 +156,8 @@ int main(int argc, char ** argv) {
     hist_list_2.push_back(h_pmiss_thetamiss);
   TH2D * h_thetapn_pp = new TH2D("thetapn_pp","#theta_{pn} vs p_{p};p_{p} (GeV/c);#theta_{pn}",40,0,1,40,0,180);
     hist_list_2.push_back(h_thetapn_pp);
-  TH2D * h_radiusz = new TH2D("radius_z","Radius vs z;z;Radius (cm)",80,-70,70,100,25,40);
-    hist_list_2.push_back(h_radiusz);
+  //TH2D * h_radiusz = new TH2D("radius_z","Radius vs z;z;Radius (cm)",80,-70,70,100,25,40);
+  //  hist_list_2.push_back(h_radiusz);
   TH1D * h_tof = new TH1D("tof","Time of Flight",100,-10,20);
     hist_list_1.push_back(h_tof);
   TH2D * h_andrew = new TH2D("andrew","(p_{miss}-p_{n})/p_{miss} vs #theta_{n,miss};(p_{miss}-p_{n})/p_{miss};#theta_{n,miss}",100,-3,1,90,0,180);
@@ -207,8 +200,8 @@ int main(int argc, char ** argv) {
     hist_list_2.push_back(h_pmiss_thetamiss2);
   TH2D * h_thetapn_pp2 = new TH2D("thetapn_pp2","#theta_{pn} vs p_{p};p_{p} (GeV/c);#theta_{pn}",40,0,1,40,0,180);
     hist_list_2.push_back(h_thetapn_pp2);
-  TH2D * h_radiusz2 = new TH2D("radius_z2","Radius vs z;z;Radius (cm)",80,-70,70,100,25,40);
-    hist_list_2.push_back(h_radiusz2);
+  //TH2D * h_radiusz2 = new TH2D("radius_z2","Radius vs z;z;Radius (cm)",80,-70,70,100,25,40);
+  //  hist_list_2.push_back(h_radiusz2);
   TH1D * h_tof2 = new TH1D("tof2","Time of Flight",100,-10,20);
     hist_list_1.push_back(h_tof2);
   TH2D * h_andrew2 = new TH2D("andrew2","(p_{miss}-p_{n})/p_{miss} vs #theta_{n,miss};(p_{miss}-p_{n})/p_{miss};#theta_{n,miss}",100,-3,1,90,0,180);
@@ -239,8 +232,6 @@ int numevent = 0;
     auto elec=c12->getByID(11);
     auto prot = c12->getByID(2212);
     auto neut = c12->getByID(2112);
-    auto piplus = c12->getByID(211);
-    auto piminus = c12->getByID(-211);
     auto allParticles=c12->getDetParticles();
     if (elec.size()!=1) {continue;}
     if (prot.size()!=1) {continue;}
@@ -346,75 +337,39 @@ int numevent = 0;
       if (is_CND3) {num_hits_inc = num_hits_inc + 1;}
        
       // put REC::Scintillator information
-      int pindex, sector, layer, component, clusterid;
-      int status = -1;
-      double time, path, x, y, z, dedx;
+      int sector;
+      double time;
       double beta = neut[i]->par()->getBeta();
       
       if (is_CND1)
       {
-        pindex = neut[i]->sci(CND1)->getPindex();
         sector = neut[i]->sci(CND1)->getSector();
-        layer =  neut[i]->sci(CND1)->getLayer();
-        component =  neut[i]->sci(CND1)->getComponent();
         time =   neut[i]->sci(CND1)->getTime() - starttime;
         energy = neut[i]->sci(CND1)->getEnergy();
-        path =   neut[i]->sci(CND1)->getPath();
-        status = neut[i]->sci(CND1)->getStatus();
-        x =      neut[i]->sci(CND1)->getX();
-        y =      neut[i]->sci(CND1)->getY();
-        z =      neut[i]->sci(CND1)->getZ();
-        dedx =   neut[i]->sci(CND1)->getDedx();
         size =   neut[i]->sci(CND1)->getSize();
       }
       
       if (is_CND3)
       {
-        pindex = neut[i]->sci(CND3)->getPindex();
         sector = neut[i]->sci(CND3)->getSector();
-        layer =  neut[i]->sci(CND3)->getLayer();
-        component =  neut[i]->sci(CND3)->getComponent();
         time =   neut[i]->sci(CND3)->getTime() - starttime;
         energy = neut[i]->sci(CND3)->getEnergy();
-        path =   neut[i]->sci(CND3)->getPath();
-        status = neut[i]->sci(CND3)->getStatus();
-        x =      neut[i]->sci(CND3)->getX();
-        y =      neut[i]->sci(CND3)->getY();
-        z =      neut[i]->sci(CND3)->getZ();
-        dedx =   neut[i]->sci(CND3)->getDedx();
         size =   neut[i]->sci(CND3)->getSize();
       }
       
       if (is_CND2)
       {
-        pindex = neut[i]->sci(CND2)->getPindex();
         sector = neut[i]->sci(CND2)->getSector();
-        layer =  neut[i]->sci(CND2)->getLayer();
-        component =  neut[i]->sci(CND2)->getComponent();
         time =   neut[i]->sci(CND2)->getTime() - starttime;
         energy = neut[i]->sci(CND2)->getEnergy();
-        path =   neut[i]->sci(CND2)->getPath();
-        status = neut[i]->sci(CND2)->getStatus();
-        x =      neut[i]->sci(CND2)->getX();
-        y =      neut[i]->sci(CND2)->getY();
-        z =      neut[i]->sci(CND2)->getZ();
-        dedx =   neut[i]->sci(CND2)->getDedx();
         size =   neut[i]->sci(CND2)->getSize();
       }
       // PROBLEM: this gives preference to 2nd-layer hits
       if (!is_CND1 && !is_CND2 && !is_CND3)
       {
         sector = (neut[i]->sci(CTOF)->getComponent())/2; // rounded down, ctof component mapped onto cnd sector
-        layer = 0;
-        component = 1; // value doesn't matter - not used
         time =   neut[i]->sci(CTOF)->getTime() - starttime;
         energy = neut[i]->sci(CTOF)->getEnergy();
-        path =   neut[i]->sci(CTOF)->getPath();
-        //status = neut[i]->sci(CTOF)->getStatus();
-        x =      neut[i]->sci(CTOF)->getX();
-        y =      neut[i]->sci(CTOF)->getY();
-        z =      neut[i]->sci(CTOF)->getZ();
-        dedx =   energy/3; // getDedx() is 0 (true for sim - is it also true for data?)
         size = neut[i]->sci(CTOF)->getSize();
       }
 
@@ -433,11 +388,6 @@ int numevent = 0;
 
 
       double n_theta = pn.Theta()*180./M_PI;
-      //if (n_theta<40 || n_theta>135) {continue;} //40-140
-
-      //if (pn.Mag()<0.2) {continue;}
-
-
 
       if (time<0 || time>20) {continue;}
       if (energy<12) {continue;}
@@ -448,8 +398,6 @@ int numevent = 0;
       h_tof->Fill(time);
       h_Edep_beta->Fill(neut[i]->getBeta(),energy);
       //if (energy<3) {continue;}
-    
-      //if (xB<0.6) {continue;}
 
     
     
@@ -467,7 +415,7 @@ int numevent = 0;
       h_p_theta->Fill(n_theta,pn.Mag());
       h_pmiss_thetamiss->Fill(pmiss.Theta()*180./M_PI,pmiss.Mag());
       h_thetapn_pp->Fill(pp.Mag(),pp.Angle(pn)*180./M_PI);
-      h_radiusz->Fill(z,pow(x*x+y*y,0.5));
+      //h_radiusz->Fill(z,pow(x*x+y*y,0.5));
       h_andrew->Fill((pmiss.Mag()-pn.Mag())/pmiss.Mag(),pn.Angle(pmiss)*180./M_PI);
       h_p_all->Fill(pmiss.Mag());
 
@@ -529,14 +477,11 @@ int numevent = 0;
   // Determine whether to write to "good neutron" or "bad neutron" file
 
   //bool good_N = (cos0>0.9 && abs(pmiss.Mag()-pn.Mag())<0.1);
-  bool good_N = pn.Angle(pmiss)*180/M_PI<40 && abs((pmiss.Mag()-pn.Mag())/pmiss.Mag())<0.5;
-  bool bad_N = !good_N;
+  bool good_N = pn.Angle(pmiss)*180./M_PI<40 && abs((pmiss.Mag()-pn.Mag())/pmiss.Mag())<0.5;
+  bool bad_N = mmiss<1.05 && (pn.Angle(pmiss)*180./M_PI>40 || abs((pmiss.Mag()-pn.Mag())/pmiss.Mag())>0.5);
 
   //bool bad_N = (cos0<0.8 || abs(pmiss.Mag()-pn.Mag())>0.2) && mmiss<1.05; // shown in paris
   //bool bad_N = (mmiss>0.8 && mmiss<1.05 && (pmiss.Theta()*180./M_PI<40 || pmiss.Theta()*180./M_PI>140));  // Justin's idea
-  //bool bad_N = (pmiss.Theta()*180./M_PI<40 || pmiss.Theta()*180./M_PI>140);
-  //bool bad_N = !good_N;
-  //bool bad_N = (prot.size()==2 && piminus.size()==1); // no stats
 
   bool keep_this_one = keep_good ? good_N : bad_N;
 
@@ -545,13 +490,12 @@ int numevent = 0;
     // all neutrons - print features
     outtxt << pmiss.Mag() << ' ';
     outtxt << energy << ' ';
-    outtxt << layermult << ' '; //outtxt << z << ' ';
-    outtxt << size << ' '; //outtxt << beta << ' ';
+    outtxt << layermult << ' ';
+    outtxt << size << ' ';
     outtxt << cnd_hits << ' ';
     outtxt << cnd_energy << ' ';
     outtxt << ctof_energy << ' ';
     outtxt << ctof_hits << ' ';
-    //outtxt << abs(hit12_phi-n_phi) << ' ';
     outtxt << angle_diff << ' ';
     outtxt << '\n';
 
@@ -571,24 +515,20 @@ int numevent = 0;
   h_p_theta2->Fill(n_theta,pn.Mag());
   h_pmiss_thetamiss2->Fill(pmiss.Theta()*180./M_PI,pmiss.Mag());
   h_thetapn_pp2->Fill(pp.Mag(),pp.Angle(pn)*180./M_PI);
-  h_radiusz2->Fill(z,pow(x*x+y*y,0.5));
+  //h_radiusz2->Fill(z,pow(x*x+y*y,0.5));
   h_tof2->Fill(time);
   h_andrew2->Fill((pmiss.Mag()-pn.Mag())/pmiss.Mag(),pn.Angle(pmiss)*180./M_PI);
   h_Edep_beta2->Fill(neut[i]->getBeta(),energy);
   h_p_cut->Fill(pmiss.Mag());
 
-  }
+  // write to tre
+  ntree->Fill();
 
-
-
+  } // closes condition for good/bad neutron
 
   }  // closes neutron loop
 
-
-
     //chain.WriteEvent();
-    ntree->Fill();
-
     counter++;
 
   }  // closes event loop
@@ -642,16 +582,6 @@ double getCVTdiff(std::vector<region_part_ptr> &allParticles, TVector3 &pn)
       angle_diff = hit12_phi;
     }
 
-    /*double drdz = 0;
-    double r_t1 = traj1.X()*traj1.X() + traj1.Y()*traj1.Y();
-    double r_t3 = traj3.X()*traj3.X() + traj3.Y()*traj3.Y();
-    double r_t5 = traj5.X()*traj5.X() + traj5.Y()*traj5.Y();
-    double r_t7 = traj7.X()*traj7.X() + traj7.Y()*traj7.Y();
-    double r_t12 = traj12.X()*traj12.X() + traj12.Y()*traj12.Y();
-    drdz = drdz + (r_t1 - r_t3) / (traj1.Z() - traj3.Z());
-    drdz = drdz + (r_t3 - r_t5) / (traj3.Z() - traj5.Z());
-    drdz = drdz + (r_t5 - r_t7) / (traj5.Z() - traj7.Z());
-    drdz = drdz + (r_t7 - r_t12) / (traj7.Z() - traj12.Z());*/
   }
 
   return angle_diff;
