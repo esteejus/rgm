@@ -30,9 +30,9 @@ module switch gemc/5.1
 module load sqlite/dev
 
 
-./N_getfeatures 0 ${OUTPUT}/sim_root/good_neutrons_${SLURM_ARRAY_TASK_ID}.root ${OUTPUT}/sim_txt/good_neutrons_${SLURM_ARRAY_TASK_ID}.txt ${INPUT}/eN_bknd/bknd_hipo/good_neutrons_${SLURM_ARRAY_TASK_ID}.hipo
+./N_getfeatures 0 ${OUTPUT}/sim_root/good_neutrons_${SLURM_ARRAY_TASK_ID}.root ${OUTPUT}/sim_txt/good_neutrons_${SLURM_ARRAY_TASK_ID}.txt ${INPUT}/eN_bknd/reconhipo_bkg/recon_neutrons_bkg_8_4_0_${SLURM_ARRAY_TASK_ID}.hipo
 
-./N_getfeatures 1 ${OUTPUT}/sim_root/fake_neutrons_${SLURM_ARRAY_TASK_ID}.root ${OUTPUT}/sim_txt/fake_neutrons_${SLURM_ARRAY_TASK_ID}.txt ${INPUT}/eN_bknd/bknd_hipo/fake_neutrons_${SLURM_ARRAY_TASK_ID}.hipo
+./N_getfeatures 1 ${OUTPUT}/sim_root/fake_neutrons_${SLURM_ARRAY_TASK_ID}.root ${OUTPUT}/sim_txt/fake_neutrons_${SLURM_ARRAY_TASK_ID}.txt ${INPUT}/eN_bknd/reconhipo_bkg/recon_protons_bkg_8_4_0_${SLURM_ARRAY_TASK_ID}.hipo
 
 
 # remember to check if charge is correct
