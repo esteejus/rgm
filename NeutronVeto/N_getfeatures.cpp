@@ -69,13 +69,14 @@ int main(int argc, char ** argv)
 
 
   Int_t nhits;
-  double px, py, pz; //double energy;
+  double px, py, pz, momentum; //double energy;
   //Float_t energy[100] = {-1};
   Int_t sec[100] = {-1};
   Int_t lay[100] = {-1};
   int event;
   double energy, cnd_energy, ctof_energy, angle_diff;
   int layermult, size, cnd_hits, ctof_hits;
+  ntree->Branch("momentum",&momentum,"momentum/D");
   ntree->Branch("energy",&energy,"energy/D");
   ntree->Branch("layermult",&layermult,"layermult/I");
   ntree->Branch("size",&size,"size/I");
@@ -187,6 +188,7 @@ int main(int argc, char ** argv)
     pz_g = c12->getBank(mc_p)->getFloat(mc_pz,1);
     p_g.SetXYZ(px_g,py_g,pz_g);
     h_pg_theta->Fill(p_g.Theta()*180./M_PI);
+    momentum = p_g.Mag();
 
 
 

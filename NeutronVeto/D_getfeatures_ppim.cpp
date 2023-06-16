@@ -75,12 +75,13 @@ int main(int argc, char ** argv) {
 
 
   Int_t nhits;
-  double px, py, pz;
+  double px, py, pz, momentum;
   Int_t sec[100] = {-1};
   Int_t lay[100] = {-1};
   int event;
   double energy, cnd_energy, ctof_energy, angle_diff;
   int layermult, size, cnd_hits, ctof_hits;
+  ntree->Branch("momentum",&momentum,"momentum/D");
   ntree->Branch("energy",&energy,"energy/D");
   ntree->Branch("layermult",&layermult,"layermult/I");
   ntree->Branch("size",&size,"size/I");
@@ -350,6 +351,7 @@ int numevent = 0;
 
     // missing momentum
     TVector3 pmiss = pq-pp-ppi;
+    momentum = pmiss.Mag();
     if (pmiss.Mag()<0.2 || pmiss.Mag()>1.25) {continue;} // 0.2-1.2
     if (pmiss.Theta()*180./M_PI<40 || pmiss.Theta()*180./M_PI>135) {continue;}
     double Ep = pow(mP*mP+pp.Mag2(),0.5);

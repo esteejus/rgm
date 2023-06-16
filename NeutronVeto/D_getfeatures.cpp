@@ -75,12 +75,13 @@ int main(int argc, char ** argv) {
 
   Int_t nhits;
   // double energy;
-  double px, py, pz;
+  double px, py, pz, momentum;
   Int_t sec[100] = {-1};
   Int_t lay[100] = {-1};
   int event;
   double energy, cnd_energy, ctof_energy, angle_diff;
   int layermult, size, cnd_hits, ctof_hits;
+  ntree->Branch("momentum",&momentum,"momentum/D");
   ntree->Branch("energy",&energy,"energy/D");
   ntree->Branch("layermult",&layermult,"layermult/I");
   ntree->Branch("size",&size,"size/I");
@@ -166,6 +167,8 @@ int main(int argc, char ** argv) {
     hist_list_2.push_back(h_Edep_beta);
   TH1D * h_p_all = new TH1D("p_all","Momentum",100,0,1.2);
     hist_list_1.push_back(h_p_all);
+  TH1D * h_sectorpn = new TH1D("sector_pn","Sector difference between proton and neutron",40,0,40);
+    hist_list_1.push_back(h_sectorpn);
 
 
 
@@ -210,6 +213,9 @@ int main(int argc, char ** argv) {
     hist_list_2.push_back(h_Edep_beta2);
   TH1D * h_p_cut = new TH1D("p_cut","Momentum",100,0,1.2);
     hist_list_1.push_back(h_p_cut);
+  TH1D * h_sectorpn2 = new TH1D("sector_pn2","Sector difference between proton and neutron",40,0,40);
+    hist_list_1.push_back(h_sectorpn2);
+
 
 
 const double mP = 0.93828;
@@ -304,12 +310,13 @@ int numevent = 0;
 
     // missing momentum
     TVector3 pmiss = pq-pp;
+    momentum = pmiss.Mag();
     if (pmiss.Mag()<0.2 || pmiss.Mag()>1.25) {continue;} // 0.2-1.2
     if (pmiss.Theta()*180./M_PI<40 || pmiss.Theta()*180./M_PI>135) {continue;}
     double Ep = sqrt(mN*mN + pp.Mag2());
     double Emiss = Ebeam + mD - pe.Mag() - Ep;
     double mmiss = sqrt((Emiss*Emiss) - pmiss.Mag2());
-    if (mmiss<0.7 || mmiss>1.2) {continue;}
+    if (mmiss<0.7 || mmiss>1.05) {continue;}
 
 //////////////////////////
 ////     NEUTRONS    /////
@@ -390,7 +397,7 @@ int numevent = 0;
       double n_theta = pn.Theta()*180./M_PI;
 
       if (time<0 || time>20) {continue;}
-      if (energy<12) {continue;}
+      if (energy<3) {continue;}
 
       // ADDITIONAL NEUTRON CUTS
       h_nangles->Fill(pn.Phi()*180./M_PI,n_theta);
@@ -418,6 +425,7 @@ int numevent = 0;
       //h_radiusz->Fill(z,pow(x*x+y*y,0.5));
       h_andrew->Fill((pmiss.Mag()-pn.Mag())/pmiss.Mag(),pn.Angle(pmiss)*180./M_PI);
       h_p_all->Fill(pmiss.Mag());
+      h_sectorpn->Fill(prot[p_index]->trk(CVT)->getSector()-sector);
 
     
   // CND & CTOF NEARBY HITS
@@ -520,6 +528,8 @@ int numevent = 0;
   h_andrew2->Fill((pmiss.Mag()-pn.Mag())/pmiss.Mag(),pn.Angle(pmiss)*180./M_PI);
   h_Edep_beta2->Fill(neut[i]->getBeta(),energy);
   h_p_cut->Fill(pmiss.Mag());
+  h_sectorpn2->Fill(prot[p_index]->trk(CVT)->getSector()-sector);
+
 
   // write to tre
   ntree->Fill();
