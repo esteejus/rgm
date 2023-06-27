@@ -20,10 +20,17 @@ using namespace std;
 using namespace clas12;
 
 void Usage() {
-  std::cerr << "Usage: ./D_getfeatures keep_good Ebeam proton-detector(F/D) output-root output-txt input-hipo\n";
+  std::cerr << "Usage: ./D_getfeatures Ebeam keep_good proton-detector(F/D) output-root output-txt input-hipo\n";
 }
 
-double getCVTdiff(std::vector<region_part_ptr> &allParticles, TVector3 &pn);
+// function declarations
+double getCVTdiff(std::vector<region_part_ptr> &allParticles_list, TVector3 &pn);
+struct eventInfo{ int cnd_hits, ctof_hits; double cnd_energy, ctof_energy; };
+typedef struct eventInfo Struct;
+//Struct getHitInfo(const std::unique_ptr<clas12::clas12reader>& c12, clas12::clas12reader* config_c12, int sector);
+Struct getHitInfo(std::vector<region_part_ptr> neutron_list, std::vector<region_part_ptr>& allParticles_list, int i);
+
+
 
 int main(int argc, char ** argv) {
 
@@ -209,7 +216,7 @@ int main(int argc, char ** argv) {
     hist_list_1.push_back(h_tof2);
   TH2D * h_andrew2 = new TH2D("andrew2","(p_{miss}-p_{n})/p_{miss} vs #theta_{n,miss};(p_{miss}-p_{n})/p_{miss};#theta_{n,miss}",100,-3,1,90,0,180);
     hist_list_2.push_back(h_andrew2);
-  TH2D * h_Edep_beta2 = new TH2D("Edep_beta2","Energy deposition vs #beta;#beta;E_{dep}",50,0,1,50,0,100);
+  TH2D * h_Edep_beta2 = new TH2D("Edep_beta2","Energy deposition vs #beta;#beta;E_{dep}HHHH",50,0,1,50,0,100);
     hist_list_2.push_back(h_Edep_beta2);
   TH1D * h_p_cut = new TH1D("p_cut","Momentum",100,0,1.2);
     hist_list_1.push_back(h_p_cut);
@@ -228,7 +235,6 @@ int numevent = 0;
   //while(chain.Next() && numevent<200)
   while(chain.Next())
   {
-
     // initialize features
     energy = 0; cnd_energy = 0; ctof_energy = 0; angle_diff = 180;
     layermult = -1; size = 0; cnd_hits = 0; ctof_hits = 0;
@@ -237,8 +243,14 @@ int numevent = 0;
     //if (!myCut.electroncut(c12)) {continue;}
     auto elec=c12->getByID(11);
     auto prot = c12->getByID(2212);
+    //std::vector<region_part_ptr> neut = c12->getByID(2112);
+    //std::vector<region_part_ptr>& allParticles=c12->getDetParticles();
     auto neut = c12->getByID(2112);
     auto allParticles=c12->getDetParticles();
+//std::cout << typeid(neut).name() << '\n';
+//std::cout << typeid(allParticles).name() << '\n';
+//std::cout << decltype(neut) << '\n';
+//std::cout << decltype((neut)) << '\n';
     if (elec.size()!=1) {continue;}
     if (prot.size()!=1) {continue;}
     if (neut.size()<1) {continue;}
@@ -255,7 +267,7 @@ int numevent = 0;
 
     numevent = numevent + 1;
     double starttime = c12->event()->getStartTime();
-
+//std::cout << "NEW EVENT\n";
 
 //////////////////////////
 /////    ELECTRONS   /////
@@ -337,6 +349,7 @@ int numevent = 0;
       bool is_CND1 = (neut[i]->sci(CND1)->getLayer()==1);
       bool is_CND2 = (neut[i]->sci(CND2)->getLayer()==2);
       bool is_CND3 = (neut[i]->sci(CND3)->getLayer()==3);
+      bool is_CTOF = (!is_CND1 && !is_CND2 && !is_CND3);
       
       int num_hits_inc = 0;
       if (is_CND1) {num_hits_inc = num_hits_inc + 1;}
@@ -374,7 +387,7 @@ int numevent = 0;
       // PROBLEM: this gives preference to 2nd-layer hits
       if (!is_CND1 && !is_CND2 && !is_CND3)
       {
-        sector = (neut[i]->sci(CTOF)->getComponent())/2; // rounded down, ctof component mapped onto cnd sector
+        sector = (neut[i]->sci(CTOF)->getComponent()); // rounded down, ctof component mapped onto cnd sector
         time =   neut[i]->sci(CTOF)->getTime() - starttime;
         energy = neut[i]->sci(CTOF)->getEnergy();
         size = neut[i]->sci(CTOF)->getSize();
@@ -389,6 +402,7 @@ int numevent = 0;
       if (is_CND1) {layermult = layermult+1;}
       if (is_CND2) {layermult = layermult+1;}
       if (is_CND3) {layermult = layermult+1;}
+      // FIX THIS!!! CTOF definition.
      
       // ESSENTIAL NEUTRONS CUTS
       if (pn_x==0 || pn_y==0 || pn_z==0) {continue;}
@@ -427,8 +441,108 @@ int numevent = 0;
       h_p_all->Fill(pmiss.Mag());
       h_sectorpn->Fill(prot[p_index]->trk(CVT)->getSector()-sector);
 
-    
+
+
+
+
+
+
+  // function for CND & CTOF hearby hits and energy
   // CND & CTOF NEARBY HITS
+cnd_hits = 0; cnd_energy = 0; ctof_hits = 0; ctof_energy = 0;
+  Struct eventhits = getHitInfo(neut, allParticles, i);
+  cnd_hits = eventhits.cnd_hits;
+  ctof_hits = eventhits.ctof_hits;
+  cnd_energy = eventhits.cnd_energy;
+  ctof_energy = eventhits.ctof_energy; // it allowed me to re-initialize this as a double...???
+
+  //std::cout << cnd_hits << '\t' << ctof_hits << '\t' << cnd_energy << '\t' << ctof_energy << '\n';
+  //std::cout << cnd_hits << '\t' << cnd_energy << '\n' << '\n';
+
+
+
+
+/* 
+  // CND & CTOF NEARBY HITS
+  // build list of sectors to search through
+cnd_hits = 0; cnd_energy = 0; ctof_hits = 0; ctof_energy = 0;
+    bool n_isCND1 = (neut[i]->sci(CND1)->getLayer()==1);
+    bool n_isCND2 = (neut[i]->sci(CND2)->getLayer()==2);
+    bool n_isCND3 = (neut[i]->sci(CND3)->getLayer()==3);
+    bool n_isCND = (n_isCND1 || n_isCND2 || n_isCND3);
+    bool n_isCTOF = (neut[i]->sci(CTOF)->getDetector()==4);
+//std::cout << "sc i = " << i << '\t' << "sector = " << sector << '\n';
+  for (int j=0; j<allParticles.size(); j++) // read in CND sector
+  {
+    // skip particles that are not in CND or CTOF
+
+    bool part_isCND1 = (allParticles[j]->sci(CND1)->getLayer()==1);
+    bool part_isCND2 = (allParticles[j]->sci(CND2)->getLayer()==2);
+    bool part_isCND3 = (allParticles[j]->sci(CND3)->getLayer()==3);
+    bool part_isCND = (part_isCND1 || part_isCND2 || part_isCND3);
+    bool part_isCTOF = (allParticles[j]->sci(CTOF)->getDetector()==4);
+    if ( !part_isCND && !part_isCTOF) {continue;}
+
+    // look for nearby hits in the CND
+    for (int k=sector-2; k<(sector+3); k++)
+    {
+      // get sector correct for matching (i.e. check boundary effects)
+      int this_sector = -1;
+      if (k<1 && n_isCND) { this_sector = k+24; }
+      else if (k>24 && n_isCND) { this_sector = k-24; }
+      else if (k<1 && n_isCTOF) { this_sector = k+48; }
+      else if (k>48 && n_isCTOF) { this_sector = k-48; }
+      else { this_sector = k; }
+      // look for nearby CND and CTOF hits
+//std::cout << "k=" << this_sector << '\t';
+
+      if (part_isCND1 && allParticles[j]->sci(CND1)->getSector()==this_sector)
+      {
+        cnd_hits = cnd_hits + allParticles[j]->sci(CND1)->getSize();
+        cnd_energy = cnd_energy + allParticles[j]->sci(CND1)->getEnergy();
+      }
+      if (part_isCND2 && allParticles[j]->sci(CND2)->getSector()==this_sector)
+      {
+        cnd_hits = cnd_hits + allParticles[j]->sci(CND2)->getSize();
+        cnd_energy = cnd_energy + allParticles[j]->sci(CND2)->getEnergy();
+      }
+      if (part_isCND3 && allParticles[j]->sci(CND3)->getSector()==this_sector)
+      {
+        cnd_hits = cnd_hits + allParticles[j]->sci(CND3)->getSize();
+        cnd_energy = cnd_energy + allParticles[j]->sci(CND3)->getEnergy();
+      // above: if particle is in more than one CND layer, we're open to double-counting
+      }
+      if (part_isCTOF && allParticles[j]->sci(CTOF)->getSector()==this_sector) // old about 1/2 the hits and energy of the old method
+      {
+        ctof_hits = ctof_hits + allParticles[j]->sci(CTOF)->getSize();
+        ctof_energy = ctof_energy + allParticles[j]->sci(CTOF)->getEnergy();
+      }
+//std::cout << '\n';
+      //std::cout << k << '\n';
+    } // end loop over nearby sectors
+  } // end loop over all particles
+  std::cout << cnd_hits << '\t' << ctof_hits << '\t' << cnd_energy << '\t' << ctof_energy << '\n' << '\n' << '\n';;
+
+  //if ( (is_CND1 || is_CND2 || is_CND3) && (sector<3 || sector>22) ) std::cout << "expect CND mismatch!\n";
+  //if ( (!is_CND1 && !is_CND2 && !is_CND3) && (sector<3 || sector>46) ) std::cout << "expect CTOF mistmatch!\n";
+
+//  std::cout << n_isCND1 << '\t' << n_isCND2 << '\t' << n_isCND3 << '\n';
+//  std::cout << cnd_hits << '\t' << ctof_hits << '\t' << cnd_energy << '\t' << ctof_energy << '\n';
+
+
+//  std::cout << n_isCND1 << '\t' << n_isCND2 << '\t' << n_isCND3 << '\n';
+*/
+
+
+
+
+
+
+
+/*cnd_hits = 0; cnd_energy = 0; ctof_hits = 0; ctof_energy = 0;
+
+//std::cout << is_CND1 << is_CND2 << is_CND3 << is_CTOF << " sc i = " << i << '\t' << "sector = " << sector << '\n';
+
   for (int j=0; j<c12->getBank(rec_scint)->getRows(); j++)
   {
     int rec_detector = c12->getBank(rec_scint)->getInt(scint_detector,j);
@@ -438,16 +552,18 @@ int numevent = 0;
     int rec_layer = c12->getBank(rec_scint)->getInt(scint_layer,j);
     int rec_component = c12->getBank(rec_scint)->getInt(scint_component,j);
     double rec_energy = c12->getBank(rec_scint)->getFloat(scint_energy,j);
-
+//std::cout << "searching sector " << rec_sector << " with energy " << rec_energy << '\n';
     if (rec_detector==3 && (abs(rec_sector-sector)<3)) // hits in CND
     {
       cnd_hits = cnd_hits + c12->getBank(rec_scintx)->getInt(scint_size,j) ;
       cnd_energy = cnd_energy + rec_energy;
+//std::cout << "searching sector " << rec_sector << " with energy " << rec_energy << '\n';
     }
     else if (rec_detector==3 && (abs(rec_sector-sector)>21)) // hits in CND, boundary
     {
       cnd_hits = cnd_hits + c12->getBank(rec_scintx)->getInt(scint_size,j);
       cnd_energy = cnd_energy + rec_energy;
+//std::cout << "searching sector " << rec_sector << " with energy " << rec_energy << '\n';
     }
     else if (rec_detector==4 && (abs(rec_component-2*sector)<3)) // hits in CTOF //technically asymmetric
     {
@@ -459,9 +575,10 @@ int numevent = 0;
       ctof_hits = ctof_hits + c12->getBank(rec_scintx)->getInt(scint_size,j) ;
       ctof_energy = ctof_energy + rec_energy;
     }
-  }
+  }*/
 
-
+  //std::cout << cnd_hits << '\t' << ctof_hits << '\t' << cnd_energy << '\t' << ctof_energy << '\n' << '\n' << '\n';
+//  std::cout << cnd_hits << '\t' << cnd_energy << '\n' << '\n' << '\n' << '\n';
 
 
   // CVT TRACKS
@@ -568,19 +685,19 @@ int numevent = 0;
 
 
 
-double getCVTdiff(std::vector<region_part_ptr> &allParticles, TVector3 &pn)
+double getCVTdiff(std::vector<region_part_ptr> &allParticles_list, TVector3 &pn)
 {
   double hit12_phi = 180;
   double angle_diff = 360;
 
-  for (int j=0; j<allParticles.size(); j++)
+  for (int j=0; j<allParticles_list.size(); j++)
   {
     // want k=1,3,5,7,12
-    TVector3 traj1( allParticles[j]->traj(CVT,1)->getX(), allParticles[j]->traj(CVT,1)->getY(), allParticles[j]->traj(CVT,1)->getZ() ); 
-    TVector3 traj3( allParticles[j]->traj(CVT,3)->getX(), allParticles[j]->traj(CVT,3)->getY(), allParticles[j]->traj(CVT,3)->getZ() );
-    TVector3 traj5( allParticles[j]->traj(CVT,5)->getX(), allParticles[j]->traj(CVT,5)->getY(), allParticles[j]->traj(CVT,5)->getZ() );
-    TVector3 traj7( allParticles[j]->traj(CVT,7)->getX(), allParticles[j]->traj(CVT,7)->getY(), allParticles[j]->traj(CVT,7)->getZ() );
-    TVector3 traj12( allParticles[j]->traj(CVT,12)->getX(), allParticles[j]->traj(CVT,12)->getY(), allParticles[j]->traj(CVT,12)->getZ() );
+    TVector3 traj1( allParticles_list[j]->traj(CVT,1)->getX(), allParticles_list[j]->traj(CVT,1)->getY(), allParticles_list[j]->traj(CVT,1)->getZ() ); 
+    TVector3 traj3( allParticles_list[j]->traj(CVT,3)->getX(), allParticles_list[j]->traj(CVT,3)->getY(), allParticles_list[j]->traj(CVT,3)->getZ() );
+    TVector3 traj5( allParticles_list[j]->traj(CVT,5)->getX(), allParticles_list[j]->traj(CVT,5)->getY(), allParticles_list[j]->traj(CVT,5)->getZ() );
+    TVector3 traj7( allParticles_list[j]->traj(CVT,7)->getX(), allParticles_list[j]->traj(CVT,7)->getY(), allParticles_list[j]->traj(CVT,7)->getZ() );
+    TVector3 traj12( allParticles_list[j]->traj(CVT,12)->getX(), allParticles_list[j]->traj(CVT,12)->getY(), allParticles_list[j]->traj(CVT,12)->getZ() );
 
 
     if (traj12.X()==0 || traj12.Y()==0 || traj12.Z()==0) {continue;}
@@ -596,3 +713,181 @@ double getCVTdiff(std::vector<region_part_ptr> &allParticles, TVector3 &pn)
 
   return angle_diff;
 }
+
+
+
+/*Struct getHitInfo(const std::unique_ptr<clas12::clas12reader>& c12, clas12::clas12reader* config_c12, int sector)
+{
+  Struct info;
+  info.cnd_hits = 0;
+  info.ctof_hits = 0;
+  info.cnd_energy = 0;
+  info.ctof_energy = 0;
+
+  // REC::Scintillator
+  auto rec_scint = config_c12->addBank("REC::Scintillator");
+  auto scint_detector = config_c12->getBankOrder(rec_scint,"detector");
+  auto scint_sector = config_c12->getBankOrder(rec_scint,"sector");
+  auto scint_layer = config_c12->getBankOrder(rec_scint,"layer");
+  auto scint_component = config_c12->getBankOrder(rec_scint,"component");
+  auto scint_energy = config_c12->getBankOrder(rec_scint,"energy");
+
+  auto rec_scintx = config_c12->addBank("REC::ScintExtras");
+  auto scint_size = config_c12->getBankOrder(rec_scintx,"size");
+
+  for (int j=0; j<c12->getBank(rec_scint)->getRows(); j++)
+  {
+    int rec_detector = c12->getBank(rec_scint)->getInt(scint_detector,j);
+    if (rec_detector!=3 && rec_detector!=4) {continue;}
+
+    int rec_sector = c12->getBank(rec_scint)->getInt(scint_sector,j);
+    int rec_layer = c12->getBank(rec_scint)->getInt(scint_layer,j);
+    int rec_component = c12->getBank(rec_scint)->getInt(scint_component,j);
+    double rec_energy = c12->getBank(rec_scint)->getFloat(scint_energy,j);
+
+    if (rec_detector==3 && (abs(rec_sector-sector)<3)) // hits in CND
+    {
+      info.cnd_hits = info.cnd_hits + c12->getBank(rec_scintx)->getInt(scint_size,j) ;
+      info.cnd_energy = info.cnd_energy + rec_energy;
+    }
+    else if (rec_detector==3 && (abs(rec_sector-sector)>21)) // hits in CND, boundary
+    {
+      info.cnd_hits = info.cnd_hits + c12->getBank(rec_scintx)->getInt(scint_size,j);
+      info.cnd_energy = info.cnd_energy + rec_energy;
+    }
+    else if (rec_detector==4 && (abs(rec_component-2*sector)<3)) // hits in CTOF //technically asymmetric
+    {
+      info.ctof_hits = info.ctof_hits + c12->getBank(rec_scintx)->getInt(scint_size,j) ;
+      info.ctof_energy = info.ctof_energy + rec_energy;
+    }
+    else if (rec_detector==4 && abs(rec_component-2*sector)>44) // hits in CTOF, boundary //technically asymmetric
+    {
+      info.ctof_hits = info.ctof_hits + c12->getBank(rec_scintx)->getInt(scint_size,j) ;
+      info.ctof_energy = info.ctof_energy + rec_energy;
+    }
+  }
+
+  return info;
+}*/
+
+
+
+
+Struct getHitInfo(std::vector<region_part_ptr> neutron_list, std::vector<region_part_ptr>& allParticles_list, int i)
+{
+  // initialize variables to return
+  Struct info;
+  info.cnd_hits = 0;
+  info.ctof_hits = 0;
+  info.cnd_energy = 0;
+  info.ctof_energy = 0;
+
+  // determine which CND layer(s) neutron is in
+  bool n_isCND1 = (neutron_list[i]->sci(CND1)->getLayer()==1);
+  bool n_isCND2 = (neutron_list[i]->sci(CND2)->getLayer()==2);
+  bool n_isCND3 = (neutron_list[i]->sci(CND3)->getLayer()==3);
+  bool n_isCND = (n_isCND1 || n_isCND2 || n_isCND3);
+  bool n_isCTOF = (neutron_list[i]->sci(CTOF)->getDetector()==4);
+
+  // get neutron phi (range -176.25 to 176.25 degrees) -- they occur at intervals of exactly 7.5 degrees :D
+  double n_phi = -360;
+  if (n_isCND1) {n_phi = atan2(neutron_list[i]->sci(CND1)->getY(),neutron_list[i]->sci(CND1)->getX())*180/M_PI;}
+  else if (n_isCND2) {n_phi = atan2(neutron_list[i]->sci(CND2)->getY(),neutron_list[i]->sci(CND2)->getX())*180/M_PI;}
+  else if (n_isCND3) {n_phi = atan2(neutron_list[i]->sci(CND3)->getY(),neutron_list[i]->sci(CND3)->getX())*180/M_PI;}
+  else {n_phi = atan2(neutron_list[i]->sci(CTOF)->getY(),neutron_list[i]->sci(CTOF)->getX())*180/M_PI;}
+
+  // get neutron sector
+  int sector = -1;
+  if (n_isCND1) {sector = neutron_list[i]->sci(CND1)->getSector();}
+  else if (n_isCND2) {sector = neutron_list[i]->sci(CND2)->getSector();}
+  else if (n_isCND3) {sector = neutron_list[i]->sci(CND3)->getSector();}
+  else {sector = neutron_list[i]->sci(CTOF)->getComponent();}
+//std::cout << n_isCND1 << n_isCND2 << n_isCND3 << n_isCTOF << " fn i = " << i << '\t' << "sector = " << sector << '\n';
+std::cout << "neutron phi = " << n_phi << '\n';
+  // for all particles, look for hits near neutron
+  for (int j=0; j<allParticles_list.size(); j++)
+  {
+    // skip particles that are not in CND or CTOF
+    bool part_isCND1 = (allParticles_list[j]->sci(CND1)->getLayer()==1);
+    bool part_isCND2 = (allParticles_list[j]->sci(CND2)->getLayer()==2);
+    bool part_isCND3 = (allParticles_list[j]->sci(CND3)->getLayer()==3);
+    bool part_isCND = (part_isCND1 || part_isCND2 || part_isCND3);
+    bool part_isCTOF = (allParticles_list[j]->sci(CTOF)->getDetector()==4);
+    if ( !part_isCND && !part_isCTOF) {continue;}
+
+    double part_phi = -360;
+    if (part_isCND1) {part_phi = atan2(allParticles_list[j]->sci(CND1)->getY(),allParticles_list[j]->sci(CND1)->getX())*180/M_PI;}
+    if (part_isCND2) {part_phi = atan2(allParticles_list[j]->sci(CND2)->getY(),allParticles_list[j]->sci(CND2)->getX())*180/M_PI;}
+    if (part_isCND3) {part_phi = atan2(allParticles_list[j]->sci(CND3)->getY(),allParticles_list[j]->sci(CND3)->getX())*180/M_PI;}
+    if (part_isCTOF) {part_phi = atan2(allParticles_list[j]->sci(CTOF)->getY(),allParticles_list[j]->sci(CTOF)->getX())*180/M_PI;}
+
+
+    // look for nearby CND and CTOF hits
+    double phi_diff = abs(part_phi-n_phi);
+    double tolerance = 30+1; // angular range (degrees) within which to look for hits
+    if (part_isCND1 && (phi_diff<tolerance || phi_diff>(360-tolerance)) )
+    {
+      info.cnd_hits = info.cnd_hits + allParticles_list[j]->sci(CND1)->getSize();
+      info.cnd_energy = info.cnd_energy + allParticles_list[j]->sci(CND1)->getEnergy();
+    }
+    if (part_isCND2 && (phi_diff<tolerance || phi_diff>(360-tolerance)) )
+    {
+      info.cnd_hits = info.cnd_hits + allParticles_list[j]->sci(CND2)->getSize();
+      info.cnd_energy = info.cnd_energy + allParticles_list[j]->sci(CND2)->getEnergy();
+    }
+    if (part_isCND3 && (phi_diff<tolerance || phi_diff>(360-tolerance)) )
+    {
+      info.cnd_hits = info.cnd_hits + allParticles_list[j]->sci(CND3)->getSize();
+      info.cnd_energy = info.cnd_energy + allParticles_list[j]->sci(CND3)->getEnergy();
+    }
+    if (part_isCTOF && (phi_diff<tolerance || phi_diff>(360-tolerance)) )
+    {
+      info.ctof_hits = info.ctof_hits + allParticles_list[j]->sci(CTOF)->getSize();
+      info.ctof_energy = info.ctof_energy + allParticles_list[j]->sci(CTOF)->getEnergy();
+    }
+/*    // look for nearby hits in the CND
+    for (int k=sector-2; k<(sector+3); k++)
+    {
+      // get sector correct for matching (i.e. check boundary effects)
+      int this_sector = -1;
+      if (k<1 && n_isCND) { this_sector = k+24; }
+      else if (k>24 && n_isCND) { this_sector = k-24; }
+      else if (k<1 && n_isCTOF) { this_sector = k+48; }
+      else if (k>48 && n_isCTOF) { this_sector = k-48; }
+      else { this_sector = k; }
+
+
+
+
+      // look for nearby CND and CTOF hits
+      if (part_isCND1 && allParticles_list[j]->sci(CND1)->getSector()==this_sector)
+      {
+        info.cnd_hits = info.cnd_hits + allParticles_list[j]->sci(CND1)->getSize();
+        info.cnd_energy = info.cnd_energy + allParticles_list[j]->sci(CND1)->getEnergy();
+std::cout << "searching sector " << this_sector << " with energy " << allParticles_list[j]->sci(CND1)->getEnergy() << '\n';
+      }
+      if (part_isCND2 && allParticles_list[j]->sci(CND2)->getSector()==this_sector)
+      {
+        info.cnd_hits = info.cnd_hits + allParticles_list[j]->sci(CND2)->getSize();
+        info.cnd_energy = info.cnd_energy + allParticles_list[j]->sci(CND2)->getEnergy();
+std::cout << "searching sector " << this_sector << " with energy " << allParticles_list[j]->sci(CND2)->getEnergy() << '\n';
+      }
+      if (part_isCND3 && allParticles_list[j]->sci(CND3)->getSector()==this_sector)
+      {
+        info.cnd_hits = info.cnd_hits + allParticles_list[j]->sci(CND3)->getSize();
+        info.cnd_energy = info.cnd_energy + allParticles_list[j]->sci(CND3)->getEnergy();
+std::cout << "searching sector " << this_sector << " with energy " << allParticles_list[j]->sci(CND3)->getEnergy() << '\n';
+      // above: if particle is in more than one CND layer, we're open to double-counting
+      }
+      if (part_isCTOF && allParticles_list[j]->sci(CTOF)->getSector()==this_sector) // old about 1/2 the hits and energy of the old method
+      {
+        info.ctof_hits = info.ctof_hits + allParticles_list[j]->sci(CTOF)->getSize();
+        info.ctof_energy = info.ctof_energy + allParticles_list[j]->sci(CTOF)->getEnergy();
+      }
+//      std::cout << this_sector << '\n';
+    } // end loop over nearby sectors*/
+  } // end loop over all particles
+
+  return info;
+
+} // end function
