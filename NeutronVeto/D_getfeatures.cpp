@@ -24,10 +24,10 @@ void Usage() {
 }
 
 // function declarations
-double getCVTdiff(std::vector<region_part_ptr> &allParticles_list, TVector3 &pn);
-struct eventInfo{ int cnd_hits, ctof_hits; double cnd_energy, ctof_energy; };
-typedef struct eventInfo Struct;
-Struct getHitInfo(std::vector<region_part_ptr> neutron_list, std::vector<region_part_ptr>& allParticles_list, int i);
+double getCVTdiff(std::vector<region_part_ptr> neutron_list, std::vector<region_part_ptr> &allParticles_list, int i);
+struct neutronInfo{ int cnd_hits, ctof_hits, layermult, size; double cnd_energy, ctof_energy, energy, angle_diff; };
+typedef struct neutronInfo Struct;
+Struct getFeatures(std::vector<region_part_ptr> neutron_list, std::vector<region_part_ptr>& allParticles_list, int i);
 
 
 
@@ -215,7 +215,7 @@ int main(int argc, char ** argv) {
     hist_list_1.push_back(h_tof2);
   TH2D * h_andrew2 = new TH2D("andrew2","(p_{miss}-p_{n})/p_{miss} vs #theta_{n,miss};(p_{miss}-p_{n})/p_{miss};#theta_{n,miss}",100,-3,1,90,0,180);
     hist_list_2.push_back(h_andrew2);
-  TH2D * h_Edep_beta2 = new TH2D("Edep_beta2","Energy deposition vs #beta;#beta;E_{dep}HHHH",50,0,1,50,0,100);
+  TH2D * h_Edep_beta2 = new TH2D("Edep_beta2","Energy deposition vs #beta;#beta;E_{dep}",50,0,1,50,0,100);
     hist_list_2.push_back(h_Edep_beta2);
   TH1D * h_p_cut = new TH1D("p_cut","Momentum",100,0,1.2);
     hist_list_1.push_back(h_p_cut);
@@ -359,7 +359,6 @@ int numevent = 0;
         sector = neut[i]->sci(CND1)->getSector();
         time =   neut[i]->sci(CND1)->getTime() - starttime;
         energy = neut[i]->sci(CND1)->getEnergy();
-        size =   neut[i]->sci(CND1)->getSize();
       }
       
       if (is_CND3)
@@ -367,7 +366,6 @@ int numevent = 0;
         sector = neut[i]->sci(CND3)->getSector();
         time =   neut[i]->sci(CND3)->getTime() - starttime;
         energy = neut[i]->sci(CND3)->getEnergy();
-        size =   neut[i]->sci(CND3)->getSize();
       }
       
       if (is_CND2)
@@ -375,7 +373,6 @@ int numevent = 0;
         sector = neut[i]->sci(CND2)->getSector();
         time =   neut[i]->sci(CND2)->getTime() - starttime;
         energy = neut[i]->sci(CND2)->getEnergy();
-        size =   neut[i]->sci(CND2)->getSize();
       }
       // PROBLEM: this gives preference to 2nd-layer hits
       if (!is_CND1 && !is_CND2 && !is_CND3)
@@ -383,26 +380,14 @@ int numevent = 0;
         sector = (neut[i]->sci(CTOF)->getComponent()); // rounded down, ctof component mapped onto cnd sector
         time =   neut[i]->sci(CTOF)->getTime() - starttime;
         energy = neut[i]->sci(CTOF)->getEnergy();
-        size = neut[i]->sci(CTOF)->getSize();
       }
 
-      double n_phi = pn.Phi()*180./M_PI;
-
       double cos0 = pmiss.Dot(pn) / (pmiss.Mag()*pn.Mag());
-    
-      // calculate layer multiplicity by hand
-      // default to 0 for CTOF
-      if (is_CND1) {layermult = layermult+1;}
-      if (is_CND2) {layermult = layermult+1;}
-      if (is_CND3) {layermult = layermult+1;}
-      // FIX THIS!!! CTOF definition.
      
+
       // ESSENTIAL NEUTRONS CUTS
       if (pn_x==0 || pn_y==0 || pn_z==0) {continue;}
-
-
       double n_theta = pn.Theta()*180./M_PI;
-
       if (time<0 || time>20) {continue;}
       if (energy<3) {continue;}
 
@@ -439,17 +424,20 @@ int numevent = 0;
 
 
   // function for CND & CTOF hearby hits and energy
-  Struct eventhits = getHitInfo(neut, allParticles, i);
-  cnd_hits = eventhits.cnd_hits;
-  ctof_hits = eventhits.ctof_hits;
-  cnd_energy = eventhits.cnd_energy;
-  ctof_energy = eventhits.ctof_energy; // it allowed me to re-initialize this as a double...???
+  Struct ninfo = getFeatures(neut, allParticles, i);
+  cnd_hits = ninfo.cnd_hits;
+  ctof_hits = ninfo.ctof_hits;
+  cnd_energy = ninfo.cnd_energy;
+  ctof_energy = ninfo.ctof_energy; // it allowed me to re-initialize this as a double...???
+  layermult = ninfo.layermult;
+  energy = ninfo.energy;
+  size = ninfo.size;
+  angle_diff = getCVTdiff(neut, allParticles, i);
 
 
 
-
-  // CVT TRACKS
-  angle_diff = getCVTdiff(allParticles, pn);
+  //// CVT TRACKS
+  //angle_diff = getCVTdiff(allParticles, pn);
 
 
 
@@ -469,7 +457,7 @@ int numevent = 0;
   // Determine whether to write to "good neutron" or "bad neutron" file
 
   //bool good_N = (cos0>0.9 && abs(pmiss.Mag()-pn.Mag())<0.1);
-  bool good_N = pn.Angle(pmiss)*180./M_PI<40 && abs((pmiss.Mag()-pn.Mag())/pmiss.Mag())<0.5;
+  bool good_N = pn.Angle(pmiss)*180./M_PI<20 && abs((pmiss.Mag()-pn.Mag())/pmiss.Mag())<0.2;
   bool bad_N = mmiss<1.05 && (pn.Angle(pmiss)*180./M_PI>40 || abs((pmiss.Mag()-pn.Mag())/pmiss.Mag())>0.5);
 
   //bool bad_N = (cos0<0.8 || abs(pmiss.Mag()-pn.Mag())>0.2) && mmiss<1.05; // shown in paris
@@ -552,10 +540,14 @@ int numevent = 0;
 
 
 
-double getCVTdiff(std::vector<region_part_ptr> &allParticles_list, TVector3 &pn)
+double getCVTdiff(std::vector<region_part_ptr> neutron_list, std::vector<region_part_ptr> &allParticles_list, int i)
 {
   double hit12_phi = 180;
   double angle_diff = 360;
+
+  // get neutron momentum
+  TVector3 pn;
+  pn.SetXYZ( neutron_list[i]->par()->getPx(), neutron_list[i]->par()->getPy(), neutron_list[i]->par()->getPz() );
 
   for (int j=0; j<allParticles_list.size(); j++)
   {
@@ -584,7 +576,7 @@ double getCVTdiff(std::vector<region_part_ptr> &allParticles_list, TVector3 &pn)
 
 
 
-Struct getHitInfo(std::vector<region_part_ptr> neutron_list, std::vector<region_part_ptr>& allParticles_list, int i)
+Struct getFeatures(std::vector<region_part_ptr> neutron_list, std::vector<region_part_ptr>& allParticles_list, int i)
 {
 
   // initialize variables to return
@@ -593,6 +585,11 @@ Struct getHitInfo(std::vector<region_part_ptr> neutron_list, std::vector<region_
   info.ctof_hits = 0;
   info.cnd_energy = 0;
   info.ctof_energy = 0;
+  info.energy = 0;
+  info.layermult = 0;
+  info.size = 0;
+  info.angle_diff = getCVTdiff(neutron_list, allParticles_list, i);
+
 
   // determine which CND layer(s) neutron is in
   bool n_isCND1 = (neutron_list[i]->sci(CND1)->getLayer()==1);
@@ -601,19 +598,42 @@ Struct getHitInfo(std::vector<region_part_ptr> neutron_list, std::vector<region_
   bool n_isCND = (n_isCND1 || n_isCND2 || n_isCND3);
   bool n_isCTOF = (neutron_list[i]->sci(CTOF)->getDetector()==4);
 
-  // get neutron phi (range -176.25 to 176.25 degrees) -- they occur at intervals of exactly 7.5 degrees :D
-  double n_phi = -360;
-  if (n_isCND1) {n_phi = atan2(neutron_list[i]->sci(CND1)->getY(),neutron_list[i]->sci(CND1)->getX())*180/M_PI;}
-  else if (n_isCND2) {n_phi = atan2(neutron_list[i]->sci(CND2)->getY(),neutron_list[i]->sci(CND2)->getX())*180/M_PI;}
-  else if (n_isCND3) {n_phi = atan2(neutron_list[i]->sci(CND3)->getY(),neutron_list[i]->sci(CND3)->getX())*180/M_PI;}
-  else {n_phi = atan2(neutron_list[i]->sci(CTOF)->getY(),neutron_list[i]->sci(CTOF)->getX())*180/M_PI;}
 
-  // get neutron sector
-  int sector = -1;
-  if (n_isCND1) {sector = neutron_list[i]->sci(CND1)->getSector();}
-  else if (n_isCND2) {sector = neutron_list[i]->sci(CND2)->getSector();}
-  else if (n_isCND3) {sector = neutron_list[i]->sci(CND3)->getSector();}
-  else {sector = neutron_list[i]->sci(CTOF)->getComponent();}
+  // initialize subdetector/layer-dependent quantities
+  double n_phi = -360; // neutron phi (range -176.25 to 176.25 degrees) -- they occur at intervals of exactly 7.5 degrees :D
+  int sector = -1; // sector in which neutron is localized
+  // define subdetector/layer-dependent quantities
+  if (n_isCND1)
+  {
+    n_phi = atan2(neutron_list[i]->sci(CND1)->getY(),neutron_list[i]->sci(CND1)->getX())*180/M_PI;
+    sector = neutron_list[i]->sci(CND1)->getSector();
+    info.energy = neutron_list[i]->sci(CND1)->getEnergy();
+    info.size = neutron_list[i]->sci(CND1)->getSize();
+    info.layermult = info.layermult + 1;
+  }
+  if (n_isCND2)
+  {
+    n_phi = atan2(neutron_list[i]->sci(CND2)->getY(),neutron_list[i]->sci(CND2)->getX())*180/M_PI;
+    sector = neutron_list[i]->sci(CND2)->getSector();
+    info.energy = neutron_list[i]->sci(CND2)->getEnergy();
+    info.size = neutron_list[i]->sci(CND2)->getSize();
+    info.layermult = info.layermult + 1;
+  }
+  if (n_isCND3)
+  {
+    n_phi = atan2(neutron_list[i]->sci(CND3)->getY(),neutron_list[i]->sci(CND3)->getX())*180/M_PI;
+    sector = neutron_list[i]->sci(CND3)->getSector();
+    info.energy = neutron_list[i]->sci(CND3)->getEnergy();
+    info.size = neutron_list[i]->sci(CND3)->getSize();
+    info.layermult = info.layermult + 1;
+  }
+  if (n_isCTOF)
+  {
+    n_phi = atan2(neutron_list[i]->sci(CTOF)->getY(),neutron_list[i]->sci(CTOF)->getX())*180/M_PI;
+    sector = neutron_list[i]->sci(CTOF)->getComponent();
+    info.energy = neutron_list[i]->sci(CTOF)->getEnergy();
+    info.size = neutron_list[i]->sci(CTOF)->getSize();
+  }
 
 
   // for all particles, look for hits near neutron
