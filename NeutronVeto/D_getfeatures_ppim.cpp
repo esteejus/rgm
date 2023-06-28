@@ -14,13 +14,14 @@
 
 #include "clas12reader.h"
 #include "HipoChain.h"
+#include "veto_functions.h"
 
 
 using namespace std;
 using namespace clas12;
 
 void Usage() {
-  std::cerr << "Usage: ./D_getfeatures keep_good Ebeam proton-detector(F/D) output-root output-txt input-hipo\n";
+  std::cerr << "Usage: ./D_getfeatures Ebeam keep_good proton-detector(F/D) output-root output-txt input-hipo\n";
 }
 
 double getCVTdiff(std::vector<region_part_ptr> &allParticles, TVector3 &pn);
@@ -242,7 +243,7 @@ int numevent = 0;
 
     // initialize features
     energy = 0; cnd_energy = 0; ctof_energy = 0; angle_diff = 180;
-    layermult = -1; size = 0; cnd_hits = 0; ctof_hits = 0;
+    layermult = 0; size = 0; cnd_hits = 0; ctof_hits = 0;
 
     // identify particles from REC::Particle
     //if (!myCut.electroncut(c12)) {continue;}
@@ -378,16 +379,11 @@ int numevent = 0;
       bool is_CND1 = (neut[i]->sci(CND1)->getLayer()==1);
       bool is_CND2 = (neut[i]->sci(CND2)->getLayer()==2);
       bool is_CND3 = (neut[i]->sci(CND3)->getLayer()==3);
-      
-      int num_hits_inc = 0;
-      if (is_CND1) {num_hits_inc = num_hits_inc + 1;}
-      if (is_CND2) {num_hits_inc = num_hits_inc + 1;}
-      if (is_CND3) {num_hits_inc = num_hits_inc + 1;}
+      bool is_CTOF = (!is_CND1 && !is_CND2 && !is_CND3);
        
       // put REC::Scintillator information
-      int pindex, sector, layer, component, clusterid;
-      int status = -1;
-      double time, path, x, y, z, dedx;
+      int sector;
+      double time;
       double beta = neut[i]->par()->getBeta();
       
       if (is_CND1)
@@ -395,7 +391,6 @@ int numevent = 0;
         sector = neut[i]->sci(CND1)->getSector();
         time =   neut[i]->sci(CND1)->getTime() - starttime;
         energy = neut[i]->sci(CND1)->getEnergy();
-        size =   neut[i]->sci(CND1)->getSize();
       }
       
       if (is_CND3)
@@ -403,7 +398,6 @@ int numevent = 0;
         sector = neut[i]->sci(CND3)->getSector();
         time =   neut[i]->sci(CND3)->getTime() - starttime;
         energy = neut[i]->sci(CND3)->getEnergy();
-        size =   neut[i]->sci(CND3)->getSize();
       }
       
       if (is_CND2)
@@ -411,7 +405,6 @@ int numevent = 0;
         sector = neut[i]->sci(CND2)->getSector();
         time =   neut[i]->sci(CND2)->getTime() - starttime;
         energy = neut[i]->sci(CND2)->getEnergy();
-        size =   neut[i]->sci(CND2)->getSize();
       }
       // PROBLEM: this gives preference to 2nd-layer hits
       if (!is_CND1 && !is_CND2 && !is_CND3)
@@ -419,31 +412,21 @@ int numevent = 0;
         sector = (neut[i]->sci(CTOF)->getComponent())/2; // rounded down, ctof component mapped onto cnd sector
         time =   neut[i]->sci(CTOF)->getTime() - starttime;
         energy = neut[i]->sci(CTOF)->getEnergy();
-        size = neut[i]->sci(CTOF)->getSize();
       }
 
-      double n_phi = pn.Phi()*180./M_PI;
       double cos0 = pmiss.Dot(pn) / (pmiss.Mag()*pn.Mag());
-    
-      // calculate layer multiplicity by hand
-      layermult=0; // default to 0 for CTOF
-      if (is_CND1) {layermult = layermult+1;}
-      if (is_CND2) {layermult = layermult+1;}
-      if (is_CND3) {layermult = layermult+1;}
      
       // ESSENTIAL NEUTRONS CUTS
       if (pn_x==0 || pn_y==0 || pn_z==0) {continue;}
-
-
       double n_theta = pn.Theta()*180./M_PI;
       if (pn.Mag()<0.2) {continue;}
+      if (energy<3) {continue;}
 
 
 
       //if (mmiss<0.7 || mmiss>1.2) {continue;}
       //if (time<0 || time>20) {continue;}
       //if (energy<12) {continue;}
-      if (energy<3) {continue;}
 
       // ADDITIONAL NEUTRON CUTS
       h_nangles->Fill(pn.Phi()*180./M_PI,n_theta);
@@ -472,44 +455,16 @@ int numevent = 0;
       h_p_all->Fill(pmiss.Mag());
 
     
-  // CND & CTOF NEARBY HITS
-  for (int j=0; j<c12->getBank(rec_scint)->getRows(); j++)
-  {
-    int rec_detector = c12->getBank(rec_scint)->getInt(scint_detector,j);
-    if (rec_detector!=3 && rec_detector!=4) {continue;}
-
-    int rec_sector = c12->getBank(rec_scint)->getInt(scint_sector,j);
-    int rec_layer = c12->getBank(rec_scint)->getInt(scint_layer,j);
-    int rec_component = c12->getBank(rec_scint)->getInt(scint_component,j);
-    double rec_energy = c12->getBank(rec_scint)->getFloat(scint_energy,j);
-
-    if (rec_detector==3 && (abs(rec_sector-sector)<3)) // hits in CND
-    {
-      cnd_hits = cnd_hits + c12->getBank(rec_scintx)->getInt(scint_size,j) ;
-      cnd_energy = cnd_energy + rec_energy;
-    }
-    else if (rec_detector==3 && (abs(rec_sector-sector)>21)) // hits in CND, boundary
-    {
-      cnd_hits = cnd_hits + c12->getBank(rec_scintx)->getInt(scint_size,j);
-      cnd_energy = cnd_energy + rec_energy;
-    }
-    else if (rec_detector==4 && (abs(rec_component-2*sector)<3)) // hits in CTOF //technically asymmetric
-    {
-      ctof_hits = ctof_hits + c12->getBank(rec_scintx)->getInt(scint_size,j) ;
-      ctof_energy = ctof_energy + rec_energy;
-    }
-    else if (rec_detector==4 && abs(rec_component-2*sector)>44) // hits in CTOF, boundary //technically asymmetric
-    {
-      ctof_hits = ctof_hits + c12->getBank(rec_scintx)->getInt(scint_size,j) ;
-      ctof_energy = ctof_energy + rec_energy;
-    }
-  }
-
-
-
-
-  // CVT TRACKS
-  angle_diff = getCVTdiff(allParticles, pn);
+    // function for CND & CTOF nearby hits and energy
+    Struct ninfo = getFeatures(neut, allParticles, i);
+    cnd_hits = ninfo.cnd_hits;
+    ctof_hits = ninfo.ctof_hits;
+    cnd_energy = ninfo.cnd_energy;
+    ctof_energy = ninfo.ctof_energy;
+    layermult = ninfo.layermult;
+    energy = ninfo.energy;
+    size = ninfo.size;
+    angle_diff = ninfo.angle_diff;
 
 
 
@@ -611,36 +566,3 @@ int numevent = 0;
   return 0;
 
 }  // closes main function
-
-
-
-
-
-double getCVTdiff(std::vector<region_part_ptr> &allParticles, TVector3 &pn)
-{
-  double hit12_phi = 180;
-  double angle_diff = 360;
-
-  for (int j=0; j<allParticles.size(); j++)
-  {
-    // want k=1,3,5,7,12
-    TVector3 traj1( allParticles[j]->traj(CVT,1)->getX(), allParticles[j]->traj(CVT,1)->getY(), allParticles[j]->traj(CVT,1)->getZ() ); 
-    TVector3 traj3( allParticles[j]->traj(CVT,3)->getX(), allParticles[j]->traj(CVT,3)->getY(), allParticles[j]->traj(CVT,3)->getZ() );
-    TVector3 traj5( allParticles[j]->traj(CVT,5)->getX(), allParticles[j]->traj(CVT,5)->getY(), allParticles[j]->traj(CVT,5)->getZ() );
-    TVector3 traj7( allParticles[j]->traj(CVT,7)->getX(), allParticles[j]->traj(CVT,7)->getY(), allParticles[j]->traj(CVT,7)->getZ() );
-    TVector3 traj12( allParticles[j]->traj(CVT,12)->getX(), allParticles[j]->traj(CVT,12)->getY(), allParticles[j]->traj(CVT,12)->getZ() );
-
-
-    if (traj12.X()==0 || traj12.Y()==0 || traj12.Z()==0) {continue;}
-
-    // take the track that is closest in angle to the neutron hit
-    if ( (pn.Angle(traj12)*180./M_PI) < angle_diff )
-    {
-      hit12_phi = pn.Angle(traj12)*180./M_PI;
-      angle_diff = hit12_phi;
-    }
-
-  }
-
-  return angle_diff;
-}
