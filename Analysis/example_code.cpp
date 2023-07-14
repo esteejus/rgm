@@ -19,8 +19,8 @@
 
 #include "clas12reader.h"
 #include "HipoChain.h"
-#include "eventcut_old.h"
-#include "functions_old.h"
+#include "eventcut/eventcut.h"
+#include "eventcut/functions.h"
 
 using namespace std;
 using namespace clas12;
@@ -132,12 +132,12 @@ int main(int argc, char ** argv)
       bool isFDlead = false;
       bool isCDlead = false;
       for(int j = 0; j < allParticles.size(); j ++){
-	if( LeadFDProton_Cut(c12,Ebeam,j) || LeadCDProton_Cut(c12,Ebeam,j)){	  
+	/*if( LeadFDProton_Cut(c12,Ebeam,j) || LeadCDProton_Cut(c12,Ebeam,j)){	  
 	  num_L++;
 	  index_L=j;
 	  isFDlead = LeadFDProton_Cut(c12,Ebeam,j);
 	  isCDlead = LeadCDProton_Cut(c12,Ebeam,j);
-	}
+	}*/ // part of eventcut_old - comment out for now
       }
       if(num_L!=1){continue;}
       TVector3 p_L;
@@ -157,10 +157,10 @@ int main(int argc, char ** argv)
       int num_pos  = 0;
       int index_Rp1 = -1;
       for(int j = 0; j < allParticles.size(); j ++){	
-	if(AllProton_Cut(c12,Ebeam,j) && (j!=index_L)){
+	/*if(AllProton_Cut(c12,Ebeam,j) && (j!=index_L)){
 	  if(num_pos==0){index_Rp1=j;}
 	  num_pos++;
-	}	
+	}*/  // part of eventcut_old - comment out for now	
       }
       if(num_pos<1){continue;}
       double mom = allParticles[index_Rp1]->getP();

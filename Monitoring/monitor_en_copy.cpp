@@ -19,8 +19,8 @@
 
 #include "clas12reader.h"
 #include "HipoChain.h"
-#include "eventcut/eventcut.h"
-#include "eventcut/functions.h"
+#include "eventcut.h"
+#include "functions.h"
 
 using namespace std;
 using namespace clas12;
@@ -65,7 +65,7 @@ int main(int argc, char ** argv)
   chain.SetReaderTags({0});
   const std::unique_ptr<clas12::clas12reader>& c12=chain.C12ref();
   chain.db()->turnOffQADB();
-
+  
 
   /////////////////////////////////////
   //Prepare histograms
@@ -187,7 +187,7 @@ int main(int argc, char ** argv)
   hist_list_2.push_back(h_mom_beta_0_CTOF_zoom);
 
   /////////////////////////////////////
-  //FTOF Proton Information
+  //ECAL Neutron Information
   /////////////////////////////////////
   TH1D * h_chiSq_p_FTOF = new TH1D("chiSq_p_FTOF","#chi^{2}_{PID};#chi^{2}_{PID};Counts",100,-10,10);
   hist_list_1.push_back(h_chiSq_p_FTOF);
@@ -223,7 +223,7 @@ int main(int argc, char ** argv)
   }
 
   /////////////////////////////////////
-  //CTOF Proton Information
+  //CND Proton Information
   /////////////////////////////////////
   TH1D * h_chiSq_p_CTOF = new TH1D("chiSq_p_CTOF","#chi^{2}_{PID};#chi^{2}_{PID};Counts",100,-10,10);
   hist_list_1.push_back(h_chiSq_p_CTOF);
@@ -251,9 +251,9 @@ int main(int argc, char ** argv)
   TH2D * h_mom_theta_p_CTOF = new TH2D("mom_theta_p_CTOF","p_{p} vs. #theta_{p} ;p_{p};#theta_{p}",100,0,4,100,30,135);
   hist_list_2.push_back(h_mom_theta_p_CTOF);
 
-
+/*
   /////////////////////////////////////
-  //Lead Proton FTOF Checks
+  //Lead Proton FTOF  Checks
   /////////////////////////////////////
   TH1D * h_theta_p_Lead_FTOF = new TH1D("theta_p_Lead_FTOF","#theta_{p,Lead};#theta_{p,Lead};Counts",100,0,60);
   hist_list_1.push_back(h_theta_p_Lead_FTOF);
@@ -339,7 +339,7 @@ int main(int argc, char ** argv)
   hist_list_2.push_back(h_mmiss_mom_p_Lead_CTOF);
   TH2D * h_mmiss_momT_p_Lead_CTOF = new TH2D("mmiss_momT_p_Lead_CTOF","m_{miss} vs. p_{p,T,Lead};m_{miss};p_{p,T,Lead};Counts",100,0.4,1.4,100,0,2.5);
   hist_list_2.push_back(h_mmiss_momT_p_Lead_CTOF);
-
+*/
 
   for(int i=0; i<hist_list_1.size(); i++){
     hist_list_1[i]->Sumw2();
@@ -370,8 +370,9 @@ int main(int argc, char ** argv)
       auto allParticles = c12->getDetParticles();
       auto electrons=c12->getByID(11);
       auto protons=c12->getByID(2212);
-      auto pionplus=c12->getByID(211);
-      auto kaonplus=c12->getByID(321);
+      auto pion0=c12->getByID(111);
+      auto kaonlong=c12->getByID(130);
+      auto kaonshort=c12->getByID(310);
       auto neutrons=c12->getByID(2112);
       double weight = 1;
       if(isMC){weight=c12->mcevent()->getWeight();}
@@ -437,30 +438,37 @@ int main(int argc, char ** argv)
   //Hadron Information
   /////////////////////////////////////
       for(int j = 0; j < allParticles.size(); j ++){
-	if(allParticles[j]->par()->getCharge()<1){continue;}
+	if(allParticles[j]->par()->getCharge()!=0){continue;}
 	//cout<<"PID="<<allParticles[j]->getPid()<<endl;
-	bool FTOF1A = (allParticles[j]->sci(clas12::FTOF1A)->getDetector() == 12);
-	bool FTOF1B = (allParticles[j]->sci(clas12::FTOF1B)->getDetector() == 12);
-	bool FTOF2 = (allParticles[j]->sci(clas12::FTOF2)->getDetector() == 12);
-	bool CTOF = (allParticles[j]->sci(clas12::CTOF)->getDetector() == 4);
-	if(FTOF1A || FTOF1B || FTOF2){
+	bool PCAL = (allParticles[j]->cal(clas12::PCAL)->getDetector() == 7);
+	bool ECin = (allParticles[j]->cal(clas12::ECIN)->getDetector() == 7);
+        bool ECout = (allParticles[j]->cal(clas12::ECOUT)->getDetector() == 7);
+        bool CND1 = (allParticles[j]->sci(clas12::CND1)->getDetector() == 3);
+        bool CND2 = (allParticles[j]->sci(clas12::CND2)->getDetector() == 3);
+        bool CND3 = (allParticles[j]->sci(clas12::CND3)->getDetector() == 3);
+	//bool FTOF1A = (allParticles[j]->sci(clas12::FTOF1A)->getDetector() == 12);
+	//bool FTOF1B = (allParticles[j]->sci(clas12::FTOF1B)->getDetector() == 12);
+	//bool FTOF2 = (allParticles[j]->sci(clas12::FTOF2)->getDetector() == 12);
+	//bool CTOF = (allParticles[j]->sci(clas12::CTOF)->getDetector() == 4);
+
+	if(PCAL || ECin || ECout){
 	  h_mom_beta_hadplus_FTOF->Fill(allParticles[j]->getP(),allParticles[j]->par()->getBeta(),weight);
 	}
-	if(CTOF){
+	if(CND1 || CND2 || CND3){
 	  h_mom_beta_hadplus_CTOF->Fill(allParticles[j]->getP(),allParticles[j]->par()->getBeta(),weight);
 	  h_mom_beta_hadplus_CTOF_zoom->Fill(allParticles[j]->getP(),allParticles[j]->par()->getBeta(),weight);
  	  
 	  int PID = allParticles[j]->getPid();
-	  if(PID==2212){
+	  if(PID==2112){
 	    h_mom_beta_proton_CTOF_zoom->Fill(allParticles[j]->getP(),allParticles[j]->par()->getBeta(),weight);  
 	  }
-	  if(PID==211){
+	  if(PID==111){
 	    h_mom_beta_pion_CTOF_zoom->Fill(allParticles[j]->getP(),allParticles[j]->par()->getBeta(),weight);  
 	  }
-	  if(PID==321){
+	  if(PID==130 || PID==310){
 	    h_mom_beta_kaon_CTOF_zoom->Fill(allParticles[j]->getP(),allParticles[j]->par()->getBeta(),weight);  
 	  }
-	  if(PID==45){
+	  if(PID==22){
 	    h_mom_beta_deuteron_CTOF_zoom->Fill(allParticles[j]->getP(),allParticles[j]->par()->getBeta(),weight);
 	  }
 	  if(PID==0){
@@ -472,30 +480,37 @@ int main(int argc, char ** argv)
   /////////////////////////////////////
   //FTOF and CTOF Proton Information
   /////////////////////////////////////
-      for(int j = 0; j < protons.size(); j++){
+      for(int j = 0; j < neutrons.size(); j++){
 	TVector3 p_p;
-	p_p.SetMagThetaPhi(protons[j]->getP(),protons[j]->getTheta(),protons[j]->getPhi());
+	p_p.SetMagThetaPhi(neutrons[j]->getP(),neutrons[j]->getTheta(),neutrons[j]->getPhi());
 	double E_p = sqrt(mN*mN + p_p.Mag2());
 	double theta_p = p_p.Theta() * 180 / M_PI;
 	double phi_p = p_p.Phi() * 180 / M_PI;
 	double theta_pq = p_p.Angle(p_q) * 180 / M_PI;
-	double beta_p = protons[j]->par()->getBeta();
-	double Chi2Pid_p = protons[j]->par()->getChi2Pid();
+	double beta_p = neutrons[j]->par()->getBeta();
+	double Chi2Pid_p = neutrons[j]->par()->getChi2Pid();
 	double phi_diff = get_phi_diff(p_e,p_p);
-	double vtz_p = protons[j]->par()->getVz();
+	double vtz_p = neutrons[j]->par()->getVz();
 	double vtz_ep_delta = vtz_e - vtz_p;
 
-	double path_p = protons[j]->getPath();
+	double path_p = neutrons[j]->getPath();
 	double beta_frommom_p = p_p.Mag()/E_p;
 	double time_frommom_p = path_p / (c*beta_frommom_p);
 	double time_frombeta_p = path_p / (c*beta_p);
 
-	bool FTOF1A = (protons[j]->sci(clas12::FTOF1A)->getDetector() == 12);
-	bool FTOF1B = (protons[j]->sci(clas12::FTOF1B)->getDetector() == 12);
-	bool FTOF2 = (protons[j]->sci(clas12::FTOF2)->getDetector() == 12);
-	bool CTOF = (protons[j]->sci(clas12::CTOF)->getDetector() == 4);
+	bool PCAL = (neutrons[j]->cal(clas12::PCAL)->getDetector() == 7);
+	bool ECin = (neutrons[j]->cal(clas12::ECIN)->getDetector() == 7);
+        bool ECout = (neutrons[j]->cal(clas12::ECOUT)->getDetector() == 7);
+        bool CND1 = (neutrons[j]->sci(clas12::CND1)->getDetector() == 3);
+        bool CND2 = (neutrons[j]->sci(clas12::CND2)->getDetector() == 3);
+        bool CND3 = (neutrons[j]->sci(clas12::CND3)->getDetector() == 3);
 
-	if(FTOF1A || FTOF1B || FTOF2){
+	//bool FTOF1A = (protons[j]->sci(clas12::FTOF1A)->getDetector() == 12);
+	//bool FTOF1B = (protons[j]->sci(clas12::FTOF1B)->getDetector() == 12);
+	//bool FTOF2 = (protons[j]->sci(clas12::FTOF2)->getDetector() == 12);
+	//bool CTOF = (protons[j]->sci(clas12::CTOF)->getDetector() == 4);
+
+	if(PCAL || ECin || ECout){
 	  h_chiSq_p_FTOF->Fill(Chi2Pid_p,weight);
 	  h_vtz_p_FTOF->Fill(vtz_p,weight);
 	  h_vtz_ep_delta_FTOF->Fill(vtz_ep_delta,weight);
@@ -508,10 +523,10 @@ int main(int argc, char ** argv)
 	  h_mom_beta_p_FTOF->Fill(p_p.Mag(),beta_p,weight);
 	  h_timediff_p_FTOF->Fill(time_frommom_p-time_frombeta_p,weight);
 
-	  h_mom_theta_p_FTOF[protons[j]->getSector()-1]->Fill(p_p.Mag(),theta_p,weight);
+	  h_mom_theta_p_FTOF[neutrons[j]->getSector()-1]->Fill(p_p.Mag(),theta_p,weight);
 	}
 
-	if(CTOF){
+	if(CND){
 	  h_chiSq_p_CTOF->Fill(Chi2Pid_p,weight);
 	  h_vtz_p_CTOF->Fill(vtz_p,weight);
 	  h_vtz_ep_delta_CTOF->Fill(vtz_ep_delta,weight);
@@ -528,7 +543,7 @@ int main(int argc, char ** argv)
 	}
       }
 
-  /////////////////////////////////////
+/*  /////////////////////////////////////
   //Lead Proton Checks
   /////////////////////////////////////
       int index_L = myCut.leadnucleoncut(c12);
@@ -547,12 +562,19 @@ int main(int argc, char ** argv)
       double theta_1q = p_1.Angle(p_q) * 180 / M_PI;
       double vtz_p = protons[index_L]->par()->getVz();
 
-      bool FTOF1A = (protons[index_L]->sci(clas12::FTOF1A)->getDetector() == 12);
-      bool FTOF1B = (protons[index_L]->sci(clas12::FTOF1B)->getDetector() == 12);
-      bool FTOF2 =  (protons[index_L]->sci(clas12::FTOF2)->getDetector() == 12);
-      bool CTOF =   (protons[index_L]->sci(clas12::CTOF)->getDetector() == 4);
+      bool PCAL = (allParticles[j]->cal(clas12::PCAL)->getDetector() == 7);
+      bool ECin = (allParticles[j]->cal(clas12::ECIN)->getDetector() == 7);
+      bool ECout = (allParticles[j]->cal(clas12::ECOUT)->getDetector() == 7);
+      bool CND1 = (allParticles[j]->sci(clas12::CND1)->getDetector() == 3);
+      bool CND2 = (allParticles[j]->sci(clas12::CND2)->getDetector() == 3);
+      bool CND3 = (allParticles[j]->sci(clas12::CND3)->getDetector() == 3);
 
-      if(FTOF1A || FTOF1B || FTOF2){
+      //bool FTOF1A = (protons[index_L]->sci(clas12::FTOF1A)->getDetector() == 12);
+      //bool FTOF1B = (protons[index_L]->sci(clas12::FTOF1B)->getDetector() == 12);
+      //bool FTOF2 =  (protons[index_L]->sci(clas12::FTOF2)->getDetector() == 12);
+      //bool CTOF =   (protons[index_L]->sci(clas12::CTOF)->getDetector() == 4);
+
+      if(PCAL || ECin || ECout){
 	h_theta_p_Lead_FTOF->Fill(theta_L,weight);
 	h_theta_pq_Lead_FTOF->Fill(theta_Lq,weight);
 	h_mom_theta_p_Lead_FTOF->Fill(p_L.Mag(),theta_L,weight);
@@ -574,7 +596,7 @@ int main(int argc, char ** argv)
 	h_mmiss_mom_p_Lead_FTOF->Fill(mmiss,p_L.Mag(),weight);
 	h_mmiss_momT_p_Lead_FTOF->Fill(mmiss,p_L.Perp(),weight);
       }
-      if(CTOF){
+      if(CND){
 	h_theta_p_Lead_CTOF->Fill(theta_L,weight);
 	h_theta_pq_Lead_CTOF->Fill(theta_Lq,weight);
 	h_mom_theta_p_Lead_CTOF->Fill(p_L.Mag(),theta_L,weight);
@@ -596,7 +618,9 @@ int main(int argc, char ** argv)
 	h_mmiss_mom_p_Lead_CTOF->Fill(mmiss,p_L.Mag(),weight);
 	h_mmiss_momT_p_Lead_CTOF->Fill(mmiss,p_L.Perp(),weight);
       }
+*/
   }
+
   cout<<counter<<endl;
 
   outFile->cd();
@@ -776,12 +800,12 @@ int main(int argc, char ** argv)
   myCanvas->Clear();
 
   /////////////////////////////////////
-  //FTOF Proton Information
+  //ECAL Neutron Information
   /////////////////////////////////////
   myText->cd();
   text.DrawLatex(0.2,0.9,"(e,e'p) Cuts:");
   text.DrawLatex(0.2,0.8,"(e,e') Cuts");
-  text.DrawLatex(0.2,0.7,"Proton Detected in FTOF");
+  text.DrawLatex(0.2,0.7,"Neutron Detected in ECAL");
   myText->Print(fileName,"pdf");
   myText->Clear();
 
@@ -822,12 +846,12 @@ int main(int argc, char ** argv)
   myCanvas->Clear();
 
   /////////////////////////////////////
-  //CTOF Proton Information
+  //CND Neutron Information
   /////////////////////////////////////
   myText->cd();
   text.DrawLatex(0.2,0.9,"(e,e'p) Cuts:");
   text.DrawLatex(0.2,0.8,"(e,e') Cuts");
-  text.DrawLatex(0.2,0.7,"Proton Detected in CTOF");
+  text.DrawLatex(0.2,0.7,"Neutron Detected in CND");
   myText->Print(fileName,"pdf");
   myText->Clear();
 
@@ -861,7 +885,7 @@ int main(int argc, char ** argv)
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
-  /////////////////////////////////////
+/*  /////////////////////////////////////
   //Lead Proton FTOF Checks
   /////////////////////////////////////
   myText->cd();
@@ -1004,7 +1028,7 @@ int main(int argc, char ** argv)
   h_mmiss_momT_p_Lead_CTOF->Draw("colz");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
-
+*/
   sprintf(fileName,"%s]",pdfFile);
   myCanvas->Print(fileName,"pdf");
 

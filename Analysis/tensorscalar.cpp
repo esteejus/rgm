@@ -19,8 +19,8 @@
 
 #include "clas12reader.h"
 #include "HipoChain.h"
-#include "eventcut_old.h" // compare with new in Monitoring!!
-#include "functions_old.h" // compare with new in Monitoring!!
+#include "eventcut/eventcut.h" // compare with new in Monitoring!!
+#include "eventcut/functions.h" // compare with new in Monitoring!!
 
 using namespace std;
 using namespace clas12;
@@ -133,7 +133,7 @@ int main(int argc, char ** argv)
   hist_list_1.push_back(h_pcos0);
   TH1D * h_prec_p = new TH1D("prec_p","Recoil Proton Momentum",100,0,2);
   hist_list_1.push_back(h_prec_p);
-  TH2D * h_prec_angles = new TH2D("prec_angles","Recoil Proton Angular Distribution;phi (deg);theta (deg)",360,-180,180,180,0,180);
+  TH2D * h_prec_angles = new TH2D("prec_angles","Recoil Proton Angular Distribution;phi (deg);theta (deg)",360,-180,180,45,0,180);
   hist_list_2.push_back(h_prec_angles);
 
   TH2D * h_pp_pmiss = new TH2D("pp_pmiss","Proton Momentum vs Missing Momentum;p_{miss} (GeV/c);Proton Momentum (GeV/c)",100,0,1.5,100,0,1.5);
@@ -151,7 +151,7 @@ int main(int argc, char ** argv)
   hist_list_1.push_back(h_ncos0);
   TH1D * h_nrec_p = new TH1D("nrec_p","Recoil Neutron Momentum",100,0,2);
   hist_list_1.push_back(h_nrec_p);
-  TH2D * h_nrec_angles = new TH2D("nrec_angles","Recoil Neutron Angular Distribution;phi (deg);theta (deg)",48,-180,180,180,0,180);
+  TH2D * h_nrec_angles = new TH2D("nrec_angles","Recoil Neutron Angular Distribution;phi (deg);theta (deg)",48,-180,180,45,0,180);
   hist_list_2.push_back(h_nrec_angles);
 
   TH2D * h_pn_pmiss = new TH2D("pn_pmiss","Neutron Momentum vs Missing Momentum;p_{miss} (GeV/c);Neutron Momentum (GeV/c)",100,0,1.5,100,0,1.5);
@@ -178,20 +178,20 @@ int main(int argc, char ** argv)
   /////////////////////////////////////
   //Histos: pmiss
   /////////////////////////////////////
-  TH1D * h_pmiss_p = new TH1D("pmiss_p","Missing Momentum (e,e'p_{SRC});p_{miss} (GeV/c);Counts",20,0.2,1);
+  TH1D * h_pmiss_p = new TH1D("pmiss_p","Missing Momentum (e,e'p_{SRC});p_{miss} (GeV/c);Counts",10,0.2,1);
   hist_list_1.push_back(h_pmiss_p);
-  TH1D * h_pmiss_p_wrec = new TH1D("pmiss_p_wrec","Missing Momentum (e,e'p_{SRC}N_{rec});p_{miss} (GeV/c);Counts",20,0.2,1);
+  TH1D * h_pmiss_p_wrec = new TH1D("pmiss_p_wrec","Missing Momentum (e,e'p_{SRC}N_{rec});p_{miss} (GeV/c);Counts",10,0.2,1);
   hist_list_1.push_back(h_pmiss_p);
-  TH1D * h_pmiss_pp = new TH1D("pmiss_pp","Missing Momentum (e,e'p_{SRC}p_{rec});p_{miss} (GeV/c);Counts",20,0.2,1);
+  TH1D * h_pmiss_pp = new TH1D("pmiss_pp","Missing Momentum (e,e'p_{SRC}p_{rec});p_{miss} (GeV/c);Counts",10,0.2,1);
   hist_list_1.push_back(h_pmiss_pp); 
-  TH1D * h_pmiss_pn = new TH1D("pmiss_pn","Missing Momentum (e,e'p_{SRC}n_{rec});p_{miss} (GeV/c);Counts",20,0.2,1);
+  TH1D * h_pmiss_pn = new TH1D("pmiss_pn","Missing Momentum (e,e'p_{SRC}n_{rec});p_{miss} (GeV/c);Counts",10,0.2,1);
   hist_list_1.push_back(h_pmiss_pn);
-  TH1D * h_pmiss_pn_corr = new TH1D("pmiss_pn_corr","Missing Momentum (e,e'p_{SRC}n_{rec}) (efficiency corrected);p_{miss} (GeV/c);Counts",20,0.2,1);
+  TH1D * h_pmiss_pn_corr = new TH1D("pmiss_pn_corr","Missing Momentum (e,e'p_{SRC}n_{rec}) (efficiency corrected);p_{miss} (GeV/c);Counts",10,0.2,1);
   hist_list_1.push_back(h_pmiss_pn_corr);
 
-  TH1D * h_pn = new TH1D("pn","Momentum (e,e'p_{SRC}n_{rec});p_{n} (GeV/c);Counts",20,0.2,1);
+  TH1D * h_pn = new TH1D("pn","Momentum (e,e'p_{SRC}n_{rec});p_{n} (GeV/c);Counts",10,0.2,1);
   hist_list_1.push_back(h_pn);
-  TH1D * h_pn_corr = new TH1D("pn_corr","Momentum (e,e'p_{SRC}n_{rec}) (efficiency corrected);p_{n} (GeV/c);Counts",20,0.2,1);
+  TH1D * h_pn_corr = new TH1D("pn_corr","Momentum (e,e'p_{SRC}n_{rec}) (efficiency corrected);p_{n} (GeV/c);Counts",10,0.2,1);
   hist_list_1.push_back(h_pn_corr);
 
 
@@ -350,20 +350,18 @@ h_pl_count->Fill(pmiss.Mag(),weight);
     //if (pmiss.Mag()<0.2) {continue;}
     h_pangles->Fill(lphi,ltheta,weight);
 
-
-
-    h_pq->Fill(pL.Mag()/q.Mag(),theta_pq,weight);
-
-    h_q2_xb->Fill(xB,Q2,weight);
-
-
-
     // lead SRC cuts
 
     if (pmiss.Mag()<0.3) {continue;}
+
+    h_q2_xb->Fill(xB,Q2,weight);
+
     if (xB<1.1) {continue;}
-    if (Q2<1.5) {continue;}
-    if (pL.Mag()/q.Mag()<0.62 || pL.Mag()/q.Mag()>1.1) {continue;}
+    //if (Q2<1.5) {continue;}
+
+    h_pq->Fill(pL.Mag()/q.Mag(),theta_pq,weight);
+
+    if (pL.Mag()/q.Mag()<0.62 || pL.Mag()/q.Mag()>0.96) {continue;}
     if (theta_pq>25) {continue;}
 
     // fill e'p(SRC) histogram
@@ -395,7 +393,7 @@ h_psrc_count->Fill(pmiss.Mag(),weight);
       h_prec_p->Fill(p_recp.Mag(),weight);
       h_prec_angles->Fill(p_recp.Phi()*180./M_PI,p_recp.Theta()*180./M_PI,weight);
       h_pptheta->Fill(p_recp.Theta()*180./M_PI,pmiss.Mag(),weight);
-      if (p_recp.Mag()<0.35) {continue;}
+      if (p_recp.Mag()<0.3) {continue;}
       if (p_recp.Theta()*180./M_PI<40 || p_recp.Theta()*180./M_PI>140) {continue;}
       // close in angle to pmiss
       p_vecX.SetXYZ( prot[i]->par()->getPx(), prot[i]->par()->getPy(), prot[i]->par()->getPz() );
@@ -410,11 +408,10 @@ h_psrc_count->Fill(pmiss.Mag(),weight);
     if (rec_p>-1)
     {
       // fill histo
-      h_pmiss_p_wrec->Fill(pmiss.Mag(),weight);
       h_pmiss_pp->Fill(pmiss.Mag(),weight);
       h_pwrec_count->Fill(pmiss.Mag(),weight);
       h_pp_count->Fill(pmiss.Mag(),weight);
-      h_lr_angles->Fill(ltheta,prot[rec_p]->getTheta()*180./M_PI,weight);
+      //h_lr_angles->Fill(ltheta,prot[rec_p]->getTheta()*180./M_PI,weight); // segfault?
     }
 
 
@@ -444,7 +441,7 @@ h_psrc_count->Fill(pmiss.Mag(),weight);
       h_nrec_p->Fill(p_recn.Mag(),weight);
       h_nrec_angles->Fill(p_recn.Phi()*180./M_PI,p_recn.Theta()*180./M_PI,weight);
       h_nptheta->Fill(pm_theta,pmiss.Mag(),weight);
-      if (p_recn.Mag()<0.35) {continue;}
+      if (p_recn.Mag()<0.3) {continue;}
       if (p_recn.Theta()*180./M_PI<40 || p_recn.Theta()*180./M_PI>140) {continue;}
       // close in angle to pmiss
       n_vecX.SetXYZ( neut[i]->par()->getPx(), neut[i]->par()->getPy(), neut[i]->par()->getPz() );
@@ -463,15 +460,21 @@ h_psrc_count->Fill(pmiss.Mag(),weight);
       pn.SetXYZ( neut[rec_n]->par()->getPx(), neut[rec_n]->par()->getPy(), neut[rec_n]->par()->getPz() );
       double neff = 0.1;
       //double neff = 0.16 - 0.1333*pmiss.Mag();
-      h_pmiss_p_wrec->Fill(pmiss.Mag(),weight);
       h_pmiss_pn->Fill(pmiss.Mag(),weight);
       h_pmiss_pn_corr->Fill(pmiss.Mag(),weight/neff);
       h_pn->Fill(pn.Mag(),weight);
       h_pn_corr->Fill(pn.Mag(),weight/neff);
       h_pwrec_count->Fill(pmiss.Mag(),weight);
       h_pn_count->Fill(pmiss.Mag(),weight);
-      h_lr_angles->Fill(ltheta,prot[rec_n]->getTheta()*180./M_PI,weight);
+      //h_lr_angles->Fill(ltheta,prot[rec_n]->getTheta()*180./M_PI,weight); // segfault?
     }
+
+
+  // add to "with recoil" p denominator if at least one nucleon meets recoil conditions
+  if (rec_n>-1 || rec_p>-1)
+  {
+    h_pmiss_p_wrec->Fill(pmiss.Mag(),weight);
+  }
 
 
   }
@@ -704,7 +707,8 @@ h_psrc_count->Fill(pmiss.Mag(),weight);
   myCanvas->Clear();
 
 
-  myCanvas->Divide(2,2);
+  // neutron momentum on x-axis instead of missing momentum
+  /*myCanvas->Divide(2,2);
   myCanvas->cd(1);  h_pmiss_pp->Draw();
   myCanvas->cd(2);  h_pn->Draw();
   myCanvas->cd(3);
@@ -732,7 +736,7 @@ h_psrc_count->Fill(pmiss.Mag(),weight);
   h_pn_p_corr->Draw();
   h_pn_p_corr->GetYaxis()->SetTitle("pn/p");
   myCanvas->Print(fileName,"pdf");
-  myCanvas->Clear();
+  myCanvas->Clear();*/
 
 
 

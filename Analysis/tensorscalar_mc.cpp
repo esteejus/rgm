@@ -19,8 +19,8 @@
 
 #include "clas12reader.h"
 #include "HipoChain.h"
-#include "eventcut_old.h" // compare with new in Monitoring!!
-#include "functions_old.h" // compare with new in Monitoring!!
+#include "eventcut/eventcut.h" // compare with new in Monitoring!!
+#include "eventcut/functions.h" // compare with new in Monitoring!!
 
 using namespace std;
 using namespace clas12;
@@ -113,8 +113,6 @@ int main(int argc, char ** argv)
 
 
 
-
-
   TH1D * h_pmiss_pL = new TH1D("pmiss_pL","Missing Momentum (e,e'p_{Lead});p_{miss} (GeV/c);Counts",30,0,3);
   hist_list_1.push_back(h_pmiss_pL);
   TH2D * h_pangles = new TH2D("pangles","Proton angles;#phi;#theta",90,-180,180,60,0,60);
@@ -172,11 +170,12 @@ int main(int argc, char ** argv)
   /////////////////////////////////////
   //Histos: Yields
   /////////////////////////////////////
-  TH1D * h_e_count = new TH1D("ecount","Electron Yield",100,0,4);
-  TH1D * h_pl_count = new TH1D("plcount","Lead Proton Yield",100,0,4);
-  TH1D * h_psrc_count = new TH1D("psrccount","SRC Proton Yield",100,0,4);
-  TH1D * h_pn_count = new TH1D("pncount","pn Yield",100,0,4);
-  TH1D * h_pp_count = new TH1D("ppcount","pp Yield",100,0,4);
+  TH1D * h_e_count = new TH1D("ecount","Electron Yield",17,0.2,1);
+  TH1D * h_pl_count = new TH1D("plcount","Lead Proton Yield",17,0.2,1);
+  TH1D * h_psrc_count = new TH1D("psrccount","SRC Proton Yield",17,0.2,1);
+  TH1D * h_pwrec_count = new TH1D("pwreccount","SRC Proton with Recoil Yield",17,0.2,1);
+  TH1D * h_pn_count = new TH1D("pncount","pn Yield",17,0.2,1);
+  TH1D * h_pp_count = new TH1D("ppcount","pp Yield",17,0.2,1);
 
 
 
@@ -244,7 +243,6 @@ int main(int argc, char ** argv)
     if(isMC){weight=c12->mcevent()->getWeight();}
 
 
-
     // initial cuts
     if (prot.size()<1) {continue;}
     //if (elec.size()!=1) {continue;}
@@ -255,8 +253,8 @@ int main(int argc, char ** argv)
 
     // electron kinematics
     TVector3 pe;
-    pe.SetMagThetaPhi(elec[0]->getP(),elec[0]->getTheta(),elec[0]->getPhi());
     TVector3 pb(0,0,Ebeam);
+    pe.SetMagThetaPhi(elec[0]->getP(),elec[0]->getTheta(),elec[0]->getPhi());
     TVector3 q = pb - pe;
     double vze = elec[0]->par()->getVz();
     double nu = Ebeam - pe.Mag();
@@ -277,13 +275,13 @@ int main(int argc, char ** argv)
 
     //// LEAD PROTON ////
     // LEAD PROTON - FTOF
-int lead = -1;
+/*int lead = -1;
     for (int k=0; k<prot.size(); k++)
     {
       // proton kinematics
       TVector3 pL;
-      //pL.SetMagThetaPhi(prot[k]->getP(),prot[k]->getTheta(),prot[k]->getPhi());
-pL.SetXYZ(prot[k]->par()->getPx(),prot[k]->par()->getPy(),prot[k]->par()->getPz());
+      pL.SetMagThetaPhi(prot[k]->getP(),prot[k]->getTheta(),prot[k]->getPhi());
+      //pL.SetXYZ(prot[k]->par()->getPx(),prot[k]->par()->getPy(),prot[k]->par()->getPz());
 
       double vzlead = prot[k]->par()->getVz();
       double chi2pid = prot[k]->par()->getChi2Pid();
@@ -303,21 +301,18 @@ std::cout << ltheta << endl;
       if ((vze-vzlead)<-4. || (vze-vzlead)>4.) {continue;}
     h_theta_pq->Fill(theta_pq,weight);
     if (theta_pq>25) {continue;}
-
-//std::cout << mmiss << endl;
       lead = k;
-    }
+    }*/
 
 
     // I need code here to figure out which proton is lead
     // cutfile_ts.txt - proton in FTOF, 0<ltheta<45, 0<theta_pq<25, -3<chipid<3, -3<vtz_diff<3
-    ////int lead = myCut.leadnucleoncut(c12);
-
+    int lead = myCut.leadnucleoncut(c12);
     if (lead<0) {continue;}
-//std::cout << lead << endl;
+
     TVector3 pL;
-    //pL.SetMagThetaPhi(prot[lead]->getP(),prot[lead]->getTheta(),prot[lead]->getPhi());
-    pL.SetXYZ(prot[lead]->par()->getPx(),prot[lead]->par()->getPy(),prot[lead]->par()->getPz());
+    pL.SetMagThetaPhi(prot[lead]->getP(),prot[lead]->getTheta(),prot[lead]->getPhi());
+    //pL.SetXYZ(prot[lead]->par()->getPx(),prot[lead]->par()->getPy(),prot[lead]->par()->getPz());
 //std::cout << pL.Mag() << '\t';
     double vzlead = prot[lead]->par()->getVz();
     double chi2pid = prot[lead]->par()->getChi2Pid();
@@ -333,8 +328,8 @@ std::cout << ltheta << endl;
 
     if ((vze-vzlead)<-4. || (vze-vzlead)>4.) {continue;}
     if (dbetap<-0.02 || dbetap>0.02) {continue;}
-    if (chi2pid<-3.0 || chi2pid>3.0) {continue;}
-    if (pL.Mag()<0.4) {continue;}
+    //if (chi2pid<-3.0 || chi2pid>3.0) {continue;}
+    if (pL.Mag()<1) {continue;}
 
 
     h_pL->Fill(pL.Mag(),weight);
@@ -361,7 +356,7 @@ h_pl_count->Fill(pmiss.Mag(),weight);
 
     // lead SRC cuts
 
-    if (pmiss.Mag()<0.3) {continue;}
+    if (pmiss.Mag()<0.25) {continue;} // so that we can start the x-axes at 0.3
     h_q2_xb->Fill(xB,Q2,weight);
     if (xB<1.1) {continue;}
     //if (Q2<1.5) {continue;}
@@ -370,7 +365,7 @@ h_pl_count->Fill(pmiss.Mag(),weight);
 //std::cout << theta_pq << endl;
 //std::cout << pL.Mag()/q.Mag() << endl;
     h_pq->Fill(pL.Mag()/q.Mag(),theta_pq,weight);
-    if (pL.Mag()/q.Mag()<0.62 || pL.Mag()/q.Mag()>1.1) {continue;}
+    if (pL.Mag()/q.Mag()<0.62 || pL.Mag()/q.Mag()>0.96) {continue;}
 
     // fill e'p(SRC) histogram
     h_mmiss->Fill(mmiss,weight);
@@ -397,13 +392,15 @@ h_psrc_count->Fill(pmiss.Mag(),weight);
       if (i==lead) {continue;}
       p_recp.SetMagThetaPhi(prot[i]->getP(),prot[i]->getTheta(),prot[i]->getPhi());
       // recoil p must be in CTOF
-      bool is_CTOF = prot[i]->sci(CTOF)->getDetector()==4;
-      if (!is_CTOF) {continue;}
+      //bool is_CTOF = prot[i]->sci(CTOF)->getDetector()==4;
+      bool is_CD = prot[i]->getRegion()==CD;
+      //if (!is_CTOF) {continue;}
+      if (!is_CD) {continue;}
       // get momenta/angles of recoil candidates
       h_prec_p->Fill(p_recp.Mag(),weight);
       h_prec_angles->Fill(p_recp.Phi()*180./M_PI,p_recp.Theta()*180./M_PI,weight);
       h_pptheta->Fill(p_recp.Theta()*180./M_PI,pmiss.Mag(),weight);
-      if (p_recp.Mag()<0.2) {continue;}
+      if (p_recp.Mag()<0.25) {continue;} // so that we can start the x-axes at 0.3
       if (p_recp.Theta()*180./M_PI<40 || p_recp.Theta()*180./M_PI>140) {continue;}
       // alternative:
       // if (prot[i]->getRegion()!=CD) {continue;}
@@ -412,7 +409,7 @@ h_psrc_count->Fill(pmiss.Mag(),weight);
       // close in angle to pmiss
       p_vecX.SetXYZ( prot[i]->par()->getPx(), prot[i]->par()->getPy(), prot[i]->par()->getPz() );
       p_cos0 = pmiss.Dot(p_vecX) / (pmiss.Mag() * p_vecX.Mag());
-      h_pcos0->Fill(p_cos0);
+      h_pcos0->Fill(p_cos0,weight);
       //if (p_cos0>-0.8) {continue;} // not needed?
       // fast recoil
       h_pp_pmiss->Fill(pmiss.Mag(),p_recp.Mag(),weight);
@@ -423,6 +420,7 @@ h_psrc_count->Fill(pmiss.Mag(),weight);
     if (rec_p>-1)
     {
       h_pp_count->Fill(pmiss.Mag(),weight);
+      h_pwrec_count->Fill(pmiss.Mag(),weight);
       h_pmiss_pp->Fill(pmiss.Mag(),weight);
     }
 
@@ -447,17 +445,18 @@ h_psrc_count->Fill(pmiss.Mag(),weight);
       bool is_CND1 = neut[i]->sci(CND1)->getDetector()==3;
       bool is_CND2 = neut[i]->sci(CND2)->getDetector()==3;
       bool is_CND3 = neut[i]->sci(CND3)->getDetector()==3;
-      if (!is_CND1 && !is_CND2 && !is_CND3) {continue;}
+      bool is_CTOF = neut[i]->sci(CTOF)->getDetector()==4;
+      if (!is_CND1 && !is_CND2 && !is_CND3 &&!is_CTOF) {continue;}
       // get momenta/angles of recoil candidates
       h_nrec_p->Fill(p_recn.Mag(),weight);
       h_nrec_angles->Fill(p_recn.Phi()*180./M_PI,p_recn.Theta()*180./M_PI,weight);
       h_nptheta->Fill(pm_theta,pmiss.Mag(),weight);
-      if (p_recn.Mag()<0.2) {continue;}
+      if (p_recn.Mag()<0.25) {continue;} // so that we can start the x-axes at 0.3
       if (p_recn.Theta()*180./M_PI<40 || p_recn.Theta()*180./M_PI>140) {continue;}
       // close in angle to pmiss
       n_vecX.SetXYZ( neut[i]->par()->getPx(), neut[i]->par()->getPy(), neut[i]->par()->getPz() );
       n_cos0 = pmiss.Dot(n_vecX) / (pmiss.Mag() * n_vecX.Mag());
-      h_ncos0->Fill(n_cos0);
+      h_ncos0->Fill(n_cos0,weight);
       //if (n_cos0>-0.8) {continue;} // not needed?
       // compared to pmiss
       h_pn_pmiss->Fill(pmiss.Mag(),p_recn.Mag(),weight);
@@ -475,7 +474,8 @@ h_psrc_count->Fill(pmiss.Mag(),weight);
     h_pmiss_pn_corr->Fill(pmiss.Mag(),weight/neff);
     h_pn->Fill(pn.Mag(),weight);
     h_pn_corr->Fill(pn.Mag(),weight/neff);
-h_pn_count->Fill(pmiss.Mag(),weight);
+    h_pn_count->Fill(pmiss.Mag(),weight);
+    h_pwrec_count->Fill(pmiss.Mag(),weight);
 
     }
 
@@ -524,6 +524,7 @@ h_pn_count->Fill(pmiss.Mag(),weight);
   // yields - just write
   h_pl_count->Write();
   h_psrc_count->Write();
+  h_pwrec_count->Write();
   h_pp_count->Write();
   h_pn_count->Write();
 

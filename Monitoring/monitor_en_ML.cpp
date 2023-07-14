@@ -19,8 +19,9 @@
 
 #include "clas12reader.h"
 #include "HipoChain.h"
-#include "eventcut/eventcut.h"
-#include "eventcut/functions.h"
+#include "eventcut.h"
+#include "functions.h"
+#include "/w/hallb-scshelf2102/clas/clase2/erins/repos/rgm/NeutronVeto/include/veto_functions.h"
 
 using namespace std;
 using namespace clas12;
@@ -516,6 +517,13 @@ int main(int argc, char ** argv)
           h_dedx_CND->Fill(p_n.Mag()/mN,dedx,weight);
           h_cluster_CND->Fill(csize,layermult,weight);
 	}
+
+
+        // TEST ML HERE
+        Struct ninfo = getFeatures(neutrons, allParticles, j);
+        double cnd_hits = ninfo.cnd_hits;
+        std::cout << cnd_hits << '\n';
+
 
 
       }

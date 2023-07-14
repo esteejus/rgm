@@ -20,7 +20,7 @@
 #include "clas12reader.h"
 #include "clas12writer.h"
 #include "HipoChain.h"
-#include "eventcut.h"
+#include "eventcut/eventcut.h"
 //#include "functions.h"
 
 using namespace std;
@@ -75,7 +75,7 @@ int main(int argc, char ** argv)
 
 
 
-// CND hits
+/*// CND hits
 auto cnd_hits = config_c12->addBank("CND::hits");
 auto cnd_id = config_c12->getBankOrder(cnd_hits,"id");
 auto cnd_status = config_c12->getBankOrder(cnd_hits,"status");
@@ -153,7 +153,7 @@ auto ctof_clus_time = config_c12->getBankOrder(ctof_clusters,"time");
 auto scintextras = config_c12->addBank("RECHB::ScintExtras");
 auto scint_dedx = config_c12->getBankOrder(scintextras,"dedx");
 auto scint_size = config_c12->getBankOrder(scintextras,"size");
-auto scint_layermult = config_c12->getBankOrder(scintextras,"layermult");
+auto scint_layermult = config_c12->getBankOrder(scintextras,"layermult");*/
 
 
   
