@@ -12,9 +12,9 @@ git clone --recurse-submodules https://github.com/esteejus/rgm.git
 
 ```
 module load cmake
-module load sqlite/4.4.1
 module load clas12/pro
-module switch clas12root/1.7.6
+module load sqlite/dev
+module switch coatjava/10.0.2
 ```
 
 alternatively 

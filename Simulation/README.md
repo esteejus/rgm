@@ -6,6 +6,15 @@
 module load cmake
 module load sqlite/dev
 module load clas12/pro
+module switch root/6.20.04
+```
+
+# Optional Compile GCF generator (if recurse-submodules used in pull)
+```
+cd Simulation/GCF_Generator_Suite/src
+cmake ./ -DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_COMPILER=gcc (for ifarm)
+cmake ./ (anywhere else)
+make
 ```
 
 # Generating LUND files
@@ -57,10 +66,3 @@ squeue -u yourUserName
 
 *General tips for submitting on the farm. Submit an array of 1-1 just to test one file works without crashing. Log outputs can be found in /farm_out/userName/. Submit a reasonable amount of jobs i.e. no more than 1000. 
 
-
-# Optional Compile GCF generator
-```
-cd Simulation/GCF_Generator_Suite/
-cmake ./
-make
-```
