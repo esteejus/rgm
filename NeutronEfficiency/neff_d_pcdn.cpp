@@ -22,8 +22,8 @@
 
 #include "clas12reader.h"
 #include "HipoChain.h"
-#include "eventcut.h"
-#include "functions.h"
+#include "eventcut/eventcut.h"
+#include "eventcut/functions.h"
 
 using namespace std;
 using namespace clas12;

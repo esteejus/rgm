@@ -14,7 +14,7 @@
 
 #include "clas12reader.h"
 #include "HipoChain.h"
-#include "veto_functions.h"
+#include "neutron-veto/veto_functions.h"
 
 using namespace std;
 using namespace clas12;
