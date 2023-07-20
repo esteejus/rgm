@@ -15,7 +15,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ROOT_CXX_FLAGS} -O0 -ggdb")
 #add_subdirectory(source)
 
 # compile executables in source directory
-foreach(fnameSrc example_ana.cpp)
+#foreach(fnameSrc example_ana.cpp Electron_Cuts.cpp Proton_Cuts.cpp ep_Kinematics.cpp epp_Kinematics.cpp Proton_Cuts_Checks.cpp skim_events.cpp Kin_Cuts.cpp Proton_Cuts_pion_channel.cpp Proton_fit.cpp Proton_Select.cpp)
+foreach(fnameSrc example_ana.cpp Electron_Cuts.cpp Proton_Cuts.cpp ep_Kinematics.cpp epp_Kinematics.cpp Proton_Cuts_Checks.cpp skim_events.cpp)
   message(STATUS ${fnameSRC})
   string (REPLACE ".cpp" "" fnameExe ${fnameSrc})
   add_executable(${fnameExe} ${fnameSrc})

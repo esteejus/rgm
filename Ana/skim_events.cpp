@@ -29,7 +29,7 @@ void SetLorentzVector(TLorentzVector &p4,clas12::region_part_ptr rp){
 
 void Usage()
 {
-  std::cerr << "Usage: ./testAna inputfiles.hipo outputfile.root \n\n\n";
+  std::cerr << "Usage: ./code outputfile.hipo inputfiles.hipo  \n\n\n";
 
 }
 
@@ -38,51 +38,38 @@ void Usage()
 int main(int argc, char ** argv)
 {
 
-  if(argc < 2)
+  if(argc < 3)
     {
       Usage();
       return -1;
     }
 
 
-
-  TString inFile  = argv[1];
-  TString outFile = argv[2];
-
-  cout<<"Ouput file "<< outFile <<endl;
-
-
-  clas12ana clasAna;
-
-  //Read in target parameter files                                                                                                                                                           
-  clasAna.readInputParam("ana.par");
-  clasAna.readEcalSFPar("paramsSF_40Ca_x2.dat");
-  clasAna.readEcalPPar("paramsPI_40Ca_x2.dat");
-
-  clasAna.printParams();
-
-
-  clas12root::HipoChainWriter chain(outFile);
-  chain.Add(inFile);
-
+  //make c12writer for the output hipo file
+  char * outName = argv[1];
+  cout<<"Ouput file "<< outName <<endl;
+  clas12root::HipoChainWriter chain(outName);
+  for(int k = 2; k < argc; k++){
+    cout<<"Input file "<<argv[k]<<endl;
+    chain.Add(argv[k]);
+  }
+  //chain.GetWriter().writeSpecialBanks(true);
   chain.SetReaderTags({0});
   chain.db()->turnOffQADB();
   auto config_c12=chain.GetC12Reader();
+  auto &c12=chain.C12ref();
 
-  //now get reference to (unique)ptr for accessing data in loop
-  //this will point to the correct place when file changes
-  //  const std::unique_ptr<clas12::clas12reader>& c12=chain.C12ref();
+  ////////////////////////////////////////////////
 
   int counter = 0;
   int cutcounter = 0;
-
-  auto &c12=chain.C12ref();
 
   auto db=TDatabasePDG::Instance();
   double mass_p = db->GetParticle(2212)->Mass();
   double mD = 1.8756;
 
-  double beam_E = 5.98;
+  //double beam_E = 5.98636;
+  double beam_E = 2.07;
 
   //some particles
   TLorentzVector beam(0,0,beam_E,beam_E);
@@ -92,43 +79,51 @@ int main(int argc, char ** argv)
   TLorentzVector recoil_ptr(0,0,0,db->GetParticle(2212)->Mass());
   TLorentzVector ntr(0,0,0,db->GetParticle(2112)->Mass());
 
-  TH1D *q2_h = new TH1D("q2_h","Q^2 ",1000,0, 4);
-  TH1D *xb_h = new TH1D("xb_h","x_B ",1000,0, 4);
-  TH1D *px_com = new TH1D("px_com","Px COM",1000,-500,500);
-  TH1D *py_com = new TH1D("py_com","Py COM",1000,-500,500);
-  TH1D *pz_com = new TH1D("pz_com","Pz COM",1000,-500,500);
+  clas12ana clasAna;
+  clasAna.readInputParam("/w/hallb-scshelf2102/clas12/users/awild/RGM/rgm/Ana/ana.par");
+  clasAna.readEcalSFPar("/w/hallb-scshelf2102/clas12/users/awild/RGM/rgm/Ana/paramsSF_40Ca_x2.dat");
+  clasAna.readEcalPPar("/w/hallb-scshelf2102/clas12/users/awild/RGM/rgm/Ana/paramsPI_40Ca_x2.dat");
 
-  TH1D *epp_h = new TH1D("epp_h","(e,e'pp)",100,0,2);
-  TH1D *ep_h  = new TH1D("ep_h","(e,e'p)",100,0,2);
-
+  clasAna.printParams();
 
   clasAna.setEcalSFCuts();
   clasAna.setEcalEdgeCuts();
   clasAna.setPidCuts();
   clasAna.setVertexCuts();
   clasAna.setVertexCorrCuts();
-  //  clasAna.setDCEdgeCuts();
+  clasAna.setDCEdgeCuts();
   
-  clasAna.setVzcuts(-6,1);
-  clasAna.setVertexCorrCuts(-3,1);
-
-
-
-
   while(chain.Next())
     {
       //Display completed  
       counter++;
+      if((counter%1000000) == 0){
+	cerr << "\n" <<counter/1000000 <<" million completed";
+      }    
+      if((counter%100000) == 0){
+	cerr << ".";
+      }    
 
       clasAna.Run(c12);
       auto electrons = clasAna.getByPid(11);
       auto protons = clasAna.getByPid(2212);
-
+      auto pip = clasAna.getByPid(211);
+      auto pim = clasAna.getByPid(-211);
 
       if(electrons.size() == 1)
 	{
           SetLorentzVector(el,electrons[0]);
+	  TLorentzVector q = beam - el;
+          double Q2 = -q.M2();
+          double xB = Q2/(2 * mass_p * (beam.E() - el.E()));
+	  /*if(xB>0.8){
+	    chain.WriteEvent();
+	    }*/
+	  //if(pip.size()!=1){continue;}
+	  //if(pim.size()!=1){continue;}
+	  chain.WriteEvent();
 
+	  /*
 	  clasAna.getLeadRecoilSRC(beam,target,el);
 	  auto lead    = clasAna.getLeadSRC();
 	  auto recoil  = clasAna.getRecoilSRC();
@@ -137,10 +132,11 @@ int main(int argc, char ** argv)
 	    chain.WriteEvent();
 
 	}
+	  */
+	  
+	}
 
     }
-
-
   return 0;
 }
 
