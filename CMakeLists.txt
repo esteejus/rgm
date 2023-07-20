@@ -12,6 +12,8 @@ list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS})
 include(${ROOT_USE_FILE})
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ROOT_CXX_FLAGS} -O0 -ggdb")
 
+add_subdirectory(libraries)
+
 add_subdirectory(Ana)
 add_subdirectory(Analysis)
 add_subdirectory(MagneticFieldStudy)
