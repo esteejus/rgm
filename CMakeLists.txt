@@ -19,7 +19,6 @@ add_subdirectory(libraries)
 
 add_subdirectory(Ana)
 add_subdirectory(Analysis)
-add_subdirectory(MagneticFieldStudy)
 add_subdirectory(Monitoring)
 add_subdirectory(NeutronVeto)
 add_subdirectory(NeutronEfficiency)
