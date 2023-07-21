@@ -1,12 +1,6 @@
-#Setup simulation directories 
-./setup_dir.sh
-
 # Setup Environment on Farm
 ```
-module load cmake
-module load sqlite/dev
-module load clas12/pro
-module switch root/6.20.04
+source environment_gemc.csh
 ```
 
 # Optional Compile GCF generator (if recurse-submodules used in pull)
