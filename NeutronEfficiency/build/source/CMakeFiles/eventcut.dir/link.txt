@@ -1,2 +1,0 @@
-/usr/bin/ar qc libeventcut.a  CMakeFiles/eventcut.dir/eventcut.cpp.o
-/usr/bin/ranlib libeventcut.a
