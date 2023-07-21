@@ -1,20 +1,3 @@
-# Install Monitoring Code
-
-Setup environment 
-```
-module load cmake
-module load sqlite/4.4.1
-module load clas12/pro
-module switch clas12root/1.7.3
-```
-
-```
-mkdir build
-cd build
-cmake /path/to/Monitoring/ -DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_COMPILER=gcc
-make
-```
-
 # Running Monitoring Code
 
 Running the compiled code will output a message showing the inputs required and the required order.
