@@ -53,11 +53,14 @@ int main(int argc, char ** argv)
   clas12ana clasAna;
 
   //Read in target parameter files                                                                                                                                                           
+  /*
   clasAna.readInputParam("ana.par");
   clasAna.readEcalSFPar("paramsSF_40Ca_x2.dat");
   clasAna.readEcalPPar("paramsPI_40Ca_x2.dat");
   clasAna.printParams();
+  */
 
+  clasAna.printParams();
 
 
   clas12root::HipoChain chain;
@@ -117,7 +120,8 @@ int main(int argc, char ** argv)
   while(chain.Next())
     {
 
-      double weight = c12->mcevent()->getWeight(); //used if MC events have a weight 
+      double weight = 1.;
+      //      double weight = c12->mcevent()->getWeight(); //used if MC events have a weight 
 
       //Display completed  
       counter++;

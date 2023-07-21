@@ -12,6 +12,9 @@ list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS})
 include(${ROOT_USE_FILE})
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ROOT_CXX_FLAGS} -O0 -ggdb")
 
+
+add_definitions(-D_CLAS12ANA_DIR="${CMAKE_SOURCE_DIR}")
+
 add_subdirectory(libraries)
 
 add_subdirectory(Ana)
