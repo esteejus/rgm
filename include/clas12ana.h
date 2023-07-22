@@ -58,10 +58,13 @@
    void setEcalPCuts(bool flag = true)     {f_ecalPCuts = flag;}; //option to have several cuts
    void setEcalSFCuts(bool flag = true)    {f_ecalSFCuts = flag;}; //option to have several cuts
    void setDCEdgeCuts(bool flag = true)    {f_DCEdgeCuts = flag;};
+   void setCDEdgeCuts(bool flag = true)    {f_CDEdgeCuts = flag;};
+   void setCDRegionCuts(bool flag = true)    {f_CDRegionCuts = flag;};
    void setEcalEdgeCuts(bool flag = true){f_ecalEdgeCuts = flag;};
    void setPidCuts(bool flag = true)     {f_pidCuts = flag;};
    void setVertexCuts(bool flag = true)  {f_vertexCuts = flag;};
    void setVertexCorrCuts(bool flag = true)  {f_corr_vertexCuts = flag;};
+
 
    TVector3 getCOM(TLorentzVector l, TLorentzVector r, TLorentzVector q);
 
@@ -127,12 +130,17 @@
    bool checkVertex(region_part_ptr p);
    bool checkVertexCorrelation(region_part_ptr el,region_part_ptr p);
    bool DCEdgeCuts(region_part_ptr p);
+   bool CDEdgeCuts(region_part_ptr p);
+
+   bool CDRegionCuts(region_part_ptr p);
 
    void setVxcuts(double min, double max){vertex_x_cuts.at(0)=min; vertex_x_cuts.at(1)=max;};
    void setVycuts(double min, double max){vertex_y_cuts.at(0)=min; vertex_y_cuts.at(1)=max;};
    void setVzcuts(double min, double max){vertex_z_cuts.at(0)=min; vertex_z_cuts.at(1)=max;};
    void setVertexCorrCuts(double min, double max){vertex_corr_cuts.at(0) = min; vertex_corr_cuts.at(1) = max; };
 
+   void setCDCutRegion(int region){region_cut = region;};
+   
    void fillDCdebug(region_part_ptr p,TH2D **h);
 
    void getLeadRecoilSRC(TLorentzVector beam, TLorentzVector target, TLorentzVector el);
@@ -180,10 +188,12 @@
    bool f_ecalPCuts          = false;
    bool f_ecalEdgeCuts       = false;
    bool f_DCEdgeCuts         = false;
+   bool f_CDEdgeCuts         = false;
    bool f_pidCuts            = false;
    bool f_vertexCuts         = false;
    bool f_corr_vertexCuts    = false;
 
+   bool f_CDRegionCuts       = false;
 
    //  map<int,vector<double> > test_cuts;
    //  map<int,int> test_cuts;
@@ -196,8 +206,13 @@
    map<string,vector<double> > vertex_cuts; //map< x,y,z, {min,max}> 
    vector<double> vertex_corr_cuts = {-99,99}; //electron vertex <-> particle vertex correlation cuts
 
-   double ecal_edge_cut = 14;
-   double dc_edge_cut   = 5;
+   double pi = 3.1415926535;
+
+   double ecal_edge_cut = 14; //cm
+   double dc_edge_cut   = 5;  //cm 
+   double cd_edge_cut   = 10; //deg phi
+   double min_mom_pt = 0.15; //min momentum transverse in CD MeV/c
+   int region_cut = 2;
 
    //SRC Cuts
    double q2_cut = 1.5; //Q^2 cut
@@ -215,7 +230,6 @@
    double mmiss_e = 0;
    double pq_e = 0;
    double theta_pq_e = 0;
-
 
    //  map<int,vector<int> > pid_cuts_stats;
    //  map<string,vector<int> > vertex_cuts_stats;
@@ -281,6 +295,8 @@
    TH1D *el_vz_debug = new TH1D("el_vz_debug","El vertex ",100,-20,10);
    TH1D *el_vz_p_debug = new TH1D("el_vz_p_debug","El-proton vertex ",100,-10,10);
 
+   TH2D *cd_particles_b = new TH2D("cd_particles_b","Pt;phi(deg);CD protons before edge cut",100,-180,180,100,0,1.);
+   TH2D *cd_particles_a = new TH2D("cd_particles_a","Pt;phi(deg);CD protons after edge cut ",100,-180,180,100,0,1.);
 
    TH2D *dc_hit_map_a[4]; //3 regions
    TH2D *dc_hit_map_b[4]; //3 regions

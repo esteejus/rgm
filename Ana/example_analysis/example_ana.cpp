@@ -107,12 +107,15 @@ int main(int argc, char ** argv)
   clasAna.setEcalPCuts();
   clasAna.setEcalEdgeCuts();
   clasAna.setPidCuts();
-  //  clasAna.setVertexCuts();
-  //  clasAna.setVertexCorrCuts();
-  //  clasAna.setDCEdgeCuts();
-  
+  clasAna.setVertexCuts();
+  clasAna.setVertexCorrCuts();
+  clasAna.setDCEdgeCuts();
+  clasAna.setCDEdgeCuts();  
+  //  clasAna.setCDRegionCuts();  
+
   clasAna.setVzcuts(-6,1);
-  //clasAna.setVertexCorrCuts(-3,1);
+  //  clasAna.setCDCutRegion(2);  
+  clasAna.setVertexCorrCuts(-3,1);
 
 
 
