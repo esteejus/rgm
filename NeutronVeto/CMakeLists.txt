@@ -1,6 +1,5 @@
 foreach (fname D_getfeatures.cpp N_getfeatures.cpp D_getfeatures_ppim.cpp veto_test.cpp)
-  message(STATUS ${fname})
   string (REPLACE ".cpp" "" fnameExe ${fname})
-  add_executable(${fnameExe} ${fname} ${LIBRARIES}/neutron-veto/veto_functions.cpp ${LIBRARIES}/eventcut/eventcut.cpp)
-  target_link_libraries(${fnameExe} ${ROOT_LIBRARIES} -lEG -lClas12Banks -lHipo4 -lClas12Root -L${CLAS12ROOT}/lib -L${CLAS12ROOT}/ccdb/lib -lTMVA)
+  add_executable(${fnameExe} ${fname})
+  target_link_libraries(${fnameExe} ${ROOT_LIBRARIES} -lEG -lClas12Banks -lHipo4 -lClas12Root -L${CLAS12ROOT}/lib -L${CLAS12ROOT}/ccdb/lib -lTMVA NeutronVeto EventCut)
 endforeach()
