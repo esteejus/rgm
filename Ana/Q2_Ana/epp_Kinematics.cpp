@@ -17,12 +17,14 @@
 #include <TDatabasePDG.h>
 #include "HipoChain.h"
 #include "clas12ana.h"
+#include "many_plots.h"
 
 using namespace std;
 using namespace clas12;
 
 const double c = 29.9792458;
 
+/*
 int binQ2(double q2){
   if(q2<1.65){return 0;}
   else if(q2<1.80){return 1;}
@@ -37,39 +39,49 @@ int binQ2(double q2){
 }
 
 struct hist_set{
-    TH1D * h_ep;
-    TH1D * h_epp;
-    TH1D * h_ep_Q2bin[10];
-    TH1D * h_epp_Q2bin[10];
+  TH1D h_ep;
+  TH1D h_epp;
+  TH1D h_ep_Q2bin[10];
+  TH1D h_epp_Q2bin[10];
 };
 
-void Init_hist_set(hist_set my_set, string temp_name, string temp_title, double xmin, double xmax){
-  my_set.h_ep = new TH1D((temp_name+"_ep").c_str(),(temp_title+";"+temp_title+";Counts").c_str(),100,xmin,xmax);
-  my_set.h_epp = new TH1D((temp_name+"_epp").c_str(),(temp_title+";"+temp_title+";Counts").c_str(),100,xmin,xmax);
+
+void Init_hist_set(hist_set &my_set, string temp_name, string temp_title, double xmin, double xmax){
+  
+  my_set.h_ep.SetNameTitle((temp_name+"_ep").c_str(),(temp_title+";"+temp_title+";Counts").c_str());
+  my_set.h_ep.SetBins(100,xmin,xmax);
+
+  my_set.h_epp.SetNameTitle((temp_name+"_epp").c_str(),(temp_title+";"+temp_title+";Counts").c_str());
+  my_set.h_epp.SetBins(100,xmin,xmax);
+
   for(int i=0; i<10; i++){
-    my_set.h_ep_Q2bin[i] = new TH1D((temp_name+"_ep_Q2bin"+std::to_string(i)).c_str(),(temp_title+";"+temp_title+";Counts").c_str(),100,xmin,xmax);
-    my_set.h_epp_Q2bin[i] = new TH1D((temp_name+"_epp_Q2bin"+std::to_string(i)).c_str(),(temp_title+";"+temp_title+";Counts").c_str(),100,xmin,xmax);
+    my_set.h_ep_Q2bin[i].SetNameTitle((temp_name+"_ep_Q2bin"+std::to_string(i)).c_str(),(temp_title+";"+temp_title+";Counts").c_str());
+    my_set.h_ep_Q2bin[i].SetBins(100,xmin,xmax);
+
+    my_set.h_epp_Q2bin[i].SetNameTitle((temp_name+"_epp_Q2bin"+std::to_string(i)).c_str(),(temp_title+";"+temp_title+";Counts").c_str());
+    my_set.h_epp_Q2bin[i].SetBins(100,xmin,xmax);
   }
 }
 
-void Fill_hist_set(hist_set my_set, bool is_epp, double Q2, double x){
-  my_set.h_ep->Fill(x);
-  my_set.h_ep_Q2bin[binQ2(Q2)]->Fill(x);
+void Fill_hist_set(hist_set *my_set, bool is_epp, double Q2, double x){
+  my_set->h_ep.Fill(x);
+  my_set->h_ep_Q2bin[binQ2(Q2)].Fill(x);
   if(is_epp){
-    my_set.h_epp->Fill(x);
-    my_set.h_epp_Q2bin[binQ2(Q2)]->Fill(x);
+    my_set->h_epp.Fill(x);
+    my_set->h_epp_Q2bin[binQ2(Q2)].Fill(x);
   }  
 }
 
-void Write_hist_set(hist_set my_set, TFile *f){
+void Write_hist_set(hist_set &my_set, TFile *f){
   f->cd();
-  my_set.h_ep->Write();
-  my_set.h_epp->Write();
+  my_set.h_ep.Write();
+  my_set.h_epp.Write();
   for(int i=0; i<10; i++){
-    my_set.h_ep_Q2bin[i]->Write();
-    my_set.h_epp_Q2bin[i]->Write();
+    my_set.h_ep_Q2bin[i].Write();
+    my_set.h_epp_Q2bin[i].Write();
   }
 }
+*/
 
 void SetLorentzVector(TLorentzVector &p4,clas12::region_part_ptr rp){
   p4.SetXYZM(rp->par()->getPx(),rp->par()->getPy(),rp->par()->getPz(),p4.M());
@@ -103,12 +115,11 @@ int main(int argc, char ** argv)
   clas12ana clasAna;
 
   //Read in target parameter files                                                                                                                                                           
-  clasAna.readInputParam("../ana.par");
-  clasAna.readEcalSFPar("../paramsSF_40Ca_x2.dat");
-  clasAna.readEcalPPar("../paramsPI_40Ca_x2.dat");
+  clasAna.readInputParam("/w/hallb-scshelf2102/clas12/users/awild/RGM/rgm/Ana/ana.par");
+  clasAna.readEcalSFPar("/w/hallb-scshelf2102/clas12/users/awild/RGM/rgm/Ana/paramsSF_40Ca_x2.dat");
+  clasAna.readEcalPPar("/w/hallb-scshelf2102/clas12/users/awild/RGM/rgm/Ana/paramsPI_40Ca_x2.dat");
   clasAna.printParams();
     
-
   clas12root::HipoChain chain;
   for(int k = 3; k < argc; k++){
     cout<<"Input file "<<argv[k]<<endl;
@@ -117,10 +128,6 @@ int main(int argc, char ** argv)
   chain.SetReaderTags({0});
   chain.db()->turnOffQADB();
   auto config_c12=chain.GetC12Reader();
-
-  //now get reference to (unique)ptr for accessing data in loop
-  //this will point to the correct place when file changes
-  //  const std::unique_ptr<clas12::clas12reader>& c12=chain.C12ref();
 
   int counter = 0;
   int cutcounter = 0;
@@ -153,42 +160,47 @@ int main(int argc, char ** argv)
   TH1D * h_E2miss = new TH1D("E2miss","E_{2 miss} ",100,-0.1,0.5);
   TH2D * h_omega_E2miss = new TH2D("omega_E2miss","E_{2 miss} vs. #omega;#omega;E_{2 miss}",100,0.0,2.5,100,-0.1,0.5);
 
+  
+  vector<many_plots> hist_list;
 
-  vector<hist_set> hist_list;
-
-
-  hist_set h_xB;
-  Init_hist_set(h_xB,"xB","x_{B}",1.1,2);
+  many_plots h_xB("xB","x_{B}",1.1,2);
   hist_list.push_back(h_xB);
-
-  hist_set h_Q2;
-  Init_hist_set(h_Q2,"Q2","Q^{2}",1.0,5.0);
+  many_plots h_Q2("Q2","Q^{2}",1.0,6.0);
   hist_list.push_back(h_Q2);
+  many_plots h_omega("omega","#omega",0.0,3.0);
+  hist_list.push_back(h_omega);
+  many_plots h_thetae("thetae","#theta_{e}",0.0,40);
+  hist_list.push_back(h_thetae);
+  many_plots h_phie("phie","#phi_{e}",-180,180);
+  hist_list.push_back(h_phie);
+
+  many_plots h_plead("plead","p_{Lead}",0.0,4.0);
+  hist_list.push_back(h_plead);
+  many_plots h_thetalead("thetalead","#theta_{Lead}",0.0,90);
+  hist_list.push_back(h_thetalead);
+  many_plots h_philead("philead","#phi_{Lead}",-180,180);
+  hist_list.push_back(h_philead);
+
+  many_plots h_pmiss("pmiss","p_{miss}",0.0,1.5);
+  hist_list.push_back(h_pmiss);
+  many_plots h_mmiss("mmiss","m_{miss}",0.7,1.2);
+  hist_list.push_back(h_mmiss);
+  many_plots h_emiss("emiss","E_{miss}",-0.1,0.6);
+  hist_list.push_back(h_emiss);
+
+  many_plots h_thetapq("thetapq","#theta_{Lead,q}",0,30);
+  hist_list.push_back(h_thetapq);
+  many_plots h_thetamissq("thetamissq","#theta_{miss,q}",0,180);
+  hist_list.push_back(h_thetamissq);
+  many_plots h_poq("poq","p/q",0.55,1.0);
+  hist_list.push_back(h_poq);
+
 
   /*
-  //ep
-  TH1D * h_xB_ep = new TH1D("xB_ep","x_{B} ",100,1.2,2);
-  TH1D * h_Q2_ep = new TH1D("Q2_ep","Q^{2} ",100,1,5);
-  TH1D * h_omega_ep = new TH1D("omega_ep","#omega ",100,0.2,2.2);
-  TH1D * h_plead_ep = new TH1D("plead_ep","p_{lead}",100,0.5,2.5);
-  TH1D * h_thetalead_ep = new TH1D("thetalead_ep","#theta_{lead}",100,0,100);
-  TH1D * h_pmiss_ep = new TH1D("pmiss_ep","p_{miss}",100,0.3,1);
-  //epp
-  TH1D * h_xB_epp = new TH1D("xB_epp","x_{B} ",100,1.2,2);
-  TH1D * h_Q2_epp = new TH1D("Q2_epp","Q^{2} ",100,1,5);
-  TH1D * h_plead_epp = new TH1D("plead_epp","p_{lead}",100,0.5,2.5);
-  TH1D * h_thetalead_epp = new TH1D("thetalead_epp","#theta_{lead}",100,0,100);
-  TH1D * h_pmiss_epp = new TH1D("pmiss_epp","p_{miss}",100,0.3,1);
-
   TH1D * h_prec = new TH1D("prec","p_{rec}",100,0.3,1);
   TH2D * h_prec_pmiss = new TH2D("prec_pmiss","p_{miss} vs. p_{rec};p_{rec};p_{miss}",100,0.3,1.0,100,0.3,1.0);
   TH1D * h_thetamissq = new TH1D("thetamissq","#theta_{miss q}",100,100,180);
   TH1D * h_costhetamissrec = new TH1D("costhetamissrec","cos(#theta_{miss rec})",100,-1,1);
-
-  hist_list.push_back(h_prec           );
-  hist_list.push_back(h_prec_pmiss     );
-  hist_list.push_back(h_thetamissq     );
-  hist_list.push_back(h_costhetamissrec);
   */
   clasAna.setEcalSFCuts();
   clasAna.setEcalPCuts();
@@ -210,12 +222,21 @@ int main(int argc, char ** argv)
 
       //Display completed  
       counter++;
+      if((counter%1000000) == 0){
+	cerr << "\n" <<counter/1000000 <<" million completed";
+      }    
+      if((counter%100000) == 0){
+	cerr << ".";
+      }    
+
+      //Display completed  
+      counter++;
       clasAna.Run(c12);
       auto electrons = clasAna.getByPid(11);
-      //auto electrons=c12->getByID(11);
       auto protons = clasAna.getByPid(2212);
       if(electrons.size() == 1 && protons.size() >= 1)
 	{
+
 	  SetLorentzVector(el,electrons[0]);
 	  TLorentzVector q = beam - el;
           double Q2        = -q.M2();
@@ -238,20 +259,26 @@ int main(int argc, char ** argv)
 	      
 	      bool rec = false;
 	      if(recoil.size() == 1){rec = true;}
-	      
-	      Fill_hist_set(h_xB,rec,Q2,xB);
-	      Fill_hist_set(h_Q2,rec,Q2,Q2);
-	      
-	      
-	      /*
-	      h_xB_ep->Fill(xB);
-	      h_Q2_ep->Fill(Q2);
-	      h_plead_ep->Fill(lead_ptr.Rho());
-	      h_thetalead_ep->Fill(lead_ptr.Theta()*180/M_PI);
-	      h_pmiss_ep->Fill(miss.Rho());
-	      */
+	      h_xB.Fill_hist_set(rec,Q2,xB);
+	      h_Q2.Fill_hist_set(rec,Q2,Q2);
+	      h_omega.Fill_hist_set(rec,Q2,omega);
+	      h_thetae.Fill_hist_set(rec,Q2,el.Theta()*180/M_PI);
+	      h_phie.Fill_hist_set(rec,Q2,el.Phi()*180/M_PI);
 
+	      h_plead.Fill_hist_set(rec,Q2,lead_ptr.P());
+	      h_thetalead.Fill_hist_set(rec,Q2,lead_ptr.Theta()*180/M_PI);
+	      h_philead.Fill_hist_set(rec,Q2,lead_ptr.Phi()*180/M_PI);
+
+	      h_pmiss.Fill_hist_set(rec,Q2,miss.P());
+	      h_mmiss.Fill_hist_set(rec,Q2,miss.M());
+	      h_emiss.Fill_hist_set(rec,Q2,Emiss);
+	      	 
+	      h_thetapq.Fill_hist_set(rec,Q2,lead_ptr.Angle(q.Vect())*180/M_PI);
+	      h_thetamissq.Fill_hist_set(rec,Q2,miss.Angle(q.Vect())*180/M_PI);
+	      h_poq.Fill_hist_set(rec,Q2,lead_ptr.P()/q.P());
+	      
 	      if(recoil.size() == 1){
+
 		num+=1.0;
 		SetLorentzVector(recoil_ptr,recoil[0]);
 		double TP2 = recoil_ptr.E() - recoil_ptr.M();
@@ -263,13 +290,6 @@ int main(int argc, char ** argv)
 		h_E2miss->Fill(E2miss);
 		h_omega_E2miss->Fill(omega,E2miss);
 
-		
-		h_xB_epp->Fill(xB);
-		h_Q2_epp->Fill(Q2);
-		h_plead_epp->Fill(lead_ptr.Rho());
-		h_thetalead_epp->Fill(lead_ptr.Theta()*180/M_PI);
-		h_pmiss_epp->Fill(miss.Rho());		
-
 		h_prec->Fill(recoil_ptr.Rho());
 		h_prec_pmiss->Fill(recoil_ptr.Rho(),miss.Rho());
 		h_thetamissq->Fill(180-miss.Angle(q.Vect())*180/M_PI);
@@ -280,18 +300,12 @@ int main(int argc, char ** argv)
 	}
     }
 
-  //clasAna.WriteDebugPlots();
-
-  TFile *f = new TFile(outFile,"RECREATE");
-  f->cd();
-  for(int i=0; i<hist_list.size(); i++){
-    Write_hist_set(hist_list[i],f);
-  }
-
-
   /////////////////////////////////////////////////////
   //Now create the output PDFs
   /////////////////////////////////////////////////////
+  TFile *f = new TFile(outFile,"RECREATE");
+  f->cd();
+
   int pixelx = 1980;
   int pixely = 1530;
   TCanvas * myCanvas = new TCanvas("myPage","myPage",pixelx,pixely);
@@ -303,69 +317,11 @@ int main(int argc, char ** argv)
   sprintf(fileName,"%s[",pdfFile);
   myText->SaveAs(fileName);
   sprintf(fileName,"%s",pdfFile);
-  /////////////////////////////////////
-  /*
-  myCanvas->Divide(1,1);
-  myCanvas->cd(1);
-  h_xB_ep->Scale(num/den);
-  h_xB_ep->SetLineColor(1);
-  h_xB_epp->SetLineColor(2);
-  h_xB_ep->Draw();
-  h_xB_epp->Draw("Same");
-  myCanvas->Print(fileName,"pdf");
-  myCanvas->Clear();  
-
-  myCanvas->Divide(1,1);
-  myCanvas->cd(1);
-  h_Q2_ep->Scale(num/den);
-  h_Q2_ep->SetLineColor(1);
-  h_Q2_epp->SetLineColor(2);
-  h_Q2_ep->Draw();
-  h_Q2_epp->Draw("Same");
-  myCanvas->Print(fileName,"pdf");
-  myCanvas->Clear();  
-
-  myCanvas->Divide(1,1);
-  myCanvas->cd(1);
-  h_plead_ep->Scale(num/den);
-  h_plead_ep->SetLineColor(1);
-  h_plead_epp->SetLineColor(2);
-  h_plead_ep->Draw();
-  h_plead_epp->Draw("Same");
-  myCanvas->Print(fileName,"pdf");
-  myCanvas->Clear();  
-
-  myCanvas->Divide(1,1);
-  myCanvas->cd(1);
-  h_thetalead_ep->Scale(num/den);
-  h_thetalead_ep->SetLineColor(1);
-  h_thetalead_epp->SetLineColor(2);
-  h_thetalead_ep->Draw();
-  h_thetalead_epp->Draw("Same");
-  myCanvas->Print(fileName,"pdf");
-  myCanvas->Clear();  
-
-  myCanvas->Divide(1,1);
-  myCanvas->cd(1);
-  h_pmiss_ep->Scale(num/den);
-  h_pmiss_ep->SetLineColor(1);
-  h_pmiss_epp->SetLineColor(2);
-  h_pmiss_ep->Draw();
-  h_pmiss_epp->Draw("Same");
-  myCanvas->Print(fileName,"pdf");
-  myCanvas->Clear();  
-
 
   for(int i=0; i<hist_list.size(); i++){
-    myCanvas->Divide(1,1);
-    myCanvas->cd(1);
-    hist_list[i]->Draw("colz");
-    myCanvas->Print(fileName,"pdf");
-    myCanvas->Clear();  
-    }
-  */
+    hist_list[i].Write_hist_set(f,fileName,myCanvas);
+  }
 
-  /////////////////////////////////////
   sprintf(fileName,"%s]",pdfFile);
   myCanvas->Print(fileName,"pdf");
 
