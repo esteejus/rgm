@@ -393,18 +393,12 @@ bool clas12ana::checkEcalSFCuts(region_part_ptr p)
     {
       double sampling_frac = getSF(p);
       double energy =  p->cal(PCAL)->getEnergy();
-      //      double energy =  p->cal(ECIN)->getEnergy() +  p->cal(ECOUT)->getEnergy();
 
       int sector = p->getSector();
       
       //Turn on for functional form 
       double sf_max_cut = ecal_sf_fcn[1][sector]->Eval(energy);
       double sf_min_cut = ecal_sf_fcn[0][sector]->Eval(energy);
-      //      cout<<"sf cut "<<sf_max_cut<<" "<<sf_min_cut<< " "<< sampling_frac <<" mom "<<p->par()->getP()<<endl;
-      //      cout<<ecal_fcn[0][sector]->GetParameter(0)<<" "<<ecal_fcn[0][sector]->GetParameter(1)<<" "<<ecal_fcn[0][sector]->GetParameter(2)<<" sector "<<sector<<endl;
-
-      //      double sf_max_cut = .28;
-      //      double sf_min_cut = .2;
       
       if(sampling_frac < sf_max_cut && sampling_frac > sf_min_cut)
 	return true;
@@ -430,11 +424,6 @@ bool clas12ana::checkEcalPCuts(region_part_ptr p)
       //Turn on for functional form 
       double sf_max_cut = ecal_p_fcn[1][sector]->Eval(p->par()->getP() );
       double sf_min_cut = ecal_p_fcn[0][sector]->Eval(p->par()->getP() );
-      //      cout<<"sf cut "<<sf_max_cut<<" "<<sf_min_cut<< " "<< sampling_frac <<" mom "<<p->par()->getP()<<endl;
-      //      cout<<ecal_fcn[0][sector]->GetParameter(0)<<" "<<ecal_fcn[0][sector]->GetParameter(1)<<" "<<ecal_fcn[0][sector]->GetParameter(2)<<" sector "<<sector<<endl;
-
-      //      double sf_max_cut = .28;
-      //      double sf_min_cut = .2;
       
       if(sampling_frac < sf_max_cut && sampling_frac > sf_min_cut)
 	return true;
@@ -471,8 +460,7 @@ bool clas12ana::CDRegionCuts(region_part_ptr p)
       double phi = p->getPhi() * 180/pi;
       
       int region = -1;
-      //      if( (phi < 0 && (phi < fiducial_phi)) ||  (phi > 0 && phi > (fiducial_phi+240)) )
-      //      region = 3;
+
       if( phi > fiducial_phi &&  phi < (fiducial_phi+120))
 	region = 1;
       else if( (phi > (fiducial_phi+120)) &&  (phi < (fiducial_phi+240)) )

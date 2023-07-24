@@ -49,11 +49,7 @@
    void Run(const std::unique_ptr<clas12::clas12reader>& c12);
    void plotDebug();
 
-
    double getSF(region_part_ptr p);
-
-   //   void pidCuts(std::vector<region_part_ptr> &particles);
-   //   void pidCuts(std::vector<std::vector<region_part_ptr>> &particles);
 
    void setEcalPCuts(bool flag = true)     {f_ecalPCuts = flag;}; //option to have several cuts
    void setEcalSFCuts(bool flag = true)    {f_ecalSFCuts = flag;}; //option to have several cuts
@@ -146,10 +142,7 @@
    void getLeadRecoilSRC(TLorentzVector beam, TLorentzVector target, TLorentzVector el);
    std::vector<region_part_ptr> getLeadSRC(){return lead_proton;};
    std::vector<region_part_ptr> getRecoilSRC(){return recoil_proton;};
-
-   //  void getByChi2Pid(std::vector<region_part_ptr> &p,double mean, double sigma);
    std::vector<region_part_ptr> getByPid(std::vector<region_part_ptr> particles, int pid);
-   //  std::vector<region_part_ptr> getByPidChi2(int pid, double chi2);
 
 
   private:
@@ -176,27 +169,18 @@
    double ecal_p_fcn_par[7][6]; //sector, parameter
    double ecal_sf_fcn_par[7][6]; //sector, parameter
    int sigma_cut = 3;
-   //vector to hold constants of function for each particle type
-   //  vector<cutpar> dc_cuts; 
-   //  vector<cutpar> ecal_cuts; 
 
-   //pid quality cuts e.g. {2212, {0.,2}} for a proton with chisq2pid mean = 0. and sigma = 2
-   //  vector<cutpar> pid_cuts;
-   //vector<cutpar> vertex_cuts;
-
-   bool f_ecalSFCuts         = false;
-   bool f_ecalPCuts          = false;
-   bool f_ecalEdgeCuts       = false;
-   bool f_DCEdgeCuts         = false;
-   bool f_CDEdgeCuts         = false;
-   bool f_pidCuts            = false;
-   bool f_vertexCuts         = false;
-   bool f_corr_vertexCuts    = false;
+   bool f_ecalSFCuts         = true;
+   bool f_ecalPCuts          = true;
+   bool f_ecalEdgeCuts       = true;
+   bool f_DCEdgeCuts         = true;
+   bool f_CDEdgeCuts         = true;
+   bool f_pidCuts            = true;
+   bool f_vertexCuts         = true;
+   bool f_corr_vertexCuts    = true;
 
    bool f_CDRegionCuts       = false;
 
-   //  map<int,vector<double> > test_cuts;
-   //  map<int,int> test_cuts;
    map<int,vector<double> > pid_cuts_cd; // map<pid, {min,max cut}> Central Detector (CD)
    map<int,vector<double> > pid_cuts_fd; // map<pid, {min,max cut}> Forward Detector (FD)
 
@@ -230,9 +214,6 @@
    double mmiss_e = 0;
    double pq_e = 0;
    double theta_pq_e = 0;
-
-   //  map<int,vector<int> > pid_cuts_stats;
-   //  map<string,vector<int> > vertex_cuts_stats;
 
    //constants
    double mass_proton    = 0.938272; //GeV/c2
