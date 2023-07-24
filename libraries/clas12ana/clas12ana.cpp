@@ -16,6 +16,31 @@ TVector3 rotate(TVector3 vec, int sector)
 }
 
 
+int clas12ana::getCDRegion(region_part_ptr p)
+{
+  int region = -1;
+
+  if(p->par()->getPid() == 2212 &&  p->getRegion() == CD) //Only defined for protons right now
+    {
+      auto px = p -> par() -> getPx();
+      auto py = p -> par() -> getPy();
+      double pt = sqrt( pow(px,2) + pow(py,2) );
+      double fiducial_phi = (-asin(min_mom_pt/pt) - (pi/2)) * 180/pi;
+      double phi = p->getPhi() * 180/pi;
+      
+      if( phi > fiducial_phi &&  phi < (fiducial_phi+120))
+	region = 1;
+      else if( (phi > (fiducial_phi+120)) &&  (phi < (fiducial_phi+240)) )
+	region = 2;
+      else
+	region = 3;
+    }
+
+  return region;
+}
+
+
+
 void clas12ana::Clear()
  {
    //  particles.clear();
