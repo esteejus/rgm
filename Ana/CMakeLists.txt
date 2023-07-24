@@ -1,1 +1,2 @@
 add_subdirectory(example_analysis)
+add_subdirectory(monitor_physics)
