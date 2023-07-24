@@ -1,4 +1,4 @@
-65;6004;1c##########
+##########
 #CLAS12 analysis cuts and parameters file
 #########
 pid_cuts	2212:0:3:FD	#proton chi2pid Forward detector cut
