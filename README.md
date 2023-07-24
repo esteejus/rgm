@@ -22,3 +22,12 @@ alternatively
 ```
 source environment.csh
 ```
+
+# Installing 
+
+```
+mkdir build
+cd build
+cmake /path/to/rgm/repo/ -DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_COMPILER=gcc
+make
+```

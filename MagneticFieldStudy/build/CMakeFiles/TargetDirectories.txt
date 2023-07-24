@@ -1,5 +1,0 @@
-/work/clas12/users/esteejus/clas12analysisForFarm/MagneticFieldStudy/build/CMakeFiles/rebuild_cache.dir
-/work/clas12/users/esteejus/clas12analysisForFarm/MagneticFieldStudy/build/CMakeFiles/LowEnergy.dir
-/work/clas12/users/esteejus/clas12analysisForFarm/MagneticFieldStudy/build/CMakeFiles/clas12reader.dir
-/work/clas12/users/esteejus/clas12analysisForFarm/MagneticFieldStudy/build/CMakeFiles/edit_cache.dir
-/work/clas12/users/esteejus/clas12analysisForFarm/MagneticFieldStudy/build/CMakeFiles/hipochain.dir

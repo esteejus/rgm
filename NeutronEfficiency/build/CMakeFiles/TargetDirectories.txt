@@ -1,8 +1,0 @@
-/home/erins/work_erins/repos/rgm/NeutronEfficiency/build/CMakeFiles/rebuild_cache.dir
-/home/erins/work_erins/repos/rgm/NeutronEfficiency/build/CMakeFiles/neff_d_pfdn.dir
-/home/erins/work_erins/repos/rgm/NeutronEfficiency/build/CMakeFiles/edit_cache.dir
-/home/erins/work_erins/repos/rgm/NeutronEfficiency/build/CMakeFiles/neff_d_pcdn.dir
-/home/erins/work_erins/repos/rgm/NeutronEfficiency/build/CMakeFiles/neff_h_epin.dir
-/home/erins/work_erins/repos/rgm/NeutronEfficiency/build/source/CMakeFiles/rebuild_cache.dir
-/home/erins/work_erins/repos/rgm/NeutronEfficiency/build/source/CMakeFiles/edit_cache.dir
-/home/erins/work_erins/repos/rgm/NeutronEfficiency/build/source/CMakeFiles/eventcut.dir
