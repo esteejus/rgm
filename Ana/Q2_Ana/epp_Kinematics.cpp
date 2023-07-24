@@ -23,9 +23,56 @@ using namespace clas12;
 
 const double c = 29.9792458;
 
+int binQ2(double q2){
+  if(q2<1.65){return 0;}
+  else if(q2<1.80){return 1;}
+  else if(q2<1.95){return 2;}
+  else if(q2<2.10){return 3;}
+  else if(q2<2.25){return 4;}
+  else if(q2<2.40){return 5;}
+  else if(q2<2.70){return 6;}
+  else if(q2<3.00){return 7;}
+  else if(q2<3.50){return 8;}
+  else{return 9;}
+}
+
+struct hist_set{
+    TH1D * h_ep;
+    TH1D * h_epp;
+    TH1D * h_ep_Q2bin[10];
+    TH1D * h_epp_Q2bin[10];
+};
+
+void Init_hist_set(hist_set my_set, string temp_name, string temp_title, double xmin, double xmax){
+  my_set.h_ep = new TH1D((temp_name+"_ep").c_str(),(temp_title+";"+temp_title+";Counts").c_str(),100,xmin,xmax);
+  my_set.h_epp = new TH1D((temp_name+"_epp").c_str(),(temp_title+";"+temp_title+";Counts").c_str(),100,xmin,xmax);
+  for(int i=0; i<10; i++){
+    my_set.h_ep_Q2bin[i] = new TH1D((temp_name+"_ep_Q2bin"+std::to_string(i)).c_str(),(temp_title+";"+temp_title+";Counts").c_str(),100,xmin,xmax);
+    my_set.h_epp_Q2bin[i] = new TH1D((temp_name+"_epp_Q2bin"+std::to_string(i)).c_str(),(temp_title+";"+temp_title+";Counts").c_str(),100,xmin,xmax);
+  }
+}
+
+void Fill_hist_set(hist_set my_set, bool is_epp, double Q2, double x){
+  my_set.h_ep->Fill(x);
+  my_set.h_ep_Q2bin[binQ2(Q2)]->Fill(x);
+  if(is_epp){
+    my_set.h_epp->Fill(x);
+    my_set.h_epp_Q2bin[binQ2(Q2)]->Fill(x);
+  }  
+}
+
+void Write_hist_set(hist_set my_set, TFile *f){
+  f->cd();
+  my_set.h_ep->Write();
+  my_set.h_epp->Write();
+  for(int i=0; i<10; i++){
+    my_set.h_ep_Q2bin[i]->Write();
+    my_set.h_epp_Q2bin[i]->Write();
+  }
+}
+
 void SetLorentzVector(TLorentzVector &p4,clas12::region_part_ptr rp){
   p4.SetXYZM(rp->par()->getPx(),rp->par()->getPy(),rp->par()->getPz(),p4.M());
-
 }
 
 void Usage()
@@ -56,9 +103,9 @@ int main(int argc, char ** argv)
   clas12ana clasAna;
 
   //Read in target parameter files                                                                                                                                                           
-  clasAna.readInputParam("ana.par");
-  clasAna.readEcalSFPar("paramsSF_40Ca_x2.dat");
-  clasAna.readEcalPPar("paramsPI_40Ca_x2.dat");
+  clasAna.readInputParam("../ana.par");
+  clasAna.readEcalSFPar("../paramsSF_40Ca_x2.dat");
+  clasAna.readEcalPPar("../paramsPI_40Ca_x2.dat");
   clasAna.printParams();
     
 
@@ -92,7 +139,7 @@ int main(int argc, char ** argv)
   //some particles
   TLorentzVector beam(0,0,beam_E,beam_E);
   TLorentzVector nucleus_ptr(0,0,0,m_4He);
-  TLorentzVector target(0,0,0,mD);
+  TLorentzVector deut_ptr(0,0,0,mD);
   TLorentzVector el(0,0,0,db->GetParticle(11)->Mass());
   TLorentzVector lead_ptr(0,0,0,db->GetParticle(2212)->Mass());
   TLorentzVector recoil_ptr(0,0,0,db->GetParticle(2212)->Mass());
@@ -102,14 +149,27 @@ int main(int argc, char ** argv)
   char temp_name[100];
   char temp_title[100];
 
-  vector<TH1*> hist_list;
 
   TH1D * h_E2miss = new TH1D("E2miss","E_{2 miss} ",100,-0.1,0.5);
   TH2D * h_omega_E2miss = new TH2D("omega_E2miss","E_{2 miss} vs. #omega;#omega;E_{2 miss}",100,0.0,2.5,100,-0.1,0.5);
 
+
+  vector<hist_set> hist_list;
+
+
+  hist_set h_xB;
+  Init_hist_set(h_xB,"xB","x_{B}",1.1,2);
+  hist_list.push_back(h_xB);
+
+  hist_set h_Q2;
+  Init_hist_set(h_Q2,"Q2","Q^{2}",1.0,5.0);
+  hist_list.push_back(h_Q2);
+
+  /*
   //ep
   TH1D * h_xB_ep = new TH1D("xB_ep","x_{B} ",100,1.2,2);
   TH1D * h_Q2_ep = new TH1D("Q2_ep","Q^{2} ",100,1,5);
+  TH1D * h_omega_ep = new TH1D("omega_ep","#omega ",100,0.2,2.2);
   TH1D * h_plead_ep = new TH1D("plead_ep","p_{lead}",100,0.5,2.5);
   TH1D * h_thetalead_ep = new TH1D("thetalead_ep","#theta_{lead}",100,0,100);
   TH1D * h_pmiss_ep = new TH1D("pmiss_ep","p_{miss}",100,0.3,1);
@@ -125,28 +185,11 @@ int main(int argc, char ** argv)
   TH1D * h_thetamissq = new TH1D("thetamissq","#theta_{miss q}",100,100,180);
   TH1D * h_costhetamissrec = new TH1D("costhetamissrec","cos(#theta_{miss rec})",100,-1,1);
 
-  hist_list.push_back(h_E2miss         );
-  hist_list.push_back(h_omega_E2miss   );
-
-  /*
-  //ep				       
-  hist_list.push_back(h_xB_ep          );
-  hist_list.push_back(h_Q2_ep          );
-  hist_list.push_back(h_plead_ep       );
-  hist_list.push_back(h_thetalead_ep   );
-  hist_list.push_back(h_pmiss_ep       );
-  //epp				       
-  hist_list.push_back(h_xB_epp         );
-  hist_list.push_back(h_Q2_epp         );
-  hist_list.push_back(h_plead_epp      );
-  hist_list.push_back(h_thetalead_epp  );
-  hist_list.push_back(h_pmiss_epp      );
-  */				       
   hist_list.push_back(h_prec           );
   hist_list.push_back(h_prec_pmiss     );
   hist_list.push_back(h_thetamissq     );
   hist_list.push_back(h_costhetamissrec);
-
+  */
   clasAna.setEcalSFCuts();
   clasAna.setEcalPCuts();
 
@@ -179,7 +222,7 @@ int main(int argc, char ** argv)
 	  double omega = q.E();
           double xB       = Q2/(2 * mass_p * (beam.E() - el.E()) );
 
-	  clasAna.getLeadRecoilSRC(beam,target,el);
+	  clasAna.getLeadRecoilSRC(beam,deut_ptr,el);
 	  auto lead    = clasAna.getLeadSRC();
 	  auto recoil  = clasAna.getRecoilSRC();
 
@@ -187,14 +230,26 @@ int main(int argc, char ** argv)
 	    {
 	      den+=1.0;
 	      SetLorentzVector(lead_ptr,lead[0]);
-	      TLorentzVector miss = q + target - lead_ptr; 	   
+	      TLorentzVector miss = q + deut_ptr - lead_ptr; 	   
+	      TLorentzVector miss_Am1 = q + nucleus_ptr - lead_ptr; 
+	      double TB = miss_Am1.E() - miss_Am1.M();
 	      double TP1 = lead_ptr.E() - lead_ptr.M();
+	      double Emiss = q.E() - TP1 - TB;
 	      
+	      bool rec = false;
+	      if(recoil.size() == 1){rec = true;}
+	      
+	      Fill_hist_set(h_xB,rec,Q2,xB);
+	      Fill_hist_set(h_Q2,rec,Q2,Q2);
+	      
+	      
+	      /*
 	      h_xB_ep->Fill(xB);
 	      h_Q2_ep->Fill(Q2);
 	      h_plead_ep->Fill(lead_ptr.Rho());
 	      h_thetalead_ep->Fill(lead_ptr.Theta()*180/M_PI);
 	      h_pmiss_ep->Fill(miss.Rho());
+	      */
 
 	      if(recoil.size() == 1){
 		num+=1.0;
@@ -204,9 +259,11 @@ int main(int argc, char ** argv)
 		double TB = miss_Am2.E() - miss_Am2.M();
 		double E2miss = q.E() - TP1 - TP2 - TB;
 	      
+		/*
 		h_E2miss->Fill(E2miss);
 		h_omega_E2miss->Fill(omega,E2miss);
 
+		
 		h_xB_epp->Fill(xB);
 		h_Q2_epp->Fill(Q2);
 		h_plead_epp->Fill(lead_ptr.Rho());
@@ -216,7 +273,7 @@ int main(int argc, char ** argv)
 		h_prec->Fill(recoil_ptr.Rho());
 		h_prec_pmiss->Fill(recoil_ptr.Rho(),miss.Rho());
 		h_thetamissq->Fill(180-miss.Angle(q.Vect())*180/M_PI);
-		h_costhetamissrec->Fill(cos(miss.Angle(recoil_ptr.Vect())));
+		h_costhetamissrec->Fill(cos(miss.Angle(recoil_ptr.Vect())));*/
 	      }
 	    }
 
@@ -228,7 +285,7 @@ int main(int argc, char ** argv)
   TFile *f = new TFile(outFile,"RECREATE");
   f->cd();
   for(int i=0; i<hist_list.size(); i++){
-    hist_list[i]->Write();
+    Write_hist_set(hist_list[i],f);
   }
 
 
@@ -247,7 +304,7 @@ int main(int argc, char ** argv)
   myText->SaveAs(fileName);
   sprintf(fileName,"%s",pdfFile);
   /////////////////////////////////////
-
+  /*
   myCanvas->Divide(1,1);
   myCanvas->cd(1);
   h_xB_ep->Scale(num/den);
@@ -305,7 +362,8 @@ int main(int argc, char ** argv)
     hist_list[i]->Draw("colz");
     myCanvas->Print(fileName,"pdf");
     myCanvas->Clear();  
-  }
+    }
+  */
 
   /////////////////////////////////////
   sprintf(fileName,"%s]",pdfFile);

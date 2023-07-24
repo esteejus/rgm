@@ -1,6 +1,4 @@
-add_subdirectory(Q2_Ana)
-
-foreach(fnameSrc example_ana.cpp)
+foreach(fnameSrc Electron_Cuts.cpp Proton_Cuts.cpp ep_Kinematics.cpp epp_Kinematics.cpp  skim_events.cpp)
   message(STATUS ${fnameSRC})
   string (REPLACE ".cpp" "" fnameExe ${fnameSrc})
   add_executable(${fnameExe} ${fnameSrc})

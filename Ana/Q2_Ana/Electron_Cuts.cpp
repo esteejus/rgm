@@ -55,14 +55,14 @@ int main(int argc, char ** argv)
   clas12ana clasAna2;
 
   //Read in target parameter files                                                                                                                                                           
-  clasAna.readInputParam("ana.par");
-  clasAna.readEcalSFPar("paramsSF_40Ca_x2.dat");
-  clasAna.readEcalPPar("paramsPI_40Ca_x2.dat");
+  clasAna.readInputParam("../ana.par");
+  clasAna.readEcalSFPar("../paramsSF_40Ca_x2.dat");
+  clasAna.readEcalPPar("../paramsPI_40Ca_x2.dat");
   clasAna.printParams();
   
-  clasAna2.readInputParam("ana.par");
-  clasAna2.readEcalSFPar("paramsSF_40Ca_x2.dat");
-  clasAna2.readEcalPPar("paramsPI_40Ca_x2.dat");
+  clasAna2.readInputParam("../ana.par");
+  clasAna2.readEcalSFPar("../paramsSF_40Ca_x2.dat");
+  clasAna2.readEcalPPar("../paramsPI_40Ca_x2.dat");
   clasAna2.printParams();
   
 
