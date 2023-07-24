@@ -17,13 +17,20 @@
 #include <TCanvas.h>
 #include <TStyle.h>
 
+#include "TMVA/Tools.h"
+#include "TMVA/Reader.h"
+#include "TMVA/MethodCuts.h"
+
 #include "clas12reader.h"
 #include "HipoChain.h"
-#include "eventcut/eventcut.h" // compare with new in Monitoring!!
-#include "eventcut/functions.h" // compare with new in Monitoring!!
+#include "eventcut/eventcut.h"
+#include "eventcut/functions.h"
+#include "neutron-veto/veto_functions.h"
 
+ 
 using namespace std;
 using namespace clas12;
+using namespace TMVA;
 
 //const double c = 29.9792458;
 const double mp = 0.938272;
@@ -133,6 +140,8 @@ int main(int argc, char ** argv)
   hist_list_1.push_back(h_pcos0);
   TH1D * h_prec_p = new TH1D("prec_p","Recoil Proton Momentum",100,0,2);
   hist_list_1.push_back(h_prec_p);
+  TH2D * h_prec_ptheta = new TH2D("prec_ptheta","Recoil Proton Theta vs Momentum;Momentum (GeV/c);#theta (degrees)",30,0.2,1.2,20,40,140);
+  hist_list_2.push_back(h_prec_ptheta);
   TH2D * h_prec_angles = new TH2D("prec_angles","Recoil Proton Angular Distribution;phi (deg);theta (deg)",360,-180,180,45,0,180);
   hist_list_2.push_back(h_prec_angles);
 
@@ -151,6 +160,8 @@ int main(int argc, char ** argv)
   hist_list_1.push_back(h_ncos0);
   TH1D * h_nrec_p = new TH1D("nrec_p","Recoil Neutron Momentum",100,0,2);
   hist_list_1.push_back(h_nrec_p);
+  TH2D * h_nrec_ptheta = new TH2D("nrec_ptheta","Recoil Neutron Theta vs Momentum;Momentum (GeV/c);#theta (degrees)",30,0.2,1.2,20,40,140);
+  hist_list_2.push_back(h_prec_ptheta);
   TH2D * h_nrec_angles = new TH2D("nrec_angles","Recoil Neutron Angular Distribution;phi (deg);theta (deg)",48,-180,180,45,0,180);
   hist_list_2.push_back(h_nrec_angles);
 
@@ -217,6 +228,24 @@ int main(int argc, char ** argv)
 
   int counter = 0;
 
+
+  // TMVA stuff
+  TMVA::Tools::Instance();
+  TMVA::Reader * reader = new TMVA::Reader("!Color:!Silent");
+  Float_t energy, cnd_energy, ctof_energy, angle_diff, momentum;
+  Float_t layermult, size, cnd_hits, ctof_hits;
+  reader->AddVariable("energy", &energy);
+  reader->AddVariable("layermult", &layermult);
+  reader->AddVariable("size", &size);
+  reader->AddVariable("cnd_hits", &cnd_hits);
+  reader->AddVariable("cnd_energy", &cnd_energy);
+  reader->AddVariable("ctof_energy", &ctof_energy);
+  reader->AddVariable("ctof_hits", &ctof_hits);
+  reader->AddVariable("angle_diff", &angle_diff);
+
+  reader->AddSpectator("momentum", &momentum);
+
+  reader->BookMVA("MLP", "/w/hallb-scshelf2102/clas/clase2/erins/repos/rgm/NeutronVeto/dataset/weights/TMVAClassification_MLP.weights.xml");
 
 
   //Define cut class
@@ -389,12 +418,17 @@ h_psrc_count->Fill(pmiss.Mag(),weight);
       // recoil p must be in CTOF
       bool is_CTOF = prot[i]->sci(CTOF)->getDetector()==4;
       if (!is_CTOF) {continue;}
-      // get momenta/angles of recoil candidates
-      h_prec_p->Fill(p_recp.Mag(),weight);
-      h_prec_angles->Fill(p_recp.Phi()*180./M_PI,p_recp.Theta()*180./M_PI,weight);
-      h_pptheta->Fill(p_recp.Theta()*180./M_PI,pmiss.Mag(),weight);
+
+      // limit to central detector acceptance
       if (p_recp.Mag()<0.3) {continue;}
       if (p_recp.Theta()*180./M_PI<40 || p_recp.Theta()*180./M_PI>140) {continue;}
+
+      // get momenta/angles of recoil candidates
+      h_prec_p->Fill(p_recp.Mag(),weight);
+      h_prec_ptheta->Fill(p_recp.Mag(),p_recp.Theta()*180./M_PI,weight);
+      h_prec_angles->Fill(p_recp.Phi()*180./M_PI,p_recp.Theta()*180./M_PI,weight);
+      h_pptheta->Fill(p_recp.Theta()*180./M_PI,pmiss.Mag(),weight);
+
       // close in angle to pmiss
       p_vecX.SetXYZ( prot[i]->par()->getPx(), prot[i]->par()->getPy(), prot[i]->par()->getPz() );
       p_cos0 = pmiss.Dot(p_vecX) / (pmiss.Mag() * p_vecX.Mag());
@@ -437,12 +471,40 @@ h_psrc_count->Fill(pmiss.Mag(),weight);
       bool is_CND2 = neut[i]->sci(CND2)->getDetector()==3;
       bool is_CND3 = neut[i]->sci(CND3)->getDetector()==3;
       if (!is_CND1 && !is_CND2 && !is_CND3) {continue;}
-      // get momenta/angles of recoil candidates
-      h_nrec_p->Fill(p_recn.Mag(),weight);
-      h_nrec_angles->Fill(p_recn.Phi()*180./M_PI,p_recn.Theta()*180./M_PI,weight);
-      h_nptheta->Fill(pm_theta,pmiss.Mag(),weight);
+
+      // limit to central detector acceptance
       if (p_recn.Mag()<0.3) {continue;}
       if (p_recn.Theta()*180./M_PI<40 || p_recn.Theta()*180./M_PI>140) {continue;}
+
+      // get momenta/angles of recoil candidates
+      h_nrec_p->Fill(p_recn.Mag(),weight);
+      h_nrec_ptheta->Fill(p_recn.Mag(),p_recn.Theta()*180./M_PI,weight);
+      h_nrec_angles->Fill(p_recn.Phi()*180./M_PI,p_recn.Theta()*180./M_PI,weight);
+      h_nptheta->Fill(pm_theta,pmiss.Mag(),weight);
+
+
+      // calculate features for ML
+      Struct ninfo = getFeatures(neut, allParticles, i);
+      cnd_hits = ninfo.cnd_hits;
+      cnd_energy = ninfo.cnd_energy;
+      ctof_hits = ninfo.ctof_hits;
+      ctof_energy = ninfo.ctof_energy;
+      layermult = ninfo.layermult;
+      energy = ninfo.energy;
+      size = ninfo.size;
+      angle_diff = ninfo.angle_diff;
+      // spectator
+      momentum = p_recn.Mag();
+
+      // apply ML model
+      double mvaValue = reader->EvaluateMVA("MLP");
+//std::cout << mvaValue << '\n';
+      // FILL MVA VALUE HISTOGRAM
+      if (mvaValue<0.5) {continue;}
+
+
+
+
       // close in angle to pmiss
       n_vecX.SetXYZ( neut[i]->par()->getPx(), neut[i]->par()->getPy(), neut[i]->par()->getPz() );
       n_cos0 = pmiss.Dot(n_vecX) / (pmiss.Mag() * n_vecX.Mag());
@@ -634,6 +696,7 @@ h_psrc_count->Fill(pmiss.Mag(),weight);
   myCanvas->Divide(2,2);
   myCanvas->cd(1);  h_pp_pmiss->Draw("colz");
   myCanvas->cd(2);  h_pptheta->Draw("colz");
+  myCanvas->cd(3);  h_prec_ptheta->Draw("colz");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
@@ -657,6 +720,7 @@ h_psrc_count->Fill(pmiss.Mag(),weight);
   myCanvas->Divide(2,2);
   myCanvas->cd(1);  h_pn_pmiss->Draw("colz");
   myCanvas->cd(2);  h_nptheta->Draw("colz");
+  myCanvas->cd(3);  h_nrec_ptheta->Draw("colz");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
