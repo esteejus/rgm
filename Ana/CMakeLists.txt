@@ -1,2 +1,3 @@
 add_subdirectory(example_analysis)
 add_subdirectory(monitor_physics)
+add_subdirectory(Q2_Ana)

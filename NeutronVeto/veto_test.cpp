@@ -171,10 +171,14 @@ int main(int argc, char ** argv)
   hist_list_2.push_back(h_pn_pmiss_sig);
   TH1D * h_cos0_sig = new TH1D("cos0_sig","Angle between p_{n} and p_{miss} (Signal);cos #theta_{pn,pmiss};Counts",20,-1.1,1.1);
   hist_list_1.push_back(h_cos0_sig);
-  TH1D * h_tof_sig = new TH1D("tof_sig","Time-of-Flight (Signal);TOF;Counts",100,-20,80);
+  TH1D * h_tof_sig = new TH1D("tof_sig","Time-of-Flight (Signal);TOF;Counts",60,-10,50);
   hist_list_1.push_back(h_tof_sig);
   TH1D * h_mom_sig = new TH1D("mom_sig","Measured Neutron Momentum (Signal);Momentum (GeV/c);Counts",100,0,1.5);
   hist_list_1.push_back(h_mom_sig);
+  TH2D * h_ptheta_sig = new TH2D("ptheta_sig","Momentum vs #theta (Signal);Neutron Momentum (GeV/c);#theta_{n} (deg)",100,0.2,1.2,10,40,140);
+  hist_list_1.push_back(h_ptheta_sig);
+  TH1D * h_Edep_sig = new TH1D("edep_sig","Energy Deposition (Signal);Energy Deposition (MeVee);Counts",100,0,100);
+  hist_list_1.push_back(h_Edep_sig);
 
   /////////////////////////////////////
   //CND Neutron Background
@@ -187,10 +191,14 @@ int main(int argc, char ** argv)
   hist_list_2.push_back(h_pn_pmiss_back);
   TH1D * h_cos0_back = new TH1D("cos0_back","Angle between p_{n} and p_{miss} (Background);cos #theta_{pn,pmiss};Counts",20,-1.1,1.1);
   hist_list_1.push_back(h_cos0_back);
-  TH1D * h_tof_back = new TH1D("tof_back","Time-of-Flight (Signal);TOF;Counts",100,-20,80);
+  TH1D * h_tof_back = new TH1D("tof_back","Time-of-Flight (Background);TOF;Counts",60,-10,50);
   hist_list_1.push_back(h_tof_back);
-  TH1D * h_mom_back = new TH1D("mom_back","Measured Neutron Momentum (Signal);Momentum (GeV/c);Counts",100,0,1.5);
+  TH1D * h_mom_back = new TH1D("mom_back","Measured Neutron Momentum (Background);Momentum (GeV/c);Counts",100,0,1.5);
   hist_list_1.push_back(h_mom_back);
+  TH2D * h_ptheta_back = new TH2D("ptheta_back","Momentum vs #theta (Background);Neutron Momentum (GeV/c);#theta_{n} (deg)",100,0.2,1.2,10,40,140);
+  hist_list_1.push_back(h_ptheta_back);
+  TH1D * h_Edep_back = new TH1D("edep_back","Energy Deposition (Background);Energy Deposition (MeVee);Counts",100,0,100);
+  hist_list_1.push_back(h_Edep_back);
 
 
   /////////////////////////////////////
@@ -232,7 +240,7 @@ int main(int argc, char ** argv)
   // spectator variable(s)
   reader->AddSpectator("momentum", &momentum);
 
-  reader->BookMVA("BDT", "/w/hallb-scshelf2102/clas/clase2/erins/repos/rgm/NeutronVeto/dataset/weights/TMVAClassification_BDT.weights.xml");
+  reader->BookMVA("MLP", "/w/hallb-scshelf2102/clas/clase2/erins/repos/rgm/NeutronVeto/dataset/weights/TMVAClassification_MLP.weights.xml");
 
 
   //Define cut class
@@ -307,9 +315,9 @@ int main(int argc, char ** argv)
         // require proton to be in correct angle and momentum range for the requested detector
         double p_theta = p_p.Theta()*180./M_PI;
         // forward proton
-        if (p_theta>40 || (p_p.Mag()<0.5 || p_p.Mag()>3.0)) {continue;}
+        //if (p_theta>40 || (p_p.Mag()<0.5 || p_p.Mag()>3.0)) {continue;}
         // central proton
-        //if ((p_theta<40 || p_theta>140) || (p_p.Mag()<0.2 || p_p.Mag()>1.2)) {continue;}
+        if ((p_theta<40 || p_theta>140) || (p_p.Mag()<0.2 || p_p.Mag()>1.2)) {continue;}
         p_index = i;
       }
       
@@ -334,6 +342,7 @@ int main(int argc, char ** argv)
   //CND Neutron Information
   /////////////////////////////////////
       int nn_CND = 0; int nn_CND_good = 0;
+      if (neutrons.size()<1) {continue;}
 
       for(int j = 0; j < neutrons.size(); j++){
 	TVector3 p_n;
@@ -354,33 +363,33 @@ int main(int argc, char ** argv)
         bool CND1 = (neutrons[j]->sci(clas12::CND1)->getDetector() == 3);
         bool CND2 = (neutrons[j]->sci(clas12::CND2)->getDetector() == 3);
         bool CND3 = (neutrons[j]->sci(clas12::CND3)->getDetector() == 3);
-        bool CND = CND1 || CND2 || CND3;
+        bool CND = (CND1 || CND2 || CND3);
         bool CTOF = (neutrons[j]->sci(clas12::CTOF)->getDetector() == 4);
 
-/*        double Edep = 0; double tof = 0;
+        double Edep = 0; double tof = 0;
 //std::cout << CND1 << '\t' << CND2 << '\t' << CND3 << '\t' << CTOF << '\n';
         if (CND1){
-          Edep = neutrons[j]->sci(CND1)->getEnergy();
-          tof = neutrons[j]->sci(CND1)->getTime();// - starttime;
+          Edep = neutrons[j]->sci(clas12::CND1)->getEnergy();
+          tof = neutrons[j]->sci(clas12::CND1)->getTime() - starttime;
         }
         else if (CND2){
-          Edep = neutrons[j]->sci(CND2)->getEnergy();
-          tof = neutrons[j]->sci(CND2)->getTime();// - starttime;
+          Edep = neutrons[j]->sci(clas12::CND2)->getEnergy();
+          tof = neutrons[j]->sci(clas12::CND2)->getTime() - starttime;
         }
         else if (CND3){
-          Edep = neutrons[j]->sci(CND3)->getEnergy();
-          tof = neutrons[j]->sci(CND3)->getTime();// - starttime;
+          Edep = neutrons[j]->sci(clas12::CND3)->getEnergy();
+          tof = neutrons[j]->sci(clas12::CND3)->getTime() - starttime;
         }
         else if (CTOF){
-          Edep = neutrons[j]->sci(CTOF)->getEnergy();
-          tof = neutrons[j]->sci(CTOF)->getTime();// - starttime;
-        } // returns 0???*/
+          Edep = neutrons[j]->sci(clas12::CTOF)->getEnergy();
+          tof = neutrons[j]->sci(clas12::CTOF)->getTime() - starttime;
+        }
 
-//std::cout << tof << '\n';
-//std::cout << Edep << '\n';
-        //if (Edep<3) {continue;}
+        if (Edep<3) {continue;}
 
-        if (!CND) {continue;}
+        //if (!!CTOF) {continue;}
+        //if (!CND && !CTOF) {continue;}
+        if (!(neutrons[j]->getRegion()==CD)) {continue;}
 
         nn_CND += 1;
 
@@ -403,16 +412,6 @@ int main(int argc, char ** argv)
         h_phi_mom_n_CND->Fill(phi_n,p_n.Mag(),weight);
 
 
-          
-        // fill histos with CND::hits bank info
-
-        // extra bank info
-        double dedx = neutrons[j]->sci(clas12::CND1)->getDedx() + neutrons[j]->sci(clas12::CND2)->getDedx() + neutrons[j]->sci(clas12::CND3)->getDedx();
-        double csize = neutrons[j]->sci(clas12::CND1)->getSize() + neutrons[j]->sci(clas12::CND2)->getSize() + neutrons[j]->sci(clas12::CND3)->getSize();
-        double layermult = neutrons[j]->sci(clas12::CND1)->getLayermulti() + neutrons[j]->sci(clas12::CND2)->getLayermulti() + neutrons[j]->sci(clas12::CND3)->getLayermulti();
-
-
-
 
         // TEST ML HERE
         // get neutron features
@@ -429,19 +428,21 @@ int main(int argc, char ** argv)
         momentum = p_n.Mag();
         
         // apply ML model
-        double mvaValue = reader->EvaluateMVA("BDT");
-
+        double mvaValue = reader->EvaluateMVA("MLP");
+//std::cout << mvaValue << '\n';
         // BDT: signal cut>0.1, background cut<0.1
         // MLP: signal cut>0.5, background<0.5
-
-        if (mvaValue>0.1) // signal
+//std::cout << p_pred.Mag() << '\t' << p_n.Mag() << '\n';
+        if (mvaValue>0.5) // signal
         {
           h_pn_angles_sig->Fill(p_p.Phi()*180./M_PI-p_n.Phi()*180./M_PI, p_p.Theta()*180./M_PI-p_n.Theta()*180./M_PI, weight);
           h_pn_pmiss_sig->Fill(p_pred.Mag(),p_n.Mag(),weight);
           h_cos0_sig->Fill(cos0,weight);
           h_n_thetaphi_sig->Fill(p_n.Phi()*180./M_PI, p_n.Theta()*180./M_PI, weight);
-          //h_tof_sig->Fill(tof,weight);
+          h_tof_sig->Fill(tof,weight);
           h_mom_sig->Fill(p_n.Mag(),weight);
+          h_ptheta_sig->Fill(p_n.Mag(),p_n.Theta()*180./M_PI,weight);
+          h_Edep_sig->Fill(Edep,weight);
         }
         else // background
         {
@@ -449,8 +450,10 @@ int main(int argc, char ** argv)
           h_pn_pmiss_back->Fill(p_pred.Mag(),p_n.Mag(),weight);
           h_cos0_back->Fill(cos0,weight);
           h_n_thetaphi_back->Fill(p_n.Phi()*180./M_PI, p_n.Theta()*180./M_PI, weight);
-          //h_tof_back->Fill(tof,weight);
+          h_tof_back->Fill(tof,weight);
           h_mom_back->Fill(p_n.Mag(),weight);
+          h_ptheta_back->Fill(p_n.Mag(),p_n.Theta()*180./M_PI,weight);
+          h_Edep_back->Fill(Edep,weight);
         }
 
 
@@ -659,6 +662,18 @@ int main(int argc, char ** argv)
   h_mom_sig->Draw();
   myCanvas->cd(4);
   h_mom_back->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(2,2);
+  myCanvas->cd(1);
+  h_ptheta_sig->Draw("colz");
+  myCanvas->cd(2);
+  h_ptheta_back->Draw("colz");
+  myCanvas->cd(3);
+  h_Edep_sig->Draw();
+  myCanvas->cd(4);
+  h_Edep_back->Draw();
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
