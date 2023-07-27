@@ -194,7 +194,7 @@ int TrainNeutronVeto_TMVA( TString myMethodList = "" )
 
 
    // simulation
-   /*TChain * chS = new TChain("T");
+   TChain * chS = new TChain("T");
    TChain * chB = new TChain("T");
    TString inputDirectory = "/lustre19/expphy/volatile/clas12/users/erins/neutron-veto/flatsim/sim_root/";
    for (int i=1; i<100; i++)
@@ -204,34 +204,55 @@ int TrainNeutronVeto_TMVA( TString myMethodList = "" )
      TString filenameB = inputDirectory + "fake_neutrons_" + i + ".root";
      chB->Add(filenameB.Data());
    }
+
+   TTree *signalTree     = chS;
+   TTree *background     = chB;
    // not needed
    //TFile *inputS = TFile::Open("/lustre19/expphy/volatile/clas12/users/erins/neutron-veto/flatsim/sim_root/good_neutrons_1.root","READ");
-   //TFile *inputB = TFile::Open("/lustre19/expphy/volatile/clas12/users/erins/neutron-veto/flatsim/sim_root/fake_neutrons_1.root","READ");*/
+   //TFile *inputB = TFile::Open("/lustre19/expphy/volatile/clas12/users/erins/neutron-veto/flatsim/sim_root/fake_neutrons_1.root","READ");
    
 
-   // D 2 GeV
+/*   // D 2 GeV
    TChain * chS = new TChain("T");
    TChain * chB = new TChain("T");
-   TString inputDirectory = "/lustre19/expphy/volatile/clas12/users/erins/neutron-veto/d_2gev_pass0/2gev_root/";
-   for (int i=7; i<9; i++)
+   TString inputDirectory = "/lustre19/expphy/volatile/clas12/users/erins/neutron-veto/d_2gev/2gev_root/";
+   vector<int> vec = {5567,5568,5569,5570,5572,5573,5574,5575,5576,5777,5578,5579,5580,5581,5583,5586,5587,5588,5589,5590,5591,5592,5593,5594,5595,5598,5599,5600,5601,5602,5603,5604,5606,5607,5608,5609,5610,5611,5612,5613,5614,5615,5616,5617,5618,5619,5620,5622,5623,5624,5625,5626,5627};
+   for (int i=0; i<vec.size(); i++)
    {
-     TString filenameS = inputDirectory + "goodn_jus_pCD_01556" + i + ".root";
+     TString filenameS = inputDirectory + "goodn_pCD_01" + vec[i] + ".root";
      chS->Add(filenameS.Data());
-     TString filenameB = inputDirectory + "badn_jus_pCD_01556" + i + ".root";
+     TString filenameB = inputDirectory + "badn_pCD_01" + vec[i] + ".root";
      chB->Add(filenameB.Data());
    }
-   // not needed
-   //TFile *inputS = TFile::Open("/lustre19/expphy/volatile/clas12/users/erins/neutron-veto/d_2gev/2gev_root/goodn_mf_015625.root","READ");
-   //TFile *inputB = TFile::Open("/lustre19/expphy/volatile/clas12/users/erins/neutron-veto/d_2gev/2gev_root/badn_mf_015625.root","READ");
+
+   // read trees (from 2 GeV or simulation)
+
+   TTree *signalTree     = chS;
+   TTree *background     = chB;*/
 
 
+/*   // D 6 GeV
+   TChain * chS = new TChain("T");
+   TChain * chB = new TChain("T");
+   TString inputDirectory = "/lustre19/expphy/volatile/clas12/users/erins/neutron-veto/d_6gev/6gev_root/";
+   vector<int> vec = {5045,5046,5047,5049,5050,5051,5052,5053,5054,5055,5056,5057,5058,5059,5060,5061,5062,5065,5066,5067,5072,5073,5074,5075,5077,5078,5079,5081,5082,5093,5094,5095,5096,5097,5098,5099,5100,5101,5102,5103,5104,5105,5106,5434,5435,5436,5437,5439,5441,5442,5443,5444,5445,5447,5448,5449,5450,5451,5452,5454,5455,5456};
 
-   // D 6 GeV
-   //TFile *inputS = TFile::Open("/lustre19/expphy/volatile/clas12/users/erins/neutron-veto/d_6gev/6gev_root/goodn_jus_pCD_015056.root","READ");
-   //TFile *inputB = TFile::Open("/lustre19/expphy/volatile/clas12/users/erins/neutron-veto/d_6gev/6gev_root/badn_jus_pCD_015056.root","READ");
+   for (int i=0; i<vec.size(); i++)
+   {
+std::cout << "NOW READING " << vec[i] << '\n';
+     TString filenameS = inputDirectory + "goodn_pCD_01" + vec[i] + ".root";
+     chS->Add(filenameS.Data());
+     TString filenameB = inputDirectory + "badn_pCD_01" + vec[i] + ".root";
+     chB->Add(filenameB.Data());
+   }
 
-   TTree *signalTree     = chS;//(TChain)chS->GetTree();// chS.GetTree();// (TTree*)inputS->Get("T");
-   TTree *background     = chB;//(TChain)chB->GetTree();//chB.GetTree();// (TTree*)inputB->Get("T");
+   // read trees (from 2 GeV or simulation)
+
+*/
+
+
+   //TTree *signalTree     = (TTree*)inputS->Get("T");
+   //TTree *background     = (TTree*)inputB->Get("T");
 
    // Create a ROOT output file where TMVA will store ntuples, histograms, etc.
    TString outfileName( "TMVA.root" );
@@ -250,7 +271,7 @@ int TrainNeutronVeto_TMVA( TString myMethodList = "" )
    TMVA::Factory *factory = new TMVA::Factory( "TrainNeutronVeto_TMVA", outputFile,
                                                "!V:!Silent:Color:DrawProgressBar:Transformations=I;D;P;G,D:AnalysisType=Classification" );
 
-   TMVA::DataLoader *dataloader=new TMVA::DataLoader("dataset");
+   TMVA::DataLoader *dataloader=new TMVA::DataLoader("dataset_sim_eN_bknd");
    // If you wish to modify default settings
    // (please check "src/Config.h" to see all available global options)
    //
@@ -346,7 +367,7 @@ int TrainNeutronVeto_TMVA( TString myMethodList = "" )
    //    dataloader->PrepareTrainingAndTestTree( mycut,
    //         "NSigTrain=3000:NBkgTrain=3000:NSigTest=3000:NBkgTest=3000:SplitMode=Random:!V" );
    dataloader->PrepareTrainingAndTestTree( mycuts, mycutb,
-                                        "nTrain_Signal=15000:nTrain_Background=15000:SplitMode=Random:NormMode=NumEvents:!V" );
+                                        "nTrain_Signal=14000:nTrain_Background=14000:SplitMode=Random:NormMode=NumEvents:!V" );
 
    // ### Book MVA methods
    //
