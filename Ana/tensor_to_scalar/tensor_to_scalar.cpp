@@ -21,9 +21,10 @@
 #include "TMVA/Reader.h"
 #include "TMVA/MethodCuts.h"
 
+#include <TDatabasePDG.h>
 #include "clas12reader.h"
 #include "HipoChain.h"
-#include "eventcut/eventcut.h"
+#include "clas12ana.h"
 #include "eventcut/functions.h"
 #include "neutron-veto/veto_functions.h"
 
@@ -34,6 +35,11 @@ using namespace TMVA;
 
 //const double c = 29.9792458;
 const double mp = 0.938272;
+
+void SetLorentzVector(TLorentzVector &p4,clas12::region_part_ptr rp)
+{
+  p4.SetXYZM(rp->par()->getPx(),rp->par()->getPy(),rp->par()->getPz(),p4.M());
+}
 
 void printProgress(double percentage);
 
@@ -62,8 +68,11 @@ int main(int argc, char ** argv)
 
   TFile * outFile = new TFile(argv[3],"RECREATE");
   char * pdfFile = argv[4];
-  eventcut myCut(Ebeam,argv[5]);
-  myCut.print_cuts();
+
+  // create instance of clas12ana class
+  clas12ana clasAna;
+  clasAna.printParams();
+
   clas12root::HipoChain chain;
   for(int k = 6; k < argc; k++){
     cout<<"Input file "<<argv[k]<<endl;
@@ -114,7 +123,7 @@ int main(int argc, char ** argv)
 
   TH1D * h_pmiss_pL = new TH1D("pmiss_pL","Missing Momentum (e,e'p_{Lead});p_{miss} (GeV/c);Counts",30,0,1);
   hist_list_1.push_back(h_pmiss_pL);
-  TH2D * h_pangles = new TH2D("pangles","Proton angles;#phi;#theta",90,-180,180,60,0,60);
+  TH2D * h_pangles = new TH2D("pangles","Proton angles;#phi;#theta",90,-180,180,180,0,180);
   hist_list_2.push_back(h_pangles);
   TH2D * h_pq = new TH2D("pq","#theta_{p,q} vs p/q;p/q;#theta_{pq}",100,0,2,100,0,100);
   hist_list_2.push_back(h_pq);
@@ -248,6 +257,21 @@ int main(int argc, char ** argv)
   reader->BookMVA("MLP", "/w/hallb-scshelf2102/clas/clase2/erins/repos/rgm/NeutronVeto/dataset/weights/TMVAClassification_MLP.weights.xml");
 
 
+  // set up clas12ana cuts
+  clasAna.setEcalSFCuts();
+  clasAna.setEcalPCuts();
+  clasAna.setEcalEdgeCuts(false);
+  clasAna.setPidCuts(false);
+  clasAna.setVertexCuts();
+  clasAna.setVertexCorrCuts();
+  clasAna.setDCEdgeCuts(false);
+  clasAna.setCDEdgeCuts(false);
+  //  clasAna.setCDRegionCuts();  
+
+  clasAna.setVzcuts(-6,1);
+  //  clasAna.setCDCutRegion(2);  
+  //clasAna.setVertexCorrCuts(-3,1);
+
   //Define cut class
   while(chain.Next()==true){
     //int misc = chain.GetNRecords();
@@ -261,10 +285,16 @@ int main(int argc, char ** argv)
       cerr << ".";
     }    
 
+    
+    clasAna.Run(c12);
+    auto elec = clasAna.getByPid(11);
+    auto prot = clasAna.getByPid(2212);
+    auto neut = clasAna.getByPid(2112);
+
     // get particles by type
-    auto elec=c12->getByID(11);
-    auto prot=c12->getByID(2212);
-    auto neut=c12->getByID(2112);
+    //auto elec=c12->getByID(11);
+    //auto prot=c12->getByID(2212);
+    //auto neut=c12->getByID(2112);
     auto allParticles=c12->getDetParticles();
     double weight = 1;
     if(isMC){weight=c12->mcevent()->getWeight();}
@@ -272,11 +302,10 @@ int main(int argc, char ** argv)
 
     // initial cuts
     if (prot.size()<1) {continue;}
-    if (elec.size()<1) {continue;}
-    //if (elec.size()!=1) {continue;}
+    if (elec.size()!=1) {continue;}
 
     // ELECTRONS
-    if(!myCut.electroncut(c12)){continue;}
+    //if(!myCut.electroncut(c12)){continue;}
 
     // electron kinematics
     TVector3 pe;
@@ -301,8 +330,18 @@ int main(int argc, char ** argv)
 
     //// LEAD PROTON ////
     // LEAD PROTON - FTOF
+    auto db = TDatabasePDG::Instance();
+    double mC = 12.0*0.9315;
+    double mD = 1.8756;
+    TLorentzVector beam(0,0,Ebeam,Ebeam);
+    TLorentzVector target(0,0,0,mD);
+    TLorentzVector el(elec[0]->par()->getPx(), elec[0]->par()->getPy(), elec[0]->par()->getPz(), pe.Mag());
+    clasAna.getLeadRecoilSRC(beam,target,el);
+    auto lead = clasAna.getLeadSRC();
 
-    for (int k=0; k<prot.size(); k++)
+    if (lead.size()!=1) {continue;}
+
+    for (int k=0; k<lead.size(); k++)
     {
       // proton kinematics
       TVector3 pL_temp;
@@ -314,6 +353,7 @@ int main(int argc, char ** argv)
       double theta_pq = pL_temp.Angle(q) * 180./M_PI;
       double mmiss = get_mmiss(pb,pe,pL_temp);
       double dbetap = prot[k]->par()->getBeta() - pL_temp.Mag()/sqrt(pL_temp.Mag2()+mp*mp);
+      //if (dbetap<-0.05 || dbetap>0.05) {continue;}
       // lead histos
       h_vtzdiff_ep->Fill(vze-vzlead,weight);
       h_chi2pid->Fill(chi2pid,weight);
@@ -322,25 +362,22 @@ int main(int argc, char ** argv)
     }
 
 
-    // I need code here to figure out which proton is lead
-    // cutfile_ts.txt - proton in FTOF, 0<ltheta<45, 0<theta_pq<25, -3<chipid<3, -3<vtz_diff<3
-    int lead = myCut.leadnucleoncut(c12);
-    if (lead<0) {continue;}
+
 
     TVector3 pL;
-    pL.SetMagThetaPhi(prot[lead]->getP(),prot[lead]->getTheta(),prot[lead]->getPhi());
-    double vzlead = prot[lead]->par()->getVz();
-    double chi2pid = prot[lead]->par()->getChi2Pid();
-    double ltheta = prot[lead]->getTheta()*180./M_PI;
-    double lphi = prot[lead]->getPhi()*180./M_PI;
+    pL.SetMagThetaPhi(lead[0]->getP(),lead[0]->getTheta(),lead[0]->getPhi());
+    double vzlead = lead[0]->par()->getVz();
+    double chi2pid = lead[0]->par()->getChi2Pid();
+    double ltheta = lead[0]->getTheta()*180./M_PI;
+    double lphi = lead[0]->getPhi()*180./M_PI;
     double theta_pq = pL.Angle(q) * 180./M_PI;
     double mmiss = get_mmiss(pb,pe,pL);
-    double dbetap = prot[lead]->par()->getBeta() - pL.Mag()/sqrt(pL.Mag2()+mp*mp);
+    double dbetap = lead[0]->par()->getBeta() - pL.Mag()/sqrt(pL.Mag2()+mp*mp);
 
 
 
     if ((vze-vzlead)<-3. || (vze-vzlead)>3.) {continue;}
-    if (dbetap<-0.05 || dbetap>0.05) {continue;}
+    //if (dbetap<-0.05 || dbetap>0.05) {continue;}
     if (chi2pid<-3.0 || chi2pid>3.0) {continue;}
 
 
@@ -349,43 +386,13 @@ int main(int argc, char ** argv)
     double pm_theta = pmiss.Theta()*180./M_PI;
 
 
-// in yield counts, for each channel, we have to account for the extra runs
-// with higher prel cutoffs (epja-sim)
-//TVector3 prel = pmiss-p
-/*if (pmiss.Mag()>0.2 && pmiss.Mag()<0.3)
-  {weight_c = weight/1;}
-else if (pmiss.Mag()>0.3 && pmiss.Mag()<0.4)
-  {weight_c = weight/2;}
-else if (pmiss.Mag()>0.4 && pmiss.Mag()<0.5)
-  {weight_c = weight/3;}
-else if (pmiss.Mag()>0.5 && pmiss.Mag()<0.6)
-  {weight_c = weight/4;}
-else if (pmiss.Mag()>0.6 && pmiss.Mag()<0.7)
-  {weight_c = weight/5;}
-else if (pmiss.Mag()>0.7 && pmiss.Mag()<0.8)
-  {weight_c = weight/6;}
-else if (pmiss.Mag()>0.8)
-  {weight_c = weight/7;}*/
-//else if (pmiss.Mag()>0.9 && pmiss.Mag()<1.0)
-  //{weight_c = weight/8;}
-
-
-h_pl_count->Fill(pmiss.Mag(),weight);
-
-    h_pmisstheta->Fill(pm_theta,weight);
-    h_pmiss_pL->Fill(pmiss.Mag(),weight);
-
-    //if (pm_theta<40.0 || pm_theta>140.0) {continue;} // 2/1/23 - this is only for deuterium!!!!
-    //if (pmiss.Mag()<0.2) {continue;}
-    h_pangles->Fill(lphi,ltheta,weight);
-
     // lead SRC cuts
 
     if (pmiss.Mag()<0.3) {continue;}
 
     h_q2_xb->Fill(xB,Q2,weight);
 
-    if (xB<1.1) {continue;}
+    if (xB<1.2) {continue;}
     //if (Q2<1.5) {continue;}
 
     h_pq->Fill(pL.Mag()/q.Mag(),theta_pq,weight);
@@ -397,6 +404,17 @@ h_pl_count->Fill(pmiss.Mag(),weight);
     h_mmiss->Fill(mmiss,weight);
 
     if (mmiss>1.1) {continue;}
+
+h_pl_count->Fill(pmiss.Mag(),weight);
+
+    h_pmisstheta->Fill(pm_theta,weight);
+    h_pmiss_pL->Fill(pmiss.Mag(),weight);
+
+    //if (pm_theta<40.0 || pm_theta>140.0) {continue;} // 2/1/23 - this is only for deuterium!!!!
+    //if (pmiss.Mag()<0.2) {continue;}
+    h_pangles->Fill(lphi,ltheta,weight);
+
+
 h_psrc_count->Fill(pmiss.Mag(),weight);
 
     h_pmiss_p->Fill(pmiss.Mag(),weight);
@@ -413,7 +431,7 @@ h_psrc_count->Fill(pmiss.Mag(),weight);
     for (int i=0; i<prot.size(); i++)
     {
       // don't accept lead
-      if (i==lead) {continue;}
+      //if (i==lead) {continue;}
       p_recp.SetMagThetaPhi(prot[i]->getP(),prot[i]->getTheta(),prot[i]->getPhi());
       // recoil p must be in CTOF
       bool is_CTOF = prot[i]->sci(CTOF)->getDetector()==4;
@@ -603,14 +621,14 @@ h_psrc_count->Fill(pmiss.Mag(),weight);
   myText->cd();
   text.DrawLatex(0.2,0.9,"(e,e') Cuts:");
   double line = 0.8;
-  if(myCut.getDoCut(e_cuts)){
+  /*if(myCut.getDoCut(e_cuts)){
     myCut.print_cut_onPDF(text,e_nphe,line);
     myCut.print_cut_onPDF(text,e_calv,line);
     myCut.print_cut_onPDF(text,e_calw,line);
     myCut.print_cut_onPDF(text,e_SF,line);
     myCut.print_cut_onPDF(text,e_mom,line);
     myCut.print_cut_onPDF(text,e_vtze,line);
-  }
+  }*/
   myText->Print(fileName,"pdf");
   myText->Clear();
 
@@ -628,6 +646,11 @@ h_psrc_count->Fill(pmiss.Mag(),weight);
   myCanvas->cd(2);  h_chi2pid->Draw();
   myCanvas->cd(3);  h_dbetap->Draw("colz");
   myCanvas->cd(4);  h_betap->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(2,2);
+  myCanvas->cd(1);  h_mmiss->Draw();
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
