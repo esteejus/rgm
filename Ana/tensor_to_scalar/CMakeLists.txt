@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.0)
-project(tensor_scalar)
+project(tensor_to_scalar)
 # compile executables in source directory
-foreach(fnameSrc tensor_scalar.cpp)
+foreach(fnameSrc tensor_to_scalar.cpp)
   message(STATUS ${fnameSRC})
   string (REPLACE ".cpp" "" fnameExe ${fnameSrc})
   add_executable(${fnameExe} ${fnameSrc})
