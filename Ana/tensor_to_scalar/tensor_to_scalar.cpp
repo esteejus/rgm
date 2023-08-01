@@ -45,14 +45,14 @@ void printProgress(double percentage);
 
 void Usage()
 {
-  std::cerr << "Usage: ./code <MC =1,Data = 0> <Ebeam(GeV)> <path/to/ouput.root> <path/to/ouput.pdf> <path/to/cutfile.txt> <path/to/input.hipo> \n";
+  std::cerr << "Usage: ./code <MC =1,Data = 0> <Ebeam(GeV)> <path/to/ouput.root> <path/to/ouput.pdf> <path/to/input.hipo> \n";
 }
 
 
 int main(int argc, char ** argv)
 {
 
-  if(argc < 7)
+  if(argc < 6)
     {
       std::cerr<<"Wrong number of arguments.\n";
       Usage();
@@ -74,7 +74,7 @@ int main(int argc, char ** argv)
   clasAna.printParams();
 
   clas12root::HipoChain chain;
-  for(int k = 6; k < argc; k++){
+  for(int k = 5; k < argc; k++){
     cout<<"Input file "<<argv[k]<<endl;
     chain.Add(argv[k]);
   }
@@ -139,6 +139,15 @@ int main(int argc, char ** argv)
   hist_list_2.push_back(h_lr_angles);
 
 
+  /////////////////////////////////////
+  //Histos: CD background
+  /////////////////////////////////////
+  TH2D * h_beta_p_all = new TH2D("beta_p_all","#beta vs Momentum in the CD;p (GeV/c);#beta",100,0,1.5,100,0,1.5);
+  hist_list_2.push_back(h_beta_p_all);
+  TH2D * h_beta_p_pFD = new TH2D("beta_p_pFD","#beta vs Momentum in the CD (assuming p in FD);p (GeV/c);#beta",100,0,1.5,100,0,1.5);
+  hist_list_2.push_back(h_beta_p_pFD);
+  TH2D * h_beta_p_pCD = new TH2D("beta_p_pCD","#beta vs Momentum in the CD (assuming p in CD);p (GeV/c);#beta",100,0,1.5,100,0,1.5);
+  hist_list_2.push_back(h_beta_p_pCD);
 
   /////////////////////////////////////
   //Histos: recoil proton
@@ -254,7 +263,7 @@ int main(int argc, char ** argv)
 
   reader->AddSpectator("momentum", &momentum);
 
-  reader->BookMVA("MLP", "/w/hallb-scshelf2102/clas/clase2/erins/repos/rgm/NeutronVeto/dataset/weights/TMVAClassification_MLP.weights.xml");
+  reader->BookMVA("MLP", "/w/hallb-scshelf2102/clas/clase2/erins/repos/rgm/NeutronVeto/dataset_6gev_pCD/weights/TrainNeutronVeto_TMVA_MLP.weights.xml");
 
 
   // set up clas12ana cuts
@@ -327,6 +336,15 @@ int main(int argc, char ** argv)
     h_vtz_e->Fill(vtz_e,weight);
 
 
+    // CD background
+    for (int i=0; i<allParticles.size(); i++)
+    {
+      if (allParticles[i]->par()->getCharge()==0) {continue;} // look at only charged particles
+      if (allParticles[i]->trk(CVT)->getDetector()!=5) {continue;} // look at only particles in CVT
+      h_beta_p_all->Fill(allParticles[i]->getP(),allParticles[i]->par()->getBeta());
+    }
+
+
 
     //// LEAD PROTON ////
     // LEAD PROTON - FTOF
@@ -338,30 +356,9 @@ int main(int argc, char ** argv)
     TLorentzVector el(elec[0]->par()->getPx(), elec[0]->par()->getPy(), elec[0]->par()->getPz(), pe.Mag());
     clasAna.getLeadRecoilSRC(beam,target,el);
     auto lead = clasAna.getLeadSRC();
+    auto recoil = clasAna.getRecoilSRC();
 
     if (lead.size()!=1) {continue;}
-
-    for (int k=0; k<lead.size(); k++)
-    {
-      // proton kinematics
-      TVector3 pL_temp;
-      pL_temp.SetMagThetaPhi(prot[k]->getP(),prot[k]->getTheta(),prot[k]->getPhi());
-      double vzlead = prot[k]->par()->getVz();
-      double chi2pid = prot[k]->par()->getChi2Pid();
-      double ltheta = prot[k]->getTheta()*180./M_PI;
-      double lphi = prot[k]->getPhi()*180./M_PI;
-      double theta_pq = pL_temp.Angle(q) * 180./M_PI;
-      double mmiss = get_mmiss(pb,pe,pL_temp);
-      double dbetap = prot[k]->par()->getBeta() - pL_temp.Mag()/sqrt(pL_temp.Mag2()+mp*mp);
-      //if (dbetap<-0.05 || dbetap>0.05) {continue;}
-      // lead histos
-      h_vtzdiff_ep->Fill(vze-vzlead,weight);
-      h_chi2pid->Fill(chi2pid,weight);
-      h_dbetap->Fill(pL_temp.Mag(),dbetap,weight);
-      h_betap->Fill(pL_temp.Mag(),prot[k]->par()->getBeta(),weight);
-    }
-
-
 
 
     TVector3 pL;
@@ -374,6 +371,15 @@ int main(int argc, char ** argv)
     double mmiss = get_mmiss(pb,pe,pL);
     double dbetap = lead[0]->par()->getBeta() - pL.Mag()/sqrt(pL.Mag2()+mp*mp);
 
+    // lead histos
+    h_vtzdiff_ep->Fill(vze-vzlead,weight);
+    h_chi2pid->Fill(chi2pid,weight);
+    h_dbetap->Fill(pL.Mag(),dbetap,weight);
+    h_betap->Fill(pL.Mag(),prot[0]->par()->getBeta(),weight);
+
+
+    //if (ltheta>40) {continue;}
+    if (ltheta<40 || ltheta>140) {continue;}
 
 
     if ((vze-vzlead)<-3. || (vze-vzlead)>3.) {continue;}
@@ -418,6 +424,19 @@ h_pl_count->Fill(pmiss.Mag(),weight);
 h_psrc_count->Fill(pmiss.Mag(),weight);
 
     h_pmiss_p->Fill(pmiss.Mag(),weight);
+
+
+
+    // CD background (assuming p in FD)
+    for (int i=0; i<allParticles.size(); i++)
+    {
+      if (allParticles[i]->par()->getCharge()==0) {continue;} // look at only charged particles
+      if (allParticles[i]->trk(CVT)->getDetector()!=5) {continue;} // look at only particles in CVT
+      if (ltheta<40) {h_beta_p_pFD->Fill(allParticles[i]->getP(),allParticles[i]->par()->getBeta());}
+      if (ltheta>40 && ltheta<140) {h_beta_p_pCD->Fill(allParticles[i]->getP(),allParticles[i]->par()->getBeta());}
+    }
+
+
 
 
 //// RECOIL P ////
@@ -653,6 +672,16 @@ h_psrc_count->Fill(pmiss.Mag(),weight);
   myCanvas->cd(1);  h_mmiss->Draw();
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
+
+  myCanvas->Divide(2,2);
+  myCanvas->cd(1);  h_beta_p_all->Draw("colz");
+  myCanvas->cd(2);  h_beta_p_pFD->Draw("colz");
+  myCanvas->cd(3);  h_beta_p_pCD->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  gPad->SetLogz();
+  myCanvas->Clear();
+
+
 
   myText->cd();
   text.DrawLatex(0.2,0.9,"Lead proton cuts:");
