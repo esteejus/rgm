@@ -193,7 +193,7 @@ int TrainNeutronVeto_TMVA( TString myMethodList = "" )
 
 
 
-   // simulation
+/*   // simulation
    TChain * chS = new TChain("T");
    TChain * chB = new TChain("T");
    TString inputDirectory = "/lustre19/expphy/volatile/clas12/users/erins/neutron-veto/flatsim/sim_root/";
@@ -209,10 +209,10 @@ int TrainNeutronVeto_TMVA( TString myMethodList = "" )
    TTree *background     = chB;
    // not needed
    //TFile *inputS = TFile::Open("/lustre19/expphy/volatile/clas12/users/erins/neutron-veto/flatsim/sim_root/good_neutrons_1.root","READ");
-   //TFile *inputB = TFile::Open("/lustre19/expphy/volatile/clas12/users/erins/neutron-veto/flatsim/sim_root/fake_neutrons_1.root","READ");
+   //TFile *inputB = TFile::Open("/lustre19/expphy/volatile/clas12/users/erins/neutron-veto/flatsim/sim_root/fake_neutrons_1.root","READ");*/
    
 
-/*   // D 2 GeV
+   // D 2 GeV
    TChain * chS = new TChain("T");
    TChain * chB = new TChain("T");
    TString inputDirectory = "/lustre19/expphy/volatile/clas12/users/erins/neutron-veto/d_2gev/2gev_root/";
@@ -221,14 +221,14 @@ int TrainNeutronVeto_TMVA( TString myMethodList = "" )
    {
      TString filenameS = inputDirectory + "goodn_pCD_01" + vec[i] + ".root";
      chS->Add(filenameS.Data());
-     TString filenameB = inputDirectory + "badn_pCD_01" + vec[i] + ".root";
+     TString filenameB = inputDirectory + "ppipn_pCD_01" + vec[i] + ".root";
      chB->Add(filenameB.Data());
    }
 
    // read trees (from 2 GeV or simulation)
 
    TTree *signalTree     = chS;
-   TTree *background     = chB;*/
+   TTree *background     = chB;
 
 
 /*   // D 6 GeV
@@ -367,7 +367,7 @@ std::cout << "NOW READING " << vec[i] << '\n';
    //    dataloader->PrepareTrainingAndTestTree( mycut,
    //         "NSigTrain=3000:NBkgTrain=3000:NSigTest=3000:NBkgTest=3000:SplitMode=Random:!V" );
    dataloader->PrepareTrainingAndTestTree( mycuts, mycutb,
-                                        "nTrain_Signal=14000:nTrain_Background=14000:SplitMode=Random:NormMode=NumEvents:!V" );
+                                        "nTrain_Signal=89000:nTrain_Background=89000:SplitMode=Random:NormMode=NumEvents:!V" );
 
    // ### Book MVA methods
    //
