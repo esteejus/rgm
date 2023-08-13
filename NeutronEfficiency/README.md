@@ -12,8 +12,8 @@ $ROOTSYS/bin/hadd allevents_6gev_epin.root /output_directory/dCD_2gev_0150*.root
 Run the following macros to combine the neutron candidates and detected neutrons from all runs to get a measure of the neutron efficiency as a function of both momentum and polar angle.
 
 ```
-combine_h_epin_neff.c
-combine_d_pcdn_neff.c
+root combine_h_epin_neff.c
+root combine_d_pcdn_neff.c
 ```
 
 The efficiency will be saved in a root file and also printed to the screen.
