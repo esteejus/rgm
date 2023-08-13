@@ -13,6 +13,7 @@
 #include <TLorentzVector.h>
 #include <TH1.h>
 #include <TH2.h>
+#include <TF2.h>
 #include <TLatex.h>
 #include <TChain.h>
 #include <TGraph.h>
@@ -53,6 +54,7 @@ double Mdisp_hi = 1.3;
 
 void printProgress(double percentage);
 double get_pin_mmiss(TVector3 p_b, TVector3 p_e, TVector3 ppi);
+Double_t fit_function(Double_t *x, Double_t *par);
 Double_t lorentzian(Double_t *x, Double_t *par);
 Double_t poly(Double_t *x, Double_t *par);
 Double_t signal(Double_t *x, Double_t *par); 
@@ -259,8 +261,10 @@ int main(int argc, char ** argv)
   /////////////////////////////////////
   TH2D * h_cand2d = new TH2D("cand2d","Neutron Candidates;p_{miss} (GeV/c);#theta_{miss} (degrees)",15,0.2,1.2,30,40,140);
   hist_list_2.push_back(h_cand2d);
+  h_cand2d->SetStats(0);
   TH2D * h_det2d = new TH2D("det2d","Detected Neutrons;p_{miss} (GeV/c);#theta_{miss} (degrees)",15,0.2,1.2,30,40,140);
   hist_list_2.push_back(h_det2d);
+  h_det2d->SetStats(0);
 
 
 
@@ -413,8 +417,9 @@ if (mmiss>Mlow && mmiss<Mhigh) {h_cand2d->Fill(pmiss.Mag(),thetamiss,weight);}
         bool is_CND1 = neut[i]->sci(CND1)->getDetector()==3;
         bool is_CND2 = neut[i]->sci(CND2)->getDetector()==3;
         bool is_CND3 = neut[i]->sci(CND3)->getDetector()==3;
-        bool is_CTOF = neut[i]->sci(CTOF)->getDetector()==4;
-        if (!is_CND1 && !is_CND2 && !is_CND3 && !is_CTOF) {continue;}
+        //bool is_CTOF = neut[i]->sci(CTOF)->getDetector()==4;
+        if (!is_CND1 && !is_CND2 && !is_CND3) {continue;}
+
 
         // in expected theta range? if no - skip to next neutron in event
         double n_theta = neut[i]->getTheta()*180./M_PI;
@@ -447,7 +452,7 @@ if (mmiss>Mlow && mmiss<Mhigh) {h_cand2d->Fill(pmiss.Mag(),thetamiss,weight);}
     bool is_CND1 = neut[pick]->sci(CND1)->getDetector()==3;
     bool is_CND2 = neut[pick]->sci(CND2)->getDetector()==3;
     bool is_CND3 = neut[pick]->sci(CND3)->getDetector()==3;
-    bool is_CTOF = neut[pick]->sci(CTOF)->getDetector()==4;
+    //bool is_CTOF = neut[pick]->sci(CTOF)->getDetector()==4;
     double n_theta = neut[pick]->getTheta()*180./M_PI;
     double beta_n = neut[pick]->par()->getBeta();
     double n_phi = neut[pick]->getPhi()*180./M_PI;
@@ -473,12 +478,12 @@ if (mmiss>Mlow && mmiss<Mhigh) {h_cand2d->Fill(pmiss.Mag(),thetamiss,weight);}
       path = neut[pick]->sci(CND3)->getPath();
       edep = neut[pick]->sci(CND3)->getEnergy();
     }
-    else if (is_CTOF)
+    /*else if (is_CTOF)
     {
       tof_n = neut[pick]->sci(CTOF)->getTime() - ts;
       path = neut[pick]->sci(CTOF)->getPath();
       edep = neut[pick]->sci(CTOF)->getEnergy();
-    }
+    }*/
     if (tof_n<0) {continue;} //{std::cout << "Look out - negative TOF!/n";}
 
 
@@ -553,7 +558,7 @@ if (mmiss>Mlow && mmiss<Mhigh) {h_det2d->Fill(pmiss.Mag(),thetamiss,weight);}
     hist_list_2[i]->Write();
   }
 
-
+  h_mmiss_pmissDET->Write();
 
 
 
@@ -1043,20 +1048,33 @@ if (mmiss>Mlow && mmiss<Mhigh) {h_det2d->Fill(pmiss.Mag(),thetamiss,weight);}
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
-
+  
+  // Fit efficiency to 2D function
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_eff2d->SetTitle("Neutron Efficiency");
+  h_eff2d->Draw("colz");
+  Double_t neff_params[4] = {-0.001,4,6,1};
+  TF2 * f2 = new TF2("f2",fit_function,0.2,1.2,40,140,4);
+  f2->SetParameters(neff_params);
+  h_eff2d->Fit("f2");
+  f2->Draw("same");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
 
 
   // wrap it up
   sprintf(fileName,"%s]",pdfFile);
   myCanvas->Print(fileName,"pdf");
-
   outFile->Close();
 }
 
 
 
 
-
+Double_t fit_function(Double_t *x, Double_t *par){
+  return (par[0] * pow( par[1]*x[0] + par[2]*x[1] , 2.0)) + par[4];
+}
 
 
 Double_t lorentzian(Double_t *x, Double_t *par) { // height, mean, width
