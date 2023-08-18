@@ -1,11 +1,11 @@
 #include "clas12ana.h"
 
 struct cutpar{
-  string id;
-  vector<double> par = {}; //pi- parameters                                                                                                                                                  
+  std::string id;
+  std::vector<double> par = {}; //pi- parameters
 };
 
-//helper function for DC fiducials                                                                                                                                                            
+//helper function for DC fiducials                                                           
 TVector3 rotate(TVector3 vec, int sector)
 {
   double rot_ang = -(sector -1)*60 *TMath::DegToRad();
@@ -20,7 +20,8 @@ int clas12ana::getCDRegion(region_part_ptr p)
 {
   int region = -1;
 
-  if(p->par()->getPid() == 2212 &&  p->getRegion() == CD) //Only defined for protons right now
+ //Only defined for protons right now
+ if(p->par()->getPid() == 2212 &&  p->getRegion() == CD) 
     {
       auto px = p -> par() -> getPx();
       auto py = p -> par() -> getPy();
@@ -61,48 +62,25 @@ void clas12ana::Clear()
    event_mult = 0;
  }
 
+//void clas12ana::Run()
 void clas12ana::Run(const std::unique_ptr<clas12::clas12reader>& c12)
 {
   Clear();
   
+  //  auto particles = _detParticles; //particles is now a std::vector of particles for this event
+  //  auto &c12=this->C12ref();
+
+
   auto particles = c12->getDetParticles(); //particles is now a std::vector of particles for this event
   auto electrons_det = c12->getByID(11);
   
       //DEBUG plots
       if(debug_plots)
 	{
-	  for (auto el = electrons_det.begin(); el != electrons_det.end();el++)
-	    {
-	      
-	      int sector = (*el)->getSector();
-	      double el_mom = (*el)->getP();
-	      double el_sf = getSF(*el);
-	      double el_pcal_energy = (*el)->cal(PCAL)->getEnergy();
-	      
-	      double ecin_v = (*el)->cal(ECIN)->getLv();
-	      double ecin_w = (*el)->cal(ECIN)->getLw();
-	      double ecout_v = (*el)->cal(ECOUT)->getLv();
-	      double ecout_w = (*el)->cal(ECOUT)->getLw();
-	      double pcal_v = (*el)->cal(PCAL)->getLv();
-	      double pcal_w = (*el)->cal(PCAL)->getLw();
-
-	      sf_v_ecalIN_debug->Fill(ecin_v,el_sf);
-	      sf_w_ecalIN_debug->Fill(ecin_w,el_sf);
-	      sf_v_ecalOUT_debug->Fill(ecout_v,el_sf);
-	      sf_w_ecalOUT_debug->Fill(ecout_w,el_sf);
-	      sf_v_pcal_debug->Fill(pcal_v,el_sf);
-	      sf_w_pcal_debug->Fill(pcal_w,el_sf);
-	      
-	      if(sector <= 6 && sector >= 1)
-		{
-		  sf_e_debug_b[sector]->Fill(el_pcal_energy,el_sf); 
-		  sf_p_debug_b[sector]->Fill(el_mom,el_sf); 
-		}
-	      
-	      fillDCdebug(*el,dc_hit_map_b);
-	    }
+	  for(auto el : electrons_det)
+	    debug_c.fillBeforeEl(el);
 	}
-  
+
        //Cut out electrons that do not pass cuts
       electrons_det.erase(std::remove_if(electrons_det.begin(),electrons_det.end(),[this](auto &el){
 	    if( el->che(HTCC)->getNphe() <= 2)           //photo electron min cut
@@ -121,80 +99,24 @@ void clas12ana::Run(const std::unique_ptr<clas12::clas12reader>& c12)
 	      return false;
 	  }), electrons_det.end());
 	       
-	      
-      //DEBUG plots
+
       if(debug_plots)
 	{
-	  for (auto el = electrons_det.begin(); el != electrons_det.end();el++)
-	    {
-	      int sector = (*el)->getSector();
-	      double el_mom = (*el)->getP();
-	      double el_sf = getSF(*el);
-	      double el_pcal_energy = (*el)->cal(PCAL)->getEnergy();
-	      
-	      double ecin_v = (*el)->cal(ECIN)->getLv();
-	      double ecin_w = (*el)->cal(ECIN)->getLw();
-	      double ecout_v = (*el)->cal(ECOUT)->getLv();
-	      double ecout_w = (*el)->cal(ECOUT)->getLw();
-	      double pcal_v = (*el)->cal(PCAL)->getLv();
-	      double pcal_w = (*el)->cal(PCAL)->getLw();
-	      
-	      
-	      //DEBUG plots
-	      if(debug_plots && sector <= 6 && sector >= 1)
-		{
-		  sf_e_debug_a[sector]->Fill((*el)->cal(PCAL)->getEnergy(),el_sf);
-		  sf_p_debug_a[sector]->Fill(el_mom,el_sf);
-		}
-	      
-	      el_vz_debug->Fill( (*el)->par()->getVz());
-	      
-	      sf_v_ecalIN_a_debug->Fill(ecin_v,el_sf);
-	      sf_w_ecalIN_a_debug->Fill(ecin_w,el_sf);
-	      sf_v_ecalOUT_a_debug->Fill(ecout_v,el_sf);
-	      sf_w_ecalOUT_a_debug->Fill(ecout_w,el_sf);
-	      sf_v_pcal_a_debug->Fill(pcal_v,el_sf);
-	      sf_w_pcal_a_debug->Fill(pcal_w,el_sf);
-	      
-	    }
+	  for(auto el : electrons_det)
+	    debug_c.fillAfterEl(el);
 	}
-  
+
+
    if(electrons_det.size() == 1) //good trigger electron
      {
        
        //       setByPid(electrons_det[0]); //set good trigger electron
 
-       if(debug_plots)
-	 {
-	   fillDCdebug(electrons_det[0],dc_hit_map_a); //electron DC hit debug maps
-
-	   for (auto p = particles.begin(); p != particles.end();++p)
-	     {
-	       
-	       if( (*p)->par()->getPid() == 2212)
-		 fillDCdebug(*p,dc_hit_map_b_proton);
-	       if( (*p)->par()->getPid() == 211)
-		 fillDCdebug(*p,dc_hit_map_b_pion);
-	   
-	       double par_mom  = (*p)->par()->getP();
-	       double par_beta = (*p)->par()->getBeta();
-	       
-	       bool is_cd = ( (*p)->getRegion()==CD);
-	       bool is_fd = ( (*p)->getRegion()==FD);
-	       
-	       //DEBUG plots
-	       if(debug_plots && ( (*p)->par()->getCharge() >= 1) && ( (*p)->par()->getPid() != 11) )
-		 {
-		   if(is_cd)
-		     pid_cd_debug->Fill(par_mom,par_beta);
-		   if(is_fd)
-		     pid_fd_debug->Fill(par_mom,par_beta);
-
-		   if((*p)->getRegion() == CD)
-		     cd_particles_b->Fill((*p)->getPhi()*180/pi,sqrt( pow((*p)->par()->getPx(),2) + pow((*p)->par()->getPy(),2)));
-		 }
-	     }
-	 }
+      if(debug_plots)
+	{
+	  for(auto p : particles)
+	    debug_c.fillBeforePart(p);
+	}
 
 
        //Cut out particles that do not pass cuts
@@ -230,63 +152,20 @@ void clas12ana::Run(const std::unique_ptr<clas12::clas12reader>& c12)
 	     }
 	   }), particles.end());
        
+       //       std::for_each(particles.begin(),particles.end(),[debug_c](auto const &p){debug_c.fillAfterPart(p)};
 
-	   if(debug_plots)
-	     {
-	       for (auto p = particles.begin(); p != particles.end();++p)
-		 {
-		   if((*p)->par()->getCharge() != 0 && (*p)->par()->getPid() != 11)
-		     el_vz_p_debug->Fill( (*p)->par()->getVz() - electrons_det[0]->par()->getVz() );
+       if(debug_plots)
+	 {
+	   for(auto p : particles)
+	     debug_c.fillAfterPart(p);
+	 }
 
-		   if((*p)->par()->getCharge() >= 1 && (*p)->par()->getPid() != 11 && (*p)->par()->getPid() == 2212)
-		     {
-		     debugByPid(*p);
-		     if( (*p)->par()->getPid() == 2212)
-		       fillDCdebug(*p,dc_hit_map_a_proton);
-		     if( (*p)->par()->getPid() == 211)
-		       fillDCdebug(*p,dc_hit_map_a_pion);
-
-		     if( (*p)->getRegion() == CD)
-		       cd_particles_a->Fill((*p)->getPhi()*180/pi,sqrt( pow((*p)->par()->getPx(),2) + pow((*p)->par()->getPy(),2)));
-
-		     }
-		 }
-	     }
-	   
 	   
      }//good electron loop
        
    
 }
 
-
-void clas12ana::fillDCdebug(region_part_ptr p,TH2D **h)
-{
-  h[1]->Fill(p->traj(DC,6)->getX(),p->traj(DC,6)->getY());
-  h[2]->Fill(p->traj(DC,18)->getX(),p->traj(DC,18)->getY());
-  h[3]->Fill(p->traj(DC,36)->getX(),p->traj(DC,36)->getY());
-}
-
-
-void clas12ana::plotDebug()
-{
-
-  TCanvas *c1 = new TCanvas("c1","c1",1000,2000);
-  c1->Divide(2,6);
-
-  for(int i = 1; i <=6; i++)
-    {   
-      c1->cd(i);
-      sf_p_debug_b[i]->Draw("colz");
-    }
-  for(int i = 7; i <=12; i++)
-    {   
-      c1->cd(i);
-      sf_p_debug_a[i]->Draw("colz");
-    }
-
-
-}
 
 
 void clas12ana::InitSFEcalCuts()
@@ -331,6 +210,9 @@ void clas12ana::InitSFPCuts()
 
 void clas12ana::Init()
 {
+      if(debug_plots)
+	debug_c.InitDebugPlots();
+
       for(int i = 0; i < 7; i++)
 	{
 	  ecal_sf_fcn[0][i] = new TF1(Form("ecal_sf_fcn_0_%d",i),"[0] + [1]/x + [2]/pow(x,2) - [6]*( [3] + [4]/x + [5]/pow(x,2))",0,1.5);
@@ -355,8 +237,8 @@ void clas12ana::Init()
 	}
     }
 
-  if(debug_plots)
-    InitDebugPlots();
+  //  if(debug_plots)
+    //    InitDebugPlots();
 
 
   this -> readInputParam( (std::string(CLAS12ANA_DIR) + "/Ana/cutFiles/ana.par").c_str() );
@@ -943,165 +825,4 @@ void clas12ana::getLeadRecoilSRC(TLorentzVector beam, TLorentzVector target, TLo
   return;  
 }
 */
-
-
-
-
-void clas12ana::debugByPid(region_part_ptr p)
-     {
-       int pid = p->par()->getPid();
-       double par_mom  = p->par()->getP();
-       double par_beta = p->par()->getBeta();
-
-       bool is_cd = ( p->getRegion()==CD);
-       bool is_fd = ( p->getRegion()==FD);
-
-       if(is_fd)
-	 {
-	   if( pid == 2212)
-	     pid_proton_fd_debug->Fill(par_mom,par_beta);
-	   else if( pid == 45)
-	     pid_deuteron_fd_debug->Fill(par_mom,par_beta);
-	   else if( pid == 211)
-	     pid_piplus_fd_debug->Fill(par_mom,par_beta);
-	   else if( pid == -211)
-	     pid_piminus_fd_debug->Fill(par_mom,par_beta);
-	   else if( pid == 321)
-	     pid_kplus_fd_debug->Fill(par_mom,par_beta);
-	   else if( pid == -321)
-	     pid_kminus_fd_debug->Fill(par_mom,par_beta);
-	   else if( pid == 0 || pid == 2112)
-	     pid_neutrals_fd_debug->Fill(par_mom,par_beta);
-	 }
-       else if(is_cd)
-	 {
-	   if( pid == 2212)
-	     pid_proton_cd_debug->Fill(par_mom,par_beta);
-	   else if( pid == 45)
-	     pid_deuteron_cd_debug->Fill(par_mom,par_beta);
-	   else if( pid == 211)
-	     pid_piplus_cd_debug->Fill(par_mom,par_beta);
-	   else if( pid == -211)
-	     pid_piminus_cd_debug->Fill(par_mom,par_beta);
-	   else if( pid == 321)
-	     pid_kplus_cd_debug->Fill(par_mom,par_beta);
-	   else if( pid == -321)
-	     pid_kminus_cd_debug->Fill(par_mom,par_beta);
-	   else if( pid == 0 || pid == 2112)
-	     pid_neutrals_cd_debug->Fill(par_mom,par_beta);
-	 }
-
-       
-     }
-
-
- void clas12ana::InitDebugPlots()
- {
-
-   for(int i = 1; i <= 6; i++)
-     {
-       sf_p_debug_b[i] = new TH2D(Form("sf_p_debug_b_sector_%d",i),Form("Sampling Fraction Before Cuts Sector_%d",i),100,0,6,100,0,.4);
-       sf_p_debug_a[i] = new TH2D(Form("sf_p_debug_a_sector_%d",i),Form("Sampling Fraction  After Cuts Sector_%d",i),100,0,6,100,0,.4);
-
-       sf_e_debug_b[i] = new TH2D(Form("sf_e_debug_b_sector_%d",i),Form("Sampling Fraction Before Cuts Sector_%d",i),100,0,1.5,100,0,.4);
-       sf_e_debug_a[i] = new TH2D(Form("sf_e_debug_a_sector_%d",i),Form("Sampling Fraction  After Cuts Sector_%d",i),100,0,1.5,100,0,.4);
-     }
-
-
-   //DC hit maps
-   for(int i = 1; i <=3 ; i++)
-     {
-       dc_hit_map_b[i] = new TH2D(Form("dc_hitmap_before_%d",i), Form("Region %d Before Cuts",i),600,-300,300,600,-300,300);
-       dc_hit_map_a[i] = new TH2D(Form("dc_hitmap_after_%d",i), Form("Region %d After Cuts",i),600,-300,300,600,-300,300);
-       dc_hit_map_a_proton[i] = new TH2D(Form("dc_hitmap_after_proton_%d",i), Form("Region %d After Cuts",i),600,-300,300,600,-300,300);
-       dc_hit_map_b_proton[i] = new TH2D(Form("dc_hitmap_before_proton_%d",i), Form("Region %d Before Cuts",i),600,-300,300,600,-300,300);
-       dc_hit_map_a_pion[i] = new TH2D(Form("dc_hitmap_after_pion_%d",i), Form("Region %d After Cuts",i),600,-300,300,600,-300,300);
-       dc_hit_map_b_pion[i] = new TH2D(Form("dc_hitmap_before_pion_%d",i), Form("Region %d Before Cuts",i),600,-300,300,600,-300,300);
-
-     }
-
-
- }
-
-
- void clas12ana::WriteDebugPlots()
- {
-   TFile *f_debugOut = new TFile(debug_fileName,"RECREATE");
-
-   for(int i = 1; i <= 6; i++)
-     {
-       sf_p_debug_b[i]->Write();
-       sf_p_debug_a[i]->Write();
-       sf_e_debug_b[i]->Write();
-       sf_e_debug_a[i]->Write();
-     }
-
-   for(int i = 1; i <= 6; i++)
-     {
-       ecal_sf_fcn[0][i]->Write();
-       ecal_sf_fcn[1][i]->Write();
-       ecal_p_fcn[0][i]->Write();
-       ecal_p_fcn[1][i]->Write();
-     }
-
-   for(int i = 1; i <= 3; i++)
-       dc_hit_map_b[i]->Write();
-
-   for(int i = 1; i <= 3; i++)
-       dc_hit_map_a[i]->Write();
-
-   for(int i = 1; i <= 3; i++)
-       dc_hit_map_b_proton[i]->Write();
-
-   for(int i = 1; i <= 3; i++)
-       dc_hit_map_a_proton[i]->Write();
-
-   for(int i = 1; i <= 3; i++)
-       dc_hit_map_b_pion[i]->Write();
-
-   for(int i = 1; i <= 3; i++)
-       dc_hit_map_a_pion[i]->Write();
-
-
-   sf_v_ecalIN_debug->Write();
-   sf_w_ecalIN_debug->Write();
-   sf_v_ecalOUT_debug->Write();
-   sf_w_ecalOUT_debug->Write();
-   sf_v_pcal_debug->Write();
-   sf_w_pcal_debug->Write();
-
-   sf_v_ecalIN_a_debug->Write();
-   sf_w_ecalIN_a_debug->Write();
-   sf_v_ecalOUT_a_debug->Write();
-   sf_w_ecalOUT_a_debug->Write();
-   sf_v_pcal_a_debug->Write();
-   sf_w_pcal_a_debug->Write();
-
-   cd_particles_a->Write();
-   cd_particles_b->Write();
-
-   pid_proton_fd_debug->Write();
-   pid_deuteron_fd_debug->Write();
-   pid_piplus_fd_debug->Write();
-   pid_piminus_fd_debug->Write();
-   pid_kplus_fd_debug->Write();
-   pid_kminus_fd_debug->Write();
-   pid_neutrals_fd_debug->Write();
-
-   pid_proton_cd_debug->Write();
-   pid_deuteron_cd_debug->Write();
-   pid_piplus_cd_debug->Write();
-   pid_piminus_cd_debug->Write();
-   pid_kplus_cd_debug->Write();
-   pid_kminus_cd_debug->Write();
-   pid_neutrals_cd_debug->Write();
-
-   pid_cd_debug->Write();
-   pid_fd_debug->Write();
-
-   el_vz_debug->Write();
-   el_vz_p_debug->Write();
-
-   f_debugOut->Close();
- }
 

@@ -1,5 +1,4 @@
 foreach(fnameSrc neff_h_epin.cpp neff_d_pcdn.cpp neff_d_pfdn.cpp)
-  message(STATUS ${fnameSRC})
   string (REPLACE ".cpp" "" fnameExe ${fnameSrc})
   add_executable(${fnameExe} ${fnameSrc})
   target_link_libraries(${fnameExe} ${ROOT_LIBRARIES} -lEG -lClas12Banks -lHipo4 -lClas12Root -L${CLAS12ROOT}/lib -L${CLAS12ROOT}/ccdb/lib NeutronVeto EventCut)

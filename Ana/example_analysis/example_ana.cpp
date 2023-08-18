@@ -28,13 +28,16 @@ void SetLorentzVector(TLorentzVector &p4,clas12::region_part_ptr rp){
 
 void Usage()
 {
-  std::cerr << "Usage: ./testAna inputfiles.hipo outputfile.root \n\n\n";
-
+  std::cerr << "Usage: ./testAna outputfile inputfile_1 inputfile_2 ... \n\n\n";
 }
 
 
 int main(int argc, char ** argv)
 {
+
+  clas12root::HipoChain chain;
+  chain.SetReaderTags({0});
+  chain.db()->turnOffQADB();
 
   if(argc < 2)
     {
@@ -44,10 +47,19 @@ int main(int argc, char ** argv)
 
 
 
-  TString inFile  = argv[1];
-  TString outFile = argv[2];
-
+  TString outFile = argv[1];
   cout<<"Ouput file "<< outFile <<endl;
+
+  if(argc >= 2)
+    {
+      for(int i = 2; i != argc; ++i)
+	{
+	  TString inFile(argv[i]);
+	  chain.Add(inFile);
+	  cout<<"Input file "<< inFile << "\n";
+	}
+    }
+
 
 
   clas12ana clasAna;
@@ -62,19 +74,12 @@ int main(int argc, char ** argv)
 
   clasAna.printParams();
 
-
-  clas12root::HipoChain chain;
-  chain.Add(inFile);
-  chain.SetReaderTags({0});
-  chain.db()->turnOffQADB();
-  auto config_c12=chain.GetC12Reader();
-
-  //now get reference to (unique)ptr for accessing data in loop
-  //this will point to the correct place when file changes
-  //  const std::unique_ptr<clas12::clas12reader>& c12=chain.C12ref();
-
-  int counter = 0;
-  int cutcounter = 0;
+  /*
+  clas12ana clasAna;
+  clasAna.Add(inFile);
+  clasAna.SetReaderTags({0});
+  clasAna.db()->turnOffQADB();
+  */
 
   auto &c12=chain.C12ref();
 
@@ -126,10 +131,8 @@ int main(int argc, char ** argv)
       double weight = 1.;
       //      double weight = c12->mcevent()->getWeight(); //used if MC events have a weight 
 
-      //Display completed  
-      counter++;
-
       clasAna.Run(c12);
+
       auto electrons = clasAna.getByPid(11);
       auto protons = clasAna.getByPid(2212);
 
@@ -190,13 +193,9 @@ int main(int argc, char ** argv)
     }
 
   missm->Draw();
-  //  pid_fd_debug->Write();
 
-  clasAna.WriteDebugPlots();
-
-  TFile *f = new TFile(outFile,"RECREATE");
-
-  f->cd();
+  TFile f(outFile,"RECREATE");
+  f.cd();
 
 
   q2_h->Write();
@@ -210,7 +209,7 @@ int main(int argc, char ** argv)
   epp_h->Write();
   missm->Write();
 
-  f->Close();
+  f.Close();
 
 
   return 0;

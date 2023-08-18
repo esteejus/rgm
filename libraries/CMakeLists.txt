@@ -5,5 +5,7 @@ target_link_libraries(NeutronVeto ${ROOT_LIBRARIES})
 target_link_libraries(EventCut ${ROOT_LIBRARIES})
 
 add_library(Clas12Ana clas12ana/clas12ana.cpp)
+add_library(Clas12Debug clas12debug/clas12debug.cpp)
 target_link_libraries(Clas12Ana ${ROOT_LIBRARIES})
+target_link_libraries(Clas12Debug ${ROOT_LIBRARIES})
 
