@@ -15,6 +15,7 @@
  #include "TFile.h"
  #include "TCanvas.h"
  #include <sstream>
+ #include "clas12debug.h"
 
  #define CLAS12ANA_DIR _CLAS12ANA_DIR
 
@@ -29,10 +30,15 @@
  {
 
   public:
-   clas12ana() 
+   clas12ana()
      {
        Init();
+     };
 
+   ~clas12ana()
+     {
+       if(debug_plots)
+	 debug_c.WriteDebugPlots();
      };
 
    void Init();
@@ -43,11 +49,9 @@
    void readEcalSFPar(const char* filename);
    void printParams();
 
-   void InitDebugPlots();
-   void WriteDebugPlots();
+   //   void InitDebugPlots();
    void Clear();
    void Run(const std::unique_ptr<clas12::clas12reader>& c12);
-   void plotDebug();
 
    double getSF(region_part_ptr p);
 
@@ -61,6 +65,7 @@
    void setVertexCuts(bool flag = true)  {f_vertexCuts = flag;};
    void setVertexCorrCuts(bool flag = true)  {f_corr_vertexCuts = flag;};
 
+   int getCDRegion(region_part_ptr p);
 
    TVector3 getCOM(TLorentzVector l, TLorentzVector r, TLorentzVector q);
 
@@ -117,8 +122,6 @@
 
    double getEventMult(){return event_mult;};
 
-   void debugByPid(region_part_ptr p);
-
    bool EcalEdgeCuts(region_part_ptr p);
    bool checkEcalPCuts(region_part_ptr p);
    bool checkEcalSFCuts(region_part_ptr p);
@@ -137,8 +140,6 @@
 
    void setCDCutRegion(int region){region_cut = region;};
    
-   void fillDCdebug(region_part_ptr p,TH2D **h);
-
    void getLeadRecoilSRC(TLorentzVector beam, TLorentzVector target, TLorentzVector el);
    std::vector<region_part_ptr> getLeadSRC(){return lead_proton;};
    std::vector<region_part_ptr> getRecoilSRC(){return recoil_proton;};
@@ -146,6 +147,8 @@
 
 
   private:
+
+   clas12debug debug_c; //debug class for plotting general plots
 
    std::vector<region_part_ptr> electrons;
    std::vector<region_part_ptr> protons;
@@ -223,71 +226,7 @@
 
    double event_mult = 0; //charged particle multiplicity 
 
-   //debugging tools
-   TString debug_fileName = "./debugOutputFile.root";
-   bool debug_plots = true;
-   TH1D *ecal_sf[7]; //ECAL sampling fraction
-   TH1D *dc[4][7];   //DC hit map
-
-
-
-   TH2D *sf_e_debug_b[7] = {nullptr};
-   TH2D *sf_e_debug_a[7] = {nullptr};
-   TH2D *sf_p_debug_b[7] = {nullptr};
-   TH2D *sf_p_debug_a[7] = {nullptr};
-
-   TH2D *pid_cd_debug = new TH2D("pid_cd_debug","PID Uncut CD",100,0,3,100,0,1.2);
-   TH2D *pid_fd_debug = new TH2D("pid_fd_debug","PID Uncut FD",100,0,5,100,0,1.2);
-
-   TH2D *sf_v_ecalIN_debug = new TH2D("sf_v_ecalIN_debug","",100,0,30,100,0,.4);
-   TH2D *sf_w_ecalIN_debug = new TH2D("sf_w_ecalIN_debug","",100,0,30,100,0,.4);
-
-   TH2D *sf_v_ecalOUT_debug = new TH2D("sf_v_ecalOUT_debug","",100,0,30,100,0,.4);
-   TH2D *sf_w_ecalOUT_debug = new TH2D("sf_w_ecalOUT_debug","",100,0,30,100,0,.4);
-
-   TH2D *sf_v_pcal_debug = new TH2D("sf_v_pcal_debug","",100,0,30,100,0,.4);
-   TH2D *sf_w_pcal_debug = new TH2D("sf_w_pcal_debug","",100,0,30,100,0,.4);
-
-   TH2D *sf_v_ecalIN_a_debug = new TH2D("sf_v_ecalIN_a_debug","",100,0,30,100,0,.4);
-   TH2D *sf_w_ecalIN_a_debug = new TH2D("sf_w_ecalIN_a_debug","",100,0,30,100,0,.4);
-
-   TH2D *sf_v_ecalOUT_a_debug = new TH2D("sf_v_ecalOUT_a_debug","",100,0,30,100,0,.4);
-   TH2D *sf_w_ecalOUT_a_debug = new TH2D("sf_w_ecalOUT_a_debug","",100,0,30,100,0,.4);
-
-   TH2D *sf_v_pcal_a_debug = new TH2D("sf_v_pcal_a_debug","",100,0,30,100,0,.4);
-   TH2D *sf_w_pcal_a_debug = new TH2D("sf_w_pcal_a_debug","",100,0,30,100,0,.4);
-
-   TH2D *pid_proton_fd_debug = new TH2D("pid_proton_fd_debug","PID Cut Proton FD",100,0,5,100,0,1.2);
-   TH2D *pid_proton_cd_debug = new TH2D("pid_proton_cd_debug","PID Cut Proton CD",100,0,5,100,0,1.2);
-   TH2D *pid_piplus_fd_debug = new TH2D("pid_piplus_fd_debug","PID Cut #pi + FD",100,0,5,100,0,1.2);
-   TH2D *pid_piplus_cd_debug = new TH2D("pid_piplus_cd_debug","PID Cut #pi + CD",100,0,5,100,0,1.2);
-   TH2D *pid_kplus_fd_debug = new TH2D("pid_kplus_fd_debug","PID Cut K+ FD",100,0,5,100,0,1.2);
-   TH2D *pid_kplus_cd_debug = new TH2D("pid_kplus_cd_debug","PID Cut K+ CD",100,0,5,100,0,1.2);
-
-   TH2D *pid_piminus_fd_debug = new TH2D("pid_piminus_fd_debug","PID Cut #pi + FD",100,0,5,100,0,1.2);
-   TH2D *pid_piminus_cd_debug = new TH2D("pid_piminus_cd_debug","PID Cut #pi + CD",100,0,5,100,0,1.2);
-   TH2D *pid_kminus_fd_debug = new TH2D("pid_kminus_fd_debug","PID Cut K+ FD",100,0,5,100,0,1.2);
-   TH2D *pid_kminus_cd_debug = new TH2D("pid_kminus_cd_debug","PID Cut K+ CD",100,0,5,100,0,1.2);
-   TH2D *pid_neutrals_fd_debug = new TH2D("pid_neutrals_fd_debug","PID Cut neutrals FD",100,0,5,100,0,1.2);
-   TH2D *pid_neutrals_cd_debug = new TH2D("pid_neutrals_cd_debug","PID Cut neutrals CD",100,0,5,100,0,1.2);
-   TH2D *pid_deuteron_fd_debug = new TH2D("pid_deuteron_fd_debug","PID Cut deuteron FD",100,0,5,100,0,1.2);
-   TH2D *pid_deuteron_cd_debug = new TH2D("pid_deuteron_cd_debug","PID Cut deutereon CD",100,0,5,100,0,1.2);
-
-   TH1D *el_vz_debug = new TH1D("el_vz_debug","El vertex ",100,-20,10);
-   TH1D *el_vz_p_debug = new TH1D("el_vz_p_debug","El-proton vertex ",100,-10,10);
-
-   TH2D *cd_particles_b = new TH2D("cd_particles_b","Pt;phi(deg);CD protons before edge cut",100,-180,180,100,0,1.);
-   TH2D *cd_particles_a = new TH2D("cd_particles_a","Pt;phi(deg);CD protons after edge cut ",100,-180,180,100,0,1.);
-
-   TH2D *dc_hit_map_a[4]; //3 regions
-   TH2D *dc_hit_map_b[4]; //3 regions
-
-   TH2D *dc_hit_map_a_proton[4]; //3 regions
-   TH2D *dc_hit_map_b_proton[4]; //3 regions
-
-   TH2D *dc_hit_map_a_pion[4]; //3 regions
-   TH2D *dc_hit_map_b_pion[4]; //3 regions
-
+   bool debug_plots = false;
  };
 
 #endif
