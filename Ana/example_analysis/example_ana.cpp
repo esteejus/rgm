@@ -136,8 +136,7 @@ int main(int argc, char ** argv)
       auto electrons = clasAna.getByPid(11);
       auto protons = clasAna.getByPid(2212);
 
-
-      if(electrons.size() == 1 && protons.size() >= 1)
+      if(electrons.size() == 1)
 	{
 	  SetLorentzVector(el,electrons[0]);
 	  //	  SetLorentzVector(ptr,protons[0]);

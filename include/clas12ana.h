@@ -53,7 +53,7 @@
    void Clear();
    void Run(const std::unique_ptr<clas12::clas12reader>& c12);
 
-   double getSF(region_part_ptr p);
+   double getSF(const region_part_ptr &p);
 
    void setEcalPCuts(bool flag = true)     {f_ecalPCuts = flag;}; //option to have several cuts
    void setEcalSFCuts(bool flag = true)    {f_ecalSFCuts = flag;}; //option to have several cuts
@@ -65,7 +65,7 @@
    void setVertexCuts(bool flag = true)  {f_vertexCuts = flag;};
    void setVertexCorrCuts(bool flag = true)  {f_corr_vertexCuts = flag;};
 
-   int getCDRegion(region_part_ptr p);
+   int getCDRegion(const region_part_ptr &p);
 
    TVector3 getCOM(TLorentzVector l, TLorentzVector r, TLorentzVector q);
 
@@ -93,7 +93,8 @@
 	 return otherpart;
      }
 
-   void setByPid(region_part_ptr p)
+
+   void setByPid(const region_part_ptr &p)
      {
        int pid = p->par()->getPid();
        if( pid == 11)
@@ -121,17 +122,16 @@
 
 
    double getEventMult(){return event_mult;};
+   bool EcalEdgeCuts(const region_part_ptr &p);
+   bool checkEcalPCuts(const region_part_ptr &p);
+   bool checkEcalSFCuts(const region_part_ptr &p);
+   bool checkPidCut(const region_part_ptr &p);
+   bool checkVertex(const region_part_ptr &p);
+   bool DCEdgeCuts(const region_part_ptr &p);
+   bool CDEdgeCuts(const region_part_ptr &p);
+   bool checkVertexCorrelation(const region_part_ptr &el,const region_part_ptr &p);
 
-   bool EcalEdgeCuts(region_part_ptr p);
-   bool checkEcalPCuts(region_part_ptr p);
-   bool checkEcalSFCuts(region_part_ptr p);
-   bool checkPidCut(region_part_ptr p);
-   bool checkVertex(region_part_ptr p);
-   bool checkVertexCorrelation(region_part_ptr el,region_part_ptr p);
-   bool DCEdgeCuts(region_part_ptr p);
-   bool CDEdgeCuts(region_part_ptr p);
-
-   bool CDRegionCuts(region_part_ptr p);
+   bool CDRegionCuts(const region_part_ptr &p);
 
    void setVxcuts(double min, double max){vertex_x_cuts.at(0)=min; vertex_x_cuts.at(1)=max;};
    void setVycuts(double min, double max){vertex_y_cuts.at(0)=min; vertex_y_cuts.at(1)=max;};
@@ -161,6 +161,18 @@
    std::vector<region_part_ptr> kminus;
    std::vector<region_part_ptr> otherpart;
 
+   /*
+   std::vector<std::unique_ptr<region_part_ptr>> electrons;
+   std::vector<std::unique_ptr<region_part_ptr>> protons;
+   std::vector<std::unique_ptr<region_part_ptr>> deuterons;
+   std::vector<std::unique_ptr<region_part_ptr>> neutrals;
+   std::vector<std::unique_ptr<region_part_ptr>> neutrons;
+   std::vector<std::unique_ptr<region_part_ptr>> piplus;
+   std::vector<std::unique_ptr<region_part_ptr>> piminus;
+   std::vector<std::unique_ptr<region_part_ptr>> kplus;
+   std::vector<std::unique_ptr<region_part_ptr>> kminus;
+   std::vector<std::unique_ptr<region_part_ptr>> otherpart;
+   */
 
    //SRC 
    std::vector<region_part_ptr> lead_proton;

@@ -16,7 +16,7 @@ TVector3 rotate(TVector3 vec, int sector)
 }
 
 
-int clas12ana::getCDRegion(region_part_ptr p)
+int clas12ana::getCDRegion(const region_part_ptr &p)
 {
   int region = -1;
 
@@ -62,14 +62,10 @@ void clas12ana::Clear()
    event_mult = 0;
  }
 
-//void clas12ana::Run()
+
 void clas12ana::Run(const std::unique_ptr<clas12::clas12reader>& c12)
 {
   Clear();
-  
-  //  auto particles = _detParticles; //particles is now a std::vector of particles for this event
-  //  auto &c12=this->C12ref();
-
 
   auto particles = c12->getDetParticles(); //particles is now a std::vector of particles for this event
   auto electrons_det = c12->getByID(11);
@@ -81,85 +77,87 @@ void clas12ana::Run(const std::unique_ptr<clas12::clas12reader>& c12)
 	    debug_c.fillBeforeEl(el);
 	}
 
-       //Cut out electrons that do not pass cuts
-      electrons_det.erase(std::remove_if(electrons_det.begin(),electrons_det.end(),[this](auto &el){
-	    if( el->che(HTCC)->getNphe() <= 2)           //photo electron min cut
-	      return true;
-	    else if(!checkEcalSFCuts(el) && f_ecalSFCuts)//ECAL SF cuts
-	      return true;
-	    else if(!checkEcalPCuts(el) && f_ecalPCuts)  //ECAL SF cuts
-	      return true;
-	    else if(!EcalEdgeCuts(el) && f_ecalEdgeCuts) //ECAL edge cuts
-	      return true;
-	    else if(!checkVertex(el)  && f_vertexCuts)   //Vertex cut
-	      return true;
-	    else if(!DCEdgeCuts(el)   && f_DCEdgeCuts)   //DC edge cut
-	      return true;
-	    else
-	      return false;
-	  }), electrons_det.end());
-	       
+
+      std::for_each(electrons_det.begin(),electrons_det.end(),[this](auto el)
+		    {
+		      if((el->che(HTCC)->getNphe() > 2)        &&  //photo electron min cut
+			 (checkEcalSFCuts(el) && f_ecalSFCuts) && //ECAL SF cuts
+			 (checkEcalPCuts(el) && f_ecalPCuts)   && //ECAL SF cuts
+			 (EcalEdgeCuts(el) && f_ecalEdgeCuts)  && //ECAL edge cuts
+			 (checkVertex(el)  && f_vertexCuts)    && //Vertex cut
+			 (DCEdgeCuts(el)   && f_DCEdgeCuts) )       //DC edge cut
+			setByPid(el);
+		    });
+
 
       if(debug_plots)
 	{
-	  for(auto el : electrons_det)
+	  for(auto el : electrons)
 	    debug_c.fillAfterEl(el);
 	}
 
 
-   if(electrons_det.size() == 1) //good trigger electron
+   if(electrons.size() == 1) //good trigger electron
      {
-       
-       //       setByPid(electrons_det[0]); //set good trigger electron
 
       if(debug_plots)
 	{
 	  for(auto p : particles)
-	    debug_c.fillBeforePart(p);
+	    if(p->par()->getPid() == 2212 || p->par()->getPid() == -211 || p->par()->getPid() == 211)
+	      debug_c.fillBeforePart(p);
 	}
 
 
-       //Cut out particles that do not pass cuts
-       particles.erase(std::remove_if(particles.begin(),particles.end(),[this,electrons_det](auto &p){
-	     //neutrals and electrons don't follow cuts below, skip them 
-	     if((p)->par()->getCharge() == 0 || (p)->par()->getPid() == 11 )
-	       {
-		 setByPid(p);
-		 return true;
-	       }
-	     else
-	       {
-		 if((p)->par()->getPid() != 11)
-		   event_mult++;
-	       }
-	     
-	     
-	     if(!checkPidCut(p) && f_pidCuts)	         //PID cuts
-	       return true;
-	     else if(!checkVertex(p) && f_vertexCuts)  //Vertex cut
-	       return true;
-	     else if(!CDEdgeCuts(p)  && f_CDEdgeCuts)  //CD edge cut
-	       return true;
-	     else if(!CDRegionCuts(p)  && f_CDRegionCuts)  //CD edge cut
-	       return true;
-	     else if(!DCEdgeCuts(p) && f_DCEdgeCuts)   //DC edge cut
-	       return true;
-	     else if(!checkVertexCorrelation(electrons_det[0],p) && f_corr_vertexCuts) //Vertex correlation cut between electron
-	       return true;
-	     else{
-	       setByPid(p);
-	       return false;
-	     }
-	   }), particles.end());
-       
-       //       std::for_each(particles.begin(),particles.end(),[debug_c](auto const &p){debug_c.fillAfterPart(p)};
+      /*
+	This may be a strange way to check the cuts, maybe there is a better way
+	We need to ensure that the flag f_cuts is on otherwise we don't want to apply any cut
+	The below logic will return particles that did not pass any cut (for only cut flags that are on
+	Then I will invert the logic using !(logic) to return when the particle do pass all cuts
+
+	(!checkPidCut(p) && f_pidCuts)    ||	         //PID cuts
+	(!checkVertex(p) && f_vertexCuts) ||  //Vertex cut
+	(!CDEdgeCuts(p)  && f_CDEdgeCuts) ||  //CD edge cut
+	(!CDRegionCuts(p)  && f_CDRegionCuts) ||  //CD edge cut
+	(!DCEdgeCuts(p) && f_DCEdgeCuts)  || //DC edge cut
+	(!checkVertexCorrelation(electrons_det[0],p) && f_corr_vertexCuts) //Vertex correlation cut between electron
+      */
+
+      std::for_each(particles.begin(),particles.end(),[this,electrons_det](auto p)
+		    {
+		      //neutrals and electrons don't follow cuts below, skip them 
+		      if(p->par()->getCharge() == 0 && p->par()->getPid() != 11 )
+			{
+			  setByPid(p);
+			  return;
+			}
+		      else if(p->par()->getPid() != 11  && electrons.size() > 0)
+			{
+			    event_mult++;
+
+			    if( !( (!checkPidCut(p) && f_pidCuts)        || //PID cuts
+				   (!checkVertex(p) && f_vertexCuts)     || //Vertex cut
+				   (!CDEdgeCuts(p)  && f_CDEdgeCuts)     || //CD edge cut
+				   (!CDRegionCuts(p)  && f_CDRegionCuts) || //CD edge cut
+				   (!DCEdgeCuts(p) && f_DCEdgeCuts)      || //DC edge cut
+				   (!checkVertexCorrelation(electrons_det[0],p) && f_corr_vertexCuts))  //Vertex correlation cut between electron
+				)
+			      setByPid(p);
+			}
+		    });
+
 
        if(debug_plots)
 	 {
-	   for(auto p : particles)
+	   for(auto p : protons)
 	     debug_c.fillAfterPart(p);
-	 }
+	   for(auto p : piplus)
+	     debug_c.fillAfterPart(p);
+	   for(auto p : piminus)
+	     debug_c.fillAfterPart(p);
 
+	   for(auto el : electrons)
+	     debug_c.fillAfterEl(el);
+	 }
 	   
      }//good electron loop
        
@@ -249,7 +247,7 @@ void clas12ana::Init()
 }
 
 
-bool clas12ana::DCEdgeCuts(region_part_ptr p)
+bool clas12ana::DCEdgeCuts(const region_part_ptr &p)
 {
   //true if inside cut
   //cut all charged particles
@@ -274,7 +272,7 @@ bool clas12ana::DCEdgeCuts(region_part_ptr p)
 
 
 
-bool clas12ana::EcalEdgeCuts(region_part_ptr p)
+bool clas12ana::EcalEdgeCuts(const region_part_ptr &p)
 {
   //true if inside cut
   double sampling_frac = getSF(p);
@@ -292,7 +290,7 @@ bool clas12ana::EcalEdgeCuts(region_part_ptr p)
 }
 
 
-bool clas12ana::checkEcalSFCuts(region_part_ptr p)
+bool clas12ana::checkEcalSFCuts(const region_part_ptr &p)
 {
   //true if inside cut
 
@@ -319,7 +317,7 @@ bool clas12ana::checkEcalSFCuts(region_part_ptr p)
 }
 
 
-bool clas12ana::checkEcalPCuts(region_part_ptr p)
+bool clas12ana::checkEcalPCuts(const region_part_ptr &p)
 {
   //true if inside cut
 
@@ -345,7 +343,7 @@ bool clas12ana::checkEcalPCuts(region_part_ptr p)
 
 
 
-double clas12ana::getSF(region_part_ptr p)
+double clas12ana::getSF(const region_part_ptr &p)
 {
   if(p->par()->getPid() == 11)
     return (p->cal(clas12::PCAL)->getEnergy() +  p->cal(clas12::ECIN)->getEnergy() +  p->cal(clas12::ECOUT)->getEnergy()) / p->par()->getP();
@@ -354,7 +352,7 @@ double clas12ana::getSF(region_part_ptr p)
 }
 
 
-bool clas12ana::CDRegionCuts(region_part_ptr p)
+bool clas12ana::CDRegionCuts(const region_part_ptr &p)
 {
   //true if inside cut
   //cut all charged particles
@@ -388,7 +386,7 @@ bool clas12ana::CDRegionCuts(region_part_ptr p)
 
 
 
-bool clas12ana::CDEdgeCuts(region_part_ptr p)
+bool clas12ana::CDEdgeCuts(const region_part_ptr &p)
 {
   //true if inside cut
   //cut all charged particles
@@ -410,7 +408,7 @@ bool clas12ana::CDEdgeCuts(region_part_ptr p)
 }
 
 
-bool clas12ana::checkVertex(region_part_ptr p)
+bool clas12ana::checkVertex(const region_part_ptr &p)
 {
   //true if inside cut
   return ( (p->par()->getVx() > vertex_x_cuts.at(0) && p->par()->getVx() < vertex_x_cuts.at(1)) 
@@ -419,13 +417,13 @@ bool clas12ana::checkVertex(region_part_ptr p)
 
 }
 
-bool clas12ana::checkVertexCorrelation(region_part_ptr el, region_part_ptr p)
+bool clas12ana::checkVertexCorrelation(const region_part_ptr &el, const region_part_ptr &p)
 {
   //true if inside cut
   return ( (p->par()->getVz() - el->par()->getVz()) > vertex_corr_cuts.at(0) &&  (p->par()->getVz() - el->par()->getVz()) < vertex_corr_cuts.at(1) );
 }
 
-bool clas12ana::checkPidCut(region_part_ptr p)
+bool clas12ana::checkPidCut(const region_part_ptr &p)
 {
   //function returns true if inside PID cuts
 
@@ -706,6 +704,7 @@ TVector3 clas12ana::getCOM(TLorentzVector lead, TLorentzVector recoil, TLorentzV
 
 void clas12ana::getLeadRecoilSRC(TLorentzVector beam, TLorentzVector target, TLorentzVector el)
 {
+
   lead_proton.clear();
   recoil_proton.clear();
 
@@ -720,9 +719,9 @@ void clas12ana::getLeadRecoilSRC(TLorentzVector beam, TLorentzVector target, TLo
   int lead_idx   = -1;
   int lead_mult  = 0;
 
+
   for(int idx_ptr = 0; idx_ptr < protons.size(); idx_ptr++)
     {
-
 
       ptr.SetXYZM(protons.at(idx_ptr)->par()->getPx(),protons.at(idx_ptr)->par()->getPy(),protons.at(idx_ptr)->par()->getPz(),mass_proton);
 
@@ -745,6 +744,8 @@ void clas12ana::getLeadRecoilSRC(TLorentzVector beam, TLorentzVector target, TLo
   
   lead_proton.push_back(protons.at(lead_idx));
 
+  //  cout<<protons.size()<<endl;
+
   int recoil_idx = -1;
 
   for(int idx_ptr = 0; idx_ptr < protons.size(); idx_ptr++)
@@ -759,6 +760,7 @@ void clas12ana::getLeadRecoilSRC(TLorentzVector beam, TLorentzVector target, TLo
 
 
   return;  
+
 }
 
 
