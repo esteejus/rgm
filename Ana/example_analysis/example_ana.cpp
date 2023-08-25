@@ -62,24 +62,17 @@ int main(int argc, char ** argv)
 
 
 
-  clas12ana clasAna;
+  //Constructor accepts
+  bool outputDebugPlots = true;
+  clas12ana clasAna(outputDebugPlots); 
 
-  //Read in target parameter files                                                                                                                                                           
   /*
   clasAna.readInputParam("ana.par");
   clasAna.readEcalSFPar("paramsSF_40Ca_x2.dat");
   clasAna.readEcalPPar("paramsPI_40Ca_x2.dat");
   clasAna.printParams();
   */
-
   clasAna.printParams();
-
-  /*
-  clas12ana clasAna;
-  clasAna.Add(inFile);
-  clasAna.SetReaderTags({0});
-  clasAna.db()->turnOffQADB();
-  */
 
   auto &c12=chain.C12ref();
 
@@ -108,22 +101,10 @@ int main(int argc, char ** argv)
 
   TH1D *missm = new TH1D("missm","Missing mass",100,0.5,1.5);
 
-  clasAna.setEcalSFCuts();
-  clasAna.setEcalPCuts();
-  clasAna.setEcalEdgeCuts();
-  clasAna.setPidCuts();
-  clasAna.setVertexCuts();
-  clasAna.setVertexCorrCuts();
-  clasAna.setDCEdgeCuts();
-  clasAna.setCDEdgeCuts();  
   //  clasAna.setCDRegionCuts();  
-
-  clasAna.setVzcuts(-6,1);
   //  clasAna.setCDCutRegion(2);  
+  clasAna.setVzcuts(-6,1);
   clasAna.setVertexCorrCuts(-3,1);
-
-
-
 
   while(chain.Next())
     {

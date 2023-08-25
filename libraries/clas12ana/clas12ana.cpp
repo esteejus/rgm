@@ -44,7 +44,6 @@ int clas12ana::getCDRegion(const region_part_ptr &p)
 
 void clas12ana::Clear()
  {
-   //  particles.clear();
    electrons.clear();
    protons.clear();
    deuterons.clear();
@@ -148,6 +147,7 @@ void clas12ana::Run(const std::unique_ptr<clas12::clas12reader>& c12)
 
        if(debug_plots)
 	 {
+
 	   for(auto p : protons)
 	     debug_c.fillAfterPart(p);
 	   for(auto p : piplus)
@@ -157,6 +157,7 @@ void clas12ana::Run(const std::unique_ptr<clas12::clas12reader>& c12)
 
 	   for(auto el : electrons)
 	     debug_c.fillAfterEl(el);
+
 	 }
 	   
      }//good electron loop
@@ -235,13 +236,10 @@ void clas12ana::Init()
 	}
     }
 
-  //  if(debug_plots)
-    //    InitDebugPlots();
-
 
   this -> readInputParam( (std::string(CLAS12ANA_DIR) + "/Ana/cutFiles/ana.par").c_str() );
-  this ->  readEcalSFPar( (std::string(CLAS12ANA_DIR) +"/Ana/cutFiles/paramsSF_40Ca_x2.dat").c_str() );
-  this ->   readEcalPPar( (std::string(CLAS12ANA_DIR) +"/Ana/cutFiles/paramsPI_40Ca_x2.dat").c_str());
+  this -> readEcalSFPar( (std::string(CLAS12ANA_DIR) +"/Ana/cutFiles/paramsSF_40Ca_x2.dat").c_str() );
+  this -> readEcalPPar( (std::string(CLAS12ANA_DIR) +"/Ana/cutFiles/paramsPI_40Ca_x2.dat").c_str());
   this -> printParams();
 
 }
@@ -694,9 +692,6 @@ TVector3 clas12ana::getCOM(TLorentzVector lead, TLorentzVector recoil, TLorentzV
 
   com*= 1000; //GeV to MeV
 
-  //  if(abs(com.Dot(vy)) < 20)
-  //  cout<<com.Mag()<<" "<<com.Dot(vx)<<" "<<com.Dot(vy)<<" "<<com.Dot(vz)<<" "<<lead.P()<<" "<<recoil.P()<<endl;
-
   return TVector3(com.Dot(vx),com.Dot(vy),com.Dot(vz));
 }
 
@@ -762,69 +757,3 @@ void clas12ana::getLeadRecoilSRC(TLorentzVector beam, TLorentzVector target, TLo
   return;  
 
 }
-
-
-
-/*
-
-void clas12ana::getLeadRecoilSRC(TLorentzVector beam, TLorentzVector target, TLorentzVector el)
-{
-  lead_proton.clear();
-  recoil_proton.clear();
-
-  TLorentzVector ptr;
-  TLorentzVector q = beam - el;                  //photon  4-vector	
-  double q2        = -q.M2();
-  double xb        = q2/(2 * mass_proton * (beam.E() - el.E()) ); //x-borken       
-
-  if( !(q2 > q2_cut && xb > xb_cut) )
-    return; 
-  
-  int lead_idx   = -1;
-  int lead_mult  = 0;
-  int recoil_idx = -1;
-
-  for(int idx_ptr = 0; idx_ptr < protons.size(); idx_ptr++)
-    {
-      ptr.SetXYZM(protons.at(idx_ptr)->par()->getPx(),protons.at(idx_ptr)->par()->getPy(),protons.at(idx_ptr)->par()->getPz(),mass_proton);
-      double theta_pq = ptr.Vect().Angle(q.Vect()) * TMath::RadToDeg(); //angle between vectors p_miss and q                                                                               
-      double p_q       = ptr.Vect().Mag()/q.Vect().Mag(); // |p|/|q|                               
-      if(theta_pq < theta_pq_cut && (p_q < pq_cut[1] && p_q > pq_cut[0]) )
-	{
-	  lead_idx = idx_ptr;
-	  lead_mult++; //check for double lead
-	}
-    }
-
-  ptr.SetXYZM(0,0,0,0);
-  
-  if(lead_idx == -1)
-    return;
-  
-  
-  ptr.SetXYZM(protons.at(lead_idx)->par()->getPx(),protons.at(lead_idx)->par()->getPy(),protons.at(lead_idx)->par()->getPz(),mass_proton);
-  
-  TLorentzVector miss = beam + target - el - ptr; //missing 4-vector                   
-  double pmiss = miss.P();
-  double mmiss   = miss.M();
-  
-  if( pmiss > pmiss_cut && mmiss > mmiss_cut[0] && mmiss < mmiss_cut[1] )
-      lead_proton.push_back(protons.at(lead_idx));
-
-
-
-  for(int idx_ptr = 0; idx_ptr < protons.size(); idx_ptr++)
-    {
-      if(idx_ptr == lead_idx)
-	continue;
-
-      if(protons[idx_ptr]->par()->getP() > recoil_mom_cut)
-	recoil_proton.push_back(protons.at(idx_ptr));
-
-    }
-
-
-  return;  
-}
-*/
-

@@ -35,6 +35,12 @@
        Init();
      };
 
+   clas12ana(bool debug): debug_plots{debug}
+     {
+       Init();
+     };
+
+
    ~clas12ana()
      {
        if(debug_plots)
@@ -64,6 +70,7 @@
    void setPidCuts(bool flag = true)     {f_pidCuts = flag;};
    void setVertexCuts(bool flag = true)  {f_vertexCuts = flag;};
    void setVertexCorrCuts(bool flag = true)  {f_corr_vertexCuts = flag;};
+   void setDebugPlots(bool flag = true)  {debug_plots = flag;};
 
    int getCDRegion(const region_part_ptr &p);
 
