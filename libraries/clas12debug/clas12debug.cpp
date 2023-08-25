@@ -202,24 +202,24 @@ void clas12debug::debugByPid(const clas12::region_part_ptr &p)
    for(int i = 1; i <= 6; i++)
      {
 
-       sf_p_debug_b.push_back(std::make_unique<TH2D>(Form("sf_p_debug_b_sector_%d",i),Form("Sampling Fraction Before Cuts Sector_%d",i),100,0,6,100,0,.4));
-       sf_p_debug_a.push_back(std::make_unique<TH2D>(Form("sf_p_debug_a_sector_%d",i),Form("Sampling Fraction  After Cuts Sector_%d",i),100,0,6,100,0,.4));
+       sf_p_debug_b.push_back(std::make_unique<TH2D>(Form("sf_p_debug_b_sector_%d",i),Form("Sampling Fraction Before Cuts Sector_%d;Momentum (GeV/c);Sampling Fraction",i),100,0,6,100,0,.4));
+       sf_p_debug_a.push_back(std::make_unique<TH2D>(Form("sf_p_debug_a_sector_%d",i),Form("Sampling Fraction  After Cuts Sector_%d;Momentum (GeV/c);Sampling Fraction",i),100,0,6,100,0,.4));
 
-       sf_e_debug_b.push_back(std::make_unique<TH2D>(Form("sf_e_debug_b_sector_%d",i),Form("Sampling Fraction Before Cuts Sector_%d",i),100,0,1.5,100,0,.4));
-       sf_e_debug_a.push_back(std::make_unique<TH2D>(Form("sf_e_debug_a_sector_%d",i),Form("Sampling Fraction  After Cuts Sector_%d",i),100,0,1.5,100,0,.4));
+       sf_e_debug_b.push_back(std::make_unique<TH2D>(Form("sf_e_debug_b_sector_%d",i),Form("Sampling Fraction Before Cuts Sector_%d;Energy (GeV);Sampling Fraction",i),100,0,1.5,100,0,.4));
+       sf_e_debug_a.push_back(std::make_unique<TH2D>(Form("sf_e_debug_a_sector_%d",i),Form("Sampling Fraction  After Cuts Sector_%d;Energy (GeV);Sampling Fraction",i),100,0,1.5,100,0,.4));
      }
 
 
    //DC hit maps
    for(int i = 1; i <=3 ; i++)
      {
-       dc_hit_map_b.push_back(std::make_unique<TH2D>(Form("dc_hitmap_before_%d",i), Form("Region %d Before Cuts",i),600,-300,300,600,-300,300));
-       dc_hit_map_a.push_back(std::make_unique<TH2D>(Form("dc_hitmap_after_%d",i), Form("Region %d After Cuts",i),600,-300,300,600,-300,300));
+       dc_hit_map_b.push_back(std::make_unique<TH2D>(Form("dc_hitmap_before_%d",i), Form("Region %d Before Cuts;x-position (cm);y-position (cm)",i),600,-300,300,600,-300,300));
+       dc_hit_map_a.push_back(std::make_unique<TH2D>(Form("dc_hitmap_after_%d",i), Form("Region %d After Cuts;x-position (cm);y-position (cm)",i),600,-300,300,600,-300,300));
 
-       dc_hit_map_a_proton.push_back(std::make_unique<TH2D>(Form("dc_hitmap_after_proton_%d",i), Form("Region %d After Cuts",i),600,-300,300,600,-300,300));
-       dc_hit_map_b_proton.push_back(std::make_unique<TH2D>(Form("dc_hitmap_before_proton_%d",i), Form("Region %d Before Cuts",i),600,-300,300,600,-300,300));
-       dc_hit_map_a_pion.push_back(std::make_unique<TH2D>(Form("dc_hitmap_after_pion_%d",i), Form("Region %d After Cuts",i),600,-300,300,600,-300,300));
-       dc_hit_map_b_pion.push_back(std::make_unique<TH2D>(Form("dc_hitmap_before_pion_%d",i), Form("Region %d Before Cuts",i),600,-300,300,600,-300,300));
+       dc_hit_map_a_proton.push_back(std::make_unique<TH2D>(Form("dc_hitmap_after_proton_%d",i), Form("Region %d After Cuts;x-position (cm);y-position (cm)",i),600,-300,300,600,-300,300));
+       dc_hit_map_b_proton.push_back(std::make_unique<TH2D>(Form("dc_hitmap_before_proton_%d",i), Form("Region %d Before Cuts;x-position (cm);y-position (cm)",i),600,-300,300,600,-300,300));
+       dc_hit_map_a_pion.push_back(std::make_unique<TH2D>(Form("dc_hitmap_after_pion_%d",i), Form("Region %d After Cuts;x-position (cm);y-position (cm)",i),600,-300,300,600,-300,300));
+       dc_hit_map_b_pion.push_back(std::make_unique<TH2D>(Form("dc_hitmap_before_pion_%d",i), Form("Region %d Before Cuts;x-position (cm);y-position (cm)",i),600,-300,300,600,-300,300));
 
       //       dc_hit_map_b[i] = new TH2D(Form("dc_hitmap_before_%d",i), Form("Region %d Before Cuts",i),600,-300,300,600,-300,300);
        //       dc_hit_map_a[i] = new TH2D(Form("dc_hitmap_after_%d",i), Form("Region %d After Cuts",i),600,-300,300,600,-300,300);
@@ -253,7 +253,7 @@ void clas12debug::debugByPid(const clas12::region_part_ptr &p)
        sf_e_debug_a[i]->Write();
      }
    */
-   /*
+   /*n
    for(int i = 0; i <= 6; i++)
      {
        ecal_sf_fcn[0][i]->Write();
