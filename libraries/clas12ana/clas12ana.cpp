@@ -76,15 +76,14 @@ void clas12ana::Run(const std::unique_ptr<clas12::clas12reader>& c12)
 	    debug_c.fillBeforeEl(el);
 	}
 
-
       std::for_each(electrons_det.begin(),electrons_det.end(),[this](auto el)
 		    {
-		      if((el->che(HTCC)->getNphe() > 2)        &&  //photo electron min cut
-			 (checkEcalSFCuts(el) && f_ecalSFCuts) && //ECAL SF cuts
-			 (checkEcalPCuts(el) && f_ecalPCuts)   && //ECAL SF cuts
-			 (EcalEdgeCuts(el) && f_ecalEdgeCuts)  && //ECAL edge cuts
-			 (checkVertex(el)  && f_vertexCuts)    && //Vertex cut
-			 (DCEdgeCuts(el)   && f_DCEdgeCuts) )       //DC edge cut
+		      if(!((el->che(HTCC)->getNphe() <= 2)        || //Photo electron min cut
+			 (!checkEcalSFCuts(el) && f_ecalSFCuts) || //ECAL SF cuts
+			 (!checkEcalPCuts(el) && f_ecalPCuts)   || //ECAL SF cuts
+			 (!EcalEdgeCuts(el) && f_ecalEdgeCuts)  || //ECAL edge cuts
+			 (!checkVertex(el)  && f_vertexCuts)    || //Vertex cut
+			   (!DCEdgeCuts(el)   && f_DCEdgeCuts)) )     //DC edge cut
 			setByPid(el);
 		    });
 
