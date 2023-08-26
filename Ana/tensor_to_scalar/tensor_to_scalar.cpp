@@ -25,7 +25,6 @@
 #include "clas12reader.h"
 #include "HipoChain.h"
 #include "clas12ana.h"
-#include "clas12debug.h"
 #include "eventcut/functions.h"
 #include "neutron-veto/veto_functions.h"
 
@@ -157,6 +156,9 @@ int main(int argc, char ** argv)
   hist_list_2.push_back(h_beta_p_pCD);
   TH1D * h_numCVT = new TH1D("numCVT","Number of Charged Particles in CVT",10,0,10);
   hist_list_1.push_back(h_numCVT);
+  TH1D * h_CVTpid = new TH1D("CVTpid","PID of Charged Particles in CVT",2000,-2500,2500);
+  hist_list_1.push_back(h_CVTpid);
+
 
   /////////////////////////////////////
   //Histos: recoil proton
@@ -169,13 +171,15 @@ int main(int argc, char ** argv)
   hist_list_1.push_back(h_prec_p);
   TH2D * h_prec_ptheta = new TH2D("prec_ptheta","Recoil Proton Theta vs Momentum;Momentum (GeV/c);#theta (degrees)",30,0.2,1.2,20,40,140);
   hist_list_2.push_back(h_prec_ptheta);
-  TH2D * h_prec_angles = new TH2D("prec_angles","Recoil Proton Angular Distribution;phi (deg);theta (deg)",360,-180,180,45,0,180);
+  TH2D * h_prec_angles = new TH2D("prec_angles","Recoil Proton Angular Distribution;phi (deg);theta (deg)",48,-180,180,45,0,180);
   hist_list_2.push_back(h_prec_angles);
 
   TH2D * h_pp_pmiss = new TH2D("pp_pmiss","Proton Momentum vs Missing Momentum;p_{miss} (GeV/c);Proton Momentum (GeV/c)",100,0,1.5,100,0,1.5);
   hist_list_2.push_back(h_pp_pmiss);
   TH2D * h_pptheta = new TH2D("pptheta","Proton #theta vs Momentum;#theta_{p};Momentum (GeV/c)",180,0,180,50,0,1.5);
   hist_list_2.push_back(h_pptheta);
+  TH1D * h_prec_plead_angle = new TH1D("prec_plead_angle","Angle between lead proton and recoil proton;#theta_{lead,recoil};Counts",180,0,180);
+  hist_list_1.push_back(h_prec_plead_angle);
 
 
   /////////////////////////////////////
@@ -191,11 +195,15 @@ int main(int argc, char ** argv)
   hist_list_2.push_back(h_prec_ptheta);
   TH2D * h_nrec_angles = new TH2D("nrec_angles","Recoil Neutron Angular Distribution;phi (deg);theta (deg)",48,-180,180,45,0,180);
   hist_list_2.push_back(h_nrec_angles);
+  TH2D * h_good_nrec_angles = new TH2D("good_nrec_angles","Recoil Neutron Angular Distribution;phi (deg);theta (deg)",48,-180,180,45,0,180);
+  hist_list_2.push_back(h_good_nrec_angles);
 
   TH2D * h_pn_pmiss = new TH2D("pn_pmiss","Neutron Momentum vs Missing Momentum;p_{miss} (GeV/c);Neutron Momentum (GeV/c)",100,0,1.5,100,0,1.5);
   hist_list_2.push_back(h_pn_pmiss);
   TH2D * h_nptheta = new TH2D("nptheta","Neutron #theta vs Momentum;#theta_{n};Momentum (GeV/c)",180,0,180,50,0,1.5);
   hist_list_2.push_back(h_nptheta);
+  TH1D * h_nrec_plead_angle = new TH1D("nrec_plead_angle","Angle between lead proton and recoil neutron;#theta_{lead,recoil};Counts",180,0,180);
+  hist_list_1.push_back(h_nrec_plead_angle);
 
 
 
@@ -316,17 +324,17 @@ int main(int argc, char ** argv)
   // set up clas12ana cuts
   clasAna.setEcalSFCuts();
   clasAna.setEcalPCuts();
-  clasAna.setEcalEdgeCuts(false);
+  //clasAna.setEcalEdgeCuts(false); // makes particle PID arrays empty
   clasAna.setPidCuts(false);
   clasAna.setVertexCuts();
   clasAna.setVertexCorrCuts();
-  clasAna.setDCEdgeCuts(false);
+  //clasAna.setDCEdgeCuts(false); // makes particle PID arrays empty
   clasAna.setCDEdgeCuts(false);
   //  clasAna.setCDRegionCuts();  
 
   clasAna.setVzcuts(-6,1);
   //  clasAna.setCDCutRegion(2);  
-  //clasAna.setVertexCorrCuts(-3,1);
+  clasAna.setVertexCorrCuts(-3,1);
 
   //Define cut class
   while(chain.Next()==true){
@@ -346,11 +354,12 @@ int main(int argc, char ** argv)
     auto elec = clasAna.getByPid(11);
     auto prot = clasAna.getByPid(2212);
     auto neut = clasAna.getByPid(2112);
-
+//std::cout << elec.size() << '\n';
     // get particles by type
     //auto elec=c12->getByID(11);
     //auto prot=c12->getByID(2212);
     //auto neut=c12->getByID(2112);
+
     auto allParticles=c12->getDetParticles();
     double weight = 1;
     if(isMC){weight=c12->mcevent()->getWeight();}
@@ -501,6 +510,7 @@ h_psrc_count->Fill(pmiss.Mag(),weight);
       if (allParticles[i]->par()->getCharge()==0) {continue;} // look at only charged particles
       if (allParticles[i]->trk(CVT)->getDetector()!=5) {continue;} // look at only particles in CVT
       num_in_CVT = num_in_CVT + 1;
+      h_CVTpid->Fill(allParticles[i]->getPid(),weight);
     }
     h_numCVT->Fill(num_in_CVT);
 
@@ -530,6 +540,7 @@ h_psrc_count->Fill(pmiss.Mag(),weight);
       h_prec_ptheta->Fill(p_recp.Mag(),p_recp.Theta()*180./M_PI,weight);
       h_prec_angles->Fill(p_recp.Phi()*180./M_PI,p_recp.Theta()*180./M_PI,weight);
       h_pptheta->Fill(p_recp.Theta()*180./M_PI,pmiss.Mag(),weight);
+      h_prec_plead_angle->Fill(p_recp.Angle(pL)*180./M_PI,weight);
 
       // close in angle to pmiss
       p_vecX.SetXYZ( recoil[0]->par()->getPx(), recoil[0]->par()->getPy(), recoil[0]->par()->getPz() );
@@ -581,7 +592,7 @@ h_psrc_count->Fill(pmiss.Mag(),weight);
       h_nrec_ptheta->Fill(p_recn.Mag(),p_recn.Theta()*180./M_PI,weight);
       h_nrec_angles->Fill(p_recn.Phi()*180./M_PI,p_recn.Theta()*180./M_PI,weight);
       h_nptheta->Fill(pm_theta,pmiss.Mag(),weight);
-
+      h_nrec_plead_angle->Fill(p_recn.Angle(pL)*180./M_PI,weight);
 
       // calculate features for ML
       Struct ninfo = getFeatures(neut, allParticles, i);
@@ -613,6 +624,7 @@ h_psrc_count->Fill(pmiss.Mag(),weight);
         h_ctof_energy_s->Fill(ctof_energy,weight);
         h_ctof_hits_s->Fill(ctof_hits,weight);
         h_anglediff_s->Fill(angle_diff,weight);
+        h_good_nrec_angles->Fill(p_recn.Phi()*180./M_PI,p_recn.Theta()*180./M_PI,weight);
 
         
         // see if neutron is close in angle to pmiss
@@ -709,13 +721,13 @@ h_psrc_count->Fill(pmiss.Mag(),weight);
   //Histos: all neutrals
   /////////////////////////////////////////////////////
 
-  h_lr_angles->Write();
-
+  //h_lr_angles->Write();
 
   myText->cd();
   text.DrawLatex(0.2,0.9,"C-12");
   myText->Print(fileName,"pdf");
   myText->Clear();
+
 
 
   myCanvas->Divide(2,2);
@@ -728,19 +740,19 @@ h_psrc_count->Fill(pmiss.Mag(),weight);
 
 
   // electrons
-  myText->cd();
+  /*myText->cd();
   text.DrawLatex(0.2,0.9,"(e,e') Cuts:");
   double line = 0.8;
-  /*if(myCut.getDoCut(e_cuts)){
+  if(myCut.getDoCut(e_cuts)){
     myCut.print_cut_onPDF(text,e_nphe,line);
     myCut.print_cut_onPDF(text,e_calv,line);
     myCut.print_cut_onPDF(text,e_calw,line);
     myCut.print_cut_onPDF(text,e_SF,line);
     myCut.print_cut_onPDF(text,e_mom,line);
     myCut.print_cut_onPDF(text,e_vtze,line);
-  }*/
+  }
   myText->Print(fileName,"pdf");
-  myText->Clear();
+  myText->Clear();*/
 
   // electrons
   // lead proton in FTOF
@@ -819,6 +831,11 @@ h_psrc_count->Fill(pmiss.Mag(),weight);
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);  h_CVTpid->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
 
   myText->cd();
   text.DrawLatex(0.2,0.9,"Recoil protons");
@@ -843,6 +860,7 @@ h_psrc_count->Fill(pmiss.Mag(),weight);
   myCanvas->cd(1);  h_pp_pmiss->Draw("colz");
   myCanvas->cd(2);  h_pptheta->Draw("colz");
   myCanvas->cd(3);  h_prec_ptheta->Draw("colz");
+  myCanvas->cd(4);  h_prec_plead_angle->Draw();
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
@@ -860,7 +878,22 @@ h_psrc_count->Fill(pmiss.Mag(),weight);
   myCanvas->cd(4);  h_nrec_angles->Draw("colz");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
+  
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);  h_good_nrec_angles->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
 
+  myCanvas->Divide(2,2);
+  myCanvas->cd(1);  h_pn_pmiss->Draw("colz");
+  myCanvas->cd(2);  h_nptheta->Draw("colz");
+  myCanvas->cd(3);  h_nrec_ptheta->Draw("colz");
+  myCanvas->cd(4);  h_nrec_plead_angle->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+
+  // ML output
   myCanvas->Divide(2,2);
   myCanvas->cd(1);  h_mvaValue_MLP->Draw();
   myCanvas->cd(2);  h_mvaValue_BDT->Draw();
@@ -916,15 +949,7 @@ h_psrc_count->Fill(pmiss.Mag(),weight);
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
   // ML features end here
-  
-  
 
-  myCanvas->Divide(2,2);
-  myCanvas->cd(1);  h_pn_pmiss->Draw("colz");
-  myCanvas->cd(2);  h_nptheta->Draw("colz");
-  myCanvas->cd(3);  h_nrec_ptheta->Draw("colz");
-  myCanvas->Print(fileName,"pdf");
-  myCanvas->Clear();
 
 
   myText->cd();
@@ -974,7 +999,7 @@ h_psrc_count->Fill(pmiss.Mag(),weight);
 
 
   // neutron momentum on x-axis instead of missing momentum
-  /*myCanvas->Divide(2,2);
+  myCanvas->Divide(2,2);
   myCanvas->cd(1);  h_pmiss_pp->Draw();
   myCanvas->cd(2);  h_pn->Draw();
   myCanvas->cd(3);
@@ -1002,7 +1027,7 @@ h_psrc_count->Fill(pmiss.Mag(),weight);
   h_pn_p_corr->Draw();
   h_pn_p_corr->GetYaxis()->SetTitle("pn/p");
   myCanvas->Print(fileName,"pdf");
-  myCanvas->Clear();*/
+  myCanvas->Clear();
 
 
   myCanvas->Divide(1,1);
@@ -1054,7 +1079,7 @@ h_psrc_count->Fill(pmiss.Mag(),weight);
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();*/
 
-
+/*
   // write to root file
   h_e_count->Write();
   h_pl_count->Write();
@@ -1065,12 +1090,12 @@ h_psrc_count->Fill(pmiss.Mag(),weight);
   h_pmiss_p_wrec->Write();
 
 
-
+*/
   // wrap it up
   sprintf(fileName,"%s]",pdfFile);
   myCanvas->Print(fileName,"pdf");
 
-  outFile->Close();
+  //outFile->Close(); // THIS LINE IS A PROBLEM!
 }
 
 
