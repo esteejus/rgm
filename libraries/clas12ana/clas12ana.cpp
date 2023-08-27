@@ -185,6 +185,27 @@ void clas12ana::InitSFEcalCuts()
 
 
 
+void clas12ana::WriteSFEcalCuts()
+{
+  TFile file_ecal("ecalSFcuts.root","RECREATE");
+   for(int i = 1; i < 7; i++)
+    {
+      for(int j = 0; j < 6; j++)
+	{
+	  ecal_sf_fcn[0][i]->Write();
+	  ecal_sf_fcn[1][i]->Write();
+	  ecal_p_fcn[0][i]->Write();
+	  ecal_p_fcn[1][i]->Write();
+
+	}
+    }
+
+   file_ecal.Close();
+}
+
+
+
+
 void clas12ana::InitSFPCuts()
 {
    cout<<"PARAMETERS for SF vs P cuts"<<endl;
@@ -295,6 +316,9 @@ bool clas12ana::checkEcalSFCuts(const region_part_ptr &p)
     {
       double sampling_frac = getSF(p);
       double energy =  p->cal(PCAL)->getEnergy();
+
+      if(energy < pcal_energy_cut)
+	return false;
 
       int sector = p->getSector();
       

@@ -59,15 +59,11 @@
    std::vector<std::unique_ptr<TH2D>> sf_p_debug_b;
    std::vector<std::unique_ptr<TH2D>> sf_p_debug_a;
 
-   /*
-   TH2D *sf_e_debug_b[7] = {nullptr};
-   TH2D *sf_e_debug_a[7] = {nullptr};
-   TH2D *sf_p_debug_b[7] = {nullptr};
-   TH2D *sf_p_debug_a[7] = {nullptr};
-   */
-
    std::unique_ptr<TH2D> pid_cd_debug = std::make_unique<TH2D>("pid_cd_debug","PID Uncut CD;Momentum (GeV/c);#Beta (v/c)",100,0,3,100,0,1.2);
    std::unique_ptr<TH2D> pid_fd_debug = std::make_unique<TH2D>("pid_fd_debug","PID Uncut FD;Momentum (GeV/c);#Beta (v/c)",100,0,5,100,0,1.2);
+
+   std::unique_ptr<TH2D> pcal_energy_b_debug = std::make_unique<TH2D>("pcal_energy_b_debug",";PCAL Energy (GeV);ECAL Inner + Outer (GeV)",1000,0,.6,100,0,.6);
+   std::unique_ptr<TH2D> pcal_energy_a_debug = std::make_unique<TH2D>("pcal_energy_a_debug",";PCAL Energy (GeV);ECAL Inner + Outer (GeV)",1000,0,.6,100,0,.6);
 
    std::unique_ptr<TH2D>sf_v_ecalIN_debug = std::make_unique<TH2D>("sf_v_ecalIN_debug",";ECAL IN V (cm);Sampling Fraction",100,0,30,100,0,.4);
    std::unique_ptr<TH2D>sf_w_ecalIN_debug = std::make_unique<TH2D>("sf_w_ecalIN_debug",";ECAL IN W (cm);Sampling Fraction",100,0,30,100,0,.4);
@@ -103,11 +99,12 @@
    std::unique_ptr<TH2D> pid_deuteron_fd_debug = std::make_unique<TH2D>("pid_deuteron_fd_debug","PID Cut deuteron FD;Momentum (GeV/c);#Beta (v/c)",100,0,5,100,0,1.2);
    std::unique_ptr<TH2D> pid_deuteron_cd_debug = std::make_unique<TH2D>("pid_deuteron_cd_debug","PID Cut deutereon CD;Momentum (GeV/c);#Beta (v/c)",100,0,5,100,0,1.2);
 
-   std::unique_ptr<TH1D> el_vz_debug   = std::make_unique<TH1D>("el_vz_debug","El vertex;z-vertex (cm);Counts",100,-20,10);
+   std::unique_ptr<TH1D> el_vz_b_debug = std::make_unique<TH1D>("el_vz_b_debug","El vertex;z-vertex (cm);Counts",100,-20,10);
+   std::unique_ptr<TH1D> el_vz_a_debug = std::make_unique<TH1D>("el_vz_a_debug","El vertex;z-vertex (cm);Counts",100,-20,10);
    std::unique_ptr<TH1D> el_vz_p_debug = std::make_unique<TH1D>("el_vz_p_debug","El-proton vertex;z-vertex (cm);Counts ",100,-10,10);
 
-   std::unique_ptr<TH2D> cd_particles_b = std::make_unique<TH2D>("cd_particles_b","Pt;phi(deg);CD protons before edge cut;Momentum (GeV/c);#Beta (v/c)",100,-180,180,100,0,1.);
-   std::unique_ptr<TH2D> cd_particles_a = std::make_unique<TH2D>("cd_particles_a","Pt;phi(deg);CD protons after edge cut;Momentum (GeV/c);#Beta (v/c)",100,-180,180,100,0,1.);
+   std::unique_ptr<TH2D> cd_particles_b = std::make_unique<TH2D>("cd_edge_before","CD protons before edge cut;#Phi angle (deg);Transverse Momentum P_t (GeV/c)",100,-180,180,100,0,1.);
+   std::unique_ptr<TH2D> cd_particles_a = std::make_unique<TH2D>("cd_edge_after","CD protons after edge cut;#Phi angle (deg);Transverse Momentum P_t (GeV/c)",100,-180,180,100,0,1.);
 
 
    std::vector<std::unique_ptr<TH2D>> dc_hit_map_a; //3 regions

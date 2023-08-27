@@ -15,6 +15,9 @@ void clas12debug::fillBeforeEl(const clas12::region_part_ptr &el)
   double pcal_v = el->cal(clas12::PCAL)->getLv();
   double pcal_w = el->cal(clas12::PCAL)->getLw();
   
+
+  pcal_energy_b_debug->Fill(el_pcal_energy,el->cal(clas12::ECIN)->getEnergy()+el->cal(clas12::ECOUT)->getEnergy());
+
   sf_v_ecalIN_debug->Fill(ecin_v,el_sf);
   sf_w_ecalIN_debug->Fill(ecin_w,el_sf);
   sf_v_ecalOUT_debug->Fill(ecout_v,el_sf);
@@ -27,7 +30,8 @@ void clas12debug::fillBeforeEl(const clas12::region_part_ptr &el)
       sf_e_debug_b[sector-1]->Fill(el_pcal_energy,el_sf); //0 indexed vector
       sf_p_debug_b[sector-1]->Fill(el_mom,el_sf); 
     }
-  
+
+  el_vz_b_debug->Fill( el->par()->getVz());  
   fillDCdebug(el,dc_hit_map_b);
 }
 
@@ -45,7 +49,7 @@ void clas12debug::fillAfterEl(const clas12::region_part_ptr &el)
   double pcal_v = el->cal(clas12::PCAL)->getLv();
   double pcal_w = el->cal(clas12::PCAL)->getLw();
   
-  
+  pcal_energy_a_debug->Fill(el_pcal_energy,el->cal(clas12::ECIN)->getEnergy()+el->cal(clas12::ECOUT)->getEnergy());
   //DEBUG plots
   if(debug_plots && sector <= 6 && sector >= 1)
     {
@@ -53,7 +57,7 @@ void clas12debug::fillAfterEl(const clas12::region_part_ptr &el)
       sf_p_debug_a[sector-1]->Fill(el_mom,el_sf);
     }
   
-  el_vz_debug->Fill( el->par()->getVz());
+  el_vz_a_debug->Fill( el->par()->getVz());
   
   sf_v_ecalIN_a_debug->Fill(ecin_v,el_sf);
   sf_w_ecalIN_a_debug->Fill(ecin_w,el_sf);
@@ -318,8 +322,12 @@ void clas12debug::debugByPid(const clas12::region_part_ptr &p)
    pid_cd_debug->Write();
    pid_fd_debug->Write();
 
-   el_vz_debug->Write();
+   el_vz_b_debug->Write();
+   el_vz_a_debug->Write();
    el_vz_p_debug->Write();
+
+   pcal_energy_b_debug->Write();
+   pcal_energy_a_debug->Write();
 
    f_debugOut.Close();
  }

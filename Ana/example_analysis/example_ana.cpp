@@ -172,6 +172,8 @@ int main(int argc, char ** argv)
 
     }
 
+  clasAna.WriteSFEcalCuts();
+
   missm->Draw();
 
   TFile f(outFile,"RECREATE");

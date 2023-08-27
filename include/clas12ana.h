@@ -48,6 +48,7 @@
      };
 
    void Init();
+   void WriteSFEcalCuts();
    void InitSFEcalCuts();
    void InitSFPCuts();
    void readInputParam(const char* inFile);
@@ -168,27 +169,14 @@
    std::vector<region_part_ptr> kminus;
    std::vector<region_part_ptr> otherpart;
 
-   /*
-   std::vector<std::unique_ptr<region_part_ptr>> electrons;
-   std::vector<std::unique_ptr<region_part_ptr>> protons;
-   std::vector<std::unique_ptr<region_part_ptr>> deuterons;
-   std::vector<std::unique_ptr<region_part_ptr>> neutrals;
-   std::vector<std::unique_ptr<region_part_ptr>> neutrons;
-   std::vector<std::unique_ptr<region_part_ptr>> piplus;
-   std::vector<std::unique_ptr<region_part_ptr>> piminus;
-   std::vector<std::unique_ptr<region_part_ptr>> kplus;
-   std::vector<std::unique_ptr<region_part_ptr>> kminus;
-   std::vector<std::unique_ptr<region_part_ptr>> otherpart;
-   */
-
    //SRC 
    std::vector<region_part_ptr> lead_proton;
    std::vector<region_part_ptr> recoil_proton;
 
    //prototype function for fitting ECAL electron cuts
-   TF1 *ecal_p_fcn[2][7]; //0 upper 1 lower fiducial
+   TF1 *ecal_p_fcn[2][7];  //0 upper 1 lower fiducial
    TF1 *ecal_sf_fcn[2][7]; //0 upper 1 lower fiducial
-   double ecal_p_fcn_par[7][6]; //sector, parameter
+   double ecal_p_fcn_par[7][6];  //sector, parameter
    double ecal_sf_fcn_par[7][6]; //sector, parameter
    int sigma_cut = 3;
 
@@ -200,7 +188,7 @@
    bool f_pidCuts            = true;
    bool f_vertexCuts         = true;
    bool f_corr_vertexCuts    = true;
-
+   //optional cut
    bool f_CDRegionCuts       = false;
 
    map<int,vector<double> > pid_cuts_cd; // map<pid, {min,max cut}> Central Detector (CD)
@@ -209,16 +197,18 @@
    vector<double> vertex_x_cuts = {-99,99};
    vector<double> vertex_y_cuts = {-99,99};
    vector<double> vertex_z_cuts = {-99,99};
-   map<string,vector<double> > vertex_cuts; //map< x,y,z, {min,max}> 
+   map<string,vector<double> > vertex_cuts;    //map< x,y,z, {min,max}> 
    vector<double> vertex_corr_cuts = {-99,99}; //electron vertex <-> particle vertex correlation cuts
 
    double pi = 3.1415926535;
 
-   double ecal_edge_cut = 14; //cm
-   double dc_edge_cut   = 5;  //cm 
-   double cd_edge_cut   = 10; //deg phi
-   double min_mom_pt = 0.15; //min momentum transverse in CD MeV/c
-   int region_cut = 2;
+   double pcal_energy_cut = 0.06; //(GeV) minimum energy cut
+   double ecal_edge_cut   = 14;   //cm
+   double dc_edge_cut     = 5;    //cm 
+   double cd_edge_cut     = 10;   //deg phi
+   double min_mom_pt = 0.15;  //min momentum transverse in CD MeV/c
+
+   int region_cut = 2; //region 2 of CD had strange occupancy not nessecarily bad
 
    //SRC Cuts
    double q2_cut = 1.5; //Q^2 cut
