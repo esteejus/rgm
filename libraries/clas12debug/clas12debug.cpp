@@ -14,8 +14,16 @@ void clas12debug::fillBeforeEl(const clas12::region_part_ptr &el)
   double ecout_w = el->cal(clas12::ECOUT)->getLw();
   double pcal_v = el->cal(clas12::PCAL)->getLv();
   double pcal_w = el->cal(clas12::PCAL)->getLw();
-  
+  double chi2_ndf = el->trk(clas12::DC)->getChi2()/el->trk(clas12::DC)->getNDF();
 
+  auto traj_index_1 = el->traj(clas12::DC,6) ->getIndex(); //layer 1                                                                                                                               
+  auto traj_index_2 = el->traj(clas12::DC,18)->getIndex(); //layer 2                                                                                                                               
+  auto traj_index_3 = el->traj(clas12::DC,36)->getIndex(); //layer 3                                                                                                                               
+  
+  auto traj_edge_1  = el->traj(clas12::DC,6) ->getFloat("edge",traj_index_1);
+  auto traj_edge_2  = el->traj(clas12::DC,18)->getFloat("edge",traj_index_2);
+  auto traj_edge_3  = el->traj(clas12::DC,36)->getFloat("edge",traj_index_3);
+  
   pcal_energy_b_debug->Fill(el_pcal_energy,el->cal(clas12::ECIN)->getEnergy()+el->cal(clas12::ECOUT)->getEnergy());
 
   sf_v_ecalIN_debug->Fill(ecin_v,el_sf);
@@ -29,10 +37,20 @@ void clas12debug::fillBeforeEl(const clas12::region_part_ptr &el)
     {
       sf_e_debug_b[sector-1]->Fill(el_pcal_energy,el_sf); //0 indexed vector
       sf_p_debug_b[sector-1]->Fill(el_mom,el_sf); 
+
+      dc_edge_el_chi2_r1[sector-1]->Fill(traj_edge_1,chi2_ndf);
+      dc_edge_el_chi2_r2[sector-1]->Fill(traj_edge_2,chi2_ndf);
+      dc_edge_el_chi2_r3[sector-1]->Fill(traj_edge_3,chi2_ndf);
+
+      dc_edge_el_r1[sector-1]->Fill(traj_edge_1);
+      dc_edge_el_r2[sector-1]->Fill(traj_edge_2);
+      dc_edge_el_r3[sector-1]->Fill(traj_edge_3);
     }
 
   el_vz_b_debug->Fill( el->par()->getVz());  
   fillDCdebug(el,dc_hit_map_b);
+
+
 }
 
 void clas12debug::fillAfterEl(const clas12::region_part_ptr &el)
@@ -83,6 +101,18 @@ void clas12debug::fillBeforePart(const clas12::region_part_ptr &p)
   bool is_cd = ( p->getRegion()==clas12::CD);
   bool is_fd = ( p->getRegion()==clas12::FD);
   
+  int sector = p->getSector();
+  double chi2_ndf = p->trk(clas12::DC)->getChi2()/p->trk(clas12::DC)->getNDF();
+
+  auto traj_index_1 = p->traj(clas12::DC,6) ->getIndex(); //layer 1                                                                                                                               
+  auto traj_index_2 = p->traj(clas12::DC,18)->getIndex(); //layer 2                                                                                                                               
+  auto traj_index_3 = p->traj(clas12::DC,36)->getIndex(); //layer 3                                                                                                                               
+  
+  auto traj_edge_1  = p->traj(clas12::DC,6) ->getFloat("edge",traj_index_1);
+  auto traj_edge_2  = p->traj(clas12::DC,18)->getFloat("edge",traj_index_2);
+  auto traj_edge_3  = p->traj(clas12::DC,36)->getFloat("edge",traj_index_3);
+
+
   //DEBUG plots
   if(debug_plots && ( p->par()->getCharge() >= 1) && ( p->par()->getPid() != 11) )
     {
@@ -93,6 +123,18 @@ void clas12debug::fillBeforePart(const clas12::region_part_ptr &p)
       
       if(p->getRegion() == clas12::CD)
 	cd_particles_b->Fill(p->getPhi()*180/pi,sqrt( pow(p->par()->getPx(),2) + pow(p->par()->getPy(),2)));
+
+
+      if( sector <= 6 && sector >= 1)
+	{
+	  dc_edge_p_chi2_r1[sector-1]->Fill(traj_edge_1,chi2_ndf);
+	  dc_edge_p_chi2_r2[sector-1]->Fill(traj_edge_2,chi2_ndf);
+	  dc_edge_p_chi2_r3[sector-1]->Fill(traj_edge_3,chi2_ndf);
+	  
+	  dc_edge_p_r1[sector-1]->Fill(traj_edge_1);
+	  dc_edge_p_r2[sector-1]->Fill(traj_edge_2);
+	  dc_edge_p_r3[sector-1]->Fill(traj_edge_3);
+	}
     }
   
 }
@@ -211,6 +253,22 @@ void clas12debug::debugByPid(const clas12::region_part_ptr &p)
 
        sf_e_debug_b.push_back(std::make_unique<TH2D>(Form("sf_e_debug_b_sector_%d",i),Form("Sampling Fraction Before Cuts Sector_%d;Energy (GeV);Sampling Fraction",i),100,0,1.5,100,0,.4));
        sf_e_debug_a.push_back(std::make_unique<TH2D>(Form("sf_e_debug_a_sector_%d",i),Form("Sampling Fraction  After Cuts Sector_%d;Energy (GeV);Sampling Fraction",i),100,0,1.5,100,0,.4));
+
+       dc_edge_el_chi2_r1.push_back(std::make_unique<TH1D>(Form("dc_edge_el_chi2_r1_%d",i),Form("Region 1 DC edge %d;Distance to Edge (cm);#chi^{2}/DOF",i),100,0,50));
+       dc_edge_el_chi2_r2.push_back(std::make_unique<TH1D>(Form("dc_edge_el_chi2_r2_%d",i),Form("Region 2 DC edge %d;Distance to Edge (cm);#chi^{2}/DOF",i),100,0,50));
+       dc_edge_el_chi2_r3.push_back(std::make_unique<TH1D>(Form("dc_edge_el_chi2_r3_%d",i),Form("Region 3 DC edge %d;Distance to Edge (cm);#chi^{2}/DOF",i),100,0,50));
+
+       dc_edge_p_chi2_r1.push_back(std::make_unique<TH1D>(Form("dc_edge_p_chi2_r1_%d",i),Form("Region 1 Protons DC edge %d;Distance to Edge (cm);#chi^{2}/DOF",i),100,0,50));
+       dc_edge_p_chi2_r2.push_back(std::make_unique<TH1D>(Form("dc_edge_p_chi2_r2_%d",i),Form("Region 2 Protons DC edge %d;Distance to Edge (cm);#chi^{2}/DOF",i),100,0,50));
+       dc_edge_p_chi2_r3.push_back(std::make_unique<TH1D>(Form("dc_edge_p_chi2_r3_%d",i),Form("Region 3 Protons DC edge %d;Distance to Edge (cm);#chi^{2}/DOF",i),100,0,50));
+
+       dc_edge_el_r1.push_back(std::make_unique<TH1D>(Form("dc_edge_el_r1_%d",i),Form("Region 1 DC edge %d;Distance to Edge (cm);#chi^{2}/DOF",i),100,0,50));
+       dc_edge_el_r2.push_back(std::make_unique<TH1D>(Form("dc_edge_el_r2_%d",i),Form("Region 2 DC edge %d;Distance to Edge (cm);#chi^{2}/DOF",i),100,0,50));
+       dc_edge_el_r3.push_back(std::make_unique<TH1D>(Form("dc_edge_el_r3_%d",i),Form("Region 3 DC edge %d;Distance to Edge (cm);#chi^{2}/DOF",i),100,0,50));
+
+       dc_edge_p_r1.push_back(std::make_unique<TH1D>(Form("dc_edge_p_r1_%d",i),Form("Region 1 DC edge %d;Distance to Edge (cm);#chi^{2}/DOF",i),100,0,50));
+       dc_edge_p_r2.push_back(std::make_unique<TH1D>(Form("dc_edge_p_r2_%d",i),Form("Region 2 DC edge %d;Distance to Edge (cm);#chi^{2}/DOF",i),100,0,50));
+       dc_edge_p_r3.push_back(std::make_unique<TH1D>(Form("dc_edge_p_r3_%d",i),Form("Region 3 DC edge %d;Distance to Edge (cm);#chi^{2}/DOF",i),100,0,50));
      }
 
 
@@ -248,24 +306,22 @@ void clas12debug::debugByPid(const clas12::region_part_ptr &p)
    std::for_each(sf_e_debug_a.begin(),sf_e_debug_a.end(), [](auto &el) {el->Write();} );
    std::for_each(sf_e_debug_b.begin(),sf_e_debug_b.end(), [](auto &el) {el->Write();} );
 
-   /*
-   for(int i = 0; i <= 6; i++)
-     {
-       //       sf_p_debug_b[i]->Write();
-       sf_p_debug_a[i]->Write();
-       sf_e_debug_b[i]->Write();
-       sf_e_debug_a[i]->Write();
-     }
-   */
-   /*n
-   for(int i = 0; i <= 6; i++)
-     {
-       ecal_sf_fcn[0][i]->Write();
-       ecal_sf_fcn[1][i]->Write();
-       ecal_p_fcn[0][i]->Write();
-       ecal_p_fcn[1][i]->Write();
-     }
-   */
+   std::for_each(dc_edge_el_chi2_r1.begin(),dc_edge_el_chi2_r1.end(),[](auto &p) {p->Write();} );
+   std::for_each(dc_edge_el_chi2_r2.begin(),dc_edge_el_chi2_r2.end(),[](auto &p) {p->Write();} );
+   std::for_each(dc_edge_el_chi2_r3.begin(),dc_edge_el_chi2_r3.end(),[](auto &p) {p->Write();} );
+
+   std::for_each(dc_edge_el_r1.begin(),dc_edge_el_r1.end(),[](auto &p) {p->Write();} );
+   std::for_each(dc_edge_el_r2.begin(),dc_edge_el_r2.end(),[](auto &p) {p->Write();} );
+   std::for_each(dc_edge_el_r3.begin(),dc_edge_el_r3.end(),[](auto &p) {p->Write();} );
+
+   std::for_each(dc_edge_p_chi2_r1.begin(),dc_edge_p_chi2_r1.end(),[](auto &p) {p->Write();} );
+   std::for_each(dc_edge_p_chi2_r2.begin(),dc_edge_p_chi2_r2.end(),[](auto &p) {p->Write();} );
+   std::for_each(dc_edge_p_chi2_r3.begin(),dc_edge_p_chi2_r3.end(),[](auto &p) {p->Write();} );
+
+   std::for_each(dc_edge_p_r1.begin(),dc_edge_p_r1.end(),[](auto &p) {p->Write();} );
+   std::for_each(dc_edge_p_r2.begin(),dc_edge_p_r2.end(),[](auto &p) {p->Write();} );
+   std::for_each(dc_edge_p_r3.begin(),dc_edge_p_r3.end(),[](auto &p) {p->Write();} );
+
 
    for(int i = 0; i <= 2; i++)
        dc_hit_map_b[i]->Write();
@@ -328,6 +384,8 @@ void clas12debug::debugByPid(const clas12::region_part_ptr &p)
 
    pcal_energy_b_debug->Write();
    pcal_energy_a_debug->Write();
+
+
 
    f_debugOut.Close();
  }

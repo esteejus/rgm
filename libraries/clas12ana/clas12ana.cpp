@@ -279,7 +279,8 @@ bool clas12ana::DCEdgeCuts(const region_part_ptr &p)
       auto traj_edge_2  = p->traj(DC,18)->getFloat("edge",traj_index_2);
       auto traj_edge_3  = p->traj(DC,36)->getFloat("edge",traj_index_3);
 
-      if(traj_edge_1 > dc_edge_cut && traj_edge_2 > dc_edge_cut && traj_edge_3 > dc_edge_cut)
+      
+      if(dc_edge_cut.size() == 3  && traj_edge_1 > dc_edge_cut[0] && traj_edge_2 > dc_edge_cut[1] && traj_edge_3 > dc_edge_cut[2])
 	  return true;
       else
 	return false;

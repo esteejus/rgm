@@ -204,12 +204,11 @@
 
    double pcal_energy_cut = 0.06; //(GeV) minimum energy cut
    double ecal_edge_cut   = 14;   //cm
-   double dc_edge_cut     = 5;    //cm 
    double cd_edge_cut     = 10;   //deg phi
-   double min_mom_pt = 0.15;  //min momentum transverse in CD MeV/c
+   double min_mom_pt      = 0.15;  //min momentum transverse in CD MeV/c
+   std::vector<double> dc_edge_cut = {4,3,10}; //units cm; {region1, region2, region3} cuts
 
    int region_cut = 2; //region 2 of CD had strange occupancy not nessecarily bad
-
    //SRC Cuts
    double q2_cut = 1.5; //Q^2 cut
    double xb_cut = 1.2; //x-borken

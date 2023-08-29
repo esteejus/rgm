@@ -59,6 +59,23 @@
    std::vector<std::unique_ptr<TH2D>> sf_p_debug_b;
    std::vector<std::unique_ptr<TH2D>> sf_p_debug_a;
 
+   //regions 1,2,3 for each sector
+   std::vector<std::unique_ptr<TH1D>> dc_edge_el_r1;
+   std::vector<std::unique_ptr<TH1D>> dc_edge_el_r2;
+   std::vector<std::unique_ptr<TH1D>> dc_edge_el_r3;
+
+   std::vector<std::unique_ptr<TH1D>> dc_edge_p_r1; 
+   std::vector<std::unique_ptr<TH1D>> dc_edge_p_r2;
+   std::vector<std::unique_ptr<TH1D>> dc_edge_p_r3;
+
+   std::vector<std::unique_ptr<TH1D>> dc_edge_el_chi2_r1;
+   std::vector<std::unique_ptr<TH1D>> dc_edge_el_chi2_r2;
+   std::vector<std::unique_ptr<TH1D>> dc_edge_el_chi2_r3;
+
+   std::vector<std::unique_ptr<TH1D>> dc_edge_p_chi2_r1;
+   std::vector<std::unique_ptr<TH1D>> dc_edge_p_chi2_r2;
+   std::vector<std::unique_ptr<TH1D>> dc_edge_p_chi2_r3;
+
    std::unique_ptr<TH2D> pid_cd_debug = std::make_unique<TH2D>("pid_cd_debug","PID Uncut CD;Momentum (GeV/c);#Beta (v/c)",100,0,3,100,0,1.2);
    std::unique_ptr<TH2D> pid_fd_debug = std::make_unique<TH2D>("pid_fd_debug","PID Uncut FD;Momentum (GeV/c);#Beta (v/c)",100,0,5,100,0,1.2);
 
