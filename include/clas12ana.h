@@ -62,8 +62,9 @@
 
    double getSF(const region_part_ptr &p);
 
-   void setEcalPCuts(bool flag = true)     {f_ecalPCuts = flag;}; //option to have several cuts
-   void setEcalSFCuts(bool flag = true)    {f_ecalSFCuts = flag;}; //option to have several cuts
+   void setEcalPCuts(bool flag = true)     {f_ecalPCuts = flag;};    //option to have several cuts
+   void setEcalSFCuts(bool flag = true)    {f_ecalSFCuts = flag;};   //option to have several cuts
+   void setEcalDiagCuts(bool flag = true)  {f_ecalDiagCuts = flag;}; //option to have several cuts
    void setDCEdgeCuts(bool flag = true)    {f_DCEdgeCuts = flag;};
    void setCDEdgeCuts(bool flag = true)    {f_CDEdgeCuts = flag;};
    void setCDRegionCuts(bool flag = true)    {f_CDRegionCuts = flag;};
@@ -133,6 +134,7 @@
    bool EcalEdgeCuts(const region_part_ptr &p);
    bool checkEcalPCuts(const region_part_ptr &p);
    bool checkEcalSFCuts(const region_part_ptr &p);
+   bool checkEcalDiagCuts(const region_part_ptr &p);
    bool checkPidCut(const region_part_ptr &p);
    bool checkVertex(const region_part_ptr &p);
    bool DCEdgeCuts(const region_part_ptr &p);
@@ -176,12 +178,17 @@
    //prototype function for fitting ECAL electron cuts
    TF1 *ecal_p_fcn[2][7];  //0 upper 1 lower fiducial
    TF1 *ecal_sf_fcn[2][7]; //0 upper 1 lower fiducial
+
+   TF1 *ecal_p_mean_fcn[7];  //mean function for plotting
+   TF1 *ecal_sf_mean_fcn[7]; //mean function for plotting
+
    double ecal_p_fcn_par[7][6];  //sector, parameter
    double ecal_sf_fcn_par[7][6]; //sector, parameter
    int sigma_cut = 3;
 
    bool f_ecalSFCuts         = true;
    bool f_ecalPCuts          = true;
+   bool f_ecalDiagCuts       = true;
    bool f_ecalEdgeCuts       = true;
    bool f_DCEdgeCuts         = true;
    bool f_CDEdgeCuts         = true;
@@ -204,6 +211,7 @@
 
    double pcal_energy_cut = 0.06; //(GeV) minimum energy cut
    double ecal_edge_cut   = 14;   //cm
+   double ecal_diag_cut   = 0.2;  //diagonal cut on SF
    double cd_edge_cut     = 10;   //deg phi
    double min_mom_pt      = 0.15;  //min momentum transverse in CD MeV/c
    std::vector<double> dc_edge_cut = {4,3,10}; //units cm; {region1, region2, region3} cuts

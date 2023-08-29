@@ -65,53 +65,54 @@ void clas12ana::Clear()
 void clas12ana::Run(const std::unique_ptr<clas12::clas12reader>& c12)
 {
   Clear();
-
+  
   auto particles = c12->getDetParticles(); //particles is now a std::vector of particles for this event
   auto electrons_det = c12->getByID(11);
   
-      //DEBUG plots
-      if(debug_plots)
-	{
-	  for(auto el : electrons_det)
-	    debug_c.fillBeforeEl(el);
-	}
-
-      std::for_each(electrons_det.begin(),electrons_det.end(),[this](auto el)
-		    {
-		      if(!((el->che(HTCC)->getNphe() <= 2)        || //Photo electron min cut
-			 (!checkEcalSFCuts(el) && f_ecalSFCuts) || //ECAL SF cuts
-			 (!checkEcalPCuts(el) && f_ecalPCuts)   || //ECAL SF cuts
-			 (!EcalEdgeCuts(el) && f_ecalEdgeCuts)  || //ECAL edge cuts
-			 (!checkVertex(el)  && f_vertexCuts)    || //Vertex cut
-			   (!DCEdgeCuts(el)   && f_DCEdgeCuts)) )     //DC edge cut
-			setByPid(el);
-		    });
-
-
-      if(debug_plots)
-	{
-	  for(auto el : electrons)
-	    debug_c.fillAfterEl(el);
-	}
-
-
-   if(electrons.size() == 1) //good trigger electron
-     {
-
+  //DEBUG plots
+  if(debug_plots)
+    {
+      for(auto el : electrons_det)
+	debug_c.fillBeforeEl(el);
+    }
+  
+  std::for_each(electrons_det.begin(),electrons_det.end(),[this](auto el)
+		{
+		  if(!((el->che(HTCC)->getNphe() <= 2)           || //Photo electron min cut
+		       (!checkEcalSFCuts(el)   && f_ecalSFCuts)  || //ECAL SF cuts
+		       (!checkEcalPCuts(el)    && f_ecalPCuts)   || //ECAL SF cuts
+		       (!checkEcalDiagCuts(el) && f_ecalDiagCuts)|| //ECAL Diagonoal SF cuts
+		       (!EcalEdgeCuts(el) && f_ecalEdgeCuts)     || //ECAL edge cuts
+		       (!checkVertex(el)  && f_vertexCuts)       || //Vertex cut
+		       (!DCEdgeCuts(el)   && f_DCEdgeCuts)) )     //DC edge cut
+		    setByPid(el);
+		});
+  
+  
+  if(debug_plots)
+    {
+      for(auto el : electrons)
+	debug_c.fillAfterEl(el);
+    }
+  
+  
+  if(electrons.size() == 1) //good trigger electron
+    {
+      
       if(debug_plots)
 	{
 	  for(auto p : particles)
 	    if(p->par()->getPid() == 2212 || p->par()->getPid() == -211 || p->par()->getPid() == 211)
 	      debug_c.fillBeforePart(p);
 	}
-
-
+      
+      
       /*
 	This may be a strange way to check the cuts, maybe there is a better way
 	We need to ensure that the flag f_cuts is on otherwise we don't want to apply any cut
 	The below logic will return particles that did not pass any cut (for only cut flags that are on
 	Then I will invert the logic using !(logic) to return when the particle do pass all cuts
-
+	
 	(!checkPidCut(p) && f_pidCuts)    ||	         //PID cuts
 	(!checkVertex(p) && f_vertexCuts) ||  //Vertex cut
 	(!CDEdgeCuts(p)  && f_CDEdgeCuts) ||  //CD edge cut
@@ -119,7 +120,7 @@ void clas12ana::Run(const std::unique_ptr<clas12::clas12reader>& c12)
 	(!DCEdgeCuts(p) && f_DCEdgeCuts)  || //DC edge cut
 	(!checkVertexCorrelation(electrons_det[0],p) && f_corr_vertexCuts) //Vertex correlation cut between electron
       */
-
+      
       std::for_each(particles.begin(),particles.end(),[this,electrons_det](auto p)
 		    {
 		      //neutrals and electrons don't follow cuts below, skip them 
@@ -130,38 +131,38 @@ void clas12ana::Run(const std::unique_ptr<clas12::clas12reader>& c12)
 			}
 		      else if(p->par()->getPid() != 11  && electrons.size() > 0)
 			{
-			    event_mult++;
-
-			    if( !( (!checkPidCut(p) && f_pidCuts)        || //PID cuts
-				   (!checkVertex(p) && f_vertexCuts)     || //Vertex cut
-				   (!CDEdgeCuts(p)  && f_CDEdgeCuts)     || //CD edge cut
-				   (!CDRegionCuts(p)  && f_CDRegionCuts) || //CD edge cut
-				   (!DCEdgeCuts(p) && f_DCEdgeCuts)      || //DC edge cut
-				   (!checkVertexCorrelation(electrons_det[0],p) && f_corr_vertexCuts))  //Vertex correlation cut between electron
-				)
-			      setByPid(p);
+			  event_mult++;
+			  
+			  if( !( (!checkPidCut(p) && f_pidCuts)        || //PID cuts
+				 (!checkVertex(p) && f_vertexCuts)     || //Vertex cut
+				 (!CDEdgeCuts(p)  && f_CDEdgeCuts)     || //CD edge cut
+				 (!CDRegionCuts(p)  && f_CDRegionCuts) || //CD edge cut
+				 (!DCEdgeCuts(p) && f_DCEdgeCuts)      || //DC edge cut
+				 (!checkVertexCorrelation(electrons_det[0],p) && f_corr_vertexCuts))  //Vertex correlation cut between electron
+			      )
+			    setByPid(p);
 			}
 		    });
-
-
-       if(debug_plots)
-	 {
-
-	   for(auto p : protons)
-	     debug_c.fillAfterPart(p);
-	   for(auto p : piplus)
-	     debug_c.fillAfterPart(p);
-	   for(auto p : piminus)
-	     debug_c.fillAfterPart(p);
-
-	   for(auto el : electrons)
-	     debug_c.fillAfterEl(el);
-
-	 }
-	   
-     }//good electron loop
-       
-   
+      
+      
+      if(debug_plots)
+	{
+	  
+	  for(auto p : protons)
+	    debug_c.fillAfterPart(p);
+	  for(auto p : piplus)
+	    debug_c.fillAfterPart(p);
+	  for(auto p : piminus)
+	    debug_c.fillAfterPart(p);
+	  
+	  for(auto el : electrons)
+	    debug_c.fillAfterEl(el);
+	  
+	}
+      
+    }//good electron loop
+  
+  
 }
 
 
@@ -173,6 +174,9 @@ void clas12ana::InitSFEcalCuts()
     {
       for(int j = 0; j < 6; j++)
 	{
+	  if(j < 4)
+	    ecal_sf_mean_fcn[i]->SetParameter(j,ecal_sf_fcn_par[i][j]); //only first 3 parameters involve mean
+
 	  cout<<"sector "<<i <<" j "<<j<<" par "<<ecal_sf_fcn_par[i][j]<<endl;
 	  ecal_sf_fcn[0][i]->SetParameter(j,ecal_sf_fcn_par[i][j]);
 	  ecal_sf_fcn[1][i]->SetParameter(j,ecal_sf_fcn_par[i][j]);
@@ -198,6 +202,9 @@ void clas12ana::WriteSFEcalCuts()
 	  ecal_p_fcn[1][i]->Write();
 
 	}
+
+      ecal_sf_mean_fcn[i]->Write();
+      ecal_p_mean_fcn[i]->Write();
     }
 
    file_ecal.Close();
@@ -213,6 +220,9 @@ void clas12ana::InitSFPCuts()
     {
       for(int j = 0; j < 6; j++)
 	{
+	  if(j < 4)
+	    ecal_p_mean_fcn[i]->SetParameter(j,ecal_p_fcn_par[i][j]); //only first 3 parameters for mean value
+
 	  cout<<"sector "<<i <<" j "<<j<<" par "<<ecal_p_fcn_par[i][j]<<endl;
 	  ecal_p_fcn[0][i]->SetParameter(j,ecal_p_fcn_par[i][j]);
 	  ecal_p_fcn[1][i]->SetParameter(j,ecal_p_fcn_par[i][j]);
@@ -234,9 +244,11 @@ void clas12ana::Init()
 
       for(int i = 0; i < 7; i++)
 	{
+	  ecal_sf_mean_fcn[i] = new TF1(Form("ecal_sf_mean_fcn_%d",i),"[0] + [1]/x + [2]/pow(x,2)",0,1.5);
 	  ecal_sf_fcn[0][i] = new TF1(Form("ecal_sf_fcn_0_%d",i),"[0] + [1]/x + [2]/pow(x,2) - [6]*( [3] + [4]/x + [5]/pow(x,2))",0,1.5);
 	  ecal_sf_fcn[1][i] = new TF1(Form("ecal_sf_fcn_1_%d",i),"[0] + [1]/x + [2]/pow(x,2) + [6]*( [3] + [4]/x + [5]/pow(x,2))",0,1.5);
 
+	  ecal_p_mean_fcn[i] = new TF1(Form("ecal_p_mean_fcn_%d",i),"[0] + [1]/x + [2]/pow(x,2)",0,10);
 	  ecal_p_fcn[0][i] = new TF1(Form("ecal_p_fcn_0_%d",i),"[0] + [1]/x + [2]/pow(x,2) - [6]*( [3] + [4]/x + [5]/pow(x,2))",0,10);
 	  ecal_p_fcn[1][i] = new TF1(Form("ecal_p_fcn_1_%d",i),"[0] + [1]/x + [2]/pow(x,2) + [6]*( [3] + [4]/x + [5]/pow(x,2))",0,10);
 	}
@@ -299,6 +311,25 @@ bool clas12ana::EcalEdgeCuts(const region_part_ptr &p)
   if(p->par()->getPid() == 11)
     {
       if(p->cal(clas12::PCAL)->getLv() > ecal_edge_cut && p->cal(clas12::PCAL)->getLw() > ecal_edge_cut)
+	return true;
+      else
+	return false;
+    }
+  
+  else
+    return true;
+}
+
+
+bool clas12ana::checkEcalDiagCuts(const region_part_ptr &p)
+{
+  double mom = p->par()->getP();
+  //true if inside cut
+  if(p->par()->getPid() == 11)
+    {
+      if( (p->cal(clas12::PCAL)->getEnergy() + p->cal(clas12::ECIN)->getEnergy())/mom > ecal_diag_cut && mom > 4.5)
+	return true;
+      else if(mom <= 4.5)
 	return true;
       else
 	return false;

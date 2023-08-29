@@ -1,5 +1,16 @@
 #include "clas12debug.h"
 
+double tof_difference(const clas12::region_part_ptr &p, double mass)
+{
+  double c_light = 29.9792; //cm/ns
+  double mom  = p->par()->getP();
+  double path = p->getPath();
+  double beta_expected = mom/sqrt(pow(mom,2) + pow(mass,2));
+  double tof_expected = path/(beta_expected*c_light);
+  double tof_meas = path/(p->par()->getBeta()*c_light);
+  //  std::cout<<tof_meas<<" "<<tof_expected<<std::endl;
+  return tof_meas - tof_expected;
+}
 
 void clas12debug::fillBeforeEl(const clas12::region_part_ptr &el)
 {
@@ -16,9 +27,9 @@ void clas12debug::fillBeforeEl(const clas12::region_part_ptr &el)
   double pcal_w = el->cal(clas12::PCAL)->getLw();
   double chi2_ndf = el->trk(clas12::DC)->getChi2()/el->trk(clas12::DC)->getNDF();
 
-  auto traj_index_1 = el->traj(clas12::DC,6) ->getIndex(); //layer 1                                                                                                                               
-  auto traj_index_2 = el->traj(clas12::DC,18)->getIndex(); //layer 2                                                                                                                               
-  auto traj_index_3 = el->traj(clas12::DC,36)->getIndex(); //layer 3                                                                                                                               
+  auto traj_index_1 = el->traj(clas12::DC,6) ->getIndex(); //layer 1                                                                                                                        
+  auto traj_index_2 = el->traj(clas12::DC,18)->getIndex(); //layer 2                                                                                                                         
+  auto traj_index_3 = el->traj(clas12::DC,36)->getIndex(); //layer 3                                                                                                                         
   
   auto traj_edge_1  = el->traj(clas12::DC,6) ->getFloat("edge",traj_index_1);
   auto traj_edge_2  = el->traj(clas12::DC,18)->getFloat("edge",traj_index_2);
@@ -90,9 +101,13 @@ void clas12debug::fillAfterEl(const clas12::region_part_ptr &el)
 
 void clas12debug::fillBeforePart(const clas12::region_part_ptr &p)
 {
-  if( p->par()->getPid() == 2212)
+  double mass_proton    = 0.938272; //GeV/c2                                                                                                                                                 
+
+  int pid = p->par()->getPid();
+
+  if( pid == 2212)
     fillDCdebug(p,dc_hit_map_b_proton);
-  if( p->par()->getPid() == 211)
+  if( pid == 211)
     fillDCdebug(p,dc_hit_map_b_pion);
   
   double par_mom  = p->par()->getP();
@@ -104,9 +119,9 @@ void clas12debug::fillBeforePart(const clas12::region_part_ptr &p)
   int sector = p->getSector();
   double chi2_ndf = p->trk(clas12::DC)->getChi2()/p->trk(clas12::DC)->getNDF();
 
-  auto traj_index_1 = p->traj(clas12::DC,6) ->getIndex(); //layer 1                                                                                                                               
-  auto traj_index_2 = p->traj(clas12::DC,18)->getIndex(); //layer 2                                                                                                                               
-  auto traj_index_3 = p->traj(clas12::DC,36)->getIndex(); //layer 3                                                                                                                               
+  auto traj_index_1 = p->traj(clas12::DC,6) ->getIndex(); //layer 1                                                                                                                          
+  auto traj_index_2 = p->traj(clas12::DC,18)->getIndex(); //layer 2                                                                                                                          
+  auto traj_index_3 = p->traj(clas12::DC,36)->getIndex(); //layer 3                                                                                                                          
   
   auto traj_edge_1  = p->traj(clas12::DC,6) ->getFloat("edge",traj_index_1);
   auto traj_edge_2  = p->traj(clas12::DC,18)->getFloat("edge",traj_index_2);
@@ -114,16 +129,28 @@ void clas12debug::fillBeforePart(const clas12::region_part_ptr &p)
 
 
   //DEBUG plots
-  if(debug_plots && ( p->par()->getCharge() >= 1) && ( p->par()->getPid() != 11) )
+  if(debug_plots && ( p->par()->getCharge() >= 1) && ( pid != 11) )
     {
       if(is_cd)
-	pid_cd_debug->Fill(par_mom,par_beta);
-      if(is_fd)
-	pid_fd_debug->Fill(par_mom,par_beta);
-      
-      if(p->getRegion() == clas12::CD)
-	cd_particles_b->Fill(p->getPhi()*180/pi,sqrt( pow(p->par()->getPx(),2) + pow(p->par()->getPy(),2)));
+	{
+	  pid_cd_debug->Fill(par_mom,par_beta);
+	  cd_particles_b->Fill(p->getPhi()*180/pi,sqrt( pow(p->par()->getPx(),2) + pow(p->par()->getPy(),2)));
 
+	  if(pid == 2212)
+	    {
+	      pid_proton_chi2_cd_debug->Fill(p->par()->getChi2Pid());
+	      pid_proton_tof_cd_b_debug->Fill(par_mom,tof_difference(p,mass_proton));
+	    }
+	}
+      else if(is_fd)
+	{
+	  if(pid == 2212)
+	    {
+	      pid_fd_debug->Fill(par_mom,par_beta);
+	      pid_proton_chi2_fd_debug->Fill(p->par()->getChi2Pid());
+	      pid_proton_tof_fd_b_debug->Fill(par_mom,tof_difference(p,mass_proton));
+	    }
+	}      
 
       if( sector <= 6 && sector >= 1)
 	{
@@ -141,17 +168,31 @@ void clas12debug::fillBeforePart(const clas12::region_part_ptr &p)
 
 void clas12debug::fillAfterPart(const clas12::region_part_ptr &p)
 {
+  double mass_proton    = 0.938272; //GeV/c2                                                                                                                                             
+  int pid = p->par()->getPid();
+  double par_mom  = p->par()->getP();
+  double par_beta = p->par()->getBeta();
+      
   if(p->par()->getCharge() >= 1 && p->par()->getPid() != 11 && p->par()->getPid() == 2212)
     {
       debugByPid(p);
-      if( p->par()->getPid() == 2212)
+      if(pid == 2212)
 	fillDCdebug(p,dc_hit_map_a_proton);
-      if( p->par()->getPid() == 211)
+      if(pid == 211)
 	fillDCdebug(p,dc_hit_map_a_pion);
       
-      if( p->getRegion() == clas12::CD)
-	cd_particles_a->Fill(p->getPhi()*180/pi,sqrt( pow(p->par()->getPx(),2) + pow(p->par()->getPy(),2)));
+      bool is_cd = ( p->getRegion()==clas12::CD);
+      bool is_fd = ( p->getRegion()==clas12::FD);
       
+      if(is_cd)
+	{
+	  cd_particles_a->Fill(p->getPhi()*180/pi,sqrt( pow(p->par()->getPx(),2) + pow(p->par()->getPy(),2)));
+	  pid_proton_tof_cd_a_debug->Fill(par_mom,tof_difference(p,mass_proton));
+	}
+      else if(is_fd)
+	{
+	  pid_proton_tof_fd_a_debug->Fill(par_mom,tof_difference(p,mass_proton));
+	}
     }
 }
 
@@ -385,7 +426,13 @@ void clas12debug::debugByPid(const clas12::region_part_ptr &p)
    pcal_energy_b_debug->Write();
    pcal_energy_a_debug->Write();
 
+   pid_proton_chi2_fd_debug->Write();      
+   pid_proton_chi2_cd_debug->Write();      
 
+   pid_proton_tof_fd_b_debug->Write();
+   pid_proton_tof_cd_b_debug->Write();
+   pid_proton_tof_fd_a_debug->Write();
+   pid_proton_tof_cd_a_debug->Write();
 
    f_debugOut.Close();
  }
