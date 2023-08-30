@@ -58,5 +58,5 @@ Check the status of the simulations using
 squeue -u yourUserName
 ```
 
-*General tips for submitting on the farm. Submit an array of 1-1 just to test one file works without crashing. Log outputs can be found in /farm_out/userName/. Submit a reasonable amount of jobs i.e. no more than 1000. 
+*General tips for submitting on the farm. Submit an array of 1-1 just to test one file works without crashing. Log outputs can be found in /farm_out/userName/. Submit a reasonable amount of jobs i.e. no more than 1000 and try to keep your output file size < 1Tb 
 

@@ -29,8 +29,8 @@ void SetLorentzVector(TLorentzVector &p4,clas12::region_part_ptr rp){
 
 void Usage()
 {
-  std::cerr << "Skimmer for hipofiles \n";
-  std::cerr << "Usage: ./testAna outputfile.hipo inputfile_1.hipo inputfile_2.hipo ... \n\n\n";
+  std::cerr << "Usage: ./testAna inputfiles.hipo outputfile.root \n\n\n";
+
 }
 
 
@@ -45,30 +45,28 @@ int main(int argc, char ** argv)
     }
 
 
-  TString outFile = argv[1];
+
+  TString inFile  = argv[1];
+  TString outFile = argv[2];
+
   cout<<"Ouput file "<< outFile <<endl;
-
-  clas12root::HipoChainWriter chain(outFile);
-  chain.SetReaderTags({0});
-  chain.db()->turnOffQADB();
-
-  if(argc >= 2)
-    {
-      for(int i = 2; i != argc; ++i)
-	{
-          TString inFile(argv[i]);
-          chain.Add(inFile);
-          cout<<"Input file "<< inFile << "\n";
-	}
-    }
 
 
   clas12ana clasAna;
+
+  //Read in target parameter files                                                                                                                                                           
+  clasAna.readInputParam("ana.par");
+  clasAna.readEcalSFPar("paramsSF_40Ca_x2.dat");
+  clasAna.readEcalPPar("paramsPI_40Ca_x2.dat");
+
   clasAna.printParams();
 
-  clasAna.setVzcuts(-6,1);
-  clasAna.setVertexCorrCuts(-3,1);
 
+  clas12root::HipoChainWriter chain(outFile);
+  chain.Add(inFile);
+
+  chain.SetReaderTags({0});
+  chain.db()->turnOffQADB();
   auto config_c12=chain.GetC12Reader();
 
   //now get reference to (unique)ptr for accessing data in loop
@@ -103,32 +101,26 @@ int main(int argc, char ** argv)
   TH1D *epp_h = new TH1D("epp_h","(e,e'pp)",100,0,2);
   TH1D *ep_h  = new TH1D("ep_h","(e,e'p)",100,0,2);
 
+
+  clasAna.setEcalSFCuts();
+  clasAna.setEcalEdgeCuts();
+  clasAna.setPidCuts();
+  clasAna.setVertexCuts();
+  clasAna.setVertexCorrCuts();
+  //  clasAna.setDCEdgeCuts();
+  
+  clasAna.setVzcuts(-6,1);
+  clasAna.setVertexCorrCuts(-3,1);
+
+
+
+
   while(chain.Next())
     {
       //Display completed  
       counter++;
 
       clasAna.Run(c12);
-
-      auto electrons = clasAna.getByPid(11);
-      auto protons = clasAna.getByPid(2212);
-
-      bool anyCD_protons = false;
-
-      if(electrons.size() > 0 && protons.size() > 0)
-	{
-	  for(auto &p : protons)
-	    {
-	      if(p->getRegion() == clas12::CD)
-	      anyCD_protons = true;
-	    }
-	}
-
-      if(anyCD_protons)
-	chain.WriteEvent();
-
-      /*
-      //Example for Lead proton skims
       auto electrons = clasAna.getByPid(11);
       auto protons = clasAna.getByPid(2212);
 
@@ -145,7 +137,6 @@ int main(int argc, char ** argv)
 	    chain.WriteEvent();
 
 	}
-      */
 
     }
 

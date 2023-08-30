@@ -15,6 +15,7 @@
  #include "TFile.h"
  #include "TCanvas.h"
  #include <sstream>
+ #include "clas12debug.h"
 
  #define CLAS12ANA_DIR _CLAS12ANA_DIR
 
@@ -29,13 +30,25 @@
  {
 
   public:
-   clas12ana() 
+   clas12ana()
      {
        Init();
+     };
 
+   clas12ana(bool debug): debug_plots{debug}
+     {
+       Init();
+     };
+
+
+   ~clas12ana()
+     {
+       if(debug_plots)
+	 debug_c.WriteDebugPlots();
      };
 
    void Init();
+   void WriteSFEcalCuts();
    void InitSFEcalCuts();
    void InitSFPCuts();
    void readInputParam(const char* inFile);
@@ -43,16 +56,15 @@
    void readEcalSFPar(const char* filename);
    void printParams();
 
-   void InitDebugPlots();
-   void WriteDebugPlots();
+   //   void InitDebugPlots();
    void Clear();
    void Run(const std::unique_ptr<clas12::clas12reader>& c12);
-   void plotDebug();
 
-   double getSF(region_part_ptr p);
+   double getSF(const region_part_ptr &p);
 
-   void setEcalPCuts(bool flag = true)     {f_ecalPCuts = flag;}; //option to have several cuts
-   void setEcalSFCuts(bool flag = true)    {f_ecalSFCuts = flag;}; //option to have several cuts
+   void setEcalPCuts(bool flag = true)     {f_ecalPCuts = flag;};    //option to have several cuts
+   void setEcalSFCuts(bool flag = true)    {f_ecalSFCuts = flag;};   //option to have several cuts
+   void setEcalDiagCuts(bool flag = true)  {f_ecalDiagCuts = flag;}; //option to have several cuts
    void setDCEdgeCuts(bool flag = true)    {f_DCEdgeCuts = flag;};
    void setCDEdgeCuts(bool flag = true)    {f_CDEdgeCuts = flag;};
    void setCDRegionCuts(bool flag = true)    {f_CDRegionCuts = flag;};
@@ -60,7 +72,9 @@
    void setPidCuts(bool flag = true)     {f_pidCuts = flag;};
    void setVertexCuts(bool flag = true)  {f_vertexCuts = flag;};
    void setVertexCorrCuts(bool flag = true)  {f_corr_vertexCuts = flag;};
+   void setDebugPlots(bool flag = true)  {debug_plots = flag;};
 
+   int getCDRegion(const region_part_ptr &p);
 
    TVector3 getCOM(TLorentzVector l, TLorentzVector r, TLorentzVector q);
 
@@ -88,7 +102,8 @@
 	 return otherpart;
      }
 
-   void setByPid(region_part_ptr p)
+
+   void setByPid(const region_part_ptr &p)
      {
        int pid = p->par()->getPid();
        if( pid == 11)
@@ -116,19 +131,17 @@
 
 
    double getEventMult(){return event_mult;};
+   bool EcalEdgeCuts(const region_part_ptr &p);
+   bool checkEcalPCuts(const region_part_ptr &p);
+   bool checkEcalSFCuts(const region_part_ptr &p);
+   bool checkEcalDiagCuts(const region_part_ptr &p);
+   bool checkPidCut(const region_part_ptr &p);
+   bool checkVertex(const region_part_ptr &p);
+   bool DCEdgeCuts(const region_part_ptr &p);
+   bool CDEdgeCuts(const region_part_ptr &p);
+   bool checkVertexCorrelation(const region_part_ptr &el,const region_part_ptr &p);
 
-   void debugByPid(region_part_ptr p);
-
-   bool EcalEdgeCuts(region_part_ptr p);
-   bool checkEcalPCuts(region_part_ptr p);
-   bool checkEcalSFCuts(region_part_ptr p);
-   bool checkPidCut(region_part_ptr p);
-   bool checkVertex(region_part_ptr p);
-   bool checkVertexCorrelation(region_part_ptr el,region_part_ptr p);
-   bool DCEdgeCuts(region_part_ptr p);
-   bool CDEdgeCuts(region_part_ptr p);
-
-   bool CDRegionCuts(region_part_ptr p);
+   bool CDRegionCuts(const region_part_ptr &p);
 
    void setVxcuts(double min, double max){vertex_x_cuts.at(0)=min; vertex_x_cuts.at(1)=max;};
    void setVycuts(double min, double max){vertex_y_cuts.at(0)=min; vertex_y_cuts.at(1)=max;};
@@ -137,8 +150,6 @@
 
    void setCDCutRegion(int region){region_cut = region;};
    
-   void fillDCdebug(region_part_ptr p,TH2D **h);
-
    void getLeadRecoilSRC(TLorentzVector beam, TLorentzVector target, TLorentzVector el);
    std::vector<region_part_ptr> getLeadSRC(){return lead_proton;};
    std::vector<region_part_ptr> getRecoilSRC(){return recoil_proton;};
@@ -146,6 +157,8 @@
 
 
   private:
+
+   clas12debug debug_c; //debug class for plotting general plots
 
    std::vector<region_part_ptr> electrons;
    std::vector<region_part_ptr> protons;
@@ -158,27 +171,31 @@
    std::vector<region_part_ptr> kminus;
    std::vector<region_part_ptr> otherpart;
 
-
    //SRC 
    std::vector<region_part_ptr> lead_proton;
    std::vector<region_part_ptr> recoil_proton;
 
    //prototype function for fitting ECAL electron cuts
-   TF1 *ecal_p_fcn[2][7]; //0 upper 1 lower fiducial
+   TF1 *ecal_p_fcn[2][7];  //0 upper 1 lower fiducial
    TF1 *ecal_sf_fcn[2][7]; //0 upper 1 lower fiducial
-   double ecal_p_fcn_par[7][6]; //sector, parameter
+
+   TF1 *ecal_p_mean_fcn[7];  //mean function for plotting
+   TF1 *ecal_sf_mean_fcn[7]; //mean function for plotting
+
+   double ecal_p_fcn_par[7][6];  //sector, parameter
    double ecal_sf_fcn_par[7][6]; //sector, parameter
    int sigma_cut = 3;
 
    bool f_ecalSFCuts         = true;
    bool f_ecalPCuts          = true;
+   bool f_ecalDiagCuts       = true;
    bool f_ecalEdgeCuts       = true;
    bool f_DCEdgeCuts         = true;
    bool f_CDEdgeCuts         = true;
    bool f_pidCuts            = true;
    bool f_vertexCuts         = true;
    bool f_corr_vertexCuts    = true;
-
+   //optional cut
    bool f_CDRegionCuts       = false;
 
    map<int,vector<double> > pid_cuts_cd; // map<pid, {min,max cut}> Central Detector (CD)
@@ -187,17 +204,19 @@
    vector<double> vertex_x_cuts = {-99,99};
    vector<double> vertex_y_cuts = {-99,99};
    vector<double> vertex_z_cuts = {-99,99};
-   map<string,vector<double> > vertex_cuts; //map< x,y,z, {min,max}> 
+   map<string,vector<double> > vertex_cuts;    //map< x,y,z, {min,max}> 
    vector<double> vertex_corr_cuts = {-99,99}; //electron vertex <-> particle vertex correlation cuts
 
    double pi = 3.1415926535;
 
-   double ecal_edge_cut = 14; //cm
-   double dc_edge_cut   = 5;  //cm 
-   double cd_edge_cut   = 10; //deg phi
-   double min_mom_pt = 0.15; //min momentum transverse in CD MeV/c
-   int region_cut = 2;
+   double pcal_energy_cut = 0.06; //(GeV) minimum energy cut
+   double ecal_edge_cut   = 14;   //cm
+   double ecal_diag_cut   = 0.2;  //diagonal cut on SF
+   double cd_edge_cut     = 10;   //deg phi
+   double min_mom_pt      = 0.15;  //min momentum transverse in CD MeV/c
+   std::vector<double> dc_edge_cut = {4,3,10}; //units cm; {region1, region2, region3} cuts
 
+   int region_cut = 2; //region 2 of CD had strange occupancy not nessecarily bad
    //SRC Cuts
    double q2_cut = 1.5; //Q^2 cut
    double xb_cut = 1.2; //x-borken
@@ -223,71 +242,7 @@
 
    double event_mult = 0; //charged particle multiplicity 
 
-   //debugging tools
-   TString debug_fileName = "./debugOutputFile.root";
-   bool debug_plots = true;
-   TH1D *ecal_sf[7]; //ECAL sampling fraction
-   TH1D *dc[4][7];   //DC hit map
-
-
-
-   TH2D *sf_e_debug_b[7] = {nullptr};
-   TH2D *sf_e_debug_a[7] = {nullptr};
-   TH2D *sf_p_debug_b[7] = {nullptr};
-   TH2D *sf_p_debug_a[7] = {nullptr};
-
-   TH2D *pid_cd_debug = new TH2D("pid_cd_debug","PID Uncut CD",100,0,3,100,0,1.2);
-   TH2D *pid_fd_debug = new TH2D("pid_fd_debug","PID Uncut FD",100,0,5,100,0,1.2);
-
-   TH2D *sf_v_ecalIN_debug = new TH2D("sf_v_ecalIN_debug","",100,0,30,100,0,.4);
-   TH2D *sf_w_ecalIN_debug = new TH2D("sf_w_ecalIN_debug","",100,0,30,100,0,.4);
-
-   TH2D *sf_v_ecalOUT_debug = new TH2D("sf_v_ecalOUT_debug","",100,0,30,100,0,.4);
-   TH2D *sf_w_ecalOUT_debug = new TH2D("sf_w_ecalOUT_debug","",100,0,30,100,0,.4);
-
-   TH2D *sf_v_pcal_debug = new TH2D("sf_v_pcal_debug","",100,0,30,100,0,.4);
-   TH2D *sf_w_pcal_debug = new TH2D("sf_w_pcal_debug","",100,0,30,100,0,.4);
-
-   TH2D *sf_v_ecalIN_a_debug = new TH2D("sf_v_ecalIN_a_debug","",100,0,30,100,0,.4);
-   TH2D *sf_w_ecalIN_a_debug = new TH2D("sf_w_ecalIN_a_debug","",100,0,30,100,0,.4);
-
-   TH2D *sf_v_ecalOUT_a_debug = new TH2D("sf_v_ecalOUT_a_debug","",100,0,30,100,0,.4);
-   TH2D *sf_w_ecalOUT_a_debug = new TH2D("sf_w_ecalOUT_a_debug","",100,0,30,100,0,.4);
-
-   TH2D *sf_v_pcal_a_debug = new TH2D("sf_v_pcal_a_debug","",100,0,30,100,0,.4);
-   TH2D *sf_w_pcal_a_debug = new TH2D("sf_w_pcal_a_debug","",100,0,30,100,0,.4);
-
-   TH2D *pid_proton_fd_debug = new TH2D("pid_proton_fd_debug","PID Cut Proton FD",100,0,5,100,0,1.2);
-   TH2D *pid_proton_cd_debug = new TH2D("pid_proton_cd_debug","PID Cut Proton CD",100,0,5,100,0,1.2);
-   TH2D *pid_piplus_fd_debug = new TH2D("pid_piplus_fd_debug","PID Cut #pi + FD",100,0,5,100,0,1.2);
-   TH2D *pid_piplus_cd_debug = new TH2D("pid_piplus_cd_debug","PID Cut #pi + CD",100,0,5,100,0,1.2);
-   TH2D *pid_kplus_fd_debug = new TH2D("pid_kplus_fd_debug","PID Cut K+ FD",100,0,5,100,0,1.2);
-   TH2D *pid_kplus_cd_debug = new TH2D("pid_kplus_cd_debug","PID Cut K+ CD",100,0,5,100,0,1.2);
-
-   TH2D *pid_piminus_fd_debug = new TH2D("pid_piminus_fd_debug","PID Cut #pi + FD",100,0,5,100,0,1.2);
-   TH2D *pid_piminus_cd_debug = new TH2D("pid_piminus_cd_debug","PID Cut #pi + CD",100,0,5,100,0,1.2);
-   TH2D *pid_kminus_fd_debug = new TH2D("pid_kminus_fd_debug","PID Cut K+ FD",100,0,5,100,0,1.2);
-   TH2D *pid_kminus_cd_debug = new TH2D("pid_kminus_cd_debug","PID Cut K+ CD",100,0,5,100,0,1.2);
-   TH2D *pid_neutrals_fd_debug = new TH2D("pid_neutrals_fd_debug","PID Cut neutrals FD",100,0,5,100,0,1.2);
-   TH2D *pid_neutrals_cd_debug = new TH2D("pid_neutrals_cd_debug","PID Cut neutrals CD",100,0,5,100,0,1.2);
-   TH2D *pid_deuteron_fd_debug = new TH2D("pid_deuteron_fd_debug","PID Cut deuteron FD",100,0,5,100,0,1.2);
-   TH2D *pid_deuteron_cd_debug = new TH2D("pid_deuteron_cd_debug","PID Cut deutereon CD",100,0,5,100,0,1.2);
-
-   TH1D *el_vz_debug = new TH1D("el_vz_debug","El vertex ",100,-20,10);
-   TH1D *el_vz_p_debug = new TH1D("el_vz_p_debug","El-proton vertex ",100,-10,10);
-
-   TH2D *cd_particles_b = new TH2D("cd_particles_b","Pt;phi(deg);CD protons before edge cut",100,-180,180,100,0,1.);
-   TH2D *cd_particles_a = new TH2D("cd_particles_a","Pt;phi(deg);CD protons after edge cut ",100,-180,180,100,0,1.);
-
-   TH2D *dc_hit_map_a[4]; //3 regions
-   TH2D *dc_hit_map_b[4]; //3 regions
-
-   TH2D *dc_hit_map_a_proton[4]; //3 regions
-   TH2D *dc_hit_map_b_proton[4]; //3 regions
-
-   TH2D *dc_hit_map_a_pion[4]; //3 regions
-   TH2D *dc_hit_map_b_pion[4]; //3 regions
-
+   bool debug_plots = false;
  };
 
 #endif

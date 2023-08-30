@@ -5,11 +5,11 @@ foreach(fnameSrc many_plots.cpp)
   target_link_libraries(${fnameLib} ${ROOT_LIBRARIES} -lEG -lClas12Banks -lHipo4 -lClas12Root -L${CLAS12ROOT}/lib -L${CLAS12ROOT}/ccdb/lib)
 endforeach()
 
-foreach(fnameSrc Electron_Cuts.cpp Proton_Cuts.cpp ep_Kinematics.cpp epp_Kinematics.cpp  Andrew_skim.cpp Central_Detector_Proton.cpp Q2_dependence.cpp)
+foreach(fnameSrc Electron_Cuts.cpp Proton_Cuts.cpp ep_Kinematics.cpp epp_Kinematics.cpp  Andrew_skim.cpp Central_Detector_Proton.cpp Q2_dependence.cpp SRC_Cuts.cpp)
   message(STATUS ${fnameSRC})
   string (REPLACE ".cpp" "" fnameExe ${fnameSrc})
   add_executable(${fnameExe} ${fnameSrc})
-  target_link_libraries(${fnameExe} ${ROOT_LIBRARIES} -lEG -lClas12Banks -lHipo4 -lClas12Root -L${CLAS12ROOT}/lib -L${CLAS12ROOT}/ccdb/lib many_plots Clas12Ana)
+  target_link_libraries(${fnameExe} ${ROOT_LIBRARIES} -lEG -lClas12Banks -lHipo4 -lClas12Root -L${CLAS12ROOT}/lib -L${CLAS12ROOT}/ccdb/lib many_plots Clas12Ana Clas12Debug)
 endforeach()
 
 

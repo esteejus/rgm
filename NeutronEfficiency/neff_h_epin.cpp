@@ -280,9 +280,10 @@ int main(int argc, char ** argv)
   /////////////////////////////////////
   TH2D * h_cand2d = new TH2D("cand2d","Neutron Candidates;p_{miss} (GeV/c);#theta_{miss} (degrees)",10,0.2,1.2,6,40,70);
   hist_list_2.push_back(h_cand2d);
+  h_cand2d->SetStats(0);
   TH2D * h_det2d = new TH2D("det2d","Detected Neutrons;p_{miss} (GeV/c);#theta_{miss} (degrees)",10,0.2,1.2,6,40,70);
   hist_list_2.push_back(h_det2d);
-
+  h_det2d->SetStats(0);
 
 
 
@@ -439,8 +440,8 @@ int main(int argc, char ** argv)
         bool is_CND1 = neut[i]->sci(CND1)->getDetector()==3;
         bool is_CND2 = neut[i]->sci(CND2)->getDetector()==3;
         bool is_CND3 = neut[i]->sci(CND3)->getDetector()==3;
-        bool is_CTOF = neut[i]->sci(CTOF)->getDetector()==4;
-        if (!is_CND1 && !is_CND2 && !is_CND3 && !is_CTOF) {continue;}
+        //bool is_CTOF = neut[i]->sci(CTOF)->getDetector()==4;
+        if (!is_CND1 && !is_CND2 && !is_CND3) {continue;}
   
         // in expected theta range? if no - skip to next neutron in event
         double n_theta = neut[i]->getTheta()*180./M_PI;
@@ -469,8 +470,8 @@ int main(int argc, char ** argv)
     bool is_CND1 = neut[pick]->sci(CND1)->getDetector()==3;
     bool is_CND2 = neut[pick]->sci(CND2)->getDetector()==3;
     bool is_CND3 = neut[pick]->sci(CND3)->getDetector()==3;
-    bool is_CTOF = neut[pick]->sci(CTOF)->getDetector()==4;
-    if (!is_CND1 && !is_CND2 && !is_CND3 && !is_CTOF) {continue;}
+    //bool is_CTOF = neut[pick]->sci(CTOF)->getDetector()==4;
+    if (!is_CND1 && !is_CND2 && !is_CND3) {continue;}
 
     // Neutron kinematics
     double n_theta = neut[pick]->getTheta()*180./M_PI;
@@ -498,12 +499,12 @@ int main(int argc, char ** argv)
       path = neut[pick]->sci(CND3)->getPath();
       energy = neut[pick]->sci(CND3)->getEnergy();
     }
-    else if (is_CTOF)
+    /*else if (is_CTOF)
     {
       tof_n = neut[pick]->sci(CTOF)->getTime() - ts;
       path = neut[pick]->sci(CTOF)->getPath();
       energy = neut[pick]->sci(CTOF)->getEnergy();
-    }
+    }*/
 
     // tof and energy cuts
     h_tof->Fill(tof_n,weight);

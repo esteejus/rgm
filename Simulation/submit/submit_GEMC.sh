@@ -8,23 +8,31 @@
 #SBATCH --time=20:00:00                                                                                               
 #SBATCH --output=/farm_out/%u/%x-%j-%N.out                                                                           
 #SBATCH --error=//farm_out/%u/%x-%j-%N.err                                                                           
-#SBATCH --array=1-1000                                                                                                
+#SBATCH --array=1-10 #Number of files 1-N                                                                                                
 
-NEVENTS=10000
-TORUS=-1.0
-FILE_PREFIX=qe_c_6gev #Change file prefix for your simulation
+NEVENTS=10
+#-1.0 for inbending(6,4 GeV) 0.5 for outbending (2 Gev)
+TORUS=-1.0 
+#Change file prefix for your simulation                                                                                                                          
+FILE_PREFIX=qe_ca_598636gev 
 
-GCARD=rgm.gcard
-YAML=rgm_mc.yaml
+#set output file path location, don't forget to set up dir using setupdir.sh
+OUTPATH=/outputfile/path/
 
-source /etc/profile.d/modules.sh
-source /group/clas12/packages/setup.sh
-module load clas12/dev # new
-module switch gemc/5.1 # new
-module load sqlite/dev
-#module load clas12/pro
-# I had to switch to the software versions Justin uses to avoid a seg fault
+#choose the Gcard for your target type
+GCARD=./gcards/rgm_calcium_tmp.gcard 
+#Reconstruction yaml file
+YAML=rgm_mc_ai.yaml
 
-gemc -USE_GUI=0  -SCALE_FIELD="TorusSymmetric, $TORUS" -SCALE_FIELD="clas12-newSolenoid, -1.0" -N=10000 -INPUT_GEN_FILE="lund, ../lundfiles/lund_${FILE_PREFIX}_${SLURM_ARRAY_TASK_ID}.txt" -OUTPUT="hipo, ../mchipo/mc_${FILE_PREFIX}_${SLURM_ARRAY_TASK_ID}_torus$TORUS.hipo" $GCARD
-echo FINISHED GEMC
-recon-util -y $YAML -i ../mchipo/mc_${FILE_PREFIX}_${SLURM_ARRAY_TASK_ID}_torus${TORUS}.hipo -o ../reconhipo/recon_${FILE_PREFIX}_${SLURM_ARRAY_TASK_ID}_torus${TORUS}.hipo
+#------DONT NEED TO TOUCH UNDER HERE UNLESS YOU NEED TOO------
+LUNDOUT=${OUTPATH}/lundfiles/
+MCOUT=${OUTPATH}/mchipo/
+RECONOUT=${OUTPATH}/reconhipo/
+
+source ../environment_gemc.sh
+
+#SUBMIT GEMC MC
+gemc -USE_GUI=0  -SCALE_FIELD="TorusSymmetric, $TORUS" -SCALE_FIELD="clas12-newSolenoid, -1.0" -N=$NEVENTS -INPUT_GEN_FILE="lund, ${LUNDOUT}/lund_${FILE_PREFIX}_${SLURM_ARRAY_TASK_ID}.txt" -OUTPUT="hipo, ${MCOUT}/mc_${FILE_PREFIX}_${SLURM_ARRAY_TASK_ID}_torus$TORUS.hipo" $GCARD
+
+#RECONSTRUCTION
+recon-util -y $YAML -n $NEVENTS -i ${MCOUT}/mc_${FILE_PREFIX}_${SLURM_ARRAY_TASK_ID}_torus${TORUS}.hipo -o ${RECONOUT}/recon_${FILE_PREFIX}_${SLURM_ARRAY_TASK_ID}_torus${TORUS}.hipo

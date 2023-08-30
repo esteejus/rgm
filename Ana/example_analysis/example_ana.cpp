@@ -28,13 +28,16 @@ void SetLorentzVector(TLorentzVector &p4,clas12::region_part_ptr rp){
 
 void Usage()
 {
-  std::cerr << "Usage: ./testAna inputfiles.hipo outputfile.root \n\n\n";
-
+  std::cerr << "Usage: ./testAna outputfile inputfile_1 inputfile_2 ... \n\n\n";
 }
 
 
 int main(int argc, char ** argv)
 {
+
+  clas12root::HipoChain chain;
+  chain.SetReaderTags({0});
+  chain.db()->turnOffQADB();
 
   if(argc < 2)
     {
@@ -44,37 +47,32 @@ int main(int argc, char ** argv)
 
 
 
-  TString inFile  = argv[1];
-  TString outFile = argv[2];
-
+  TString outFile = argv[1];
   cout<<"Ouput file "<< outFile <<endl;
 
+  if(argc >= 2)
+    {
+      for(int i = 2; i != argc; ++i)
+	{
+	  TString inFile(argv[i]);
+	  chain.Add(inFile);
+	  cout<<"Input file "<< inFile << "\n";
+	}
+    }
 
-  clas12ana clasAna;
 
-  //Read in target parameter files                                                                                                                                                           
+
+  //Constructor accepts
+  bool outputDebugPlots = true;
+  clas12ana clasAna(outputDebugPlots); 
+
   /*
   clasAna.readInputParam("ana.par");
   clasAna.readEcalSFPar("paramsSF_40Ca_x2.dat");
   clasAna.readEcalPPar("paramsPI_40Ca_x2.dat");
   clasAna.printParams();
   */
-
   clasAna.printParams();
-
-
-  clas12root::HipoChain chain;
-  chain.Add(inFile);
-  chain.SetReaderTags({0});
-  chain.db()->turnOffQADB();
-  auto config_c12=chain.GetC12Reader();
-
-  //now get reference to (unique)ptr for accessing data in loop
-  //this will point to the correct place when file changes
-  //  const std::unique_ptr<clas12::clas12reader>& c12=chain.C12ref();
-
-  int counter = 0;
-  int cutcounter = 0;
 
   auto &c12=chain.C12ref();
 
@@ -103,22 +101,10 @@ int main(int argc, char ** argv)
 
   TH1D *missm = new TH1D("missm","Missing mass",100,0.5,1.5);
 
-  clasAna.setEcalSFCuts();
-  clasAna.setEcalPCuts();
-  clasAna.setEcalEdgeCuts();
-  clasAna.setPidCuts();
-  clasAna.setVertexCuts();
-  clasAna.setVertexCorrCuts();
-  clasAna.setDCEdgeCuts();
-  clasAna.setCDEdgeCuts();  
   //  clasAna.setCDRegionCuts();  
-
-  clasAna.setVzcuts(-6,1);
   //  clasAna.setCDCutRegion(2);  
+  clasAna.setVzcuts(-6,1);
   clasAna.setVertexCorrCuts(-3,1);
-
-
-
 
   while(chain.Next())
     {
@@ -126,15 +112,12 @@ int main(int argc, char ** argv)
       double weight = 1.;
       //      double weight = c12->mcevent()->getWeight(); //used if MC events have a weight 
 
-      //Display completed  
-      counter++;
-
       clasAna.Run(c12);
+
       auto electrons = clasAna.getByPid(11);
       auto protons = clasAna.getByPid(2212);
 
-
-      if(electrons.size() == 1 && protons.size() >= 1)
+      if(electrons.size() == 1)
 	{
 	  SetLorentzVector(el,electrons[0]);
 	  //	  SetLorentzVector(ptr,protons[0]);
@@ -189,14 +172,12 @@ int main(int argc, char ** argv)
 
     }
 
+  clasAna.WriteSFEcalCuts();
+
   missm->Draw();
-  //  pid_fd_debug->Write();
 
-  clasAna.WriteDebugPlots();
-
-  TFile *f = new TFile(outFile,"RECREATE");
-
-  f->cd();
+  TFile f(outFile,"RECREATE");
+  f.cd();
 
 
   q2_h->Write();
@@ -210,7 +191,7 @@ int main(int argc, char ** argv)
   epp_h->Write();
   missm->Write();
 
-  f->Close();
+  f.Close();
 
 
   return 0;

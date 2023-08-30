@@ -126,6 +126,10 @@ int main(int argc, char ** argv)
   hist_list_2.push_back(h_xB_WSq);
   TH2D * h_QSq_WSq = new TH2D("QSq_WSq","Q^{2} vs. W^{2} ;Q^{2};W^{2}",100,0,3,100,0,7);
   hist_list_2.push_back(h_QSq_WSq);
+  TH2D * h_eangles = new TH2D("eangles","Electron Angular Distribution",360,-180,180,180,0,180);
+  hist_list_2.push_back(h_eangles);
+
+
 
   TH2D * h_mom_theta[6];
   for(int i=0; i<6; i++){
@@ -179,6 +183,15 @@ int main(int argc, char ** argv)
   hist_list_1.push_back(h_ptheta_sig);
   TH1D * h_Edep_sig = new TH1D("edep_sig","Energy Deposition (Signal);Energy Deposition (MeVee);Counts",100,0,100);
   hist_list_1.push_back(h_Edep_sig);
+  TH2D * h_Edep_p_sig = new TH2D("edep_p_sig","Energy Deposition vs Momentum;Momentum (GeV/c);Energy Deposition (MeVee)",100,0,1.5,100,0,100);
+  hist_list_2.push_back(h_Edep_p_sig);
+  TH2D * h_Edep_theta_sig = new TH2D("edep_theta_sig","Energy Deposition vs #theta_{n};#theta_{n};Energy Deposition (MeVee)",180,0,180,100,0,100);
+  hist_list_2.push_back(h_Edep_theta_sig);
+  TH2D * h_Edep_phi_sig = new TH2D("edep_phi_sig","Energy Deposition vs #phi;#phi;Energy Deposition (MeVee)",48,-180,180,100,0,100);
+  hist_list_2.push_back(h_Edep_phi_sig);
+  TH2D * h_Edep_thetapn_sig = new TH2D("edep_thetapn_sig","Energy Deposition vs #theta_{pn};theta_{pn};Energy Deposition (MeVee)",180,0,180,100,0,100);
+  hist_list_2.push_back(h_Edep_thetapn_sig);
+
 
   /////////////////////////////////////
   //CND Neutron Background
@@ -199,6 +212,54 @@ int main(int argc, char ** argv)
   hist_list_1.push_back(h_ptheta_back);
   TH1D * h_Edep_back = new TH1D("edep_back","Energy Deposition (Background);Energy Deposition (MeVee);Counts",100,0,100);
   hist_list_1.push_back(h_Edep_back);
+  TH2D * h_Edep_p_back = new TH2D("edep_p_back","Energy Deposition vs Momentum;Momentum (GeV/c);Energy Deposition (MeVee)",100,0,1.5,100,0,100);
+  hist_list_2.push_back(h_Edep_p_back);
+  TH2D * h_Edep_theta_back = new TH2D("edep_theta_back","Energy Deposition vs #theta_{n};#theta_{n};Energy Deposition (MeVee)",180,0,180,100,0,100);
+  hist_list_2.push_back(h_Edep_theta_back);
+  TH2D * h_Edep_phi_back = new TH2D("edep_phi_back","Energy Deposition vs #phi;#phi;Energy Deposition (MeVee)",48,-180,180,100,0,100);
+  hist_list_2.push_back(h_Edep_phi_back);
+  TH2D * h_Edep_thetapn_back = new TH2D("edep_thetapn_back","Energy Deposition vs #theta_{pn};theta_{pn};Energy Deposition (MeVee)",180,0,180,100,0,100);
+  hist_list_2.push_back(h_Edep_thetapn_back);
+
+
+  /////////////////////////////////////
+  //ML Features
+  /////////////////////////////////////
+  TH1D * h_energy_s = new TH1D("f_energy_s","Neutron Energy",100,0,100);
+    hist_list_1.push_back(h_energy_s);
+  TH1D * h_layermult_s = new TH1D("f_layermult_s","CND Layer Mult",4,0,4);
+    hist_list_1.push_back(h_layermult_s);
+  TH1D * h_size_s = new TH1D("f_size_s","Cluster Size",5,0,5);
+    hist_list_1.push_back(h_size_s);
+  TH1D * h_cnd_hits_s = new TH1D("f_cnd_hits_s","Nearby CND Hits",10,0,10);
+    hist_list_1.push_back(h_cnd_hits_s);
+  TH1D * h_cnd_energy_s = new TH1D("f_cnd_energy_s","Nearby CND Energy",100,0,100);
+    hist_list_1.push_back(h_cnd_energy_s);
+  TH1D * h_ctof_energy_s = new TH1D("f_ctof_energy_s","Nearby CTOF Energy",100,0,100);
+    hist_list_1.push_back(h_ctof_energy_s);
+  TH1D * h_ctof_hits_s = new TH1D("f_ctof_hits_s","Nearby CTOF Hits",10,0,10);
+    hist_list_1.push_back(h_ctof_hits_s);
+  TH1D * h_anglediff_s = new TH1D("f_anglediff_s","CVT Angle Diff",200,0,200);
+    hist_list_1.push_back(h_anglediff_s);
+
+  TH1D * h_energy_b = new TH1D("f_energy_b","Neutron Energy",100,0,100);
+    hist_list_1.push_back(h_energy_b);
+  TH1D * h_layermult_b = new TH1D("f_layermult_b","CND Layer Mult",4,0,4);
+    hist_list_1.push_back(h_layermult_b);
+  TH1D * h_size_b = new TH1D("f_size_b","Cluster Size",5,0,5);
+    hist_list_1.push_back(h_size_b);
+  TH1D * h_cnd_hits_b = new TH1D("f_cnd_hits_b","Nearby CND Hits",10,0,10);
+    hist_list_1.push_back(h_cnd_hits_b);
+  TH1D * h_cnd_energy_b = new TH1D("f_cnd_energy_b","Nearby CND Energy",100,0,100);
+    hist_list_1.push_back(h_cnd_energy_b);
+  TH1D * h_ctof_energy_b = new TH1D("f_ctof_energy_b","Nearby CTOF Energy",100,0,100);
+    hist_list_1.push_back(h_ctof_energy_b);
+  TH1D * h_ctof_hits_b = new TH1D("f_ctof_hits_b","Nearby CTOF Hits",10,0,10);
+    hist_list_1.push_back(h_ctof_hits_b);
+  TH1D * h_anglediff_b = new TH1D("f_anglediff_b","CVT Angle Diff",200,0,200);
+    hist_list_1.push_back(h_anglediff_b);
+
+
 
 
   /////////////////////////////////////
@@ -223,6 +284,9 @@ int main(int argc, char ** argv)
   int counter = 0;
 
 
+
+
+  // USE THIS SECTION TO ADD THE TMVA READER AND FEATURES
   // TMVA stuff
   //TMVA::Tools::Instance();
   TMVA::Reader * reader = new TMVA::Reader("!Color:!Silent");
@@ -236,11 +300,13 @@ int main(int argc, char ** argv)
   reader->AddVariable("cnd_energy", &cnd_energy);
   reader->AddVariable("ctof_energy", &ctof_energy);
   reader->AddVariable("ctof_hits", &ctof_hits);
-  reader->AddVariable("angle_diff", &angle_diff);
+  //reader->AddVariable("angle_diff", &angle_diff);
   // spectator variable(s)
   reader->AddSpectator("momentum", &momentum);
 
-  reader->BookMVA("MLP", "/w/hallb-scshelf2102/clas/clase2/erins/repos/rgm/NeutronVeto/dataset/weights/TMVAClassification_MLP.weights.xml");
+  reader->BookMVA("MLP", "/w/hallb-scshelf2102/clas/clase2/erins/repos/rgm/NeutronVeto/dataset_6gev_pCD/weights/TrainNeutronVeto_TMVA_MLP.weights.xml");
+
+
 
 
   //Define cut class
@@ -296,7 +362,7 @@ int main(int argc, char ** argv)
       h_xB_QSq->Fill(xB,QSq,weight);
       h_xB_WSq->Fill(xB,WSq,weight);
       h_QSq_WSq->Fill(QSq,WSq,weight);
-
+      h_eangles->Fill(p_e.Phi()*180./M_PI,p_e.Theta()*180./M_PI,weight);
 
   /////////////////////////////////////
   //Proton Kinematics  
@@ -367,7 +433,7 @@ int main(int argc, char ** argv)
         bool CTOF = (neutrons[j]->sci(clas12::CTOF)->getDetector() == 4);
 
         double Edep = 0; double tof = 0;
-//std::cout << CND1 << '\t' << CND2 << '\t' << CND3 << '\t' << CTOF << '\n';
+
         if (CND1){
           Edep = neutrons[j]->sci(clas12::CND1)->getEnergy();
           tof = neutrons[j]->sci(clas12::CND1)->getTime() - starttime;
@@ -413,8 +479,7 @@ int main(int argc, char ** argv)
 
 
 
-        // TEST ML HERE
-        // get neutron features
+        // GET TMVA ML MODEL FEATURES FOR THIS NEUTRON HERE
         Struct ninfo = getFeatures(neutrons, allParticles, j);
         cnd_hits = ninfo.cnd_hits;
         cnd_energy = ninfo.cnd_energy;
@@ -424,15 +489,15 @@ int main(int argc, char ** argv)
         energy = ninfo.energy;
         size = ninfo.size;
         angle_diff = ninfo.angle_diff;
-        // spectator
+        // spectator variable
         momentum = p_n.Mag();
         
-        // apply ML model
+        // GET TMVA VALUE - PLACE CUT TO ASSIGN NEUTRON AS SIGNAL/BACKGROUND
         double mvaValue = reader->EvaluateMVA("MLP");
-//std::cout << mvaValue << '\n';
+
         // BDT: signal cut>0.1, background cut<0.1
         // MLP: signal cut>0.5, background<0.5
-//std::cout << p_pred.Mag() << '\t' << p_n.Mag() << '\n';
+
         if (mvaValue>0.5) // signal
         {
           h_pn_angles_sig->Fill(p_p.Phi()*180./M_PI-p_n.Phi()*180./M_PI, p_p.Theta()*180./M_PI-p_n.Theta()*180./M_PI, weight);
@@ -443,6 +508,19 @@ int main(int argc, char ** argv)
           h_mom_sig->Fill(p_n.Mag(),weight);
           h_ptheta_sig->Fill(p_n.Mag(),p_n.Theta()*180./M_PI,weight);
           h_Edep_sig->Fill(Edep,weight);
+          h_Edep_p_sig->Fill(p_n.Mag(),Edep,weight);
+          h_Edep_theta_sig->Fill(p_n.Theta()*180./M_PI,Edep,weight);
+          h_Edep_phi_sig->Fill(p_n.Phi()*180./M_PI,Edep,weight);
+          h_Edep_thetapn_sig->Fill(p_n.Angle(p_p)*180./M_PI,Edep,weight);
+          // ML features
+          h_energy_s->Fill(energy,weight);
+          h_layermult_s->Fill(layermult,weight);
+          h_size_s->Fill(size,weight);
+          h_cnd_hits_s->Fill(cnd_hits,weight);
+          h_cnd_energy_s->Fill(cnd_energy,weight);
+          h_ctof_energy_s->Fill(ctof_energy,weight);
+          h_ctof_hits_s->Fill(ctof_hits,weight);
+          h_anglediff_s->Fill(angle_diff,weight);
         }
         else // background
         {
@@ -454,7 +532,30 @@ int main(int argc, char ** argv)
           h_mom_back->Fill(p_n.Mag(),weight);
           h_ptheta_back->Fill(p_n.Mag(),p_n.Theta()*180./M_PI,weight);
           h_Edep_back->Fill(Edep,weight);
+          h_Edep_p_back->Fill(p_n.Mag(),Edep,weight);
+          h_Edep_theta_back->Fill(p_n.Theta()*180./M_PI,Edep,weight);
+          h_Edep_phi_back->Fill(p_n.Phi()*180./M_PI,Edep,weight);
+          h_Edep_thetapn_back->Fill(p_n.Angle(p_p)*180./M_PI,Edep,weight);
+          // ML features
+          h_energy_b->Fill(energy,weight);
+          h_layermult_b->Fill(layermult,weight);
+          h_size_b->Fill(size,weight);
+          h_cnd_hits_b->Fill(cnd_hits,weight);
+          h_cnd_energy_b->Fill(cnd_energy,weight);
+          h_ctof_energy_b->Fill(ctof_energy,weight);
+          h_ctof_hits_b->Fill(ctof_hits,weight);
+          h_anglediff_b->Fill(angle_diff,weight);
         }
+
+
+        /*if (mvaValue<0.5 && Edep>18 && Edep<23) // background
+        {
+          std::cout << Edep << '\t' << p_n.Theta()*180./M_PI << '\t' << p_n.Mag() << '\t' << p_n.Phi()*180./M_PI << '\n';
+        }*/
+        /*if (mvaValue<0.5)
+        {
+          std::cout << p_e.Theta()*180./M_PI << '\t' << p_n.Angle(p_e)*180/M_PI << '\n';
+        }*/
 
 
       }
@@ -463,70 +564,7 @@ int main(int argc, char ** argv)
 
 
 
-/*
 
-  /////////////////////////////////////
-  //Compare CND Neutrons to Pmiss
-  /////////////////////////////////////
-
-  // only events with 1 proton and 1 neutron
-  if (protons.size()!=1) {continue;}
-  if (neutrons.size()!=1) {continue;}
-
-  // skip events with particles other than proton, neutrons, electron, photon
-  bool trash = 0;
-  for(int j = 0; j < allParticles.size(); j ++){
-    int PID = allParticles[j]->getPid();
-    if (PID!=2212 && PID!=2112 && PID!=22 && PID!=11){
-      trash = 1;
-    }
-  }
-  if (trash) {continue;}
-
-  TVector3 p_p;
-  p_p.SetMagThetaPhi(protons[0]->getP(),protons[0]->getTheta(),protons[0]->getPhi());
-  TVector3 p_pred = p_p - p_q;
-  double theta_pm = p_pred.Theta()*180 / M_PI;
-
-
-  for(int j = 0; j < neutrons.size(); j++){
-	TVector3 p_n;
-	p_n.SetMagThetaPhi(neutrons[j]->getP(),neutrons[j]->getTheta(),neutrons[j]->getPhi());
-	double E_n = sqrt(mN*mN + p_n.Mag2());
-	double theta_n = p_n.Theta() * 180 / M_PI;
-	double phi_n = p_n.Phi() * 180 / M_PI;
-	double beta_frommom_n = p_n.Mag()/E_n;
-        double cos0 = p_pred.Dot(p_n) / (p_pred.Mag()*p_n.Mag());
-
-        double dphi_pn = protons[0]->getPhi()*180./M_PI - phi_n;
-        double dtheta_pn = protons[0]->getTheta()*180./M_PI - theta_n;
-
-        bool CND1 = (neutrons[j]->sci(clas12::CND1)->getDetector() == 3);
-        bool CND2 = (neutrons[j]->sci(clas12::CND2)->getDetector() == 3);
-        bool CND3 = (neutrons[j]->sci(clas12::CND3)->getDetector() == 3);
-
-        // cuts to get good neutrons
-        if (beta_frommom_n==0) {continue;}
-        if (theta_n==0) {continue;}
-        if (phi_n==0) {continue;}
-        if (p_n.Mag()<0.2) {continue;}
-        if (theta_n<40 || theta_n>140) {continue;}
-
-        // require pmiss to be as expected
-        if (p_pred.Mag()<0.2) {continue;}
-        if (theta_pm<40 || theta_pm>140) {continue;}
-
-        // "good neutrons" start here
-        if(CND){
-          h_pn_angles->Fill( dphi_pn , dtheta_pn , weight);
-          if (dtheta_pn>-15) {continue;}
-          h_pn_pmiss->Fill(p_pred.Mag(),p_n.Mag(),weight);
-          h_cos0->Fill(cos0,weight);
-          h_theta_phi_p->Fill(p_p.Theta()*180./M_PI,p_p.Phi()*180./M_PI,weight);
-        }
-
-  }
-*/
   
   }
 
@@ -581,6 +619,12 @@ int main(int argc, char ** argv)
   h_xB_WSq->Draw("colz");
   myCanvas->cd(6);
   h_QSq_WSq->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(2,2);
+  myCanvas->cd(1);
+  h_eangles->Draw("colz");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
   
@@ -653,6 +697,56 @@ int main(int argc, char ** argv)
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
+  // ML features start here
+  myCanvas->Divide(2,2);
+  myCanvas->cd(1);
+  h_energy_s->Draw();
+  myCanvas->cd(2);
+  h_energy_b->Draw();
+  myCanvas->cd(3);
+  h_layermult_s->Draw();
+  myCanvas->cd(4);
+  h_layermult_b->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(2,2);
+  myCanvas->cd(1);
+  h_size_s->Draw();
+  myCanvas->cd(2);
+  h_size_b->Draw();
+  myCanvas->cd(3);
+  h_anglediff_s->Draw();
+  myCanvas->cd(4);
+  h_anglediff_b->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(2,2);
+  myCanvas->cd(1);
+  h_cnd_hits_s->Draw();
+  myCanvas->cd(2);
+  h_cnd_hits_b->Draw();
+  myCanvas->cd(3);
+  h_cnd_energy_s->Draw();
+  myCanvas->cd(4);
+  h_cnd_energy_b->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(2,2);
+  myCanvas->cd(1);
+  h_ctof_hits_s->Draw();
+  myCanvas->cd(2);
+  h_ctof_hits_b->Draw();
+  myCanvas->cd(3);
+  h_ctof_energy_s->Draw();
+  myCanvas->cd(4);
+  h_ctof_energy_b->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+  // ML features end here
+
   myCanvas->Divide(2,2);
   myCanvas->cd(1);
   h_tof_sig->Draw();
@@ -677,6 +771,29 @@ int main(int argc, char ** argv)
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
+  myCanvas->Divide(2,2);
+  myCanvas->cd(1);
+  h_Edep_p_sig->Draw("colz");
+  myCanvas->cd(2);
+  h_Edep_p_back->Draw("colz");
+  myCanvas->cd(3);
+  h_Edep_theta_sig->Draw("colz");
+  myCanvas->cd(4);
+  h_Edep_theta_back->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(2,2);
+  myCanvas->cd(1);
+  h_Edep_phi_sig->Draw("colz");
+  myCanvas->cd(2);
+  h_Edep_phi_back->Draw("colz");
+  myCanvas->cd(3);
+  h_Edep_thetapn_sig->Draw("colz");
+  myCanvas->cd(4);
+  h_Edep_thetapn_back->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
 
 
   sprintf(fileName,"%s]",pdfFile);
