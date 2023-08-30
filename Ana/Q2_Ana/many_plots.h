@@ -31,6 +31,8 @@ class many_plots{
 
   void Fill_hist_set(bool is_epp, double Q2, double x);
   void Write_hist_set(TFile *f, char fileName[100], TCanvas * myCanvas);
+  void Write_hist_set_epp(TFile *f, char fileName[100], TCanvas * myCanvas);
+  void Write_ratio_set(TFile *f, char fileName[100], TCanvas * myCanvas);
   int binQ2(double q2);
   
  private:

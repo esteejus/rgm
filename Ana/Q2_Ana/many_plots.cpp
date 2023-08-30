@@ -42,25 +42,78 @@ void many_plots::Write_hist_set(TFile *f, char fileName[100], TCanvas * myCanvas
 
   myCanvas->Divide(4,3);
   myCanvas->cd(1);
-  h_ep->Scale(1/h_ep->Integral());
-  h_ep->SetLineColor(1);
+  h_ep->Scale(h_epp->Integral()/h_ep->Integral());
+  h_ep->SetLineColor(2);
   h_ep->Draw();
-  h_epp->Scale(1/h_epp->Integral());
-  h_epp->SetLineColor(2);
+  h_epp->SetLineColor(1);
   h_epp->Draw("SAME");
   for(int i=0; i<10; i++){
     myCanvas->cd(i+3);
     h_ep_Q2bin[i]->Scale(1/h_ep_Q2bin[i]->Integral());
-    h_ep_Q2bin[i]->SetLineColor(1);
+    h_ep_Q2bin[i]->SetLineColor(2);
     h_ep_Q2bin[i]->Draw();
     h_epp_Q2bin[i]->Scale(1/h_epp_Q2bin[i]->Integral());
-    h_epp_Q2bin[i]->SetLineColor(2);
+    h_epp_Q2bin[i]->SetLineColor(1);
     h_epp_Q2bin[i]->Draw("SAME");
   }
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();  
 
 
+}
+
+void many_plots::Write_hist_set_epp(TFile *f, char fileName[100], TCanvas * myCanvas)
+{
+  f->cd();
+  h_epp->Write();
+  for(int i=0; i<10; i++){
+    h_epp_Q2bin[i]->Write();
+  }
+
+  myCanvas->Divide(4,3);
+  myCanvas->cd(1);
+  h_epp->SetLineColor(1);
+  h_epp->Draw("SAME");
+  /*
+  myCanvas->cd(2);
+  for(int i=0; i<10; i++){
+    h_epp_Q2bin[i]->SetLineColor(1);
+    h_epp_Q2bin[i]->Draw("SAME");
+    }*/
+  for(int i=0; i<10; i++){
+    myCanvas->cd(i+3);
+    h_epp_Q2bin[i]->SetLineColor(1);
+    h_epp_Q2bin[i]->Draw("SAME");
+  }
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();  
+
+
+}
+
+void many_plots::Write_ratio_set(TFile *f, char fileName[100], TCanvas * myCanvas)
+{
+  f->cd();
+  TH1D * h_epp_clone = (TH1D*) h_epp->Clone();
+  h_epp_clone->Divide(h_ep);
+  h_epp_clone->Write();
+
+  TH1D * h_epp_clone_Q2bin[10];
+  for(int i=0; i<10; i++){
+    h_epp_clone_Q2bin[i] = (TH1D*) h_epp_Q2bin[i]->Clone();
+    h_epp_clone_Q2bin[i]->Divide(h_ep_Q2bin[i]);
+    h_epp_clone_Q2bin[i]->Write();
+  }
+
+  myCanvas->Divide(4,3);
+  myCanvas->cd(1);
+  h_epp_clone->Draw();  
+  for(int i=0; i<10; i++){
+    myCanvas->cd(i+3);
+    h_epp_clone_Q2bin[i]->Draw();
+  }
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();  
 }
 
 int many_plots::binQ2(double q2){
