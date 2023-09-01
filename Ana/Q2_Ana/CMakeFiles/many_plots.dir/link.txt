@@ -1,0 +1,2 @@
+/usr/bin/ar qc libmany_plots.a CMakeFiles/many_plots.dir/many_plots.cpp.o
+/usr/bin/ranlib libmany_plots.a
