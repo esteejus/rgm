@@ -131,6 +131,7 @@ void clas12ana::Run(const std::unique_ptr<clas12::clas12reader>& c12)
 			}
 		      else if(p->par()->getPid() != 11  && electrons.size() > 0)
 			{
+			  //charge particles
 			  event_mult++;
 			  
 			  if( !( (!checkPidCut(p) && f_pidCuts)        || //PID cuts
@@ -138,8 +139,7 @@ void clas12ana::Run(const std::unique_ptr<clas12::clas12reader>& c12)
 				 (!CDEdgeCuts(p)  && f_CDEdgeCuts)     || //CD edge cut
 				 (!CDRegionCuts(p)  && f_CDRegionCuts) || //CD edge cut
 				 (!DCEdgeCuts(p) && f_DCEdgeCuts)      || //DC edge cut
-				 (!checkVertexCorrelation(electrons_det[0],p) && f_corr_vertexCuts))  //Vertex correlation cut between electron
-			      )
+				 (!checkVertexCorrelation(electrons_det[0],p) && f_corr_vertexCuts)) ) //Vertex correlation cut between electron
 			    setByPid(p);
 			}
 		    });
@@ -159,7 +159,7 @@ void clas12ana::Run(const std::unique_ptr<clas12::clas12reader>& c12)
 	    debug_c.fillAfterEl(el);
 	  
 	}
-      
+
     }//good electron loop
   
   
@@ -291,9 +291,14 @@ bool clas12ana::DCEdgeCuts(const region_part_ptr &p)
       auto traj_edge_2  = p->traj(DC,18)->getFloat("edge",traj_index_2);
       auto traj_edge_3  = p->traj(DC,36)->getFloat("edge",traj_index_3);
 
-      
-      if(dc_edge_cut.size() == 3  && traj_edge_1 > dc_edge_cut[0] && traj_edge_2 > dc_edge_cut[1] && traj_edge_3 > dc_edge_cut[2])
-	  return true;
+      //PUT DC EDGE CUTS IN PARAMETER FILE
+
+      //electron DC cuts
+      if(p->par()->getCharge() < 0 && (dc_edge_cut_el.size() == 3  && traj_edge_1 > dc_edge_cut_el[0] && traj_edge_2 > dc_edge_cut_el[1] && traj_edge_3 > dc_edge_cut_el[2]) )
+	return true;
+      //proton DC cuts
+      else if(p->par()->getCharge() > 0 && (dc_edge_cut_ptr.size() == 3  && traj_edge_1 > dc_edge_cut_ptr[0] && traj_edge_2 > dc_edge_cut_ptr[1] && traj_edge_3 > dc_edge_cut_ptr[2]) )
+	return true;
       else
 	return false;
     }
@@ -320,6 +325,25 @@ bool clas12ana::EcalEdgeCuts(const region_part_ptr &p)
     return true;
 }
 
+
+bool clas12ana::checkGhostTrackCD(const region_part_ptr &p)
+{
+  //check ghost tracks for charged particles only
+  if(p->par()->getCharge() == 0)
+    return false;
+
+  //only CD (primarily protons) suffer from this
+  if(p->getRegion() != clas12::CD)
+    return false;
+
+  for(auto &p2 : protons)
+    {
+      if(p2->getRegion() == clas12::CD && p2->sci(CTOF)->getComponent() == p->sci(CTOF)->getComponent())
+	return true;
+    }
+
+  return false;
+}
 
 bool clas12ana::checkEcalDiagCuts(const region_part_ptr &p)
 {

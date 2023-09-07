@@ -140,6 +140,7 @@ void clas12debug::fillBeforePart(const clas12::region_part_ptr &p)
 	    {
 	      pid_proton_chi2_cd_debug->Fill(p->par()->getChi2Pid());
 	      pid_proton_tof_cd_b_debug->Fill(par_mom,tof_difference(p,mass_proton));
+	      p_vz_cd_debug->Fill(p->par()->getVz());
 	    }
 	}
       else if(is_fd)
@@ -149,6 +150,7 @@ void clas12debug::fillBeforePart(const clas12::region_part_ptr &p)
 	      pid_fd_debug->Fill(par_mom,par_beta);
 	      pid_proton_chi2_fd_debug->Fill(p->par()->getChi2Pid());
 	      pid_proton_tof_fd_b_debug->Fill(par_mom,tof_difference(p,mass_proton));
+	      p_vz_fd_debug->Fill(p->par()->getVz());
 	    }
 	}      
 
@@ -338,9 +340,9 @@ void clas12debug::debugByPid(const clas12::region_part_ptr &p)
  }
 
 
- void clas12debug::WriteDebugPlots()
+ void clas12debug::WriteDebugPlots(TString filename)
  {
-   TFile f_debugOut(debug_fileName,"RECREATE");
+   TFile f_debugOut(filename,"RECREATE");
 
    std::for_each(sf_p_debug_b.begin(),sf_p_debug_b.end(), [](auto &el) {el->Write();} );
    std::for_each(sf_p_debug_a.begin(),sf_p_debug_a.end(), [](auto &el) {el->Write();} );
@@ -433,6 +435,10 @@ void clas12debug::debugByPid(const clas12::region_part_ptr &p)
    pid_proton_tof_cd_b_debug->Write();
    pid_proton_tof_fd_a_debug->Write();
    pid_proton_tof_cd_a_debug->Write();
+
+   p_vz_cd_debug->Write();
+   p_vz_fd_debug->Write();
+
 
    f_debugOut.Close();
  }

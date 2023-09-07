@@ -44,7 +44,8 @@
    ~clas12ana()
      {
        if(debug_plots)
-	 debug_c.WriteDebugPlots();
+	 debug_c.WriteDebugPlots(debug_out_file);
+
      };
 
    void Init();
@@ -72,7 +73,9 @@
    void setPidCuts(bool flag = true)     {f_pidCuts = flag;};
    void setVertexCuts(bool flag = true)  {f_vertexCuts = flag;};
    void setVertexCorrCuts(bool flag = true)  {f_corr_vertexCuts = flag;};
+
    void setDebugPlots(bool flag = true)  {debug_plots = flag;};
+   void setDebugFile(TString file)  {debug_out_file = file;};
 
    int getCDRegion(const region_part_ptr &p);
 
@@ -109,7 +112,10 @@
        if( pid == 11)
 	 electrons.push_back(p);
        else if( pid == 2212)
-	 protons.push_back(p);
+	 {
+	   if(!checkGhostTrackCD(p)) //don't fill if ghost track
+	     protons.push_back(p);
+	 }
        else if( pid == 2112)
 	 neutrons.push_back(p);
        else if( pid == 45)
@@ -139,6 +145,9 @@
    bool checkVertex(const region_part_ptr &p);
    bool DCEdgeCuts(const region_part_ptr &p);
    bool CDEdgeCuts(const region_part_ptr &p);
+
+   bool checkGhostTrackCD(const region_part_ptr &p);
+
    bool checkVertexCorrelation(const region_part_ptr &el,const region_part_ptr &p);
 
    bool CDRegionCuts(const region_part_ptr &p);
@@ -159,6 +168,7 @@
   private:
 
    clas12debug debug_c; //debug class for plotting general plots
+   TString debug_out_file = "debugPlots.root";
 
    std::vector<region_part_ptr> electrons;
    std::vector<region_part_ptr> protons;
@@ -214,7 +224,8 @@
    double ecal_diag_cut   = 0.2;  //diagonal cut on SF
    double cd_edge_cut     = 10;   //deg phi
    double min_mom_pt      = 0.15;  //min momentum transverse in CD MeV/c
-   std::vector<double> dc_edge_cut = {4,3,10}; //units cm; {region1, region2, region3} cuts
+   std::vector<double> dc_edge_cut_el  = {4.5,3.5,7.5}; //units cm; {region1, region2, region3} cuts for electrons INBENDING
+   std::vector<double> dc_edge_cut_ptr = {2.5,3,10.5}; //units cm; {region1, region2, region3} cuts for protons  OUTBENDING
 
    int region_cut = 2; //region 2 of CD had strange occupancy not nessecarily bad
    //SRC Cuts

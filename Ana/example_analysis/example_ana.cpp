@@ -28,7 +28,7 @@ void SetLorentzVector(TLorentzVector &p4,clas12::region_part_ptr rp){
 
 void Usage()
 {
-  std::cerr << "Usage: ./testAna outputfile inputfile_1 inputfile_2 ... \n\n\n";
+  std::cerr << "Usage: ./testAna Data(0)/MC(1) outputfile inputfile_1 inputfile_2 ... \n\n\n";
 }
 
 
@@ -39,7 +39,7 @@ int main(int argc, char ** argv)
   chain.SetReaderTags({0});
   chain.db()->turnOffQADB();
 
-  if(argc < 2)
+  if(argc < 3)
     {
       Usage();
       return -1;
@@ -47,12 +47,17 @@ int main(int argc, char ** argv)
 
 
 
-  TString outFile = argv[1];
+  TString outFile = argv[2];
   cout<<"Ouput file "<< outFile <<endl;
+  std::stringstream  ss(argv[1]);
+  bool data_type;
+  //  if(!(ss >> std::boolalpha >> data_type))
+  if(!(ss >> data_type))
+    {std::cerr << "Data type invalid use 0 or 1"<<std::endl; return -1;}
 
-  if(argc >= 2)
+  if(argc >= 3)
     {
-      for(int i = 2; i != argc; ++i)
+      for(int i = 3; i != argc; ++i)
 	{
 	  TString inFile(argv[i]);
 	  chain.Add(inFile);
@@ -65,6 +70,11 @@ int main(int argc, char ** argv)
   //Constructor accepts
   bool outputDebugPlots = true;
   clas12ana clasAna(outputDebugPlots); 
+
+  clasAna.readEcalSFPar("/w/hallb-scshelf2102/clas12/users/esteejus/rgm/Ana/cutFiles/paramsSF_LD2_x2.dat");
+  clasAna.readEcalPPar("/w/hallb-scshelf2102/clas12/users/esteejus/rgm/Ana/cutFiles/paramsPI_LD2_x2.dat");
+
+
 
   /*
   clasAna.readInputParam("ana.par");
@@ -101,6 +111,8 @@ int main(int argc, char ** argv)
 
   TH1D *missm = new TH1D("missm","Missing mass",100,0.5,1.5);
 
+  TH1D *htcc = new TH1D("htcc",";Counts;HTCC N_{e^{-}}",40,0,40);
+
   //  clasAna.setCDRegionCuts();  
   //  clasAna.setCDCutRegion(2);  
   clasAna.setVzcuts(-6,1);
@@ -110,12 +122,19 @@ int main(int argc, char ** argv)
     {
 
       double weight = 1.;
-      //      double weight = c12->mcevent()->getWeight(); //used if MC events have a weight 
+      if(data_type)
+	weight = c12->mcevent()->getWeight(); //used if MC events have a weight 
 
+      //      cout<<"weight "<<weight<<endl;
       clasAna.Run(c12);
+
+      auto electrons_c12 = c12->getByID(11);
 
       auto electrons = clasAna.getByPid(11);
       auto protons = clasAna.getByPid(2212);
+
+      for(auto &e : electrons_c12)
+	htcc->Fill(e->che(HTCC)->getNphe());
 
       if(electrons.size() == 1)
 	{
@@ -190,6 +209,7 @@ int main(int argc, char ** argv)
   ep_h->Write();
   epp_h->Write();
   missm->Write();
+  htcc->Write();
 
   f.Close();
 
