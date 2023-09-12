@@ -223,7 +223,9 @@
    double ecal_edge_cut   = 14;   //cm
    double ecal_diag_cut   = 0.2;  //diagonal cut on SF
    double cd_edge_cut     = 10;   //deg phi
-   double min_mom_pt      = 0.15;  //min momentum transverse in CD MeV/c
+   double min_mom_pt      = 0.15; //min momentum transverse in CD MeV/c
+   double ghost_track_cut = 5;    //deg; cuts the angle between CD tracks and FD tracks to remove ghost tracks (track measured in both CD and FD)
+ 
    std::vector<double> dc_edge_cut_el  = {4.5,3.5,7.5}; //units cm; {region1, region2, region3} cuts for electrons INBENDING
    std::vector<double> dc_edge_cut_ptr = {2.5,3,10.5}; //units cm; {region1, region2, region3} cuts for protons  OUTBENDING
 

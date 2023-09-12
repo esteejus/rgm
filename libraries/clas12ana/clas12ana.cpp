@@ -328,19 +328,32 @@ bool clas12ana::EcalEdgeCuts(const region_part_ptr &p)
 
 bool clas12ana::checkGhostTrackCD(const region_part_ptr &p)
 {
-  //check ghost tracks for charged particles only
-  if(p->par()->getCharge() == 0)
-    return false;
+  /*
+    Function returns true if track is a suspected ghost track
 
-  //only CD (primarily protons) suffer from this
-  if(p->getRegion() != clas12::CD)
+    There are two sources of ghost tracks. A ghost track is a particle which gets reconstructed twice
+    one of the tracks should only be kept. Two cases have been identified:
+    1. CD protons have the exact same CTOF hit component (remove by removing if a tracks shares same CTOF component in CD
+    2. Proton reconstructed by CD and FD separately, they have < 5deg angle between tracks. 
+  */
+
+  //check ghost tracks only apply to charge particles. Investigated for protons. Need to check pions
+  if(p->par()->getCharge() == 0)
     return false;
 
   for(auto &p2 : protons)
     {
-      if(p2->getRegion() == clas12::CD && p2->sci(CTOF)->getComponent() == p->sci(CTOF)->getComponent())
+      //case 1
+      if(p->getRegion() == clas12::CD && p2->getRegion() == clas12::CD 
+	 && p2->sci(CTOF)->getComponent() == p->sci(CTOF)->getComponent())
+	return true;
+      
+      //case 2
+      else if( (p->getRegion() == clas12::FD && p2->getRegion() == clas12::CD) || (p->getRegion() == clas12::CD && p2->getRegion() == clas12::FD) &&
+	       abs(p2->getTheta() - p->getTheta())*TMath::RadToDeg() < ghost_track_cut )
 	return true;
     }
+
 
   return false;
 }
