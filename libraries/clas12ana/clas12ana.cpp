@@ -131,14 +131,13 @@ void clas12ana::Run(const std::unique_ptr<clas12::clas12reader>& c12)
 			}
 		      else if(p->par()->getPid() != 11  && electrons.size() > 0)
 			{
-			  //charge particles
-			  event_mult++;
+			  ++event_mult;	//charge particles
 			  
-			  if( !( (!checkPidCut(p) && f_pidCuts)        || //PID cuts
-				 (!checkVertex(p) && f_vertexCuts)     || //Vertex cut
-				 (!CDEdgeCuts(p)  && f_CDEdgeCuts)     || //CD edge cut
-				 (!CDRegionCuts(p)  && f_CDRegionCuts) || //CD edge cut
-				 (!DCEdgeCuts(p) && f_DCEdgeCuts)      || //DC edge cut
+			  if( !( (!checkPidCut(p)  && f_pidCuts)      || //PID cuts
+				 (!checkVertex(p)  && f_vertexCuts)   || //Vertex cut
+				 (!CDEdgeCuts(p)   && f_CDEdgeCuts)   || //CD edge cut
+				 (!CDRegionCuts(p) && f_CDRegionCuts) || //CD edge cut
+				 (!DCEdgeCuts(p)   && f_DCEdgeCuts)   || //DC edge cut
 				 (!checkVertexCorrelation(electrons_det[0],p) && f_corr_vertexCuts)) ) //Vertex correlation cut between electron
 			    setByPid(p);
 			}
@@ -239,20 +238,23 @@ void clas12ana::InitSFPCuts()
 
 void clas12ana::Init()
 {
-      if(debug_plots)
-	debug_c.InitDebugPlots();
+  if(debug_plots)
+    debug_c.InitDebugPlots();
 
-      for(int i = 0; i < 7; i++)
-	{
-	  ecal_sf_mean_fcn[i] = new TF1(Form("ecal_sf_mean_fcn_%d",i),"[0] + [1]/x + [2]/pow(x,2)",0,1.5);
-	  ecal_sf_fcn[0][i] = new TF1(Form("ecal_sf_fcn_0_%d",i),"[0] + [1]/x + [2]/pow(x,2) - [6]*( [3] + [4]/x + [5]/pow(x,2))",0,1.5);
-	  ecal_sf_fcn[1][i] = new TF1(Form("ecal_sf_fcn_1_%d",i),"[0] + [1]/x + [2]/pow(x,2) + [6]*( [3] + [4]/x + [5]/pow(x,2))",0,1.5);
+  proton_pid_mean->SetParameters(0.0152222,0.816844,-0.0950375,0.255628);
+  proton_pid_sigma->SetParameters(0.0760525,0.240862,-0.000276433,0.229085);
 
-	  ecal_p_mean_fcn[i] = new TF1(Form("ecal_p_mean_fcn_%d",i),"[0] + [1]/x + [2]/pow(x,2)",0,10);
-	  ecal_p_fcn[0][i] = new TF1(Form("ecal_p_fcn_0_%d",i),"[0] + [1]/x + [2]/pow(x,2) - [6]*( [3] + [4]/x + [5]/pow(x,2))",0,10);
-	  ecal_p_fcn[1][i] = new TF1(Form("ecal_p_fcn_1_%d",i),"[0] + [1]/x + [2]/pow(x,2) + [6]*( [3] + [4]/x + [5]/pow(x,2))",0,10);
-	}
-
+  for(int i = 0; i < 7; i++)
+    {
+      ecal_sf_mean_fcn[i] = new TF1(Form("ecal_sf_mean_fcn_%d",i),"[0] + [1]/x + [2]/pow(x,2)",0,1.5);
+      ecal_sf_fcn[0][i] = new TF1(Form("ecal_sf_fcn_0_%d",i),"[0] + [1]/x + [2]/pow(x,2) - [6]*( [3] + [4]/x + [5]/pow(x,2))",0,1.5);
+      ecal_sf_fcn[1][i] = new TF1(Form("ecal_sf_fcn_1_%d",i),"[0] + [1]/x + [2]/pow(x,2) + [6]*( [3] + [4]/x + [5]/pow(x,2))",0,1.5);
+      
+      ecal_p_mean_fcn[i] = new TF1(Form("ecal_p_mean_fcn_%d",i),"[0] + [1]/x + [2]/pow(x,2)",0,10);
+      ecal_p_fcn[0][i] = new TF1(Form("ecal_p_fcn_0_%d",i),"[0] + [1]/x + [2]/pow(x,2) - [6]*( [3] + [4]/x + [5]/pow(x,2))",0,10);
+      ecal_p_fcn[1][i] = new TF1(Form("ecal_p_fcn_1_%d",i),"[0] + [1]/x + [2]/pow(x,2) + [6]*( [3] + [4]/x + [5]/pow(x,2))",0,10);
+    }
+  
   for(int i = 0; i < 7; i++)
     {
       for(int j = 0; j < 6; j++)
@@ -542,6 +544,40 @@ bool clas12ana::checkPidCut(const region_part_ptr &p)
 }
 
 
+bool clas12ana::checkProtonPidCut(const region_part_ptr &p)
+{
+  //returns true if inside cut
+  //this is the pid done "by hand" where we cut on TOF vs momentum for protons
+  //we only apply to CD where PID default from CLAS getByID is not as good
+
+  //apply to only CD
+  if(p->getRegion() != clas12::CD) 
+    return false;
+
+  //only applies to + charged particles
+  if(p->par()->getCharge() <= 0) 
+    return false;
+
+  //get the # of sigma away in PID cut from par file
+  auto itter = pid_cuts_cd.find(2212);
+  if(itter != pid_cuts_cd.end())
+    {
+      double num_sigma =  itter->second.at(1); //sigma away from mean
+      double mom = p->par()->getP();
+      double exp_beta  = mom/sqrt(pow(mom,2) + pow(mass_proton,2)); //expected beta of particle assuming proton mass
+      double tof_diff = (p->getPath()/c)*(1/p->par()->getBeta() - 1/exp_beta); //TOF difference measured - expected
+      double up_lim  =  proton_pid_mean->Eval(mom) + num_sigma*proton_pid_sigma->Eval(mom); 
+      double low_lim =  proton_pid_mean->Eval(mom) - num_sigma*proton_pid_sigma->Eval(mom);
+
+      if( !(tof_diff < up_lim && tof_diff > low_lim) )
+	return false;
+    }
+
+  return true;
+}
+
+
+
 void clas12ana::readEcalSFPar(const char* filename)
 {
   int num_par = 6; 
@@ -553,12 +589,12 @@ void clas12ana::readEcalSFPar(const char* filename)
       string tp;
 
       //remove 3 lines of header                                                                   
-      for(int i = 0; i < 2; i++)
+      for(int i = 0; i < 2; ++i)
 	getline(infile, tp);
       cout<<tp<<endl;
 
 
-      for(int i = 1; i < 7; i++)
+      for(int i = 1; i < 7; ++i)
 	{
 	  getline(infile, tp);  //read data from file object and put it into string.       
           stringstream ss(tp);
@@ -592,12 +628,12 @@ void clas12ana::readEcalPPar(const char* filename)
       string tp;
 
       //remove 3 lines of header                                                                   
-      for(int i = 0; i < 2; i++)
+      for(int i = 0; i < 2; ++i)
 	getline(infile, tp);
       cout<<tp<<endl;
 
 
-      for(int i = 1; i < 7; i++)
+      for(int i = 1; i < 7; ++i)
 	{
 	  getline(infile, tp);  //read data from file object and put it into string.       
           stringstream ss(tp);
@@ -630,7 +666,7 @@ void clas12ana::readInputParam(const char* filename)
       string tp;
 
       //remove 3 lines of header                                                                                                                                              
-      for(int i = 0; i < 3; i++)
+      for(int i = 0; i < 3; ++i)
         getline(infile, tp);
 
       while(getline(infile, tp))  //read data from file object and put it into string.                                                                                                       

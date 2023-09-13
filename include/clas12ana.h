@@ -70,7 +70,8 @@
    void setCDEdgeCuts(bool flag = true)    {f_CDEdgeCuts = flag;};
    void setCDRegionCuts(bool flag = true)    {f_CDRegionCuts = flag;};
    void setEcalEdgeCuts(bool flag = true){f_ecalEdgeCuts = flag;};
-   void setPidCuts(bool flag = true)     {f_pidCuts = flag;};
+   void setPidCuts(bool flag = true)       {f_pidCuts = flag;};
+   void setProtonPidCuts(bool flag = true) {f_protonpidCuts = flag;};
    void setVertexCuts(bool flag = true)  {f_vertexCuts = flag;};
    void setVertexCorrCuts(bool flag = true)  {f_corr_vertexCuts = flag;};
 
@@ -109,26 +110,32 @@
    void setByPid(const region_part_ptr &p)
      {
        int pid = p->par()->getPid();
-       if( pid == 11)
+
+       //Proton PID assignment by user supplied TOF vs momentum curve cuts
+       if(checkProtonPidCut(p) && f_protonpidCuts)
+	 pid = 2212;
+
+       if(pid == 11)
 	 electrons.push_back(p);
-       else if( pid == 2212)
+       else if(pid == 2212)
 	 {
-	   if(!checkGhostTrackCD(p)) //don't fill if ghost track
-	     protons.push_back(p);
+	   //is a proton if not a ghost track and check for PID by TOF vs momentum assignment
+	   if(!checkGhostTrackCD(p) && ((f_protonpidCuts) ? checkProtonPidCut(p) : true) )
+	       protons.push_back(p);
 	 }
-       else if( pid == 2112)
+       else if(pid == 2112)
 	 neutrons.push_back(p);
-       else if( pid == 45)
+       else if(pid == 45)
 	  deuterons.push_back(p);
-       else if( pid == 211)
+       else if(pid == 211)
 	  piplus.push_back(p);
-       else if( pid == -211)
+       else if(pid == -211)
 	  piminus.push_back(p);
-       else if( pid == 321)
+       else if(pid == 321)
 	  kplus.push_back(p);
-       else if( pid == -321)
+       else if(pid == -321)
 	  kminus.push_back(p);
-       else if( pid == 0)
+       else if(pid == 0)
 	 neutrals.push_back(p);
        else 
 	 otherpart.push_back(p);
@@ -142,6 +149,7 @@
    bool checkEcalSFCuts(const region_part_ptr &p);
    bool checkEcalDiagCuts(const region_part_ptr &p);
    bool checkPidCut(const region_part_ptr &p);
+   bool checkProtonPidCut(const region_part_ptr &p);
    bool checkVertex(const region_part_ptr &p);
    bool DCEdgeCuts(const region_part_ptr &p);
    bool CDEdgeCuts(const region_part_ptr &p);
@@ -192,6 +200,10 @@
    TF1 *ecal_p_mean_fcn[7];  //mean function for plotting
    TF1 *ecal_sf_mean_fcn[7]; //mean function for plotting
 
+   //proton pid TOF vs momentum
+   TF1 *proton_pid_mean  = new TF1("proton_pid_mean","[0]*(1 + ([1]/(x-[3])) + ([2]/sqrt(x-[3])))",0,10); 
+   TF1 *proton_pid_sigma = new TF1("proton_pid_sigma","[0]*(1 + ([1]/(x-[3])) + ([2]/sqrt(x-[3])))",0,10); 
+
    double ecal_p_fcn_par[7][6];  //sector, parameter
    double ecal_sf_fcn_par[7][6]; //sector, parameter
    int sigma_cut = 3;
@@ -206,6 +218,7 @@
    bool f_vertexCuts         = true;
    bool f_corr_vertexCuts    = true;
    //optional cut
+   bool f_protonpidCuts      = false;
    bool f_CDRegionCuts       = false;
 
    map<int,vector<double> > pid_cuts_cd; // map<pid, {min,max cut}> Central Detector (CD)
@@ -217,7 +230,8 @@
    map<string,vector<double> > vertex_cuts;    //map< x,y,z, {min,max}> 
    vector<double> vertex_corr_cuts = {-99,99}; //electron vertex <-> particle vertex correlation cuts
 
-   double pi = 3.1415926535;
+   const double pi = 3.1415926535;
+   const double c = 29.9792458;
 
    double pcal_energy_cut = 0.06; //(GeV) minimum energy cut
    double ecal_edge_cut   = 14;   //cm

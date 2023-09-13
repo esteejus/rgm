@@ -115,6 +115,10 @@ int main(int argc, char ** argv)
 
   //  clasAna.setCDRegionCuts();  
   //  clasAna.setCDCutRegion(2);  
+
+  clasAna.setPidCuts(false); //clas chi2pid
+  clasAna.setProtonPidCuts(true); //tof vs mom pid (proton)
+
   clasAna.setVzcuts(-6,1);
   clasAna.setVertexCorrCuts(-3,1);
 
