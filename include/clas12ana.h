@@ -120,8 +120,8 @@
        else if(pid == 2212)
 	 {
 	   //is a proton if not a ghost track and check for PID by TOF vs momentum assignment
-	   if(!checkGhostTrackCD(p) && ((f_protonpidCuts) ? checkProtonPidCut(p) : true) )
-	       protons.push_back(p);
+	   if(!checkGhostTrackCD(p))
+	     protons.push_back(p);
 	 }
        else if(pid == 2112)
 	 neutrons.push_back(p);
@@ -201,8 +201,8 @@
    TF1 *ecal_sf_mean_fcn[7]; //mean function for plotting
 
    //proton pid TOF vs momentum
-   TF1 *proton_pid_mean  = new TF1("proton_pid_mean","[0]*(1 + ([1]/(x-[3])) + ([2]/sqrt(x-[3])))",0,10); 
-   TF1 *proton_pid_sigma = new TF1("proton_pid_sigma","[0]*(1 + ([1]/(x-[3])) + ([2]/sqrt(x-[3])))",0,10); 
+   TF1 *proton_pid_mean  = new TF1("proton_pid_mean","[0]*(1 + ([1]/(x-[3])) + ([2]/pow(x-[3],2)))",0,10); 
+   TF1 *proton_pid_sigma = new TF1("proton_pid_sigma","[0]*(1 + ([1]/(x-[3])) + ([2]/pow(x-[3],2)))",0,10); 
 
    double ecal_p_fcn_par[7][6];  //sector, parameter
    double ecal_sf_fcn_par[7][6]; //sector, parameter
