@@ -132,8 +132,18 @@ void clas12ana::Run(const std::unique_ptr<clas12::clas12reader>& c12)
 		      else if(p->par()->getPid() != 11  && electrons.size() > 0)
 			{
 			  ++event_mult;	//charge particles
+
+			  // check next if f_protonpidCuts is not true or if true check only if p is not in checkProtonPidCuts
+			  //
+			  //  (!checkPidCut(p)  && f_pidCuts) not inside PID cuts chi2pid
+			  //  (!checkProtonPidCut(p)  && f_protonpidCuts) not inside proton PID cut
+
+
+			  bool check_pid_cuts =  (f_protonpidCuts && (checkProtonPidCut(p) || checkPidCut(p))) || //check if in proton PID cuts or chi2pid cuts
+			    (!f_protonpidCuts && f_pidCuts && checkPidCut(p)) ||                                  // if proton pid cuts if off but pid cuts on just use chi2pid
+			    (!f_protonpidCuts && !f_pidCuts);                                                     // if no pid cuts are specified let all particles pass pid
 			  
-			  if( !( (!checkPidCut(p)  && f_pidCuts)      || //PID cuts
+			  if( !( (!check_pid_cuts)                    || //PID cuts
 				 (!checkVertex(p)  && f_vertexCuts)   || //Vertex cut
 				 (!CDEdgeCuts(p)   && f_CDEdgeCuts)   || //CD edge cut
 				 (!CDRegionCuts(p) && f_CDRegionCuts) || //CD edge cut
@@ -550,12 +560,18 @@ bool clas12ana::checkProtonPidCut(const region_part_ptr &p)
   //this is the pid done "by hand" where we cut on TOF vs momentum for protons
   //we only apply to CD where PID default from CLAS getByID is not as good
 
-  //apply to only CD
-  if(p->getRegion() != clas12::CD) 
+  //PID cuts only apply to CD
+  if(p->getRegion() == clas12::FD) 
     return false;
 
   //only applies to + charged particles
   if(p->par()->getCharge() <= 0) 
+    return false;
+
+  //positive particles are reconstructed even without CTOF hit
+  //Assigned a beta = -9999, here we throw away any tracks that could have no beta 
+  //these tracks also have a path = 0 which would mae the tof_diff below 0. So we throw away all beta <= 0 tracks
+  if(p->par()->getBeta() <= 1e-3)
     return false;
 
   //get the # of sigma away in PID cut from par file
@@ -569,7 +585,7 @@ bool clas12ana::checkProtonPidCut(const region_part_ptr &p)
       double up_lim  =  proton_pid_mean->Eval(mom) + num_sigma*proton_pid_sigma->Eval(mom); 
       double low_lim =  proton_pid_mean->Eval(mom) - num_sigma*proton_pid_sigma->Eval(mom);
 
-      if( !(tof_diff < up_lim && tof_diff > low_lim) )
+      if( !(tof_diff < up_lim && tof_diff > low_lim))
 	return false;
     }
 
