@@ -48,7 +48,7 @@ bool CD_fiducial(double phi, double theta, double momT){
 
 void Usage()
 {
-  std::cerr << "Usage: ./code outputfile.root outputfile.pdf inputfiles.hipo \n\n\n";
+  std::cerr << "Usage: ./code A outputfile.root outputfile.pdf inputfiles.hipo \n\n\n";
 
 }
 
@@ -63,12 +63,15 @@ int main(int argc, char ** argv)
     }
 
 
+  int A = atoi(argv[1]);
 
-  TString outFile = argv[1];
-  char * pdfFile = argv[2];
 
-  cout<<"Ouput file "<< outFile <<endl;
-  cout<<"Ouput PDF file "<< pdfFile <<endl;
+
+  TString outFile = argv[2];
+  char * pdfFile = argv[3];
+
+  cout<<"Output file "<< outFile <<endl;
+  cout<<"Output PDF file "<< pdfFile <<endl;
 
 
 
@@ -76,7 +79,7 @@ int main(int argc, char ** argv)
   clas12ana clasAna;
 
   //Read in target parameter files
-  // before run 15542 - D
+  // before run 15542 - D, C
   clasAna.readEcalSFPar("/w/hallb-scshelf2102/clas/clase2/erins/repos/rgm/Ana/cutFiles/paramsSF_LD2_x2.dat");
   clasAna.readEcalPPar("/w/hallb-scshelf2102/clas/clase2/erins/repos/rgm/Ana/cutFiles/paramsPI_LD2_x2.dat");
   // after run 15542 - 40Ca
@@ -92,7 +95,7 @@ int main(int argc, char ** argv)
     
 
   clas12root::HipoChain chain;
-  for(int k = 3; k < argc; k++){
+  for(int k = 4; k < argc; k++){
     cout<<"Input file "<<argv[k]<<endl;
     chain.Add(argv[k]);
   }
@@ -112,6 +115,19 @@ int main(int argc, char ** argv)
   auto db=TDatabasePDG::Instance();
   double mass_p = db->GetParticle(2212)->Mass();
   double mD = 1.8756;
+  double mU = 0.9315;
+  double me = 0.000510998;
+  double mA = 0;
+  switch (A) {
+    case 4: // He-4
+      mA = 4.002603*mU - 2*me;
+    case 12: // C-12
+      mA = 12*mU - 6*me;
+    case 40: // Ca-40
+      mA = 39.962591*mU - 20*me;
+    case 48: // Ca-48
+      mA = 47.952523*mU - 20*me;
+  }
 
   double beam_E = 5.98;
 
@@ -172,6 +188,9 @@ int main(int argc, char ** argv)
   TH1D * h_mmiss_cd = new TH1D("mmiss_cd","Missing Mass;M_{miss} (GeV/c^{2});Counts",100,0,2);
   TH2D * h_p_theta_cd = new TH2D("p_theta_cd","Phase Space Distribution of Leading Protons;#theta_{p} (Degrees);Momentum p (GeV/c)",180,0,180,100,0,2.5);
 
+
+
+
   ///////////////////////////////////////////////////////
   //Both Forward Detector & Central Detector
   ///////////////////////////////////////////////////////  
@@ -196,7 +215,49 @@ int main(int argc, char ** argv)
   TH2D * h_xb_q2_src_all = new TH2D("xb_q2_src_all","x_{B} vs Q^{2} of Lead SRC Protons;Q^{2} (GeV^{2});x_{B}",50,1.5,4,50,1.2,2.5);
   /*TH2D * h_q2_omega_src_all = new TH2D("emiss_omega","Missing Energy vs #omega;#omega (GeV);E_{miss}"
   TH2D * h_mmiss_emiss_src_all*/
+
+  ///////////////////////////////////////////////////////
+  //Final Distributions after Cuts
+  ///////////////////////////////////////////////////////  
+  TH1D * h_xb_final = new TH1D("xb_final","x-Bjorken x_{B};x_{B};Counts",100,1.2,2.5);
+  TH1D * h_pmiss_final = new TH1D("pmiss_final","Missing Momentum p_{miss};p_{miss} (GeV/c);Counts",120,0.35,1.2);
+  TH1D * h_q2_final = new TH1D("q2_final","Q^{2};Q^{2} (GeV^{2});Counts",100,1.4,4);
+  TH2D * h_thetapq_pq_final = new TH2D("thetapq_pq_final","#theta_{pq} vs p/q;p/q;#theta_{pq} (degrees)",100,0,1.2,100,0,60);
+  TH1D * h_mmiss_final = new TH1D("mmiss_final","Missing Mass;M_{miss} (GeV/c^{2});Counts",100,0,2);
+
+  ///////////////////////////////////////////////////////
+  //(e,e'p) Kinematics
+  ///////////////////////////////////////////////////////  
+  TH1D * h_emiss = new TH1D("emiss","Missing Energy;E_{miss} (GeV);Counts",50,-0.2,0.5);
+  TH2D * h_emiss_omega = new TH2D("emiss_omega","Missing Energy vs #omega;#omega (GeV);E_{miss} (GeV)",50,0,2.5,50,-0.2,0.6);
+  TH2D * h_q2_omega = new TH2D("q2_omega","Q^{2} vs #omega;#omega (GeV);Q^{2} (GeV/c^{2})",50,0,2.5,50,1,6);
+  TH2D * h_mmiss_emiss = new TH2D("mmiss_emiss","Missing Mass vs Missing Energy;E_{miss} (GeV);M_{miss}",50,-0.3,0.6,50,0.4,1.3);
   
+
+
+  ///////////////////////////////////////////////////////
+  //Recoil Selection
+  /////////////////////////////////////////////////////// 
+  TH2D * h_lead_rec = new TH2D("lead_rec","Lead Theta vs Recoil Theta;#theta_{recoil} (deg);#theta_{lead} (deg)",90,0,180,90,0,180); 
+  TH1D * h_prec = new TH1D("prec","Recoil Proton Momentum;p_{rec} (GeV/c);Counts",100,0,1.5);
+  TH1D * h_cos0 = new TH1D("cos0","Angle between Lead and Recoil Protons",100,-1,1);
+  
+
+  ///////////////////////////////////////////////////////
+  //(e,e'pp) Kinematics
+  /////////////////////////////////////////////////////// 
+  TH1D * h_emiss_pp = new TH1D("emiss_pp","Missing Energy;E_{miss} (GeV)",100,-0.1,0.5);
+  TH2D * h_emiss_omega_pp = new TH2D("emiss_omega_pp","Missing Energy vs #omega;#omega (GeV);E_{miss} (GeV)",50,0,2.5,50,-0.1,0.5);
+  TH1D * h_xb_pp = new TH1D("xb_pp","x-Bjorken x_{B};x_{B};Counts",100,1.2,2.5);
+  TH1D * h_pmiss_pp = new TH1D("pmiss_pp","Missing Momentum p_{miss};p_{miss} (GeV/c);Counts",120,0.3,1.2);
+  TH1D * h_q2_pp = new TH1D("q2_pp","Q^{2};Q^{2} (GeV^{2});Counts",100,1,4);
+  TH2D * h_thetapq_pq_pp = new TH2D("thetapq_pq_pp","#theta_{pq} vs p/q;p/q;#theta_{pq} (degrees)",100,0,1.2,100,0,60);
+  TH1D * h_mmiss_pp = new TH1D("mmiss_pp","Missing Mass;M_{miss} (GeV/c^{2});Counts",100,0,1.2);
+  TH2D * h_plead_prec = new TH2D("plead_prec","Lead Proton Momentum vs Recoil Momentum;p_{rec} (GeV/c);p_{lead} (GeV/c)",50,0,1,50,0,3);
+  TH2D * h_tlead_trec = new TH2D("tlead_trec","Lead Proton #theta vs Recoil #theta;#theta_{recoil} (deg);#theta_{lead} (deg)",90,0,180,90,0,180);
+  TH2D * h_pmiss_prec = new TH2D("pmiss_prec","Missing Momentum vs Recoil Momentum;p_{rec} (GeV/c);p_{miss} (GeV/c)",50,0.3,1,50,0.3,1.2);
+  TH1D * h_thetapmq = new TH1D("thetapmq","Angle between Missing Momentum and q;#theta_{pmiss,q};Counts",50,90,180);
+
 
 
   
@@ -229,19 +290,29 @@ int main(int argc, char ** argv)
 
 	  TLorentzVector q = beam - el; //photon  4-vector            
           double Q2        = -q.M2(); // Q^2
-          double xB       = Q2/(2 * mass_p * (beam.E() - el.E()) ); //x-borken
+          double xB       = Q2/(2 * mass_p * (beam.E() - el.E()) ); //x-bjorken
+          double omega = beam.E() - el.E();
 	  h_Q2_bc->Fill(Q2);
 	  h_xB_bc->Fill(xB);
 	  h_phi_theta_bc->Fill(el.Phi()*180/M_PI,el.Theta()*180/M_PI);
           h_qmag_qtheta->Fill(-1*q.Mag(),q.Vect().Theta()*180./M_PI);
 	  double vtz_e = electrons[0]->par()->getVz();
+
+          // define final lead kinematics - use these after first proton loop (see warning below)
+          TVector3 lead_pmiss(0,0,0);
+          double lead_mom = 0; double lead_theta = 0;
+          double lead_thetapq = 0; double lead_pq = 0;
+          double lead_mmiss = 0;
+          double Tp = 0; double Tb = 0; double lead_emiss = 0;
 	  
 	  ///////////////////////////////
 	  //Before cuts
 	  ///////////////////////////////
-	  for(auto p = particles.begin(); p != particles.end();++p){
+	  int pindex = -1;
+	  for(auto p = protons.begin(); p != protons.end();++p){
 	    if((*p)->par()->getCharge()<1){continue;}
-	    int hpid = (*p)->getPid();
+
+            // Warning: these proton kinematics apply to the current proton in the loop. If the lead proton is not the last proton in the proton array, these values will not be the correct values for the lead.
 
 	    //Momenta
 	    SetLorentzVector(lead_ptr,(*p));
@@ -260,8 +331,9 @@ int main(int argc, char ** argv)
             double pq = (lead_ptr.Vect().Mag()) / (q.Vect().Mag());
             double mmiss = (q + TLorentzVector(TVector3(0.,0.,0.),2*mN) - lead_ptr).Mag();
 
-	    if(beta<0.2){continue;} // proton cut
+            // end warning
 
+	    if(beta<0.2){continue;} // proton cut
 
 
             // FORWARD DETECTOR PROTONS
@@ -281,8 +353,13 @@ int main(int argc, char ** argv)
               if (xB<1.2) {continue;}
 
 
+              h_pmiss_fd->Fill(pmiss.Mag());
+            h_pmiss_all->Fill(pmiss.Mag());
+              if (pmiss.Mag()<0.35 || pmiss.Mag()>1.0) {continue;}
+
               h_mmiss_q2_fd->Fill(Q2,mmiss);
             h_mmiss_q2_all->Fill(Q2,mmiss);
+
 
               h_q2_fd->Fill(Q2);
             h_q2_all->Fill(Q2);
@@ -299,11 +376,6 @@ int main(int argc, char ** argv)
               if (pq<0.62 || pq>0.96) {continue;}
 
 
-              h_pmiss_fd->Fill(pmiss.Mag());
-            h_pmiss_all->Fill(pmiss.Mag());
-              if (pmiss.Mag()<0.35 || pmiss.Mag()>1.0) {continue;}
-
-
               h_mmiss_fd->Fill(mmiss);
             h_mmiss_all->Fill(mmiss);
               if (mmiss>1.1) {continue;}
@@ -313,7 +385,17 @@ int main(int argc, char ** argv)
             h_xb_q2_src_all->Fill(Q2,xB);
 
 
-              // recoil selection here
+              // define kinematics for lead proton (valid past this proton loop)
+              pindex = (*p)->trk(DC)->getPindex();
+              lead_mom = mom;
+              lead_theta = theta;
+              lead_pmiss = pmiss;
+              lead_thetapq = thetapq;
+              lead_pq = pq;
+              lead_mmiss = mmiss;
+              Tp = lead_ptr.E() - mN;
+              Tb = omega + mA - lead_ptr.E() - pow( pow( (omega + mA - lead_ptr.E()), 2.) - lead_pmiss*lead_pmiss, 0.5 );
+              lead_emiss = omega - Tp - Tb;
 
 
 	    }
@@ -337,6 +419,11 @@ int main(int argc, char ** argv)
               if (xB<1.2) {continue;}
 
 
+              h_pmiss_cd->Fill(pmiss.Mag());
+            h_pmiss_all->Fill(pmiss.Mag());
+              if (pmiss.Mag()<0.35 || pmiss.Mag()>1.0) {continue;}
+
+
               h_mmiss_q2_cd->Fill(Q2,mmiss);  // define
             h_mmiss_q2_all->Fill(Q2,mmiss);
 
@@ -353,12 +440,6 @@ int main(int argc, char ** argv)
               if (thetapq>25) {continue;}
               if (pq<0.62 || pq>0.96) {continue;}
 
-
-              h_pmiss_cd->Fill(pmiss.Mag());
-            h_pmiss_all->Fill(pmiss.Mag());
-              if (pmiss.Mag()<0.35 || pmiss.Mag()>1.0) {continue;}
-
-
               h_mmiss_cd->Fill(mmiss);
             h_mmiss_all->Fill(mmiss);
 
@@ -368,36 +449,121 @@ int main(int argc, char ** argv)
             h_pmiss_src_all->Fill(pmiss.Mag());
             h_xb_q2_src_all->Fill(Q2,xB);
 
+
+
+              // define kinematics for lead proton (valid past this proton loop)
+              pindex = (*p)->trk(CVT)->getPindex();
+              lead_mom = mom;
+              lead_theta = theta;
+              lead_pmiss = pmiss;
+              lead_thetapq = thetapq;
+              lead_pq = pq;
+              lead_mmiss = mmiss;
+              Tp = lead_ptr.E() - mN;
+              Tb = omega + mA - lead_ptr.E() - pow( pow( (omega + mA - lead_ptr.E()), 2.) - lead_pmiss*lead_pmiss, 0.5 );
+              lead_emiss = omega - Tp - Tb;
+
 	    }
 
 	    else{
 	      cout<<"Not Either"<<endl;
-	    }	   
+	    }  // end if statement deciding whether lead proton is in FD or CD
+
+
+
 
             // ALL PROTONS - FD and CD
-            if ((*p)->getRegion()==CD && !CD_fiducial(phi,theta,momT)) {continue;} // CD fiducial cut
+            if ((*p)->getRegion()==CD && !CD_fiducial(phi,theta,momT)) {continue;} // CD fiducial cut if applicable
 
-
-
+            // SRC cuts
             if (xB<1.2) {continue;}
-
-
-
             if (pmiss.Mag()<0.35 || pmiss.Mag()>1.0) {continue;}
-
-
-
             if (Q2<1.5) {continue;}
-
             if (thetapq>25) {continue;}
             if (pq<0.62 || pq>0.96) {continue;}
             if (mmiss>1.1) {continue;}
- 
-	  }
-	  
 
-	}
-    }
+            // final e'p distributions after SRC cuts
+            h_xb_final->Fill(xB);
+            h_pmiss_final->Fill(pmiss.Mag());
+            h_q2_final->Fill(Q2);
+            h_thetapq_pq_final->Fill(pq,thetapq);
+            h_mmiss_final->Fill(mmiss);
+            h_emiss->Fill(lead_emiss);
+            h_emiss_omega->Fill(omega,lead_emiss);
+            h_q2_omega->Fill(omega,Q2);
+            h_mmiss_emiss->Fill(lead_emiss,mmiss);
+ 
+	  } // end first loop over protons
+
+
+
+          if (pindex==-1) {continue;} // if no lead proton, skip to next event (don't look for recoil)
+
+
+          // e'pp starts here - look for CD recoils only
+
+
+	  for(auto p = protons.begin(); p != protons.end();++p){
+
+	    if((*p)->par()->getCharge()<1){continue;} // look only at charged particles in the CVT
+
+            if ((*p)->trk(CVT)->getPindex()==pindex) {continue;} // make sure the recoil is not the same as the lead
+
+
+              //Momenta
+              SetLorentzVector(recoil_ptr,(*p));
+              double mom = recoil_ptr.P();
+              double momT = recoil_ptr.Perp();
+              double theta = recoil_ptr.Theta() * 180 / M_PI;
+              double phi = recoil_ptr.Phi() * 180 / M_PI;
+
+              double beta = (*p)->par()->getBeta();
+              double path = (*p)->getPath();
+              double vtz_p = (*p)->par()->getVz();
+
+
+              // calculate SRC kinematics
+              TVector3 pmiss = recoil_ptr.Vect() - q.Vect();
+              double thetapq = recoil_ptr.Vect().Angle(q.Vect())*180./M_PI;
+              double pq = (recoil_ptr.Vect().Mag()) / (q.Vect().Mag());
+              double mmiss = (q + TLorentzVector(TVector3(0.,0.,0.),2*mN) - recoil_ptr).Mag();
+              double recoil_emiss = lead_emiss - recoil_ptr.E();
+
+	      //if(mom==0){continue;} // proton cut
+	      h_lead_rec->Fill(theta,lead_theta);
+
+            if((*p)->getRegion() == CD){ // look in CD only
+
+
+              // cut on momentum
+              h_prec->Fill(mom);
+              if (mom<0.35) {continue;}
+              
+              h_cos0->Fill(cos(lead_pmiss.Angle(recoil_ptr.Vect())));
+
+              // histos for e'pp kinematics
+              h_emiss_pp->Fill(lead_emiss);
+              h_emiss_omega_pp->Fill(omega,lead_emiss);
+              h_xb_pp->Fill(xB);
+              h_pmiss_pp->Fill(lead_pmiss.Mag());
+              h_q2_pp->Fill(Q2);
+              h_thetapq_pq_pp->Fill(lead_pq,lead_thetapq);
+              h_mmiss_pp->Fill(lead_mmiss);
+              h_plead_prec->Fill(mom,lead_mom);
+              h_tlead_trec->Fill(theta,lead_theta);
+              h_pmiss_prec->Fill(mom,lead_pmiss.Mag());
+              h_thetapmq->Fill(lead_pmiss.Angle(q.Vect())*180./M_PI);
+              
+
+            } // end requirement for recoil to be in CD
+          
+
+          } // end second loop over protons
+
+
+	} // end requirement for one electron in event
+    } // end event loop
 
   //clasAna.WriteDebugPlots();
 
@@ -491,6 +657,20 @@ int main(int argc, char ** argv)
 
   myCanvas->Divide(1,1);
   myCanvas->cd(1);
+  h_pmiss_all->Draw();
+  TLine * line_pmiss_all_1 = new TLine(0.35,0,0.35,h_pmiss_all->GetMaximum());
+  TLine * line_pmiss_all_2 = new TLine(1,0,1,h_pmiss_all->GetMaximum());
+  line_pmiss_all_1->SetLineColor(kRed);
+  line_pmiss_all_1->SetLineWidth(3);
+  line_pmiss_all_1->Draw("same");
+  line_pmiss_all_2->SetLineColor(kRed);
+  line_pmiss_all_2->SetLineWidth(3);
+  line_pmiss_all_2->Draw("same");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();  
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
   h_mmiss_q2_all->Draw("colz");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
@@ -548,19 +728,7 @@ int main(int argc, char ** argv)
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
-  myCanvas->Divide(1,1);
-  myCanvas->cd(1);
-  h_pmiss_all->Draw();
-  TLine * line_pmiss_all_1 = new TLine(0.35,0,0.35,h_pmiss_all->GetMaximum());
-  TLine * line_pmiss_all_2 = new TLine(1,0,1,h_pmiss_all->GetMaximum());
-  line_pmiss_all_1->SetLineColor(kRed);
-  line_pmiss_all_1->SetLineWidth(3);
-  line_pmiss_all_1->Draw("same");
-  line_pmiss_all_2->SetLineColor(kRed);
-  line_pmiss_all_2->SetLineWidth(3);
-  line_pmiss_all_2->Draw("same");
-  myCanvas->Print(fileName,"pdf");
-  myCanvas->Clear();  
+
 
   myCanvas->Divide(1,1);
   myCanvas->cd(1);
@@ -631,6 +799,20 @@ int main(int argc, char ** argv)
 
   myCanvas->Divide(1,1);
   myCanvas->cd(1);
+  h_pmiss_fd->Draw();
+  TLine * line_pmiss_fd_1 = new TLine(0.35,0,0.35,h_pmiss_fd->GetMaximum());
+  TLine * line_pmiss_fd_2 = new TLine(1,0,1,h_pmiss_fd->GetMaximum());
+  line_pmiss_fd_1->SetLineColor(kRed);
+  line_pmiss_fd_1->SetLineWidth(3);
+  line_pmiss_fd_1->Draw("same");
+  line_pmiss_fd_2->SetLineColor(kRed);
+  line_pmiss_fd_2->SetLineWidth(3);
+  line_pmiss_fd_2->Draw("same");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();  
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
   h_mmiss_q2_fd->Draw("colz");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
@@ -691,20 +873,6 @@ int main(int argc, char ** argv)
 
   myCanvas->Divide(1,1);
   myCanvas->cd(1);
-  h_pmiss_fd->Draw();
-  TLine * line_pmiss_fd_1 = new TLine(0.35,0,0.35,h_pmiss_fd->GetMaximum());
-  TLine * line_pmiss_fd_2 = new TLine(1,0,1,h_pmiss_fd->GetMaximum());
-  line_pmiss_fd_1->SetLineColor(kRed);
-  line_pmiss_fd_1->SetLineWidth(3);
-  line_pmiss_fd_1->Draw("same");
-  line_pmiss_fd_2->SetLineColor(kRed);
-  line_pmiss_fd_2->SetLineWidth(3);
-  line_pmiss_fd_2->Draw("same");
-  myCanvas->Print(fileName,"pdf");
-  myCanvas->Clear();  
-
-  myCanvas->Divide(1,1);
-  myCanvas->cd(1);
   h_mmiss_fd->Draw();
   TLine * line_mmiss_fd = new TLine(1.1,0,1.1,h_mmiss_fd->GetMaximum());
   line_mmiss_fd->SetLineColor(kRed);
@@ -758,6 +926,21 @@ int main(int argc, char ** argv)
   line_xb_cd->Draw("same");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
+
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_pmiss_cd->Draw();
+  TLine * line_pmiss_cd_1 = new TLine(0.35,0,0.35,h_pmiss_cd->GetMaximum());
+  TLine * line_pmiss_cd_2 = new TLine(1,0,1,h_pmiss_cd->GetMaximum());
+  line_pmiss_cd_1->SetLineColor(kRed);
+  line_pmiss_cd_1->SetLineWidth(3);
+  line_pmiss_cd_1->Draw("same");
+  line_pmiss_cd_2->SetLineColor(kRed);
+  line_pmiss_cd_2->SetLineWidth(3);
+  line_pmiss_cd_2->Draw("same");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();  
 
   myCanvas->Divide(1,1);
   myCanvas->cd(1);
@@ -815,20 +998,6 @@ int main(int argc, char ** argv)
 
   myCanvas->Divide(1,1);
   myCanvas->cd(1);
-  h_pmiss_cd->Draw();
-  TLine * line_pmiss_cd_1 = new TLine(0.35,0,0.35,h_pmiss_cd->GetMaximum());
-  TLine * line_pmiss_cd_2 = new TLine(1,0,1,h_pmiss_cd->GetMaximum());
-  line_pmiss_cd_1->SetLineColor(kRed);
-  line_pmiss_cd_1->SetLineWidth(3);
-  line_pmiss_cd_1->Draw("same");
-  line_pmiss_cd_2->SetLineColor(kRed);
-  line_pmiss_cd_2->SetLineWidth(3);
-  line_pmiss_cd_2->Draw("same");
-  myCanvas->Print(fileName,"pdf");
-  myCanvas->Clear();  
-
-  myCanvas->Divide(1,1);
-  myCanvas->cd(1);
   h_mmiss_cd->Draw();
   TLine * line_mmiss_cd = new TLine(1.1,0,1.1,h_mmiss_cd->GetMaximum());
   line_mmiss_cd->SetLineColor(kRed);
@@ -845,6 +1014,162 @@ int main(int argc, char ** argv)
 
 
 
+  ///////////////////////////////////////////////////////
+  //Final Distributions after SRC Cuts
+  ///////////////////////////////////////////////////////  
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_xb_final->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_pmiss_final->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_q2_final->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_thetapq_pq_final->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_mmiss_final->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  ///////////////////////////////////////////////////////
+  //(e,e'p) Kinematics
+  ///////////////////////////////////////////////////////  
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_emiss->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();  
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_emiss_omega->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();  
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_q2_omega->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();  
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_mmiss_emiss->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();  
+
+
+  ///////////////////////////////////////////////////////
+  //Lead and Recoil (e,e'pp)
+  ///////////////////////////////////////////////////////  
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_lead_rec->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();  
+  
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_prec->Draw();
+  TLine * line_prec = new TLine(0.35,0,0.35,h_prec->GetMaximum());
+  line_prec->SetLineColor(kRed);
+  line_prec->SetLineWidth(3);
+  line_prec->Draw("same");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_cos0->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+
+
+  ///////////////////////////////////////////////////////
+  //(e,e'pp) Kinematics
+  ///////////////////////////////////////////////////////  
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_emiss_pp->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();  
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_emiss_omega_pp->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();  
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_xb_pp->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();  
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_pmiss_pp->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();  
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_q2_pp->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();  
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_thetapq_pq_pp->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();  
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_mmiss_pp->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();  
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_plead_prec->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();  
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_tlead_trec->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();  
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_pmiss_prec->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_thetapmq->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
   
   /////////////////////////////////////
   sprintf(fileName,"%s]",pdfFile);
