@@ -9,12 +9,17 @@
 #include <TTree.h>
 #include <TLorentzVector.h>
 #include <TH1.h>
+#include <TGraph.h>
 #include <TH2.h>
 #include <TLatex.h>
 #include <TChain.h>
 #include <TCanvas.h>
 #include <TStyle.h>
 #include <TDatabasePDG.h>
+#include "TF1.h"
+#include "TFitResult.h"
+#include "TFitResultPtr.h"
+#include "TLatex.h"
 #include "HipoChain.h"
 #include "clas12ana.h"
 
@@ -28,9 +33,36 @@ void SetLorentzVector(TLorentzVector &p4,clas12::region_part_ptr rp){
 
 }
 
+double Cut_Params[] = {0.0152222,
+		       0.816844,
+		       -0.0950375,
+		       0.255628,
+		       0.0760525,
+		       0.240862,
+		       -0.000276433,
+		       0.229085};
+
+double sq(double x){return x*x;}
+
+double cut_func(double x, double a, double b, double c, double d){
+  return a * (1 + (b/(x-d)) + (c/sq(x-d))); 
+}
+
+bool pass_cut(double mom, double DT, double w){
+  double mu = cut_func(mom,Cut_Params[0],Cut_Params[1],Cut_Params[2],Cut_Params[3]);
+  double sigma = cut_func(mom,Cut_Params[4],Cut_Params[5],Cut_Params[6],Cut_Params[7]);
+  double upper = mu + w * sigma;
+  double lower = mu - w * sigma;
+  if((DT<upper)&&(DT>lower)){
+    return true;
+  }
+  return false;
+}
+
+
 bool CD_fiducial(double phi, double theta, double momT){
   bool pass_fiducial = true;
-  double fiducial_phi_width = 10;
+  double fiducial_phi_width = 3;
   double fiducial_phi_shift = 0;
   double fiducial_momT_start = 0.15;
   double fiducial_phi_central = (-asin(fiducial_momT_start/momT) - (M_PI/2)) * 180/M_PI;
@@ -115,51 +147,50 @@ int main(int argc, char ** argv)
   char temp_title[100];
 
   vector<TH1*> hist_list;
-  TH1D * h_Q2_bc = new TH1D("Q2_bc","Q^{2} ",1000,0, 5);
-  hist_list.push_back(h_Q2_bc);
-  TH1D * h_xB_bc = new TH1D("xB_bc","x_{B} ",1000,0, 2);
-  hist_list.push_back(h_xB_bc);
-  TH2D * h_phi_theta_bc = new TH2D("phi_theta_bc","#phi_{e} vs. #theta_{e} ;#phi_{e};#theta_{e}",100,-180,180,100,5,40);
-  hist_list.push_back(h_phi_theta_bc);
 
   ///////////////////////////////////////////////////////
   //Central Detector
   ///////////////////////////////////////////////////////  
   //Fid
-  TH1D * h_theta_CD_bc = new TH1D("theta_CD_bc","#theta vs. Counts; #theta; Counts",100,0,180);
+  TH1D * h_theta_CD_bc = new TH1D("theta_CD_bc","#theta vs. Counts; #theta [degrees]; Counts",100,0,180);
   hist_list.push_back(h_theta_CD_bc);
-  TH2D * h_phi_momT_CD_bc = new TH2D("phi_momT_CD_bc","#phi vs. p_{T}; #phi; p_{T}",100,-180,180,100,0,2);
+  TH2D * h_phi_momT_CD_bc = new TH2D("phi_momT_CD_bc","#phi vs. p_{T}; #phi; Transverse Momentum [GeV]",100,-180,180,100,0,2);
   hist_list.push_back(h_phi_momT_CD_bc);
-  TH2D * h_mom_ToFToF_d_ToFMom_CD_bc = new TH2D("mom_ToFToF_d_ToFMom_CD_bc","Momentum vs. ToF_{ToF} - ToF_{p};Momentum;ToF_{ToF} - ToF_{p}",100,0,3,100,-1,1);
+  TH2D * h_mom_ToFToF_d_ToFMom_CD_bc = new TH2D("mom_ToFToF_d_ToFMom_CD_bc","Momentum vs. ToF - ToF_{expected} [ns];Momentum [GeV];ToF - ToF_{expected} [ns]",100,0,3,100,-1,1);
   hist_list.push_back(h_mom_ToFToF_d_ToFMom_CD_bc);
   TH1D * h_ToFToF_d_ToFMom_CD_bc_bin[4];
   for(int i = 0; i < 4; i++){
     sprintf(temp_name,"ToFToF_d_ToFMom_CD_bc_bin_%d",i+1);
-    sprintf(temp_title,"ToF_{ToF} - ToF_{p} Bin=%d;ToF_{ToF} - ToF_{p};Counts",i+1);
+    sprintf(temp_title,"ToF - ToF_{expected}[ns] Bin=%d;ToF - ToF_{expected} [ns];Counts",i+1);
     h_ToFToF_d_ToFMom_CD_bc_bin[i] = new TH1D(temp_name,temp_title,100,-1,1);
     hist_list.push_back(h_ToFToF_d_ToFMom_CD_bc_bin[i]);
   }
 
-  TH1D * h_theta_CD_ac = new TH1D("theta_CD_ac","#theta vs. Counts; #theta; Counts",100,0,180);
+  TH1D * h_edge_first_CD_bc = new TH1D("edge_first_CD_bc","First Edge; Distance to Edge [cm]; Counts",100,-5,25);
+  hist_list.push_back(h_edge_first_CD_bc);
+  TH1D * h_edge_last_CD_bc = new TH1D("edge_last_CD_bc","Last Edge; Distance to Edge [cm]; Counts",100,-5,25);
+  hist_list.push_back(h_edge_last_CD_bc);
+
+  TH1D * h_theta_CD_ac = new TH1D("theta_CD_ac","#theta vs. Counts; #theta [degrees]; Counts",100,0,180);
   hist_list.push_back(h_theta_CD_ac);
-  TH2D * h_phi_momT_CD_ac = new TH2D("phi_momT_CD_ac","#phi vs. p_{T}; #phi; p_{T}",100,-180,180,100,0,2);
+  TH2D * h_phi_momT_CD_ac = new TH2D("phi_momT_CD_ac","#phi vs. p_{T}; #phi; Transverse Momentum [GeV]",100,-180,180,100,0,2);
   hist_list.push_back(h_phi_momT_CD_ac);
-  TH2D * h_mom_ToFToF_d_ToFMom_CD_ac = new TH2D("mom_ToFToF_d_ToFMom_CD_ac","Momentum vs. ToF_{ToF} - ToF_{p};Momentum;ToF_{ToF} - ToF_{p}",100,0,3,100,-1,1);
+  TH2D * h_mom_ToFToF_d_ToFMom_CD_ac = new TH2D("mom_ToFToF_d_ToFMom_CD_ac","Momentum vs. ToF - ToF_{expected} [ns];Momentum [GeV];ToF - ToF_{expected} [ns]",100,0,3,100,-1,1);
   hist_list.push_back(h_mom_ToFToF_d_ToFMom_CD_ac);
   TH1D * h_ToFToF_d_ToFMom_CD_ac_bin[4];
   for(int i = 0; i < 4; i++){
     sprintf(temp_name,"ToFToF_d_ToFMom_CD_ac_bin_%d",i+1);
-    sprintf(temp_title,"ToF_{ToF} - ToF_{p} Bin=%d;ToF_{ToF} - ToF_{p};Counts",i+1);
+    sprintf(temp_title,"ToF - ToF_{expected}[ns] Bin=%d;ToF - ToF_{expected} [ns];Counts",i+1);
     h_ToFToF_d_ToFMom_CD_ac_bin[i] = new TH1D(temp_name,temp_title,100,-1,1);
     hist_list.push_back(h_ToFToF_d_ToFMom_CD_ac_bin[i]);
   }
 
-  TH2D * h_mom_ToFToF_d_ToFMom_CD_bad = new TH2D("mom_ToFToF_d_ToFMom_CD_bad","Momentum vs. ToF_{ToF} - ToF_{p};Momentum;ToF_{ToF} - ToF_{p}",100,0,3,100,-1,1);
+  TH2D * h_mom_ToFToF_d_ToFMom_CD_bad = new TH2D("mom_ToFToF_d_ToFMom_CD_bad","Momentum vs. ToF - ToF_{expected} [ns];Momentum [GeV];ToF - ToF_{expected} [ns]",100,0,3,100,-1,1);
   hist_list.push_back(h_mom_ToFToF_d_ToFMom_CD_bad);
   TH1D * h_ToFToF_d_ToFMom_CD_bad_bin[4];
   for(int i = 0; i < 4; i++){
     sprintf(temp_name,"ToFToF_d_ToFMom_CD_bad_bin_%d",i+1);
-    sprintf(temp_title,"ToF_{ToF} - ToF_{p} Bin=%d;ToF_{ToF} - ToF_{p};Counts",i+1);
+    sprintf(temp_title,"ToF - ToF_{expected}[ns] Bin=%d;ToF - ToF_{expected} [ns];Counts",i+1);
     h_ToFToF_d_ToFMom_CD_bad_bin[i] = new TH1D(temp_name,temp_title,100,-1,1);
     hist_list.push_back(h_ToFToF_d_ToFMom_CD_bad_bin[i]);
   }
@@ -180,23 +211,36 @@ int main(int argc, char ** argv)
   hist_list.push_back(h_vtz_e_p_CD_ac);
   
   //PID
-  TH2D * h_mom_beta_CD_bc = new TH2D("mom_beta_CD_bc","Momentum vs. #beta ;p;#beta",100,0,2,100,0,1.1);
-  hist_list.push_back(h_mom_beta_CD_bc);
-  TH1D * h_Chi2PID_CD_bc = new TH1D("Chi2PID_CD_bc","#chi^{2} PID CD",100,-10,10);
-  hist_list.push_back(h_Chi2PID_CD_bc);
-  TH2D * h_mom_DT_CD_bc = new TH2D("mom_DT_CD_bc","#Delta Time CD",100,0,3,100,-1,1);
-  hist_list.push_back(h_mom_DT_CD_bc);
-  TH2D * h_mom_Chi2PID_CD_bc = new TH2D("mom_Chi2PID_CD_bc","#chi^2 PID CD",100,0,3,100,-10,10);
-  hist_list.push_back(h_mom_Chi2PID_CD_bc);
+  TH2D * h_mom_DT = new TH2D("mom_DT","#Delta ToF vs. Momentum;p [GeV];#Delta ToF [ns]",100,0,3,200,-2,2);
+  hist_list.push_back(h_mom_DT);
+  TH2D * h_mom_beta = new TH2D("mom_beta","#beta vs. Momentum;Momentum [GeV];#beta",100,0,3,100,0,1.1);
+  hist_list.push_back(h_mom_beta);
+  TH1D * h_DT_mom_bin[4];
+  for(int i = 0; i < 4; i++){
+    sprintf(temp_name,"DT_mom_bin_%d",i+1);
+    h_DT_mom_bin[i] = new TH1D(temp_name,"#Delta Time;#Delta ToF [ns];Counts",200,-2,2);
+    hist_list.push_back(h_DT_mom_bin[i]);
+  }
+  TH2D * h_mom_DT_theta_phi_bin[6][3];
+  for(int i = 0; i < 6; i++){
+    for(int j = 0; j < 3; j++){
+      sprintf(temp_name,"mom_DT_theta_phi_bin_%d_%d",i+1,j+1);
+      h_mom_DT_theta_phi_bin[i][j] = new TH2D(temp_name,"#Delta ToF vs. Momentum;p [GeV];#Delta ToF [ns]",100,0,3,200,-2,2);
+      hist_list.push_back(h_mom_DT_theta_phi_bin[i][j]);
+    }
+  }
 
-  TH2D * h_mom_beta_CD_ac = new TH2D("mom_beta_CD_ac","Momentum vs. #beta ;p;#beta",100,0,2,100,0,1.1);
-  hist_list.push_back(h_mom_beta_CD_ac);
-  TH1D * h_Chi2PID_CD_ac = new TH1D("Chi2PID_CD_ac","#chi^{2} PID CD",100,-10,10);
-  hist_list.push_back(h_Chi2PID_CD_ac);
-  TH2D * h_mom_DT_CD_ac = new TH2D("mom_DT_CD_ac","#Delta Time CD",100,0,3,100,-1,1);
-  hist_list.push_back(h_mom_DT_CD_ac);
-  TH2D * h_mom_Chi2PID_CD_ac = new TH2D("mom_Chi2PID_CD_ac","#chi^2 PID CD",100,0,3,100,-10,10);
-  hist_list.push_back(h_mom_Chi2PID_CD_ac);
+  TH2D * h_mom_beta_2212 = new TH2D("mom_beta_2212","#beta vs. Momentum;Momentum [GeV];#beta",100,0,3,100,0,1.1);
+  hist_list.push_back(h_mom_beta_2212);
+
+  TH2D * h_mom_DT_wPID = new TH2D("mom_DT_wPID","#Delta ToF vs. Momentum;p [GeV];#Delta ToF [ns]",100,0,3,200,-2,2);
+  hist_list.push_back(h_mom_DT_wPID);
+  TH2D * h_mom_beta_wPID = new TH2D("mom_beta_wPID","#beta vs. Momentum;Momentum [GeV];#beta",100,0,3,100,0,1.1);
+  hist_list.push_back(h_mom_beta_wPID);
+  TH2D * h_mom_Chi2PID_wPID = new TH2D("mom_Chi2PID_wPID","#chi^{2}_{PID} vs. Momentum [GeV];Momentum [GeV];#chi^{2}_{PID}",100,0,3,100,-10,10);
+  hist_list.push_back(h_mom_Chi2PID_wPID);
+  TH1D * h_Chi2PID_wPID = new TH1D("Chi2PID_wPID","#chi^{2}_{PID};#chi^{2}_{PID};Counts",100,-10,10);
+  hist_list.push_back(h_Chi2PID_wPID);
   
 
   clasAna.setEcalSFCuts();
@@ -209,11 +253,11 @@ int main(int argc, char ** argv)
   //clasAna.setVertexCorrCuts();
   clasAna.setDCEdgeCuts();
   
-  //clasAna.setVzcuts(-6,1);
+  clasAna.setVzcuts(-6,1);
   //clasAna.setVertexCorrCuts(-3,1);
 
-  //while(chain.Next())
-  while(chain.Next() && counter<10000)
+  while(chain.Next())
+  //while(chain.Next() && counter<100)
     {
 
       double weight = c12->mcevent()->getWeight(); //used if MC events have a weight 
@@ -242,9 +286,6 @@ int main(int argc, char ** argv)
 	  TLorentzVector q = beam - el; //photon  4-vector            
           double Q2        = -q.M2(); // Q^2
           double xB       = Q2/(2 * mass_p * (beam.E() - el.E()) ); //x-borken
-	  h_Q2_bc->Fill(Q2);
-	  h_xB_bc->Fill(xB);
-	  h_phi_theta_bc->Fill(el.Phi()*180/M_PI,el.Theta()*180/M_PI);
 	  double vtz_e = electrons[0]->par()->getVz();
 	  
 	  ///////////////////////////////
@@ -262,28 +303,61 @@ int main(int argc, char ** argv)
 	    double phi = lead_ptr.Phi() * 180 / M_PI;
 
 	    double beta = (*p)->par()->getBeta();
+	    double gamma = 1/sqrt(1-(beta*beta));
 	    double path = (*p)->getPath();
 	    double hadron_mass = (hpid==45)? mD : db->GetParticle(hpid)->Mass();
 	    TLorentzVector hadron_ptr(0,0,0,hadron_mass);
 	    SetLorentzVector(hadron_ptr,(*p));	    
 	    double DT_proton = (path / (c*beta)) - (path / (c*lead_ptr.Beta()));
 	    double DT_hadron = (path / (c*beta)) - (path / (c*hadron_ptr.Beta()));
+	    double Dbeta_proton = beta - lead_ptr.Beta();
 	    double Chi2PID = (*p)->par()->getChi2Pid();
 	    Chi2PID *= DT_proton/DT_hadron;
 
 	    double vtz_p = (*p)->par()->getVz();	    
 	    int mom_bin = (mom<0.5)?0:(mom<1.0)?1:(mom<1.5)?2:3;
-	    
+	    double pbg = lead_ptr.Rho()/(beta*gamma);
+
 	    if(beta<0.2){continue;}
 
 	    if((*p)->getRegion() != CD){continue;}
 
+	    double edge_first = (*p)->traj(CVT,7)->getEdge();
+	    TVector3 hit_first((*p)->traj(CVT,7)->getX(),(*p)->traj(CVT,7)->getY(),(*p)->traj(CVT,7)->getZ());
+	    double hp_first = hit_first.Phi()*180/M_PI;
+	    int hit_reg_first = hp_first<-90?1:hp_first<30?2:hp_first<150?3:1;
+
+	    double edge_last = (*p)->traj(CVT,12)->getEdge();
+	    TVector3 hit_last((*p)->traj(CVT,12)->getX(),(*p)->traj(CVT,12)->getY(),(*p)->traj(CVT,12)->getZ());
+	    double hp_last = hit_last.Phi()*180/M_PI;
+	    int hit_reg_last = hp_last<-90?1:hp_last<30?2:hp_last<150?3:1;
+
+	    bool pass_fid = false;
+	    if((edge_first>0.5) && (edge_last>0.5) && (hit_reg_first == hit_reg_last)){
+	      pass_fid = true;
+	    }
+
+	    //vertex
+	    h_vtz_CD_bc->Fill(vtz_p);
+	    h_diffvtz_CD_bc->Fill(vtz_e-vtz_p);
+	    h_vtz_e_p_CD_bc->Fill(vtz_e,vtz_p);
+	    if(fabs(vtz_e-vtz_p-0.62)>(2*0.86)){continue;}
+	    if((vtz_p<-5.5) || (vtz_p>-0.5)){continue;}
+	    h_vtz_CD_ac->Fill(vtz_p);
+	    h_diffvtz_CD_ac->Fill(vtz_e-vtz_p);
+	    h_vtz_e_p_CD_ac->Fill(vtz_e,vtz_p);
+
+
 	    //fid
-	    h_mom_ToFToF_d_ToFMom_CD_bc->Fill(mom,DT_proton);  
+	    h_mom_ToFToF_d_ToFMom_CD_bc->Fill(mom,DT_proton);
 	    h_theta_CD_bc->Fill(theta);
 	    h_phi_momT_CD_bc->Fill(phi,momT);
 	    h_ToFToF_d_ToFMom_CD_bc_bin[mom_bin]->Fill(DT_proton);
-	    if(!CD_fiducial(phi,theta,momT)){
+
+	    h_edge_first_CD_bc->Fill(edge_first);
+	    h_edge_last_CD_bc->Fill(edge_last);
+
+	    if(!pass_fid){
 	      h_mom_ToFToF_d_ToFMom_CD_bad->Fill(mom,DT_proton);  		
 	      h_ToFToF_d_ToFMom_CD_bad_bin[mom_bin]->Fill(DT_proton);
 	      continue;
@@ -294,43 +368,80 @@ int main(int argc, char ** argv)
 	    h_theta_CD_ac->Fill(theta);		  
 	    h_phi_momT_CD_ac->Fill(phi,momT);
 
-	    //vertex
-	    h_vtz_CD_bc->Fill(vtz_p);
-	    h_diffvtz_CD_bc->Fill(vtz_e-vtz_p);
-	    h_vtz_e_p_CD_bc->Fill(vtz_e,vtz_p);
-	    if(fabs(vtz_e-vtz_p)>2){continue;}
-	    h_vtz_CD_ac->Fill(vtz_p);
-	    h_diffvtz_CD_ac->Fill(vtz_e-vtz_p);
-	    h_vtz_e_p_CD_ac->Fill(vtz_e,vtz_p);
-	    
+
 	    //pid
-	    h_mom_beta_CD_bc->Fill(lead_ptr.Rho(),beta);
-	    h_Chi2PID_CD_bc->Fill(Chi2PID);
-	    h_mom_DT_CD_bc->Fill(lead_ptr.Rho(),DT_proton);
-	    h_mom_Chi2PID_CD_bc->Fill(lead_ptr.Rho(),Chi2PID);
-	    if(fabs(DT_proton)>0.4){continue;}
-	    if(fabs(Chi2PID)>3.5){continue;}
+	    h_mom_DT->Fill(mom,DT_proton);
+	    h_mom_beta->Fill(mom,beta);
+	    h_DT_mom_bin[mom_bin]->Fill(DT_proton);
+	    int theta_bin = theta<60?0:theta<80?1:2;
+	    int phi_bin = phi<-120?0:phi<-60?1:phi<0?2:phi<60?3:phi<120?4:5;
+	    h_mom_DT_theta_phi_bin[phi_bin][theta_bin]->Fill(mom,DT_proton);
 
+	    if(hpid==2212){
+	      h_mom_beta_2212->Fill(mom,beta);
+	    }
 
-	    h_mom_beta_CD_ac->Fill(lead_ptr.Rho(),beta);
-	    h_Chi2PID_CD_ac->Fill(Chi2PID);
-	    h_mom_DT_CD_ac->Fill(lead_ptr.Rho(),DT_proton);
-	    h_mom_Chi2PID_CD_ac->Fill(lead_ptr.Rho(),Chi2PID);
+	    if(pass_cut(mom,DT_proton,2) && (DT_proton>-0.75)){
+	      h_mom_DT_wPID->Fill(mom,DT_proton);
+	      h_mom_beta_wPID->Fill(mom,beta);
+	      h_mom_Chi2PID_wPID->Fill(mom,Chi2PID);
+	      h_Chi2PID_wPID->Fill(Chi2PID);
+	    }
+	    
 
 	    
-	  }
-	  
+	  }	  
 	}
     }
 
   //clasAna.WriteDebugPlots();
+  char temp[100];
+  TGraph * g_phi[3];
+  for(int i = 0; i<3; i++){
+    //Make the graphs     
+    sprintf(temp,"g_phi_%d",i);
+    g_phi[i] = new TGraph();
+    g_phi[i]->SetName(temp);
+    g_phi[i]->SetLineColor(2);
+    for(int j = 0; j < 100; j++){
+      double shift = (-60 + i * 120) * (M_PI/180);
+      double phi = (M_PI/2) * ((double)j/100) - shift;
+      double momT = 0.15 * (1/sin(phi + (M_PI/2) + shift));
+      g_phi[i]->SetPoint(g_phi[i]->GetN(),phi*180/M_PI,momT);
+    }
+    g_phi[i]->Write();
+  }
+
+
+  TF1 * f_vertex= new TF1("f_vertex","gaus(0)",-1,2);
+  f_vertex->SetParameter(0,h_diffvtz_CD_bc->GetMaximum());
+  f_vertex->SetParameter(1,0);
+  f_vertex->SetParameter(2,1);
+  TFitResultPtr p_vertex = h_diffvtz_CD_bc->Fit(f_vertex,"qesrn","",-1,2);
+
+  TGraph * g_vertex = new TGraph();
+  g_vertex->SetName("g_vertex");
+  g_vertex->SetLineColor(2);
+  for(int j = 0; j < 100; j++){
+    double x = 0.62 + 0.86 *(-3 + 6*(double)j);
+    double y = (39082/(0.86*sqrt(2*M_PI))) * exp(-0.5 * (x-0.62)*(x-0.62)/(0.86*0.86));
+    g_vertex->SetPoint(g_vertex->GetN(),x,y);
+  }
 
   TFile *f = new TFile(outFile,"RECREATE");
   f->cd();
-  h_Q2_bc->Write();
-  h_xB_bc->Write();
+  for(int i = 0; i < hist_list.size(); i++){
+    hist_list[i]->GetXaxis()->CenterTitle();
+    hist_list[i]->GetYaxis()->SetTitleOffset(1.0);
+    hist_list[i]->GetYaxis()->CenterTitle();
 
+    hist_list[i]->GetXaxis()->SetTitleSize(0.08);
+    hist_list[i]->GetYaxis()->SetTitleSize(0.05);
+    hist_list[i]->GetYaxis()->SetTitleOffset(1.0);
+    hist_list[i]->Write();
+  }
 
+  //Plot on pdf
   TStyle *myStyle  = new TStyle("MyStyle","My Root Styles");
 
   // from ROOT plain style
@@ -339,15 +450,13 @@ int main(int argc, char ** argv)
   // myStyle->SetOptTitle(0);
   myStyle->SetOptDate(0);
   myStyle->SetLabelSize(0.35, "xyz");
-  myStyle->SetTitleSize(0.07, "xyz");
-  myStyle->SetTitleOffset(1.0, "xyz");
-  myStyle->SetTitleOffset(0.0, "y");
+  myStyle->SetTitleSize(1.07, "xyz");
+  //myStyle->SetTitleOffset(1.0, "xyz");
+  //myStyle->SetTitleOffset(4.0, "y");
   myStyle->SetTitleFont(132, "xyz");
   myStyle->SetLabelFont(82, "xyz"); // size of axis values
   myStyle->SetNdivisions(4, "xyz");
   // Some canvas borders and stuff
-  myStyle->SetCanvasDefW(2000);
-  myStyle->SetCanvasDefH(1500);
   myStyle->SetCanvasColor(0);
   myStyle->SetCanvasBorderMode(0);
   myStyle->SetCanvasBorderSize(0);
@@ -369,12 +478,9 @@ int main(int argc, char ** argv)
   myStyle->SetHistLineWidth(2); //Style option to make the plots look a certain way
   myStyle->SetHistFillColor(kYellow);
   myStyle->SetTitleSize(0.0002, "t");
-  //myStyle->SetTitleFont(132, "t");
   myStyle->SetTitleBorderSize(0);
   myStyle->SetTitleFillColor(0);
   myStyle->SetTitleTextColor(0);
-  //myStyle->SetTitleH(0.12);
-  //myStyle->SetTitleX(0.16);
   myStyle->SetTitleAlign(18);
   myStyle->SetPalette(kBird);
   //myStyle->SetLabelSize(3.5);
@@ -383,7 +489,7 @@ int main(int argc, char ** argv)
   /////////////////////////////////////////////////////
   //Now create the output PDFs
   /////////////////////////////////////////////////////
-  int pixelx = 2000;
+  int pixelx = 2200;
   int pixely = 1600;
   TCanvas * myCanvas = new TCanvas("myPage","myPage",pixelx,pixely);
   TCanvas * myText = new TCanvas("myText","myText",pixelx,pixely);
@@ -395,15 +501,138 @@ int main(int argc, char ** argv)
   myText->SaveAs(fileName);
   sprintf(fileName,"%s",pdfFile);
   /////////////////////////////////////
-  
-  for(int i = 0; i < hist_list.size(); i++){
+
+  /////////////////////////////////////
+  //Fiducial Cuts
+  /////////////////////////////////////
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_edge_first_CD_bc->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();  
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_edge_last_CD_bc->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();  
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_phi_momT_CD_bc->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();  
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_phi_momT_CD_ac->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();  
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_theta_CD_bc->Draw();
+  h_theta_CD_ac->SetLineColor(2);
+  h_theta_CD_ac->Draw("same");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();  
+
+
+  for(int i = 0; i < 4; i++){
     myCanvas->Divide(1,1);
     myCanvas->cd(1);
-    hist_list[i]->Draw("colz");
+    h_ToFToF_d_ToFMom_CD_ac_bin[i]->Draw("colz");
+    h_ToFToF_d_ToFMom_CD_bad_bin[i]->Scale(h_ToFToF_d_ToFMom_CD_ac_bin[i]->Integral()/h_ToFToF_d_ToFMom_CD_bad_bin[i]->Integral());
+    h_ToFToF_d_ToFMom_CD_bad_bin[i]->SetLineColor(2);
+    h_ToFToF_d_ToFMom_CD_bad_bin[i]->Draw("same");
     myCanvas->Print(fileName,"pdf");
     myCanvas->Clear();  
   }
-  
+
+  /////////////////////////////////////
+  //Vertex Cuts
+  /////////////////////////////////////
+  /*
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_vtz_CD_bc->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();  
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_diffvtz_CD_bc->Draw("colz");
+  f_vertex->Draw("same");
+  text.DrawLatex(-9.5,h_diffvtz_CD_bc->GetMaximum()*0.9,Form("#mu = %g #pm %g",p_vertex->Parameter(1),p_vertex->ParError(1)));
+  text.DrawLatex(-9.5,h_diffvtz_CD_bc->GetMaximum()*0.8,Form("#sigma = %g #pm %g",p_vertex->Parameter(2),p_vertex->ParError(2)));
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();  
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_vtz_e_p_CD_bc->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();  
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_vtz_e_p_CD_ac->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();  
+  */
+  /////////////////////////////////////
+  //PID Cuts
+  /////////////////////////////////////
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_mom_DT->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();  
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_mom_beta->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();  
+
+  for(int i = 0; i < 4; i++){
+    myCanvas->Divide(1,1);
+    myCanvas->cd(1);
+    h_DT_mom_bin[i]->Draw();
+    myCanvas->Print(fileName,"pdf");
+    myCanvas->Clear();  
+  }
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_mom_beta_2212->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();  
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_mom_DT_wPID->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();  
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_mom_beta_wPID->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();  
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_mom_Chi2PID_wPID->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();  
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_Chi2PID_wPID->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();  
+
   /////////////////////////////////////
   sprintf(fileName,"%s]",pdfFile);
   myCanvas->Print(fileName,"pdf");
@@ -450,4 +679,10 @@ int main(int argc, char ** argv)
   TH2D * h_mom_Res_CD_45_ac = new TH2D("mom_Res_CD_45_ac","#Delta Time Deut CD",100,0,3,100,-20,20);
   hist_list.push_back(h_mom_Res_CD_45_ac);
 }
+
+
+  //TH2D * h_mom_Dbeta_CD_bc = new TH2D("mom_Dbeta_CD_bc","#Delta #beta vs. Momentum;p;#beta",100,0,3,100,-1,1);
+  //hist_list.push_back(h_mom_Dbeta_CD_bc);
+  //TH2D * h_mom_DT_CD_bc = new TH2D("mom_DT_CD_bc","#Delta Time vs. Momentum;p;#Delta time",100,0,3,100,-1,1);
+  //hist_list.push_back(h_mom_DT_CD_bc);
 */
