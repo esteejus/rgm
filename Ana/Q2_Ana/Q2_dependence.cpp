@@ -56,8 +56,7 @@ int binQ2(double q2){
 double binEdges_Q2[] = {1.5,1.65,1.80,1.95,2.10,2.25,2.40,2.70,3.00,3.50,5.0};
 int binEdgeslength_Q2 = sizeof(binEdges_Q2)/sizeof(binEdges_Q2[0]) -1;
 
-//double binEdges[] = { 0.35, 0.38, 0.41, 0.44, 0.47, 0.5, 0.53, 0.56, 0.59, 0.61, 0.64, 0.67, 0.70, 0.75, 0.80, 0.85, 0.90, 0.95, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5 };
-double binEdges[] = { 0.35, 0.38, 0.41, 0.44, 0.47, 0.5, 0.53, 0.56, 0.59, 0.61, 0.64, 0.67, 0.70, 0.75, 0.80, 0.85, 0.90, 0.95, 1.0};
+double binEdges[] = { 0.35, 0.38, 0.41, 0.44, 0.47, 0.5, 0.53, 0.56, 0.59, 0.62, 0.65, 0.68, 0.71, 0.76, 0.80, 0.85, 0.90, 0.95, 1.0};
 
 int binEdgeslength = sizeof(binEdges)/sizeof(binEdges[0]) -1;
 
@@ -164,6 +163,14 @@ int main(int argc, char ** argv)
     hist_list.push_back(h_Q2_SRC_pmissbin[i]);
   }
 
+  TH1D * h_emiss_SRC_pmissbin[4];
+  for(int i=0; i<4; i++){
+    sprintf(temp_name,"emiss_SRC_pmissbin_%d",i+1);
+    sprintf(temp_title,"E_{miss} p_{miss}bin=%d;E_{miss};Counts",i+1);
+    h_emiss_SRC_pmissbin[i] = new TH1D(temp_name,temp_title,100,-0.1,0.5);
+    hist_list.push_back(h_emiss_SRC_pmissbin[i]);
+  }
+
   ////////////////////////////////////////////////
   //epp
   ////////////////////////////////////////////////
@@ -216,6 +223,14 @@ int main(int argc, char ** argv)
     hist_list.push_back(h_Q2_Rec_pmissbin[i]);
   }
 
+  TH1D * h_emiss_Rec_pmissbin[4];
+  for(int i=0; i<4; i++){
+    sprintf(temp_name,"emiss_Rec_pmissbin_%d",i+1);
+    sprintf(temp_title,"E_{miss} p_{miss}bin=%d;E_{miss};Counts",i+1);
+    h_emiss_Rec_pmissbin[i] = new TH1D(temp_name,temp_title,100,-0.1,0.5);
+    hist_list.push_back(h_emiss_Rec_pmissbin[i]);
+  }
+
   for(int i=0; i<hist_list.size(); i++){
     hist_list[i]->Sumw2();
     hist_list[i]->GetXaxis()->CenterTitle();
@@ -231,6 +246,12 @@ int main(int argc, char ** argv)
   clasAna.setVertexCuts();
   clasAna.setVertexCorrCuts();
   clasAna.setDCEdgeCuts();
+
+  clasAna.setVzcuts(-6,1);
+  clasAna.setVertexCorrCuts(-3,1);
+  
+  clasAna.setPidCuts(false); //clas chi2pid
+  clasAna.setProtonPidCuts(true); //tof vs mom pid (proton)
 
   double num = 0;
   double den = 0;
@@ -275,14 +296,18 @@ int main(int argc, char ** argv)
 	      TLorentzVector neg_miss = -miss;
 	      bool rec = false;
 	      int bp = binpmiss(miss.P());
+	      double ei = lead_ptr.E() - omega;
+	      double emiss = mass_p - ei;
+	      
 	      if(recoil.size() == 1){rec = true;}
 	      if(miss.P()<0.3){continue;}
 
 	      h_pmiss_SRC->Fill(miss.P(),weight);
 	      h_Q2_SRC_Q2bin[binQ2(Q2)]->Fill(Q2,weight);
-	      h_pmiss_SRC_Q2bin[binQ2(Q2)]->Fill(miss.P(),weight);
+	      h_pmiss_SRC_Q2bin[binQ2(Q2)]->Fill(miss.P(),weight);	      
 	      if(bp!=-1){
 		h_Q2_SRC_pmissbin[bp]->Fill(Q2);
+		h_emiss_SRC_pmissbin[bp]->Fill(emiss);
 	      }
 
 	      if(recoil.size() == 1){
@@ -305,6 +330,7 @@ int main(int argc, char ** argv)
 		h_p_x_cm_Rec->Fill(v_cm.Dot(vx),weight);
 		if(bp!=-1){
 		  h_Q2_Rec_pmissbin[bp]->Fill(Q2);
+		  h_emiss_Rec_pmissbin[bp]->Fill(emiss);
 		}
 		
 		h_pmiss_Rec_Q2bin[binQ2(Q2)]->Fill(miss.P(),weight);
@@ -323,6 +349,9 @@ int main(int argc, char ** argv)
   /////////////////////////////////////////////////////
   TFile *f = new TFile(outFile,"RECREATE");
   f->cd();
+  for(int i=0; i<hist_list.size(); i++){
+    hist_list[i]->Write();
+  } 
 
   int pixelx = 1980;
   int pixely = 1530;
