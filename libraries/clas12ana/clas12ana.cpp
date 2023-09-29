@@ -138,10 +138,9 @@ void clas12ana::Run(const std::unique_ptr<clas12::clas12reader>& c12)
 			  //  (!checkPidCut(p)  && f_pidCuts) not inside PID cuts chi2pid
 			  //  (!checkProtonPidCut(p)  && f_protonpidCuts) not inside proton PID cut
 
-
-			  bool check_pid_cuts =  (f_protonpidCuts && (checkProtonPidCut(p) || checkPidCut(p))) || //check if in proton PID cuts or chi2pid cuts
-			    (!f_protonpidCuts && f_pidCuts && checkPidCut(p)) ||                                  // if proton pid cuts if off but pid cuts on just use chi2pid
-			    (!f_protonpidCuts && !f_pidCuts);                                                     // if no pid cuts are specified let all particles pass pid
+			  bool check_pid_cuts = ((f_protonpidCuts && checkProtonPidCut(p)) || //check if in proton PID cuts or chi2pid cuts
+						 (f_pidCuts && checkPidCut(p))             || // if proton pid cuts if off but pid cuts on just use chi2pid
+						 (!f_protonpidCuts && !f_pidCuts));           // if no pid cuts are specified let all particles pass pid 
 			  
 			  if( !( (!check_pid_cuts)                    || //PID cuts
 				 (!checkVertex(p)  && f_vertexCuts)   || //Vertex cut
