@@ -250,8 +250,8 @@
    double pmiss_cut = .2; //missing momentum cut
    double recoil_mom_cut = .3; //missing momentum cut
    double mmiss_cut[2] = {.84,1.2}; //missing mass cut
-   double pq_cut[2] = {0.6,0.96}; //|p|/|q| cut
-   double theta_pq_cut = 25; //degrees angle between pLead & q
+   double pq_cut[2] = {0.0,0.96}; //|p|/|q| cut
+   double theta_pq_cut = 180; //degrees angle between pLead & q
 
    //SRC variables
    double q2_e = 0;
