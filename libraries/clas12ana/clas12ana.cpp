@@ -846,7 +846,7 @@ void clas12ana::getLeadRecoilSRC(TLorentzVector beam, TLorentzVector target, TLo
   lead_proton.clear();
   recoil_proton.clear();
 
-  TLorentzVector ptr;
+  TLorentzVector ptr(0,0,0,0);
   TLorentzVector q = beam - el;                  //photon  4-vector	
   double q2        = -q.M2();
   double xb        = q2/(2 * mass_proton * (beam.E() - el.E()) ); //x-borken       
@@ -858,7 +858,7 @@ void clas12ana::getLeadRecoilSRC(TLorentzVector beam, TLorentzVector target, TLo
   int lead_mult  = 0;
 
 
-  for(int idx_ptr = 0; idx_ptr < protons.size(); idx_ptr++)
+  for(int idx_ptr = 0; idx_ptr != protons.size(); ++idx_ptr)
     {
 
       ptr.SetXYZM(protons.at(idx_ptr)->par()->getPx(),protons.at(idx_ptr)->par()->getPy(),protons.at(idx_ptr)->par()->getPz(),mass_proton);
@@ -868,25 +868,22 @@ void clas12ana::getLeadRecoilSRC(TLorentzVector beam, TLorentzVector target, TLo
       double mmiss   = miss.M2();
       double theta_pq = ptr.Vect().Angle(q.Vect()) * TMath::RadToDeg(); //angle between vectors p_miss and q                                                                               
       double p_q       = ptr.Vect().Mag()/q.Vect().Mag(); // |p|/|q|                               
-      if( pmiss > pmiss_cut && mmiss > mmiss_cut[0] && mmiss < mmiss_cut[1] && theta_pq < theta_pq_cut && (p_q < pq_cut[1] && p_q > pq_cut[0]) )
+      if( ptr.P() > mom_lead_cut && pmiss > pmiss_cut && mmiss > mmiss_cut[0] && mmiss < mmiss_cut[1] && theta_pq < theta_pq_cut && (p_q < pq_cut[1] && p_q > pq_cut[0]) )
 	{
 	  lead_idx = idx_ptr;
 	  lead_mult++; //check for double lead
 	}
     }
 
-  ptr.SetXYZM(0,0,0,0);
-  
   if(lead_idx == -1 || lead_mult != 1)
     return;
   
   lead_proton.push_back(protons.at(lead_idx));
 
-  //  cout<<protons.size()<<endl;
 
   int recoil_idx = -1;
 
-  for(int idx_ptr = 0; idx_ptr < protons.size(); idx_ptr++)
+  for(int idx_ptr = 0; idx_ptr != protons.size(); ++idx_ptr)
     {
       if(idx_ptr == lead_idx)
 	continue;
@@ -895,6 +892,8 @@ void clas12ana::getLeadRecoilSRC(TLorentzVector beam, TLorentzVector target, TLo
 	recoil_proton.push_back(protons.at(idx_ptr));
 
     }
+
+  //need to check if recoil momentum < lead momentum? 
 
 
   return;  
