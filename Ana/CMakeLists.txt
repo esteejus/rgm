@@ -1,3 +1,4 @@
 add_subdirectory(example_analysis)
 add_subdirectory(tensor_to_scalar)
 add_subdirectory(Q2_Ana)
+add_subdirectory(proton_efficiency)

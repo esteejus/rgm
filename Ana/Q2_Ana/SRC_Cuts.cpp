@@ -56,7 +56,7 @@ void Usage()
 int main(int argc, char ** argv)
 {
 
-  if(argc < 3)
+  if(argc < 4)
     {
       Usage();
       return -1;
@@ -66,8 +66,30 @@ int main(int argc, char ** argv)
   int A = atoi(argv[1]);
 
 
-
+  // set up output root file (and tree)
   TString outFile = argv[2];
+  TFile *f = new TFile(outFile,"RECREATE");
+  TTree *tree = new TTree("T","myTree");
+  double e_mom, e_theta, e_phi, mom, theta, phi, xB, Q2; 
+  double thetapq, pq, mmiss, pmiss_mom, pmiss_theta, pmiss_phi, theta_pmq;
+  tree->Branch("e_mom",&e_mom,"e_mom/D");
+  tree->Branch("e_theta",&e_theta,"e_theta/D");
+  tree->Branch("e_phi",&e_phi,"e_phi/D");
+  tree->Branch("xB",&xB,"xB/D");
+  tree->Branch("Q2",&Q2,"Q2/D");
+  tree->Branch("mom",&mom,"mom/D");
+  tree->Branch("theta",&theta,"theta/D");
+  tree->Branch("phi",&phi,"phi/D");
+  tree->Branch("thetapq",&thetapq,"thetapq/D");
+  tree->Branch("pq",&pq,"pq/D");
+  tree->Branch("mmiss",&mmiss,"mmiss/D");
+  tree->Branch("pmiss_mom",&pmiss_mom,"pmiss_mom/D");
+  tree->Branch("pmiss_theta",&pmiss_theta,"pmiss_theta/D");
+  tree->Branch("pmiss_phi",&pmiss_phi,"pmiss_phi/D");
+  tree->Branch("theta_pmq",&theta_pmq,"theta_pmq/D");
+
+
+  // set up output pdf file
   char * pdfFile = argv[3];
 
   cout<<"Output file "<< outFile <<endl;
@@ -156,15 +178,15 @@ int main(int argc, char ** argv)
   TH2D * h_thetae_q2_fd = new TH2D("thetae_q2_fd","Electron Angle vs Q^{2};Q^{2} (GeV^{2});#theta_{e} (deg)",100,0,4,60,0,60);
   TH2D * h_mmiss_xb_fd = new TH2D("mmiss_xb_fd","Missing Mass vs x_{B};x_{B};M_{miss} (GeV/c^{2})",50,0,3,50,0,2);
   TH2D * h_mmiss_q2_fd = new TH2D("mmiss_q2_fd","Missing Mass vs Q^{2};Q^{2} (GeV^{2});M_{miss} (GeV/c^{2})",50,0,4,50,0,2);
-  TH1D * h_mmiss_nocuts_fd = new TH1D("mmiss_nocuts_fd","Missing Mass (before SRC cuts);Missing Mass (GeV/c^{2});Counts",100,0,2);
+  TH1D * h_mmiss_nocuts_fd = new TH1D("mmiss_nocuts_fd","Missing Mass (before SRC cuts);Missing Mass (GeV/c^{2})",100,0,2);
   TH1D * h_xb_fd = new TH1D("xb_fd","x-Bjorken x_{B};x_{B};Counts",100,0.5,2.5);
-  TH1D * h_pmiss_fd = new TH1D("pmiss_fd","Missing Momentum p_{miss};p_{miss} (GeV/c);Counts",120,0,1.2);
-  TH1D * h_q2_fd = new TH1D("q2_fd","Q^{2};Q^{2} (GeV^{2});Counts",100,0,4);
+  TH1D * h_pmiss_fd = new TH1D("pmiss_fd","Missing Momentum p_{miss};p_{miss} (GeV/c);Counts",25,0,1.2);
+  TH1D * h_q2_fd = new TH1D("q2_fd","Q^{2};Q^{2} (GeV^{2});Counts",25,0,4);
   TH2D * h_mmiss_thetapq_fd = new TH2D("mmiss_thetapq_fd","Missing Mass vs #theta_{pq};#theta_{pq} (deg);M_{miss} (GeV/c^{2})",60,0,60,60,0,2);
-  TH2D * h_mmiss_pq_fd = new TH2D("mmiss_pq_fd","Missing Mass vs p/q;p/q;M_{miss} (GeV/c^{2})",60,0,1.2,60,0,2);
-  TH2D * h_thetapq_pq_fd = new TH2D("thetapq_pq_fd","#theta_{pq} vs p/q;p/q;#theta_{pq} (degrees)",100,0,1.2,100,0,60);
-  TH1D * h_mmiss_fd = new TH1D("mmiss_fd","Missing Mass;M_{miss} (GeV/c^{2});Counts",100,0,2);
-  TH2D * h_p_theta_fd = new TH2D("p_theta_fd","Phase Space Distribution of Leading Protons;#theta_{p} (Degrees);Momentum p (GeV/c)",180,0,180,100,0,2.5);
+  TH2D * h_mmiss_pq_fd = new TH2D("mmiss_pq_fd","Missing Mass vs p_{L}/q;p_{L}/q;M_{miss} (GeV/c^{2})",60,0,1.2,60,0,2);
+  TH2D * h_thetapq_pq_fd = new TH2D("thetapq_pq_fd","#theta_{pq} vs p_{L}/q;p_{L}/q;#theta_{pq} (degrees)",50,0,1.2,50,0,60);
+  TH1D * h_mmiss_fd = new TH1D("mmiss_fd","Missing Mass;M_{miss} (GeV/c^{2});Counts",50,0,2);
+  TH2D * h_p_theta_fd = new TH2D("p_theta_fd","Phase Space Distribution of Leading Protons;#theta_{p} (Degrees);Momentum p_{L} (GeV/c)",45,0,180,50,0,2.5);
 
 
 
@@ -178,15 +200,15 @@ int main(int argc, char ** argv)
   TH2D * h_thetae_q2_cd = new TH2D("thetae_q2_cd","Electron Angle vs Q^{2};Q^{2} (GeV^{2});#theta_{e} (deg)",100,0,4,60,0,60);
   TH2D * h_mmiss_xb_cd = new TH2D("mmiss_xb_cd","Missing Mass vs x_{B};x_{B};M_{miss} (GeV/c^{2})",50,0,3,50,0,2);
   TH2D * h_mmiss_q2_cd = new TH2D("mmiss_q2_cd","Missing Mass vs Q^{2};Q^{2} (GeV^{2});M_{miss} (GeV/c^{2})",50,0,4,50,0,2);
-  TH1D * h_mmiss_nocuts_cd = new TH1D("mmiss_nocuts_cd","Missing Mass (before SRC cuts);Missing Mass (GeV/c^{2});Counts",100,0,2);
+  TH1D * h_mmiss_nocuts_cd = new TH1D("mmiss_nocuts_cd","Missing Mass (before SRC cuts);Missing Mass (GeV/c^{2})",100,0,2);
   TH1D * h_xb_cd = new TH1D("xb_cd","x-Bjorken x_{B};x_{B};Counts",100,0.5,2.5);
-  TH1D * h_pmiss_cd = new TH1D("pmiss_cd","Missing Momentum p_{miss};p_{miss} (GeV/c);Counts",120,0,1.2);
-  TH1D * h_q2_cd = new TH1D("q2_cd","Q^{2};Q^{2} (GeV^{2});Counts",100,0,4);
+  TH1D * h_pmiss_cd = new TH1D("pmiss_cd","Missing Momentum p_{miss};p_{miss} (GeV/c);Counts",25,0,1.2);
+  TH1D * h_q2_cd = new TH1D("q2_cd","Q^{2};Q^{2} (GeV^{2});Counts",25,0,4);
   TH2D * h_mmiss_thetapq_cd = new TH2D("mmiss_thetapq_cd","Missing mass vs #theta_{pq};#theta_{pq} (deg);M_{miss} (GeV/c^{2})",60,0,60,60,0,2);
-  TH2D * h_mmiss_pq_cd = new TH2D("mmiss_pq_cd","Mmiss vs pq;p/q;Mmiss",60,0,1.2,60,0,2);
-  TH2D * h_thetapq_pq_cd = new TH2D("thetapq_pq_cd","#theta_{pq} vs p/q;p/q;#theta_{pq} (degrees)",100,0,1.2,100,0,60);
-  TH1D * h_mmiss_cd = new TH1D("mmiss_cd","Missing Mass;M_{miss} (GeV/c^{2});Counts",100,0,2);
-  TH2D * h_p_theta_cd = new TH2D("p_theta_cd","Phase Space Distribution of Leading Protons;#theta_{p} (Degrees);Momentum p (GeV/c)",180,0,180,100,0,2.5);
+  TH2D * h_mmiss_pq_cd = new TH2D("mmiss_pq_cd","Mmiss vs p_{L}/q;p_{L}/q;Mmiss",60,0,1.2,60,0,2);
+  TH2D * h_thetapq_pq_cd = new TH2D("thetapq_pq_cd","#theta_{pq} vs p/q;p/q;#theta_{pq} (degrees)",50,0,1.2,50,0,60);
+  TH1D * h_mmiss_cd = new TH1D("mmiss_cd","Missing Mass;M_{miss} (GeV/c^{2});Counts",50,0,2);
+  TH2D * h_p_theta_cd = new TH2D("p_theta_cd","Phase Space Distribution of Leading Protons;#theta_{p} (Degrees);Momentum p_{L} (GeV/c)",45,0,180,50,0,2.5);
 
 
 
@@ -200,15 +222,15 @@ int main(int argc, char ** argv)
   TH1D * h_xb_all = new TH1D("xb_all","x-Bjorken x_{B};x_{B};Counts",100,0.5,2.5);
   TH2D * h_mmiss_xb_all = new TH2D("mmiss_xb_all","Missing Mass vs x_{B};x_{B};M_{miss} (GeV/c^{2})",50,0,3,50,0,2);
   TH2D * h_mmiss_q2_all = new TH2D("mmiss_q2_all","Missing Mass vs Q^{2};Q^{2} (GeV^{2});M_{miss} (GeV/c^{2})",50,0,4,50,0,2);
-  TH1D * h_mmiss_nocuts_all = new TH1D("mmiss_nocuts_all","Missing Mass (before SRC cuts);Missing Mass (GeV/c^{2});Counts",100,0,2);
-  TH1D * h_pmiss_all = new TH1D("pmiss_all","Missing Momentum p_{miss};p_{miss} (GeV/c);Counts",120,0,1.2);
-  TH1D * h_q2_all = new TH1D("q2_all","Q^{2};Q^{2} (GeV^{2});Counts",100,0,4);
+  TH1D * h_mmiss_nocuts_all = new TH1D("mmiss_nocuts_all","Missing Mass (before SRC cuts);Missing Mass (GeV/c^{2})",100,0,2);
+  TH1D * h_pmiss_all = new TH1D("pmiss_all","Missing Momentum p_{miss};p_{miss} (GeV/c);Counts",25,0,1.2);
+  TH1D * h_q2_all = new TH1D("q2_all","Q^{2};Q^{2} (GeV^{2});Counts",25,0,4);
   TH2D * h_mmiss_thetapq_all = new TH2D("mmiss_thetapq_all","Missing Mass vs #theta_{pq};#theta_{pq} (deg);M_{miss} (GeV/c^{2})",60,0,60,60,0,2);
-  TH2D * h_mmiss_pq_all = new TH2D("mmiss_pq_all","Missing Mass vs p/q;p/q;M_{miss} (GeV/c^{2})",60,0,1.2,60,0,2);
-  TH2D * h_thetapq_pq_all = new TH2D("thetapq_pq_all","#theta_{pq} vs p/q;p/q;#theta_{pq} (degrees)",100,0,1.2,100,0,60);
-  TH1D * h_mmiss_all = new TH1D("mmiss_all","Missing Mass;M_{miss} (GeV/c^{2});Counts",100,0,2);
+  TH2D * h_mmiss_pq_all = new TH2D("mmiss_pq_all","Missing Mass vs p_{L}/q;p_{L}/q;M_{miss} (GeV/c^{2})",60,0,1.2,60,0,2);
+  TH2D * h_thetapq_pq_all = new TH2D("thetapq_pq_all","#theta_{pq} vs p_{L}/q;p+{L}/q;#theta_{pq} (degrees)",50,0,1.2,50,0,60);
+  TH1D * h_mmiss_all = new TH1D("mmiss_all","Missing Mass;M_{miss} (GeV/c^{2});Counts",50,0,2);
 
-  TH2D * h_p_theta_all = new TH2D("p_theta_all","Phase Space Distribution of Leading Protons;#theta_{p} (Degrees);Momentum p (GeV/c)",180,0,180,100,0,2.5);
+  TH2D * h_p_theta_all = new TH2D("p_theta_all","Phase Space Distribution of Leading Protons;#theta_{p} (Degrees);Momentum p_{L} (GeV/c)",45,0,180,50,0,2.5);
   TH2D * h_emiss_omega_all = new TH2D("emiss_omega_all","Missing Energy vs #omega;#omega (GeV);E_{miss} (GeV)",100,0,2.5,100,0,0.5);
   
   TH1D * h_pmiss_src_all = new TH1D("pmiss_src_all","Missing Momentum of Lead SRC Protons;p_{miss} (GeV/c);Counts",50,0.35,1);
@@ -238,7 +260,7 @@ int main(int argc, char ** argv)
   ///////////////////////////////////////////////////////
   //Recoil Selection
   /////////////////////////////////////////////////////// 
-  TH2D * h_lead_rec = new TH2D("lead_rec","Lead Theta vs Recoil Theta;#theta_{recoil} (deg);#theta_{lead} (deg)",90,0,180,90,0,180); 
+  TH2D * h_lead_rec = new TH2D("lead_rec","Lead Theta vs Recoil Theta;#theta_{rec} (deg);#theta_{L} (deg)",90,0,180,90,0,180); 
   TH1D * h_prec = new TH1D("prec","Recoil Proton Momentum;p_{rec} (GeV/c);Counts",100,0,1.5);
   TH1D * h_cos0 = new TH1D("cos0","Angle between Lead and Recoil Protons",100,-1,1);
   
@@ -251,13 +273,24 @@ int main(int argc, char ** argv)
   TH1D * h_xb_pp = new TH1D("xb_pp","x-Bjorken x_{B};x_{B};Counts",100,1.2,2.5);
   TH1D * h_pmiss_pp = new TH1D("pmiss_pp","Missing Momentum p_{miss};p_{miss} (GeV/c);Counts",120,0.3,1.2);
   TH1D * h_q2_pp = new TH1D("q2_pp","Q^{2};Q^{2} (GeV^{2});Counts",100,1,4);
-  TH2D * h_thetapq_pq_pp = new TH2D("thetapq_pq_pp","#theta_{pq} vs p/q;p/q;#theta_{pq} (degrees)",100,0,1.2,100,0,60);
+  TH2D * h_thetapq_pq_pp = new TH2D("thetapq_pq_pp","#theta_{pq} vs p_{L}/q;p_{L}/q;#theta_{pq} (degrees)",100,0,1.2,100,0,60);
   TH1D * h_mmiss_pp = new TH1D("mmiss_pp","Missing Mass;M_{miss} (GeV/c^{2});Counts",100,0,1.2);
-  TH2D * h_plead_prec = new TH2D("plead_prec","Lead Proton Momentum vs Recoil Momentum;p_{rec} (GeV/c);p_{lead} (GeV/c)",50,0,1,50,0,3);
-  TH2D * h_tlead_trec = new TH2D("tlead_trec","Lead Proton #theta vs Recoil #theta;#theta_{recoil} (deg);#theta_{lead} (deg)",90,0,180,90,0,180);
+  TH2D * h_plead_prec = new TH2D("plead_prec","Lead Proton Momentum vs Recoil Momentum;p_{rec} (GeV/c);p_{L} (GeV/c)",50,0,1,50,0,3);
+  TH2D * h_tlead_trec = new TH2D("tlead_trec","Lead Proton #theta vs Recoil #theta;#theta_{rec} (deg);#theta_{L} (deg)",90,0,180,90,0,180);
   TH2D * h_pmiss_prec = new TH2D("pmiss_prec","Missing Momentum vs Recoil Momentum;p_{rec} (GeV/c);p_{miss} (GeV/c)",50,0.3,1,50,0.3,1.2);
-  TH1D * h_thetapmq = new TH1D("thetapmq","Angle between Missing Momentum and q;#theta_{pmiss,q};Counts",50,90,180);
+  TH1D * h_thetapmq_pp = new TH1D("thetapmq_pp","Angle between Missing Momentum and q;#theta_{pmiss,q};Counts",50,90,180);
 
+
+  ///////////////////////////////////////////////////////
+  //Additional Histos
+  /////////////////////////////////////////////////////// 
+  TH1D * h_plead_all = new TH1D("plead_all","Momentum of Lead Proton Candidate;p_{L} (GeV/c)",100,0,3);
+  TH1D * h_plead_fd = new TH1D("plead_fd","Momentum of Lead Proton Candidate;p_{L} (GeV/c)",100,0,3);
+  TH1D * h_plead_cd = new TH1D("plead_cd","Momentum of Lead Proton Candidate;p_{L} (GeV/c)",100,0,3);
+  TH2D * h_thetapmq_pq_all = new TH2D("thetapmq_pq_all","Angle between Missing Momentum and q;p/q;#theta_{pmiss,q}",100,0,1.2,90,0,180);
+  TH2D * h_thetapmq_pq_fd = new TH2D("thetapmq_pq_fd","Angle between Missing Momentum and q;p/q;#theta_{pmiss,q}",100,0,1.2,90,0,180);
+  TH2D * h_thetapmq_pq_cd = new TH2D("thetapmq_pq_cd","Angle between Missing Momentum and q;p/q;#theta_{pmiss,q}",100,0,1.2,90,0,180);
+  TH1D * h_doublelead = new TH1D("doublelead","Number of Protons Passing SRC Cuts;Proton Number",5,1,6);
 
 
   
@@ -287,10 +320,13 @@ int main(int argc, char ** argv)
 	{
 	  SetLorentzVector(el,electrons[0]);
 	  //	  SetLorentzVector(ptr,protons[0]);
+	  e_mom = el.P();
+          e_theta = el.Theta()*180./M_PI;
+          e_phi = el.Phi()*180./M_PI;
 
 	  TLorentzVector q = beam - el; //photon  4-vector            
-          double Q2        = -q.M2(); // Q^2
-          double xB       = Q2/(2 * mass_p * (beam.E() - el.E()) ); //x-bjorken
+          Q2        = -q.M2(); // Q^2
+          xB       = Q2/(2 * mass_p * (beam.E() - el.E()) ); //x-bjorken
           double omega = beam.E() - el.E();
 	  h_Q2_bc->Fill(Q2);
 	  h_xB_bc->Fill(xB);
@@ -309,6 +345,8 @@ int main(int argc, char ** argv)
 	  //Before cuts
 	  ///////////////////////////////
 	  int pindex = -1;
+          int num_lead = 0;
+
 	  for(auto p = protons.begin(); p != protons.end();++p){
 	    if((*p)->par()->getCharge()<1){continue;}
 
@@ -316,10 +354,10 @@ int main(int argc, char ** argv)
 
 	    //Momenta
 	    SetLorentzVector(lead_ptr,(*p));
-	    double mom = lead_ptr.P();
+	    mom = lead_ptr.P();
 	    double momT = lead_ptr.Perp();
-	    double theta = lead_ptr.Theta() * 180 / M_PI;
-	    double phi = lead_ptr.Phi() * 180 / M_PI;
+	    theta = lead_ptr.Theta() * 180 / M_PI;
+	    phi = lead_ptr.Phi() * 180 / M_PI;
 
 	    double beta = (*p)->par()->getBeta();
 	    double path = (*p)->getPath();
@@ -327,13 +365,19 @@ int main(int argc, char ** argv)
 
             // calculate SRC kinematics
             TVector3 pmiss = lead_ptr.Vect() - q.Vect();
-            double thetapq = lead_ptr.Vect().Angle(q.Vect())*180./M_PI;
-            double pq = (lead_ptr.Vect().Mag()) / (q.Vect().Mag());
-            double mmiss = (q + TLorentzVector(TVector3(0.,0.,0.),2*mN) - lead_ptr).Mag();
+            thetapq = lead_ptr.Vect().Angle(q.Vect())*180./M_PI;
+            pq = (lead_ptr.Vect().Mag()) / (q.Vect().Mag());
+            mmiss = (q + TLorentzVector(TVector3(0.,0.,0.),2*mN) - lead_ptr).Mag();
+            pmiss_mom = pmiss.Mag();
+            pmiss_theta = pmiss.Theta()*180./M_PI;
+            pmiss_phi = pmiss.Phi()*180./M_PI;
+            theta_pmq = pmiss.Angle(q.Vect())*180./M_PI;
 
             // end warning
 
 	    if(beta<0.2){continue;} // proton cut
+
+            tree->Fill();
 
 
             // FORWARD DETECTOR PROTONS
@@ -342,6 +386,11 @@ int main(int argc, char ** argv)
               h_thetae_q2_fd->Fill(Q2,el.Theta()*180./M_PI);
               h_thetae_q2_all->Fill(Q2,el.Theta()*180./M_PI);
               h_thetap_q2_all->Fill(Q2,theta);
+
+              // plead cut
+              h_plead_all->Fill(mom);
+              h_plead_fd->Fill(mom);
+              if (mom<1.0) {continue;}
 
               // SRC histograms here - FD
               h_mmiss_nocuts_fd->Fill(mmiss);
@@ -372,8 +421,12 @@ int main(int argc, char ** argv)
             h_thetapq_pq_all->Fill(pq,thetapq);
             h_mmiss_thetapq_all->Fill(thetapq,mmiss);
             h_mmiss_pq_all->Fill(pq,mmiss);
-              if (thetapq>25) {continue;}
-              if (pq<0.62 || pq>0.96) {continue;}
+              h_thetapmq_pq_fd->Fill(pq,theta_pmq);
+            h_thetapmq_pq_all->Fill(pq,theta_pmq);
+
+              //if (thetapq>25) {continue;}
+              //if (pq<0.62) {continue;}
+              if (pq>0.96) {continue;}
 
 
               h_mmiss_fd->Fill(mmiss);
@@ -409,6 +462,11 @@ int main(int argc, char ** argv)
               h_thetae_q2_cd->Fill(Q2,el.Theta()*180./M_PI);
               h_thetae_q2_all->Fill(Q2,el.Theta()*180./M_PI);
 
+              // plead cut
+              h_plead_all->Fill(mom);
+              h_plead_cd->Fill(mom);
+              if (mom<1.0) {continue;}
+
               // SRC histograms here - CD
               h_mmiss_nocuts_cd->Fill(mmiss);
               h_mmiss_xb_cd->Fill(xB,mmiss);  // define
@@ -437,8 +495,12 @@ int main(int argc, char ** argv)
             h_thetapq_pq_all->Fill(pq,thetapq);
             h_mmiss_thetapq_all->Fill(thetapq,mmiss);
             h_mmiss_pq_all->Fill(pq,mmiss);
-              if (thetapq>25) {continue;}
-              if (pq<0.62 || pq>0.96) {continue;}
+              h_thetapmq_pq_cd->Fill(pq,theta_pmq);
+            h_thetapmq_pq_all->Fill(pq,theta_pmq);
+
+              //if (thetapq>25) {continue;}
+              //if (pq<0.62) {continue;}
+              if (pq>0.96) {continue;}
 
               h_mmiss_cd->Fill(mmiss);
             h_mmiss_all->Fill(mmiss);
@@ -448,7 +510,6 @@ int main(int argc, char ** argv)
             h_p_theta_all->Fill(theta,mom);
             h_pmiss_src_all->Fill(pmiss.Mag());
             h_xb_q2_src_all->Fill(Q2,xB);
-
 
 
               // define kinematics for lead proton (valid past this proton loop)
@@ -476,12 +537,19 @@ int main(int argc, char ** argv)
             if ((*p)->getRegion()==CD && !CD_fiducial(phi,theta,momT)) {continue;} // CD fiducial cut if applicable
 
             // SRC cuts
+            if (mom<1.0) {continue;}
             if (xB<1.2) {continue;}
             if (pmiss.Mag()<0.35 || pmiss.Mag()>1.0) {continue;}
             if (Q2<1.5) {continue;}
-            if (thetapq>25) {continue;}
-            if (pq<0.62 || pq>0.96) {continue;}
+            //if (thetapq>25) {continue;}
+            //if (pq<0.62) {continue;}
+            if (pq>0.96) {continue;}
             if (mmiss>1.1) {continue;}
+
+
+            // count protons passing SRC cuts
+            num_lead = num_lead + 1;
+
 
             // final e'p distributions after SRC cuts
             h_xb_final->Fill(xB);
@@ -496,7 +564,7 @@ int main(int argc, char ** argv)
  
 	  } // end first loop over protons
 
-
+          if (num_lead>0) {h_doublelead->Fill(num_lead);}
 
           if (pindex==-1) {continue;} // if no lead proton, skip to next event (don't look for recoil)
 
@@ -527,7 +595,7 @@ int main(int argc, char ** argv)
               TVector3 pmiss = recoil_ptr.Vect() - q.Vect();
               double thetapq = recoil_ptr.Vect().Angle(q.Vect())*180./M_PI;
               double pq = (recoil_ptr.Vect().Mag()) / (q.Vect().Mag());
-              double mmiss = (q + TLorentzVector(TVector3(0.,0.,0.),2*mN) - recoil_ptr).Mag();
+              mmiss = (q + TLorentzVector(TVector3(0.,0.,0.),2*mN) - recoil_ptr).Mag();
               double recoil_emiss = lead_emiss - recoil_ptr.E();
 
 	      //if(mom==0){continue;} // proton cut
@@ -553,7 +621,7 @@ int main(int argc, char ** argv)
               h_plead_prec->Fill(mom,lead_mom);
               h_tlead_trec->Fill(theta,lead_theta);
               h_pmiss_prec->Fill(mom,lead_pmiss.Mag());
-              h_thetapmq->Fill(lead_pmiss.Angle(q.Vect())*180./M_PI);
+              h_thetapmq_pp->Fill(lead_pmiss.Angle(q.Vect())*180./M_PI);
               
 
             } // end requirement for recoil to be in CD
@@ -567,8 +635,11 @@ int main(int argc, char ** argv)
 
   //clasAna.WriteDebugPlots();
 
-  TFile *f = new TFile(outFile,"RECREATE");
+
+
   f->cd();
+  tree->Write();
+
   h_Q2_bc->Write();
   h_xB_bc->Write();
 
@@ -698,10 +769,10 @@ int main(int argc, char ** argv)
   myCanvas->Divide(1,1);
   myCanvas->cd(1);
   h_mmiss_pq_all->Draw("colz");
-  TLine * line_mmiss_pq_all_1 = new TLine(0.62,0,0.62,2);
+  /*TLine * line_mmiss_pq_all_1 = new TLine(0.62,0,0.62,2);
   line_mmiss_pq_all_1->SetLineColor(kRed);
   line_mmiss_pq_all_1->SetLineWidth(3);
-  line_mmiss_pq_all_1->Draw("same");
+  line_mmiss_pq_all_1->Draw("same");*/
   TLine * line_mmiss_pq_all_2 = new TLine(0.96,0,0.96,2);
   line_mmiss_pq_all_2->SetLineColor(kRed);
   line_mmiss_pq_all_2->SetLineWidth(3);
@@ -713,18 +784,18 @@ int main(int argc, char ** argv)
   myCanvas->Divide(1,1);
   myCanvas->cd(1);
   h_thetapq_pq_all->Draw("colz");
-  TLine * line_pq_all_1 = new TLine(0.62,0,0.62,60);
+  /*TLine * line_pq_all_1 = new TLine(0.62,0,0.62,60);
   line_pq_all_1->SetLineColor(kRed);
   line_pq_all_1->SetLineWidth(3);
-  line_pq_all_1->Draw("same");
+  line_pq_all_1->Draw("same");*/
   TLine * line_pq_all_2 = new TLine(0.96,0,0.96,60);
   line_pq_all_2->SetLineColor(kRed);
   line_pq_all_2->SetLineWidth(3);
   line_pq_all_2->Draw("same");
-  TLine * line_pq_all_3 = new TLine(0,25,1.2,25);
+  /*TLine * line_pq_all_3 = new TLine(0,25,1.2,25);
   line_pq_all_3->SetLineColor(kRed);
   line_pq_all_3->SetLineWidth(3);
-  line_pq_all_3->Draw("same");
+  line_pq_all_3->Draw("same");*/
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
@@ -841,10 +912,10 @@ int main(int argc, char ** argv)
   myCanvas->Divide(1,1);
   myCanvas->cd(1);
   h_mmiss_pq_fd->Draw("colz");
-  TLine * line_mmiss_pq_fd_1 = new TLine(0.62,0,0.62,2);
+  /*TLine * line_mmiss_pq_fd_1 = new TLine(0.62,0,0.62,2);
   line_mmiss_pq_fd_1->SetLineColor(kRed);
   line_mmiss_pq_fd_1->SetLineWidth(3);
-  line_mmiss_pq_fd_1->Draw("same");
+  line_mmiss_pq_fd_1->Draw("same");*/
   TLine * line_mmiss_pq_fd_2 = new TLine(0.96,0,0.96,2);
   line_mmiss_pq_fd_2->SetLineColor(kRed);
   line_mmiss_pq_fd_2->SetLineWidth(3);
@@ -856,18 +927,18 @@ int main(int argc, char ** argv)
   myCanvas->Divide(1,1);
   myCanvas->cd(1);
   h_thetapq_pq_fd->Draw("colz");
-  TLine * line_pq_fd_1 = new TLine(0.62,0,0.62,60);
+  /*TLine * line_pq_fd_1 = new TLine(0.62,0,0.62,60);
   line_pq_fd_1->SetLineColor(kRed);
   line_pq_fd_1->SetLineWidth(3);
-  line_pq_fd_1->Draw("same");
+  line_pq_fd_1->Draw("same");*/
   TLine * line_pq_fd_2 = new TLine(0.96,0,0.96,60);
   line_pq_fd_2->SetLineColor(kRed);
   line_pq_fd_2->SetLineWidth(3);
   line_pq_fd_2->Draw("same");
-  TLine * line_pq_fd_3 = new TLine(0,25,1.2,25);
+  /*TLine * line_pq_fd_3 = new TLine(0,25,1.2,25);
   line_pq_fd_3->SetLineColor(kRed);
   line_pq_fd_3->SetLineWidth(3);
-  line_pq_fd_3->Draw("same");
+  line_pq_fd_3->Draw("same");*/
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
@@ -965,10 +1036,10 @@ int main(int argc, char ** argv)
   myCanvas->Divide(1,1);
   myCanvas->cd(1);
   h_mmiss_pq_cd->Draw("colz");
-  TLine * line_mmiss_pq_cd_1 = new TLine(0.62,0,0.62,2);
+  /*TLine * line_mmiss_pq_cd_1 = new TLine(0.62,0,0.62,2);
   line_mmiss_pq_cd_1->SetLineColor(kRed);
   line_mmiss_pq_cd_1->SetLineWidth(3);
-  line_mmiss_pq_cd_1->Draw("same");
+  line_mmiss_pq_cd_1->Draw("same");*/
   TLine * line_mmiss_pq_cd_2 = new TLine(0.96,0,0.96,2);
   line_mmiss_pq_cd_2->SetLineColor(kRed);
   line_mmiss_pq_cd_2->SetLineWidth(3);
@@ -980,18 +1051,18 @@ int main(int argc, char ** argv)
   myCanvas->Divide(1,1);
   myCanvas->cd(1);
   h_thetapq_pq_cd->Draw("colz");
-  TLine * line_pq_cd_1 = new TLine(0.62,0,0.62,60);
+  /*TLine * line_pq_cd_1 = new TLine(0.62,0,0.62,60);
   line_pq_cd_1->SetLineColor(kRed);
   line_pq_cd_1->SetLineWidth(3);
-  line_pq_cd_1->Draw("same");
+  line_pq_cd_1->Draw("same");*/
   TLine * line_pq_cd_2 = new TLine(0.96,0,0.96,60);
   line_pq_cd_2->SetLineColor(kRed);
   line_pq_cd_2->SetLineWidth(3);
   line_pq_cd_2->Draw("same");
-  TLine * line_pq_cd_3 = new TLine(0,25,1.2,25);
+  /*TLine * line_pq_cd_3 = new TLine(0,25,1.2,25);
   line_pq_cd_3->SetLineColor(kRed);
   line_pq_cd_3->SetLineWidth(3);
-  line_pq_cd_3->Draw("same");
+  line_pq_cd_3->Draw("same");*/
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
@@ -1167,9 +1238,78 @@ int main(int argc, char ** argv)
 
   myCanvas->Divide(1,1);
   myCanvas->cd(1);
-  h_thetapmq->Draw("colz");
+  h_thetapmq_pp->Draw("colz");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
+
+  ///////////////////////////////////////////////////////
+  //Additional Histos
+  ///////////////////////////////////////////////////////  
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_plead_all->Draw();
+  TLine * line_plead_all = new TLine(1,0,1,h_plead_all->GetMaximum());
+  line_plead_all->SetLineColor(kRed);
+  line_plead_all->SetLineWidth(3);
+  line_plead_all->Draw("same");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_plead_fd->Draw();
+  TLine * line_plead_fd = new TLine(1,0,1,h_plead_fd->GetMaximum());
+  line_plead_fd->SetLineColor(kRed);
+  line_plead_fd->SetLineWidth(3);
+  line_plead_fd->Draw("same");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_plead_cd->Draw();
+  TLine * line_plead_cd = new TLine(1,0,1,h_plead_cd->GetMaximum());
+  line_plead_cd->SetLineColor(kRed);
+  line_plead_cd->SetLineWidth(3);
+  line_plead_cd->Draw("same");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_thetapmq_pq_all->Draw("colz");
+  TLine * line_thetapmq_pq_all = new TLine(0.96,0,0.96,180);
+  line_thetapmq_pq_all->SetLineColor(kRed);
+  line_thetapmq_pq_all->SetLineWidth(3);
+  line_thetapmq_pq_all->Draw("same");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_thetapmq_pq_fd->Draw("colz");
+  TLine * line_thetapmq_pq_fd = new TLine(0.96,0,0.96,180);
+  line_thetapmq_pq_fd->SetLineColor(kRed);
+  line_thetapmq_pq_fd->SetLineWidth(3);
+  line_thetapmq_pq_fd->Draw("same");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_thetapmq_pq_cd->Draw("colz");
+  TLine * line_thetapmq_pq_cd = new TLine(0.96,0,0.96,180);
+  line_thetapmq_pq_cd->SetLineColor(kRed);
+  line_thetapmq_pq_cd->SetLineWidth(3);
+  line_thetapmq_pq_cd->Draw("same");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_doublelead->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();  
   
   /////////////////////////////////////
   sprintf(fileName,"%s]",pdfFile);
