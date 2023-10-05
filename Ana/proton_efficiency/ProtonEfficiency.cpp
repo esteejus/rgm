@@ -16,6 +16,7 @@
 #include "clas12writer.h"
 #include "HipoChain.h"
 #include "efficiency/efficiency.h"
+#include "clas12ana.h"
 
 
 using namespace std;
@@ -37,7 +38,7 @@ double t_max = 140;
 
 int main(int argc, char ** argv) {
 
-  if(argc<6) {
+  if(argc<5) {
     std::cerr << "Wrong number of arguments\n";
     Usage();
     return -1;
@@ -66,6 +67,13 @@ int main(int argc, char ** argv) {
   chain.db()->turnOffQADB();
 
   auto currc12=chain.GetC12Reader();
+
+  // clas12ana setup
+  clas12ana clasAna;
+  clasAna.readEcalSFPar("/w/hallb-scshelf2102/clas12/users/esteejus/rgm/Ana/cutFiles/paramsSF_LD2_x2.dat");
+  clasAna.readEcalPPar("/w/hallb-scshelf2102/clas12/users/esteejus/rgm/Ana/cutFiles/paramsPI_LD2_x2.dat");
+  clasAna.setProtonPidCuts(true);
+
 
   // prepare histograms
   vector<TH1*> hist_list_1;
@@ -245,14 +253,20 @@ int numevent = 0;
       c12writer.assignReader(*currc12);
     }
 
+    clasAna.Run(c12);
+
     // identify particles from REC::Particle
-    //if (!myCut.electroncut(c12)) {continue;}
-    auto elec=c12->getByID(11);
+    /*auto elec=c12->getByID(11);
     auto prot = c12->getByID(2212);
-    //auto neut = c12->getByID(2112);
     auto piplus = c12->getByID(211);
-    auto piminus = c12->getByID(-211);
+    auto piminus = c12->getByID(-211);*/
     auto allParticles=c12->getDetParticles();
+
+    auto elec = clasAna.getByPid(11);
+    auto prot = clasAna.getByPid(2212);
+    auto piplus = clasAna.getByPid(211);
+    auto piminus = clasAna.getByPid(-211);
+
     if (elec.size()!=1) {continue;}
     if (prot.size()<1) {continue;}
     //if (neut.size()<1) {continue;}
@@ -295,7 +309,7 @@ int numevent = 0;
     int p_index = -1;
     TVector3 pp1(0.,0.,0.);
     // technically not optimized - this doesn't address what happens if there are two protons passing cuts
-    for (int i=0; i<prot.size(); i++) // technically not optimized - 
+    for (int i=0; i<prot.size(); i++)
     {
       // define quantities
       pp1.SetMagThetaPhi(prot[i]->getP(),prot[i]->getTheta(),prot[i]->getPhi());
