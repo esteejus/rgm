@@ -244,14 +244,16 @@
    std::vector<double> dc_edge_cut_ptr = {2.5,3,10.5}; //units cm; {region1, region2, region3} cuts for protons  OUTBENDING
 
    int region_cut = 2; //region 2 of CD had strange occupancy not nessecarily bad
+
    //SRC Cuts
-   double q2_cut = 1.5; //Q^2 cut
-   double xb_cut = 1.2; //x-borken
-   double pmiss_cut = .2; //missing momentum cut
-   double recoil_mom_cut = .3; //missing momentum cut
-   double mmiss_cut[2] = {.84,1.2}; //missing mass cut
-   double pq_cut[2] = {0.0,0.96}; //|p|/|q| cut
-   double theta_pq_cut = 180; //degrees angle between pLead & q
+   double q2_cut         = 1.5; //Q^2 cut
+   double xb_cut         = 1.2; //x-borken
+   double pmiss_cut      = .25; //missing momentum cut
+   double recoil_mom_cut = .3;  //missing momentum cut
+   double mmiss_cut[2]   = {0,1.2};  //missing mass cut
+   double pq_cut[2]      = {0,0.96}; //|p|/|q| cut
+   double theta_pq_cut   = 180; //degrees angle between pLead & q
+   double mom_lead_cut   = 1.;  //min momentum of lead particle GeV/c
 
    //SRC variables
    double q2_e = 0;
