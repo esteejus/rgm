@@ -318,7 +318,7 @@ int numevent = 0;
     TVector3 pb(0,0,Ebeam);
     TVector3 pq = pb - pe;
     double nu = Ebeam - pe.Mag();
-    double QSq = pq.Mag() - (nu*nu);
+    double QSq = pq.Mag2() - (nu*nu);
     double xB = QSq / (2*mN*nu);
 
 
@@ -399,10 +399,10 @@ int numevent = 0;
       is_CND3 = (neut[i]->sci(CND3)->getLayer()==3);
       is_CTOF = neut[i]->sci(CTOF)->getDetector()==4;
       
-      int num_hits_inc = 0;
+      /*int num_hits_inc = 0;
       if (is_CND1) {num_hits_inc = num_hits_inc + 1;}
       if (is_CND2) {num_hits_inc = num_hits_inc + 1;}
-      if (is_CND3) {num_hits_inc = num_hits_inc + 1;}
+      if (is_CND3) {num_hits_inc = num_hits_inc + 1;}*/
 
        
       // put REC::Scintillator information
@@ -435,7 +435,7 @@ int numevent = 0;
         //if (cnd_sector<0) {cnd_sector = sector;}
       }
       // PROBLEM: this gives preference to 2nd-layer hits
-      if (!is_CND1 && !is_CND2 && !is_CND3)
+      if (is_CTOF)
       {
         sector = (neut[i]->sci(CTOF)->getComponent()); // rounded down, ctof component mapped onto cnd sector
         time =   neut[i]->sci(CTOF)->getTime() - starttime;

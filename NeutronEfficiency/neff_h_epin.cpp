@@ -18,6 +18,7 @@
 #include <TCanvas.h>
 #include <TStyle.h>
 #include <TLegend.h>
+#include <TLine.h>
 
 #include "clas12reader.h"
 #include "HipoChain.h"
@@ -143,7 +144,7 @@ int main(int argc, char ** argv)
   /////////////////////////////////////
   TH1D * h_pivertex = new TH1D("pi vertex","Pion vertex - electron vertex;v_{pi+} - v_{e} (cm);Counts",50,-5,5);
   hist_list_1.push_back(h_pivertex);
-  TH2D * h_dbetap = new TH2D("dbeta_p","#Delta #beta vs Momentum;Momentum (GeV/c);#beta_{meas} - p/sqrt(p^{2}+m^{2})",100,0,3,100,-0.2,0.2);
+  TH2D * h_dbetap = new TH2D("dbeta_p","#Delta #beta vs Momentum;Momentum (GeV/c);#beta_{meas} - p/sqrt(p^{2}+m^{2})",100,0,4,100,-0.2,0.2);
   hist_list_2.push_back(h_dbetap);
   TH1D * h_pitheta = new TH1D("pitheta","Pion #theta;#theta (degrees);Counts",180,0,180);
   hist_list_1.push_back(h_pitheta);
@@ -365,18 +366,16 @@ int main(int argc, char ** argv)
       }
     if (trash==1) {continue;}
 
-    // pion histos
-    h_pivertex->Fill(vzpi-vze,weight);
-    h_dbetap->Fill(p_pip.Mag(),dbeta,weight);
-    h_pitheta->Fill(pitheta,weight);
-
-
     // pion cuts
+    h_pivertex->Fill(vzpi-vze,weight);
     if ((vzpi-vze)<-4. || (vzpi-vze)>2.) {continue;}
+    h_dbetap->Fill(p_pip.Mag(),dbeta,weight);
     if (dbeta<-0.03 || dbeta>0.03) {continue;}   
     if (p_pip.Mag() < 0.4) {continue;}
     if (p_pip.Mag() > 3.) {continue;}
+    h_pitheta->Fill(pitheta,weight);
     if (pitheta>35.) {continue;}
+
 
     // Missing Mass and missing momentum
     TVector3 p_e;
@@ -645,17 +644,49 @@ int main(int argc, char ** argv)
   myCanvas->Divide(1,1);
   myCanvas->cd(1);
   h_pivertex->Draw();
+  TLine * l_pivertex1 = new TLine(-4,0,-4,h_pivertex->GetMaximum());
+  l_pivertex1->SetLineColor(kRed);
+  l_pivertex1->SetLineWidth(3);
+  l_pivertex1->Draw("same");
+  TLine * l_pivertex2 = new TLine(2,0,2,h_pivertex->GetMaximum());
+  l_pivertex2->SetLineColor(kRed);
+  l_pivertex2->SetLineWidth(3);
+  l_pivertex2->Draw("same");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
- 
+
   myCanvas->Divide(1,1);
   myCanvas->cd(1);
   h_dbetap->Draw("colz");
+  TLine * l_dbetap1 = new TLine(0.4,-0.2,0.4,0.2);
+  l_dbetap1->SetLineColor(kRed);
+  l_dbetap1->SetLineWidth(3);
+  l_dbetap1->Draw("same");
+  TLine * l_dbetap2 = new TLine(3,-0.2,3,0.2);
+  l_dbetap2->SetLineColor(kRed);
+  l_dbetap2->SetLineWidth(3);
+  l_dbetap2->Draw("same");
+  TLine * l_dbetap3 = new TLine(0,-0.2,4,-0.2);
+  l_dbetap3->SetLineColor(kRed);
+  l_dbetap3->SetLineWidth(3);
+  l_dbetap3->Draw("same");
+  TLine * l_dbetap4 = new TLine(0,0.2,4,0.2);
+  l_dbetap4->SetLineColor(kRed);
+  l_dbetap4->SetLineWidth(3);
+  l_dbetap4->Draw("same");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear(); 
 
-
-
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_pitheta->Draw("colz");
+  TLine * l_pitheta = new TLine(35,0,35,h_pitheta->GetMaximum());
+  l_pitheta->SetLineColor(kRed);
+  l_pitheta->SetLineWidth(3);
+  l_pitheta->Draw("same");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear(); 
+  
   
   // all photons and neutrons
   myText->cd();

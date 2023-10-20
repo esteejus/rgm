@@ -299,7 +299,7 @@ int numevent = 0;
     TVector3 pb(0,0,Ebeam);
     TVector3 pq = pb - pe;
     double nu = Ebeam - pe.Mag();
-    double QSq = pq.Mag() - (nu*nu);
+    double QSq = pq.Mag2() - (nu*nu);
     double xB = QSq / (2*mN*nu);
 
 
@@ -398,7 +398,8 @@ int numevent = 0;
       bool is_CND1 = (neut[i]->sci(CND1)->getLayer()==1);
       bool is_CND2 = (neut[i]->sci(CND2)->getLayer()==2);
       bool is_CND3 = (neut[i]->sci(CND3)->getLayer()==3);
-      bool is_CTOF = (!is_CND1 && !is_CND2 && !is_CND3);
+      bool is_CTOF = (neut[i]->sci(CTOF)->getDetector()==4); 
+      if (!is_CND1 && !is_CND2 && !is_CND3 && !is_CTOF) {continue;}
        
       // put REC::Scintillator information
       int sector;
@@ -426,7 +427,7 @@ int numevent = 0;
         energy = neut[i]->sci(CND2)->getEnergy();
       }
       // PROBLEM: this gives preference to 2nd-layer hits
-      if (!is_CND1 && !is_CND2 && !is_CND3)
+      if (is_CTOF)
       {
         sector = (neut[i]->sci(CTOF)->getComponent())/2; // rounded down, ctof component mapped onto cnd sector
         time =   neut[i]->sci(CTOF)->getTime() - starttime;
@@ -463,8 +464,7 @@ int numevent = 0;
       energy = ninfo.energy;
       size = ninfo.size;
       angle_diff = ninfo.angle_diff;
-      //h_cnd_ctof_sector->Fill(ctof_sector,cnd_sector);
-      //h_cnd_ctof_secdiff->Fill(ctof_sector-cnd_sector);
+
 
 
       // FILL HISTOS FOR NEUTRON CANDIDATES
