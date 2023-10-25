@@ -8,7 +8,7 @@
 double getCVTdiff(std::vector<region_part_ptr> neutron_list, std::vector<region_part_ptr> &allParticles_list, int i)
 {
   double hit12_phi = 180;
-  double angle_diff = 360;
+  double angle_diff = 180;
 
   // get neutron momentum
   TVector3 pn;
@@ -64,41 +64,39 @@ Struct getFeatures(std::vector<region_part_ptr> neutron_list, std::vector<region
   bool n_isCTOF = (neutron_list[i]->sci(CTOF)->getDetector()==4);
 
 
+
+
   // initialize subdetector/layer-dependent quantities
   double n_phi = -360; // neutron phi (range -176.25 to 176.25 degrees) -- they occur at intervals of exactly 7.5 degrees :D
-  int sector = -1; // sector in which neutron is localized
   // define subdetector/layer-dependent quantities
   if (n_isCND1)
   {
     n_phi = atan2(neutron_list[i]->sci(CND1)->getY(),neutron_list[i]->sci(CND1)->getX())*180/M_PI;
-    sector = neutron_list[i]->sci(CND1)->getSector();
-    info.energy = neutron_list[i]->sci(CND1)->getEnergy();
+    info.energy = info.energy + neutron_list[i]->sci(CND1)->getEnergy();
     info.size = neutron_list[i]->sci(CND1)->getSize();
     info.layermult = info.layermult + 1;
   }
   if (n_isCND2)
   {
     n_phi = atan2(neutron_list[i]->sci(CND2)->getY(),neutron_list[i]->sci(CND2)->getX())*180/M_PI;
-    sector = neutron_list[i]->sci(CND2)->getSector();
-    info.energy = neutron_list[i]->sci(CND2)->getEnergy();
+    info.energy = info.energy + neutron_list[i]->sci(CND2)->getEnergy();
     info.size = neutron_list[i]->sci(CND2)->getSize();
     info.layermult = info.layermult + 1;
   }
   if (n_isCND3)
   {
     n_phi = atan2(neutron_list[i]->sci(CND3)->getY(),neutron_list[i]->sci(CND3)->getX())*180/M_PI;
-    sector = neutron_list[i]->sci(CND3)->getSector();
-    info.energy = neutron_list[i]->sci(CND3)->getEnergy();
+    info.energy = info.energy + neutron_list[i]->sci(CND3)->getEnergy();
     info.size = neutron_list[i]->sci(CND3)->getSize();
     info.layermult = info.layermult + 1;
   }
   if (n_isCTOF)
   {
     n_phi = atan2(neutron_list[i]->sci(CTOF)->getY(),neutron_list[i]->sci(CTOF)->getX())*180/M_PI;
-    sector = neutron_list[i]->sci(CTOF)->getComponent();
-    info.energy = neutron_list[i]->sci(CTOF)->getEnergy();
-    info.size = neutron_list[i]->sci(CTOF)->getSize();
+    info.energy = info.energy + neutron_list[i]->sci(CTOF)->getEnergy();
+    info.size = info.size + neutron_list[i]->sci(CTOF)->getSize(); // add CTOF cluster size to CND cluster size
   }
+
 
 
   // for all particles, look for hits near neutron
