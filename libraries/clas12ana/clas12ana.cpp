@@ -20,8 +20,8 @@ int clas12ana::getCDRegion(const region_part_ptr &p)
 {
   int region = -1;
 
- //Only defined for protons right now
- if(p->par()->getPid() == 2212 &&  p->getRegion() == CD) 
+ //Only defined for protons right now!!!!
+ if(p->getRegion() == CD) 
     {
       auto px = p -> par() -> getPx();
       auto py = p -> par() -> getPy();
