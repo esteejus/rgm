@@ -53,6 +53,7 @@
    void InitSFEcalCuts();
    void InitSFPCuts();
    void readInputParam(const char* inFile);
+   void readInputSRCParam(const char* inFile);
    void readEcalPPar(const char* filename);
    void readEcalSFPar(const char* filename);
    void printParams();
@@ -165,7 +166,8 @@
    void setVxcuts(double min, double max){vertex_x_cuts.at(0)=min; vertex_x_cuts.at(1)=max;};
    void setVycuts(double min, double max){vertex_y_cuts.at(0)=min; vertex_y_cuts.at(1)=max;};
    void setVzcuts(double min, double max){vertex_z_cuts.at(0)=min; vertex_z_cuts.at(1)=max;};
-   void setVertexCorrCuts(double min, double max){vertex_corr_cuts.at(0) = min; vertex_corr_cuts.at(1) = max; };
+   void setVertexCorrCuts_FD(double min, double max){vertex_corr_cuts_fd.at(0) = min; vertex_corr_cuts_fd.at(1) = max; };
+   void setVertexCorrCuts_CD(double min, double max){vertex_corr_cuts_cd.at(0) = min; vertex_corr_cuts_cd.at(1) = max; };
 
    void checkCutParameters();
 
@@ -237,7 +239,8 @@
    vector<double> vertex_y_cuts = {-99,99};
    vector<double> vertex_z_cuts = {-99,99};
    map<string,vector<double> > vertex_cuts;    //map< x,y,z, {min,max}> 
-   vector<double> vertex_corr_cuts = {-99,99}; //electron vertex <-> particle vertex correlation cuts
+   vector<double> vertex_corr_cuts_cd = {-1.8,3.1}; //electron vertex <-> particle vertex correlation cuts
+   vector<double> vertex_corr_cuts_fd = {-3.5,5.8}; //electron vertex <-> particle vertex correlation cuts
 
    const double pi = 3.1415926535;
    const double c  = 29.9792458; // speed of light ns/cm
@@ -247,6 +250,8 @@
    double ecal_diag_cut   = 0.2;  //diagonal cut on SF
    double cd_edge_cut     = 10;   //deg phi
    double min_mom_pt      = 0.15; //min momentum transverse in CD MeV/c
+
+   double proton_sigma = 2.;
    double ghost_track_cut = 5;    //deg; cuts the angle between CD tracks and FD tracks to remove ghost tracks (track measured in both CD and FD)
  
    std::vector<double> dc_edge_cut_el  = {4.5,3.5,7.5}; //units cm; {region1, region2, region3} cuts for electrons INBENDING
@@ -255,22 +260,14 @@
    int region_cut = 2; //region 2 of CD had strange occupancy not nessecarily bad
 
    //SRC Cuts
-   double q2_cut         = 1.5; //Q^2 cut
-   double xb_cut         = 1.2; //x-borken
-   double pmiss_cut      = .25; //missing momentum cut
-   double recoil_mom_cut = .3;  //missing momentum cut
-   double mmiss_cut[2]   = {0,1.2};  //missing mass cut
-   double pq_cut[2]      = {0,0.96}; //|p|/|q| cut
-   double theta_pq_cut   = 180; //degrees angle between pLead & q
-   double mom_lead_cut   = 1.;  //min momentum of lead particle GeV/c
-
-   //SRC variables
-   double q2_e = 0;
-   double xb_e = 0;
-   double pmiss_e = 0; //missing momentum
-   double mmiss_e = 0;
-   double pq_e = 0;
-   double theta_pq_e = 0;
+   std::vector<double> q2_cut         = {1.5,99}; //Q^2 cut
+   std::vector<double> xb_cut         = {1.2,99}; //x-borken
+   std::vector<double> pmiss_cut      = {.25,1.2}; //missing momentum cut
+   std::vector<double> recoil_mom_cut = {.3,1.};  //missing momentum cut
+   std::vector<double> mmiss_cut      = {0,1.2};  //missing mass cut
+   std::vector<double> pq_cut         = {0,0.96}; //|p|/|q| cut
+   std::vector<double> theta_pq_cut   = {0,180};  //degrees angle between pLead & q
+   std::vector<double> mom_lead_cut   = {1.,5.};  //min momentum of lead particle GeV/c
 
    //constants
    double mass_proton    = 0.938272; //GeV/c2

@@ -184,7 +184,7 @@ void clas12ana::InitSFEcalCuts()
 	  if(j < 4)
 	    ecal_sf_mean_fcn[i]->SetParameter(j,ecal_sf_fcn_par[i][j]); //only first 3 parameters involve mean
 
-	  cout<<"sector "<<i <<" j "<<j<<" par "<<ecal_sf_fcn_par[i][j]<<endl;
+	  //	  cout<<"sector "<<i <<" j "<<j<<" par "<<ecal_sf_fcn_par[i][j]<<endl;
 	  ecal_sf_fcn[0][i]->SetParameter(j,ecal_sf_fcn_par[i][j]);
 	  ecal_sf_fcn[1][i]->SetParameter(j,ecal_sf_fcn_par[i][j]);
 	}
@@ -230,7 +230,7 @@ void clas12ana::InitSFPCuts()
 	  if(j < 4)
 	    ecal_p_mean_fcn[i]->SetParameter(j,ecal_p_fcn_par[i][j]); //only first 3 parameters for mean value
 
-	  cout<<"sector "<<i <<" j "<<j<<" par "<<ecal_p_fcn_par[i][j]<<endl;
+	  //	  cout<<"sector "<<i <<" j "<<j<<" par "<<ecal_p_fcn_par[i][j]<<endl;
 	  ecal_p_fcn[0][i]->SetParameter(j,ecal_p_fcn_par[i][j]);
 	  ecal_p_fcn[1][i]->SetParameter(j,ecal_p_fcn_par[i][j]);
 	}
@@ -296,7 +296,7 @@ void clas12ana::checkCutParameters()
 	return;
 
      std::cerr << "WARNING:: Run range changed for run " << current_run << ". Setting ana_he4.par file." << std::endl;
-     this -> readInputParam( (std::string(CLAS12ANA_DIR) + "/Ana/cutFiles/ana_ca40.par").c_str() );
+     this -> readInputParam( (std::string(CLAS12ANA_DIR) + "/Ana/cutFiles/ana_he4.par").c_str() );
    }
   else if(ca40_runrange)
     {
@@ -335,16 +335,16 @@ void clas12ana::checkCutParameters()
       if(d_runrange_prev)
 	return;
 
-      std::cerr << "WARNING:: Run range changed for run " << current_run << ". Setting ana_d.par file." << std::endl;
-      this -> readInputParam( (std::string(CLAS12ANA_DIR) + "/Ana/cutFiles/ana_d.par").c_str() );
+      std::cerr << "WARNING:: Run range changed for run " << current_run << ". Setting ana_he4.par file. Which is std. liquid cell default." << std::endl;
+      this -> readInputParam( (std::string(CLAS12ANA_DIR) + "/Ana/cutFiles/ana_he4.par").c_str() );
     }
   else if(h_runrange)
     {
       if(h_runrange_prev)
 	return;
 
-      std::cerr << "WARNING:: Run range changed for run " << current_run << ". Setting ana_h.par file." << std::endl;
-      this -> readInputParam( (std::string(CLAS12ANA_DIR) + "/Ana/cutFiles/ana_h.par").c_str() );
+      std::cerr << "WARNING:: Run range changed for run " << current_run << ". Setting ana_he4.par file. Which is std. liquid cell default." << std::endl;
+      this -> readInputParam( (std::string(CLAS12ANA_DIR) + "/Ana/cutFiles/ana_he4.par").c_str() );
     }
   else
     {
@@ -397,6 +397,8 @@ void clas12ana::Init()
   this -> readInputParam( (std::string(CLAS12ANA_DIR) + "/Ana/cutFiles/ana_he4.par").c_str() );
   this -> readEcalSFPar( (std::string(CLAS12ANA_DIR) +"/Ana/cutFiles/paramsSF_LD2_x2.dat").c_str() );
   this -> readEcalPPar( (std::string(CLAS12ANA_DIR) +"/Ana/cutFiles/paramsPI_LD2_x2.dat").c_str());
+
+  this -> readInputSRCParam( (std::string(CLAS12ANA_DIR) + "/Ana/cutFiles/src_cuts.par").c_str() );
   this -> printParams();
 
 }
@@ -635,7 +637,12 @@ bool clas12ana::checkVertex(const region_part_ptr &p)
 bool clas12ana::checkVertexCorrelation(const region_part_ptr &el, const region_part_ptr &p)
 {
   //true if inside cut
-  return ( (p->par()->getVz() - el->par()->getVz()) > vertex_corr_cuts.at(0) &&  (p->par()->getVz() - el->par()->getVz()) < vertex_corr_cuts.at(1) );
+  if(p->getRegion() == clas12::CD)
+    return ( (el->par()->getVz() - p->par()->getVz()) > vertex_corr_cuts_cd.at(0) &&  (el->par()->getVz() - p->par()->getVz()) < vertex_corr_cuts_cd.at(1) );
+  else if(p->getRegion() == clas12::FD)
+    return ( (el->par()->getVz() - p->par()->getVz()) > vertex_corr_cuts_fd.at(0) &&  (el->par()->getVz() - p->par()->getVz()) < vertex_corr_cuts_fd.at(1) );
+  else
+    return true;
 }
 
 bool clas12ana::checkPidCut(const region_part_ptr &p)
@@ -691,12 +698,11 @@ bool clas12ana::checkProtonPidCut(const region_part_ptr &p)
   auto itter = pid_cuts_cd.find(2212);
   if(itter != pid_cuts_cd.end())
     {
-      double num_sigma =  itter->second.at(1); //sigma away from mean
       double mom = p->par()->getP();
       double exp_beta  = mom/sqrt(pow(mom,2) + pow(mass_proton,2)); //expected beta of particle assuming proton mass
       double tof_diff = (p->getPath()/c)*(1/p->par()->getBeta() - 1/exp_beta); //TOF difference measured - expected
-      double up_lim  =  proton_pid_mean->Eval(mom) + num_sigma*proton_pid_sigma->Eval(mom); 
-      double low_lim =  proton_pid_mean->Eval(mom) - num_sigma*proton_pid_sigma->Eval(mom);
+      double up_lim  =  proton_pid_mean->Eval(mom) + proton_sigma*proton_pid_sigma->Eval(mom); 
+      double low_lim =  proton_pid_mean->Eval(mom) - proton_sigma*proton_pid_sigma->Eval(mom);
 
       if( !(tof_diff < up_lim && tof_diff > low_lim))
 	return false;
@@ -858,44 +864,212 @@ void clas12ana::readInputParam(const char* filename)
 	      if(pid != "")
 		vertex_cuts.insert(pair<string, vector<double> >(pid, par));
             }
-
-
-
-
-	  /*
-
-
-          else if(parameter == "cell_pos")
+          else if(parameter == "vertex_z_p_cd")
             {
 	      ss >> parameter2;
               stringstream ss2(parameter2);
-              string cell_v;
-              while(getline(ss2, cell_v, ':'))
-                cell.push_back(atof(cell_v.c_str()));
+              string value;
+	      double vzmin,vzmax;
+	      int count = 0;
+	      while(getline(ss2, value, ':'))
+		{
+		  stringstream ss3(value);
+		  if (count == 0)
+		    ss3 >> vzmin;
+		  else
+		    ss3 >> vzmax;
+
+		  ++count;
+		}
+	      this->setVzcuts(vzmin,vzmax);
             }
 
-          ss >> value;
+        }
+    }
+  else
+    cout<<"Parameter file didn't read in "<<endl;
 
-	  if(parameter == "raster_x")
-            raster_x = value;
-          else if(parameter == "raster_y")
-            raster_y = value;
-          else if(parameter == "cell_limit")
+  return;
+}
+
+
+
+void clas12ana::readInputSRCParam(const char* filename)
+{
+  ifstream infile;
+  infile.open(filename);
+
+  if (infile.is_open())
+    {  
+      string tp;
+
+      //remove 3 lines of header                                                                                                                                              
+      for(int i = 0; i < 3; ++i)
+        getline(infile, tp);
+
+      while(getline(infile, tp))  //read data from file object and put it into string.     
+        {
+          stringstream ss(tp);
+          string parameter,parameter2;
+          double value;
+	  //get cut identifier 
+	  ss >> parameter;
+	  cout << parameter <<endl;
+          if(parameter == "q2")
             {
-              cell.push_back(value); //first limit                                                                                                                                            
-              ss >> value; //get second limit                                                                                                                                                 
-              cell.push_back(value); //second limit                                                                                                                                           
+	      ss >> parameter2;
+              stringstream ss2(parameter2);
+              string value;
+	      double min,max;
+	      int count = 0;
+	      while(getline(ss2, value, ':'))
+		{
+		  stringstream ss3(value);
+		  if (count == 0)
+		    ss3 >> min;
+		  else
+		    ss3 >> max;
+		  
+		  ++count;
+		}
+	      cout <<"q2 cut HEREEEEEEEEEEE"<< min << " "<<max<<endl;
+	      q2_cut = {min,max};
             }
-          else if(pannrameter == "target_A")
-            target_A = value;
-          else if(parameter == "target_Z")
-            target_Z = value;
-          else if(parameter == "beamspot_x")
-            beamspot_x = value;
-          else if(parameter == "beamspot_y")
-            beamspot_y = value;
+          else if(parameter == "xb")
+            {
+	      ss >> parameter2;
+              stringstream ss2(parameter2);
+              string value;
+	      double min,max;
+	      int count = 0;
+	      while(getline(ss2, value, ':'))
+		{
+		  stringstream ss3(value);
+		  if (count == 0)
+		    ss3 >> min;
+		  else
+		    ss3 >> max;
 
-	  */
+		  ++count;
+		}
+	      xb_cut = {min,max};
+            }
+          else if(parameter == "pmiss")
+            {
+	      ss >> parameter2;
+              stringstream ss2(parameter2);
+              string value;
+	      double min,max;
+	      int count = 0;
+	      while(getline(ss2, value, ':'))
+		{
+		  stringstream ss3(value);
+		  if (count == 0)
+		    ss3 >> min;
+		  else
+		    ss3 >> max;
+
+		  ++count;
+		}
+	      pmiss_cut = {min,max};
+            }
+          else if(parameter == "recoil_mom")
+            {
+	      ss >> parameter2;
+              stringstream ss2(parameter2);
+              string value;
+	      double min,max;
+	      int count = 0;
+	      while(getline(ss2, value, ':'))
+		{
+		  stringstream ss3(value);
+		  if (count == 0)
+		    ss3 >> min;
+		  else
+		    ss3 >> max;
+
+		  ++count;
+		}
+	      recoil_mom_cut = {min,max};
+            }
+          else if(parameter == "miss_mass")
+            {
+	      ss >> parameter2;
+              stringstream ss2(parameter2);
+              string value;
+	      double min,max;
+	      int count = 0;
+	      while(getline(ss2, value, ':'))
+		{
+		  stringstream ss3(value);
+		  if (count == 0)
+		    ss3 >> min;
+		  else
+		    ss3 >> max;
+
+		  ++count;
+		}
+	      cout << "MISSING MASSSSSSSSS "<<min <<" "<<max<<endl;
+	      mmiss_cut = {min,max};
+            }
+          else if(parameter == "p/q")
+            {
+	      ss >> parameter2;
+              stringstream ss2(parameter2);
+              string value;
+	      double min,max;
+	      int count = 0;
+	      while(getline(ss2, value, ':'))
+		{
+		  stringstream ss3(value);
+		  if (count == 0)
+		    ss3 >> min;
+		  else
+		    ss3 >> max;
+
+		  ++count;
+		}
+	      pq_cut = {min,max};
+            }
+          else if(parameter == "theta_pq")
+            {
+	      ss >> parameter2;
+              stringstream ss2(parameter2);
+              string value;
+	      double min,max;
+	      int count = 0;
+	      while(getline(ss2, value, ':'))
+		{
+		  stringstream ss3(value);
+		  if (count == 0)
+		    ss3 >> min;
+		  else
+		    ss3 >> max;
+
+		  ++count;
+		}
+	      theta_pq_cut = {min,max};
+            }
+          else if(parameter == "lead_mom")
+            {
+	      ss >> parameter2;
+              stringstream ss2(parameter2);
+              string value;
+	      double min,max;
+	      int count = 0;
+	      while(getline(ss2, value, ':'))
+		{
+		  stringstream ss3(value);
+		  if (count == 0)
+		    ss3 >> min;
+		  else
+		    ss3 >> max;
+
+		  ++count;
+		}
+	      mom_lead_cut = {min,max};
+            }
+
         }
     }
   else
@@ -927,13 +1101,25 @@ void clas12ana::printParams()
   }
 
 
-  cout<<"Vertex cuts:"<<endl;
+  cout<<"Vertex cuts (Electrons):"<<endl;
   for (auto itr = vertex_cuts.begin(); itr != vertex_cuts.end(); ++itr) {
     cout << '\t' << "Particle type: " << itr->first << '\t' <<"{min,max}: ";
 	  for(auto a : itr->second)
 	    cout  << '\t' << a ;
 	  cout<< '\n';
   }
+
+  cout<<"Vertex z-cuts (non-Electrons Particles): Min:"<< vertex_z_cuts.at(0)<< " Max: " << vertex_z_cuts.at(1)<<endl;
+
+  cout <<"SRC lead and recoil cuts:"<<endl;
+  cout << "Q2 {max,min}: "    << q2_cut[0]<<","<<q2_cut[1]<<endl;
+  cout << "xB {max,min}: "    << xb_cut[0]<<","<<xb_cut[1]<<endl;
+  cout << "Pmiss {max,min}: " << pmiss_cut[0]<<","<<pmiss_cut[1]<<endl;
+  cout << "Recoil mom {max,min}: " << recoil_mom_cut[0]<<","<<recoil_mom_cut[1]<<endl;
+  cout << "Misisng mass {max,min}: " << mmiss_cut[0]<<","<<mmiss_cut[1]<<endl;
+  cout << "|p|/|q| {max,min}: " << pq_cut[0]<<","<<pq_cut[1]<<endl;
+  cout << "Theta_pq {max,min}: " << theta_pq_cut[0]<<","<<theta_pq_cut[1]<<endl;
+  cout << "Mom. lead {max,min}: " << mom_lead_cut[0]<<","<<mom_lead_cut[1]<<endl;
 
 }
 
@@ -965,7 +1151,7 @@ void clas12ana::getLeadRecoilSRC(TLorentzVector beam, TLorentzVector target, TLo
   double q2        = -q.M2();
   double xb        = q2/(2 * mass_proton * (beam.E() - el.E()) ); //x-borken       
   
-  if( !(q2 > q2_cut && xb > xb_cut) )
+  if( !(q2 > q2_cut[0] && xb > xb_cut[0]) )
     return; 
   
   int lead_idx   = -1;
@@ -978,11 +1164,15 @@ void clas12ana::getLeadRecoilSRC(TLorentzVector beam, TLorentzVector target, TLo
       ptr.SetXYZM(protons.at(idx_ptr)->par()->getPx(),protons.at(idx_ptr)->par()->getPy(),protons.at(idx_ptr)->par()->getPz(),mass_proton);
 
       TLorentzVector miss = beam + target - el - ptr; //missing 4-vector                   
-      double pmiss = miss.P();
-      double mmiss   = miss.M2();
+      double pmiss    = miss.P();
+      double mmiss    = miss.M2();
       double theta_pq = ptr.Vect().Angle(q.Vect()) * TMath::RadToDeg(); //angle between vectors p_miss and q                                                                               
-      double p_q       = ptr.Vect().Mag()/q.Vect().Mag(); // |p|/|q|                               
-      if( ptr.P() > mom_lead_cut && pmiss > pmiss_cut && mmiss > mmiss_cut[0] && mmiss < mmiss_cut[1] && theta_pq < theta_pq_cut && (p_q < pq_cut[1] && p_q > pq_cut[0]) )
+      double p_q      = ptr.Vect().Mag()/q.Vect().Mag(); // |p|/|q|                               
+      if( ptr.P() > mom_lead_cut[0] &&  ptr.P() < mom_lead_cut[1]   && 
+	  pmiss > pmiss_cut[0] && pmiss < pmiss_cut[1]              && 
+	  mmiss > mmiss_cut[0] && mmiss < mmiss_cut[1]              && 
+	  theta_pq > theta_pq_cut[0]  && theta_pq < theta_pq_cut[1] &&
+	  p_q > pq_cut[0] && p_q < pq_cut[1])
 	{
 	  lead_idx = idx_ptr;
 	  lead_mult++; //check for double lead
@@ -1002,7 +1192,7 @@ void clas12ana::getLeadRecoilSRC(TLorentzVector beam, TLorentzVector target, TLo
       if(idx_ptr == lead_idx)
 	continue;
 
-      if(protons[idx_ptr]->par()->getP() > recoil_mom_cut)
+      if(protons[idx_ptr]->par()->getP() > recoil_mom_cut[0] && protons[idx_ptr]->par()->getP() < recoil_mom_cut[1])
 	recoil_proton.push_back(protons.at(idx_ptr));
 
     }
