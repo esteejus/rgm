@@ -78,7 +78,9 @@
    void setDebugPlots(bool flag = true)  {debug_plots = flag;};
    void setDebugFile(TString file)  {debug_out_file = file;};
 
-   int getCDRegion(const region_part_ptr &p);
+   void checkCutParametersCut();
+ 
+  int getCDRegion(const region_part_ptr &p);
 
    TVector3 getCOM(TLorentzVector l, TLorentzVector r, TLorentzVector q);
 
@@ -165,6 +167,8 @@
    void setVzcuts(double min, double max){vertex_z_cuts.at(0)=min; vertex_z_cuts.at(1)=max;};
    void setVertexCorrCuts(double min, double max){vertex_corr_cuts.at(0) = min; vertex_corr_cuts.at(1) = max; };
 
+   void checkCutParameters();
+
    void setCDCutRegion(int region){region_cut = region;};
    
    void getLeadRecoilSRC(TLorentzVector beam, TLorentzVector target, TLorentzVector el);
@@ -206,7 +210,11 @@
 
    double ecal_p_fcn_par[7][6];  //sector, parameter
    double ecal_sf_fcn_par[7][6]; //sector, parameter
-   int sigma_cut = 3;
+
+   int current_run     = -1;
+   int previous_run    = -1;
+   int current_cut_run = -1;
+   int sigma_cut   = 3;
 
    bool f_ecalSFCuts         = true;
    bool f_ecalPCuts          = true;
@@ -217,9 +225,10 @@
    bool f_pidCuts            = true;
    bool f_vertexCuts         = true;
    bool f_corr_vertexCuts    = true;
+   bool f_protonpidCuts      = true; // PID of CD protons handled not by chi2pid (CLAS) but our own
+
    //optional cut
-   bool f_protonpidCuts      = false;
-   bool f_CDRegionCuts       = false;
+   bool f_CDRegionCuts       = false; 
 
    map<int,vector<double> > pid_cuts_cd; // map<pid, {min,max cut}> Central Detector (CD)
    map<int,vector<double> > pid_cuts_fd; // map<pid, {min,max cut}> Forward Detector (FD)
@@ -231,7 +240,7 @@
    vector<double> vertex_corr_cuts = {-99,99}; //electron vertex <-> particle vertex correlation cuts
 
    const double pi = 3.1415926535;
-   const double c = 29.9792458;
+   const double c  = 29.9792458; // speed of light ns/cm
 
    double pcal_energy_cut = 0.06; //(GeV) minimum energy cut
    double ecal_edge_cut   = 14;   //cm

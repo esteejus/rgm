@@ -58,6 +58,7 @@ void clas12ana::Clear()
    lead_proton.clear();
    recoil_proton.clear();
 
+   current_run = -1;
    event_mult = 0;
  }
 
@@ -65,10 +66,12 @@ void clas12ana::Clear()
 void clas12ana::Run(const std::unique_ptr<clas12::clas12reader>& c12)
 {
   Clear();
-  
+  current_run = c12->runconfig()->getRun();
+  checkCutParameters(); //check run number has the right cuts 
+
   auto particles = c12->getDetParticles(); //particles is now a std::vector of particles for this event
   auto electrons_det = c12->getByID(11);
-  
+
   //DEBUG plots
   if(debug_plots)
     {
@@ -133,10 +136,6 @@ void clas12ana::Run(const std::unique_ptr<clas12::clas12reader>& c12)
 			{
 			  ++event_mult;	//charge particles
 
-			  // check next if f_protonpidCuts is not true or if true check only if p is not in checkProtonPidCuts
-			  //
-			  //  (!checkPidCut(p)  && f_pidCuts) not inside PID cuts chi2pid
-			  //  (!checkProtonPidCut(p)  && f_protonpidCuts) not inside proton PID cut
 
 			  bool check_pid_cuts = ((f_protonpidCuts && checkProtonPidCut(p)) || //check if in proton PID cuts or chi2pid cuts
 						 (f_pidCuts && checkPidCut(p))             || // if proton pid cuts if off but pid cuts on just use chi2pid
@@ -243,7 +242,120 @@ void clas12ana::InitSFPCuts()
 
 }
 
+void clas12ana::checkCutParameters()
+{
+  //This next section sets the Sampling Fraction cuts; pass1 data has two SF regions
+  //< 15542 and >=15542 based on the SF timelines
+  //Defualt SF cuts are set in Init() function and is the < 15542 events
+  if(current_run >= 15542)
+    {
+      if(previous_run >= 15542) //default; do nothing already been set to >=15542
+	return;
 
+      //Set new SF cuts, new run range
+      this -> readEcalSFPar( (std::string(CLAS12ANA_DIR) +"/Ana/cutFiles/paramsSF_40Ca_x2.dat").c_str() );
+      this -> readEcalPPar( (std::string(CLAS12ANA_DIR) +"/Ana/cutFiles/paramsPI_40Ca_x2.dat").c_str());
+      std::cerr << "WARNING:: Run number changed to " << current_run <<". The SF cuts are changed to reflect this new run range" << std::endl;
+    }
+
+  //note run ranges cover all possible ranges for a given target
+  // the production runs is some subet of the full range
+  //Here we check the previous run and the current run, if the current run differs
+  //then we need to set a new set of par files
+  bool h_runrange    = (current_run >= 15016 && current_run <= 15042);
+  bool d_runrange    = (current_run >= 15043 && current_run <= 15106);
+  bool he_runrange   = (current_run >= 15108 && current_run <= 15164);
+  bool cx4_runrange  = (current_run >= 15178 && current_run <= 15317);
+  bool snx4_runrange = (current_run >= 15318 && current_run <= 15328);
+  bool ca40_runrange = (current_run >= 15355 && current_run <= 15432);
+  bool ca48_runrange = (current_run >= 15829 && current_run <= 15884);
+
+  bool h_runrange_prev    = (previous_run >= 15016 && previous_run <= 15042);
+  bool d_runrange_prev    = (previous_run >= 15043 && previous_run <= 15106);
+  bool he_runrange_prev   = (previous_run >= 15108 && previous_run <= 15164);
+  bool cx4_runrange_prev  = (previous_run >= 15178 && previous_run <= 15317);
+  bool snx4_runrange_prev = (previous_run >= 15318 && previous_run <= 15328);
+  bool ca40_runrange_prev = (previous_run >= 15355 && previous_run <= 15432);
+  bool ca48_runrange_prev = (previous_run >= 15829 && previous_run <= 15884);
+
+
+  //for some reason first 3-4 events are always run 0
+  //they seem to always have 0 particles so maybe they are headers; do nothing here
+  if(current_run == 0)
+    return;
+
+  //MC runs are always run 11 per CLAS default
+  //We assume the USER must supply the parameter file inline in the analysis code
+  //Since the MC run# is always 11 there is no automatic feature
+  if(current_run == 11 || previous_run == 11)
+    return; //do nothing
+
+  else if(he_runrange)
+    {
+      if(he_runrange_prev) //already set
+	return;
+
+     std::cerr << "WARNING:: Run range changed for run " << current_run << ". Setting ana_he4.par file." << std::endl;
+     this -> readInputParam( (std::string(CLAS12ANA_DIR) + "/Ana/cutFiles/ana_ca40.par").c_str() );
+   }
+  else if(ca40_runrange)
+    {
+     if(ca40_runrange_prev)
+       return;
+
+      std::cerr << "WARNING:: Run range changed for run " << current_run << ". Setting ana_ca40.par file." << std::endl;
+      this -> readInputParam( (std::string(CLAS12ANA_DIR) + "/Ana/cutFiles/ana_ca40.par").c_str() );
+    }
+  else if(ca48_runrange)
+    {
+      if(ca48_runrange_prev)
+	return;
+
+      std::cerr << "WARNING:: Run range changed for run " << current_run << ". Setting ana_ca48.par file." << std::endl;
+      this -> readInputParam( (std::string(CLAS12ANA_DIR) + "/Ana/cutFiles/ana_ca48.par").c_str() );
+    }
+  else if(cx4_runrange)
+    {
+      if(cx4_runrange_prev)
+	return;
+
+      std::cerr << "WARNING:: Run range changed for run " << current_run << ". Setting ana_cx4.par file." << std::endl;
+      this -> readInputParam( (std::string(CLAS12ANA_DIR) + "/Ana/cutFiles/ana_cx4.par").c_str() );
+    }
+  else if(snx4_runrange)
+    {
+      if(snx4_runrange_prev)
+	return;
+
+      std::cerr << "WARNING:: Run range changed for run " << current_run << ". Setting ana_snx4.par file." << std::endl;
+      this -> readInputParam( (std::string(CLAS12ANA_DIR) + "/Ana/cutFiles/ana_snx4.par").c_str() );
+    }
+  else if(d_runrange)
+    {
+      if(d_runrange_prev)
+	return;
+
+      std::cerr << "WARNING:: Run range changed for run " << current_run << ". Setting ana_d.par file." << std::endl;
+      this -> readInputParam( (std::string(CLAS12ANA_DIR) + "/Ana/cutFiles/ana_d.par").c_str() );
+    }
+  else if(h_runrange)
+    {
+      if(h_runrange_prev)
+	return;
+
+      std::cerr << "WARNING:: Run range changed for run " << current_run << ". Setting ana_h.par file." << std::endl;
+      this -> readInputParam( (std::string(CLAS12ANA_DIR) + "/Ana/cutFiles/ana_h.par").c_str() );
+    }
+  else
+    {
+      std::cerr << "WARNING:: Run range not found for run " << current_run << " in setting analysis .par file. Setting to defualt ana.par file, is this what you want???" << std::endl;
+      this -> readInputParam( (std::string(CLAS12ANA_DIR) + "/Ana/cutFiles/ana.par").c_str() );
+    }
+
+  previous_run = current_run;
+
+  this -> printParams();
+}
 
 void clas12ana::Init()
 {
@@ -280,9 +392,11 @@ void clas12ana::Init()
     }
 
 
-  this -> readInputParam( (std::string(CLAS12ANA_DIR) + "/Ana/cutFiles/ana.par").c_str() );
-  this -> readEcalSFPar( (std::string(CLAS12ANA_DIR) +"/Ana/cutFiles/paramsSF_40Ca_x2.dat").c_str() );
-  this -> readEcalPPar( (std::string(CLAS12ANA_DIR) +"/Ana/cutFiles/paramsPI_40Ca_x2.dat").c_str());
+  //As defualt load 4He analysis cuts and the SF cuts fit on liquid deuterium which apply to runs < 15542
+  previous_run = 15108; //set to a defualt helium run
+  this -> readInputParam( (std::string(CLAS12ANA_DIR) + "/Ana/cutFiles/ana_he4.par").c_str() );
+  this -> readEcalSFPar( (std::string(CLAS12ANA_DIR) +"/Ana/cutFiles/paramsSF_LD2_x2.dat").c_str() );
+  this -> readEcalPPar( (std::string(CLAS12ANA_DIR) +"/Ana/cutFiles/paramsPI_LD2_x2.dat").c_str());
   this -> printParams();
 
 }
