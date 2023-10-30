@@ -479,7 +479,7 @@ bool clas12ana::checkGhostTrackCD(const region_part_ptr &p)
 	return true;
       
       //case 2
-      else if( (p->getRegion() == clas12::FD && p2->getRegion() == clas12::CD) || (p->getRegion() == clas12::CD && p2->getRegion() == clas12::FD) &&
+      else if( ((p->getRegion() == clas12::FD && p2->getRegion() == clas12::CD) || (p->getRegion() == clas12::CD && p2->getRegion() == clas12::FD)) &&
 	       abs(p2->getTheta() - p->getTheta())*TMath::RadToDeg() < ghost_track_cut )
 	return true;
     }

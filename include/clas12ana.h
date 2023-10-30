@@ -73,6 +73,7 @@
    void setEcalEdgeCuts(bool flag = true){f_ecalEdgeCuts = flag;};
    void setPidCuts(bool flag = true)       {f_pidCuts = flag;};
    void setProtonPidCuts(bool flag = true) {f_protonpidCuts = flag;};
+   void setGhostTrackCuts(bool flag = true) {f_ghostTrackCuts = flag;};
    void setVertexCuts(bool flag = true)  {f_vertexCuts = flag;};
    void setVertexCorrCuts(bool flag = true)  {f_corr_vertexCuts = flag;};
 
@@ -123,7 +124,7 @@
        else if(pid == 2212)
 	 {
 	   //is a proton if not a ghost track and check for PID by TOF vs momentum assignment
-	   if(!checkGhostTrackCD(p))
+	   if(!(checkGhostTrackCD(p) && f_ghostTrackCuts))
 	     protons.push_back(p);
 	 }
        else if(pid == 2112)
@@ -228,6 +229,7 @@
    bool f_vertexCuts         = true;
    bool f_corr_vertexCuts    = true;
    bool f_protonpidCuts      = true; // PID of CD protons handled not by chi2pid (CLAS) but our own
+   bool f_ghostTrackCuts     = true; // ghost track cut in CD
 
    //optional cut
    bool f_CDRegionCuts       = false; 
