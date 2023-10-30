@@ -78,7 +78,7 @@ bool CD_fiducial(double phi, double theta, double momT){
 
 void Usage()
 {
-  std::cerr << "Usage: ./code outputfile.root outputfile.pdf inputfiles.hipo \n\n\n";
+  std::cerr << "Usage: ./code isMC outputfile.root outputfile.pdf inputfiles.hipo \n\n\n";
 
 }
 
@@ -94,8 +94,9 @@ int main(int argc, char ** argv)
 
 
 
-  TString outFile = argv[1];
-  char * pdfFile = argv[2];
+  int isMC = atoi(argv[1]);
+  TString outFile = argv[2];
+  char * pdfFile = argv[3];
 
   cout<<"Ouput file "<< outFile <<endl;
   cout<<"Ouput PDF file "<< pdfFile <<endl;
@@ -104,14 +105,14 @@ int main(int argc, char ** argv)
   clas12ana clasAna;
 
   //Read in target parameter files                                                                                                                                                           
-  clasAna.readInputParam("../ana.par");
-  clasAna.readEcalSFPar("../paramsSF_40Ca_x2.dat");
-  clasAna.readEcalPPar("../paramsPI_40Ca_x2.dat");
+  clasAna.readInputParam("/w/hallb-scshelf2102/clas12/users/awild/RGM/rgm/Ana/ana.par");
+  clasAna.readEcalSFPar("/w/hallb-scshelf2102/clas12/users/awild/RGM/rgm/Ana/paramsSF_40Ca_x2.dat");
+  clasAna.readEcalPPar("/w/hallb-scshelf2102/clas12/users/awild/RGM/rgm/Ana/paramsPI_40Ca_x2.dat");
   clasAna.printParams();
     
 
   clas12root::HipoChain chain;
-  for(int k = 3; k < argc; k++){
+  for(int k = 4; k < argc; k++){
     cout<<"Input file "<<argv[k]<<endl;
     chain.Add(argv[k]);
   }
@@ -211,6 +212,16 @@ int main(int argc, char ** argv)
   hist_list.push_back(h_vtz_e_p_CD_ac);
   
   //PID
+  TH1D * h_StartTime = new TH1D("StartTime","StartTime;StartTime;Counts",100,80,105);
+  hist_list.push_back(h_StartTime);
+  TH1D * h_HitTime = new TH1D("HitTime","HitTime;HitTime;Counts",100,80,105);
+  hist_list.push_back(h_HitTime);
+  TH1D * h_ToF = new TH1D("ToF","ToF;ToF;Counts",100,-1,6);
+  hist_list.push_back(h_ToF);
+  TH1D * h_Path = new TH1D("Path","Path;Path;Counts",100,0,50);
+  hist_list.push_back(h_Path);
+  TH2D * h_ToF_Path = new TH2D("ToF_Path","Path vs. ToF;ToF;Path",100,-1,6,100,0,50);
+  hist_list.push_back(h_ToF_Path);
   TH2D * h_mom_DT = new TH2D("mom_DT","#Delta ToF vs. Momentum;p [GeV];#Delta ToF [ns]",100,0,3,200,-2,2);
   hist_list.push_back(h_mom_DT);
   TH2D * h_mom_beta = new TH2D("mom_beta","#beta vs. Momentum;Momentum [GeV];#beta",100,0,3,100,0,1.1);
@@ -259,8 +270,10 @@ int main(int argc, char ** argv)
   while(chain.Next())
   //while(chain.Next() && counter<100)
     {
-
-      double weight = c12->mcevent()->getWeight(); //used if MC events have a weight 
+      double weight = 1;
+      if(isMC==1){
+	weight = c12->mcevent()->getWeight(); //used if MC events have a weight
+      }
 
       //Display completed  
       counter++;
@@ -338,54 +351,59 @@ int main(int argc, char ** argv)
 	    }
 
 	    //vertex
-	    h_vtz_CD_bc->Fill(vtz_p);
-	    h_diffvtz_CD_bc->Fill(vtz_e-vtz_p);
-	    h_vtz_e_p_CD_bc->Fill(vtz_e,vtz_p);
+	    h_vtz_CD_bc->Fill(vtz_p,weight);
+	    h_diffvtz_CD_bc->Fill(vtz_e-vtz_p,weight);
+	    h_vtz_e_p_CD_bc->Fill(vtz_e,vtz_p,weight);
 	    if(fabs(vtz_e-vtz_p-0.62)>(2*0.86)){continue;}
 	    if((vtz_p<-5.5) || (vtz_p>-0.5)){continue;}
-	    h_vtz_CD_ac->Fill(vtz_p);
-	    h_diffvtz_CD_ac->Fill(vtz_e-vtz_p);
-	    h_vtz_e_p_CD_ac->Fill(vtz_e,vtz_p);
+	    h_vtz_CD_ac->Fill(vtz_p,weight);
+	    h_diffvtz_CD_ac->Fill(vtz_e-vtz_p,weight);
+	    h_vtz_e_p_CD_ac->Fill(vtz_e,vtz_p,weight);
 
 
 	    //fid
-	    h_mom_ToFToF_d_ToFMom_CD_bc->Fill(mom,DT_proton);
-	    h_theta_CD_bc->Fill(theta);
-	    h_phi_momT_CD_bc->Fill(phi,momT);
-	    h_ToFToF_d_ToFMom_CD_bc_bin[mom_bin]->Fill(DT_proton);
+	    h_mom_ToFToF_d_ToFMom_CD_bc->Fill(mom,DT_proton,weight);
+	    h_theta_CD_bc->Fill(theta,weight);
+	    h_phi_momT_CD_bc->Fill(phi,momT,weight);
+	    h_ToFToF_d_ToFMom_CD_bc_bin[mom_bin]->Fill(DT_proton,weight);
 
-	    h_edge_first_CD_bc->Fill(edge_first);
-	    h_edge_last_CD_bc->Fill(edge_last);
+	    h_edge_first_CD_bc->Fill(edge_first,weight);
+	    h_edge_last_CD_bc->Fill(edge_last,weight);
 
 	    if(!pass_fid){
-	      h_mom_ToFToF_d_ToFMom_CD_bad->Fill(mom,DT_proton);  		
-	      h_ToFToF_d_ToFMom_CD_bad_bin[mom_bin]->Fill(DT_proton);
+	      h_mom_ToFToF_d_ToFMom_CD_bad->Fill(mom,DT_proton,weight);  		
+	      h_ToFToF_d_ToFMom_CD_bad_bin[mom_bin]->Fill(DT_proton,weight);
 	      continue;
 	    }
 	    
-	    h_mom_ToFToF_d_ToFMom_CD_ac->Fill(mom,DT_proton);
-	    h_ToFToF_d_ToFMom_CD_ac_bin[mom_bin]->Fill(DT_proton);
-	    h_theta_CD_ac->Fill(theta);		  
-	    h_phi_momT_CD_ac->Fill(phi,momT);
+	    h_mom_ToFToF_d_ToFMom_CD_ac->Fill(mom,DT_proton,weight);
+	    h_ToFToF_d_ToFMom_CD_ac_bin[mom_bin]->Fill(DT_proton,weight);
+	    h_theta_CD_ac->Fill(theta,weight);		  
+	    h_phi_momT_CD_ac->Fill(phi,momT,weight);
 
 
 	    //pid
-	    h_mom_DT->Fill(mom,DT_proton);
-	    h_mom_beta->Fill(mom,beta);
-	    h_DT_mom_bin[mom_bin]->Fill(DT_proton);
+	    h_StartTime->Fill(c12->event()->getStartTime(),weight);
+	    h_HitTime->Fill((*p)->getTime(),weight);
+	    h_ToF->Fill((*p)->getTime()-c12->event()->getStartTime(),weight);
+	    h_Path->Fill((*p)->getPath(),weight);
+	    h_ToF_Path->Fill((*p)->getTime(),(*p)->getPath(),weight);
+	    h_mom_DT->Fill(mom,DT_proton,weight);
+	    h_mom_beta->Fill(mom,beta,weight);
+	    h_DT_mom_bin[mom_bin]->Fill(DT_proton,weight);
 	    int theta_bin = theta<60?0:theta<80?1:2;
 	    int phi_bin = phi<-120?0:phi<-60?1:phi<0?2:phi<60?3:phi<120?4:5;
-	    h_mom_DT_theta_phi_bin[phi_bin][theta_bin]->Fill(mom,DT_proton);
+	    h_mom_DT_theta_phi_bin[phi_bin][theta_bin]->Fill(mom,DT_proton,weight);
 
 	    if(hpid==2212){
-	      h_mom_beta_2212->Fill(mom,beta);
+	      h_mom_beta_2212->Fill(mom,beta,weight);
 	    }
 
 	    if(pass_cut(mom,DT_proton,2) && (DT_proton>-0.75)){
-	      h_mom_DT_wPID->Fill(mom,DT_proton);
-	      h_mom_beta_wPID->Fill(mom,beta);
-	      h_mom_Chi2PID_wPID->Fill(mom,Chi2PID);
-	      h_Chi2PID_wPID->Fill(Chi2PID);
+	      h_mom_DT_wPID->Fill(mom,DT_proton,weight);
+	      h_mom_beta_wPID->Fill(mom,beta,weight);
+	      h_mom_Chi2PID_wPID->Fill(mom,Chi2PID,weight);
+	      h_Chi2PID_wPID->Fill(Chi2PID,weight);
 	    }
 	    
 
@@ -412,7 +430,7 @@ int main(int argc, char ** argv)
     g_phi[i]->Write();
   }
 
-
+  /*
   TF1 * f_vertex= new TF1("f_vertex","gaus(0)",-1,2);
   f_vertex->SetParameter(0,h_diffvtz_CD_bc->GetMaximum());
   f_vertex->SetParameter(1,0);
@@ -427,7 +445,7 @@ int main(int argc, char ** argv)
     double y = (39082/(0.86*sqrt(2*M_PI))) * exp(-0.5 * (x-0.62)*(x-0.62)/(0.86*0.86));
     g_vertex->SetPoint(g_vertex->GetN(),x,y);
   }
-
+  */
   TFile *f = new TFile(outFile,"RECREATE");
   f->cd();
   for(int i = 0; i < hist_list.size(); i++){
@@ -552,7 +570,7 @@ int main(int argc, char ** argv)
   /////////////////////////////////////
   //Vertex Cuts
   /////////////////////////////////////
-  /*
+  /*  
   myCanvas->Divide(1,1);
   myCanvas->cd(1);
   h_vtz_CD_bc->Draw("colz");
@@ -579,10 +597,40 @@ int main(int argc, char ** argv)
   h_vtz_e_p_CD_ac->Draw("colz");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();  
-  */
+  */  
   /////////////////////////////////////
   //PID Cuts
   /////////////////////////////////////
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_StartTime->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();  
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_HitTime->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();  
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_ToF->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();  
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_Path->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();  
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_ToF_Path->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();  
+
   myCanvas->Divide(1,1);
   myCanvas->cd(1);
   h_mom_DT->Draw("colz");
