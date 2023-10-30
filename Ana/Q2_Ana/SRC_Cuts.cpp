@@ -100,22 +100,6 @@ int main(int argc, char ** argv)
   // ELECTRON AND PROTON CUTS
   clas12ana clasAna;
 
-  //Read in target parameter files
-  // before run 15542 - D, C
-  clasAna.readEcalSFPar("/w/hallb-scshelf2102/clas/clase2/erins/repos/rgm/Ana/cutFiles/paramsSF_LD2_x2.dat");
-  clasAna.readEcalPPar("/w/hallb-scshelf2102/clas/clase2/erins/repos/rgm/Ana/cutFiles/paramsPI_LD2_x2.dat");
-  // after run 15542 - 40Ca
-  //clasAna.readEcalSFPar("/w/hallb-scshelf2102/clas/clase2/erins/repos/rgm/Ana/cutFiles/paramsSF_40Ca_x2.dat");
-  //clasAna.readEcalPPar("/w/hallb-scshelf2102/clas/clase2/erins/repos/rgm/Ana/cutFiles/paramsPI_40Ca_x2.dat");
-
-  //clasAna.printParams();
-
-  clasAna.setVzcuts(-6,1);
-  clasAna.setVertexCorrCuts(-3,1);
-
-
-    
-
   clas12root::HipoChain chain;
   for(int k = 4; k < argc; k++){
     cout<<"Input file "<<argv[k]<<endl;
@@ -292,10 +276,6 @@ int main(int argc, char ** argv)
   TH2D * h_thetapmq_pq_cd = new TH2D("thetapmq_pq_cd","Angle between Missing Momentum and q;p/q;#theta_{pmiss,q}",100,0,1.2,90,0,180);
   TH1D * h_doublelead = new TH1D("doublelead","Number of Protons Passing SRC Cuts;Proton Number",5,1,6);
 
-
-  
-  //clasAna.setVzcuts(-6,1);
-  //clasAna.setVertexCorrCuts(-3,1);
 
   while(chain.Next())
     {

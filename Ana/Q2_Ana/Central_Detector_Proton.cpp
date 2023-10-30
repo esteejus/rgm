@@ -104,12 +104,6 @@ int main(int argc, char ** argv)
 
   clas12ana clasAna;
 
-  //Read in target parameter files                                                                                                                                                           
-  clasAna.readInputParam("/w/hallb-scshelf2102/clas12/users/awild/RGM/rgm/Ana/ana.par");
-  clasAna.readEcalSFPar("/w/hallb-scshelf2102/clas12/users/awild/RGM/rgm/Ana/paramsSF_40Ca_x2.dat");
-  clasAna.readEcalPPar("/w/hallb-scshelf2102/clas12/users/awild/RGM/rgm/Ana/paramsPI_40Ca_x2.dat");
-  clasAna.printParams();
-    
 
   clas12root::HipoChain chain;
   for(int k = 4; k < argc; k++){
@@ -253,19 +247,6 @@ int main(int argc, char ** argv)
   TH1D * h_Chi2PID_wPID = new TH1D("Chi2PID_wPID","#chi^{2}_{PID};#chi^{2}_{PID};Counts",100,-10,10);
   hist_list.push_back(h_Chi2PID_wPID);
   
-
-  clasAna.setEcalSFCuts();
-  clasAna.setEcalPCuts();
-
-  clasAna.setEcalEdgeCuts();
-  clasAna.setPidCuts();
-
-  clasAna.setVertexCuts();
-  //clasAna.setVertexCorrCuts();
-  clasAna.setDCEdgeCuts();
-  
-  clasAna.setVzcuts(-6,1);
-  //clasAna.setVertexCorrCuts(-3,1);
 
   while(chain.Next())
   //while(chain.Next() && counter<100)

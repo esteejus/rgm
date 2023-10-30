@@ -54,14 +54,6 @@ int main(int argc, char ** argv)
 
   clas12ana clasAna;
 
-  //Read in target parameter files                                                                                                                                                           
-  clasAna.readInputParam("ana.par");
-  clasAna.readEcalSFPar("paramsSF_40Ca_x2.dat");
-  clasAna.readEcalPPar("paramsPI_40Ca_x2.dat");
-
-  clasAna.printParams();
-
-
   clas12root::HipoChainWriter chain(outFile);
   chain.Add(inFile);
 
@@ -100,20 +92,6 @@ int main(int argc, char ** argv)
 
   TH1D *epp_h = new TH1D("epp_h","(e,e'pp)",100,0,2);
   TH1D *ep_h  = new TH1D("ep_h","(e,e'p)",100,0,2);
-
-
-  clasAna.setEcalSFCuts();
-  clasAna.setEcalEdgeCuts();
-  clasAna.setPidCuts();
-  clasAna.setVertexCuts();
-  clasAna.setVertexCorrCuts();
-  //  clasAna.setDCEdgeCuts();
-  
-  clasAna.setVzcuts(-6,1);
-  clasAna.setVertexCorrCuts(-3,1);
-
-
-
 
   while(chain.Next())
     {
