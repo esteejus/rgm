@@ -245,11 +245,12 @@
    const double pi = 3.1415926535;
    const double c  = 29.9792458; // speed of light ns/cm
 
-   double pcal_energy_cut = 0.06; //(GeV) minimum energy cut
-   double ecal_edge_cut   = 14;   //cm
-   double ecal_diag_cut   = 0.2;  //diagonal cut on SF
-   double cd_edge_cut     = 10;   //deg phi
-   double min_mom_pt      = 0.15; //min momentum transverse in CD MeV/c
+   double pcal_energy_cut      = 0.06;     //(GeV) minimum energy cut
+   double ecal_edge_cut        = 14;       //cm
+   double ecal_diag_cut        = 0.2;      //diagonal cut on SF
+   double cd_edge_cut          = 10;       //deg phi
+   double min_mom_pt           = 0.15;     //min momentum transverse in CD MeV/c
+   vector<double> theta_cut_CD = {40,145}; //min,max polar angle cut in CD deg.
 
    double proton_sigma = 2.;
    double ghost_track_cut = 5;    //deg; cuts the angle between CD tracks and FD tracks to remove ghost tracks (track measured in both CD and FD)
@@ -275,6 +276,7 @@
    double mass_pion      = 0.13957;
    double mass_deuterium = 1.8756;
 
+   double beam_energy = 0;
    double event_mult = 0; //charged particle multiplicity 
 
    bool debug_plots = false;

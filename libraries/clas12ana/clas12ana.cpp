@@ -59,6 +59,7 @@ void clas12ana::Clear()
    recoil_proton.clear();
 
    current_run = -1;
+   beam_energy = 0;
    event_mult = 0;
  }
 
@@ -68,6 +69,8 @@ void clas12ana::Run(const std::unique_ptr<clas12::clas12reader>& c12)
   Clear();
   current_run = c12->runconfig()->getRun();
   checkCutParameters(); //check run number has the right cuts 
+
+
 
   auto particles = c12->getDetParticles(); //particles is now a std::vector of particles for this event
   auto electrons_det = c12->getByID(11);
@@ -176,7 +179,7 @@ void clas12ana::Run(const std::unique_ptr<clas12::clas12reader>& c12)
 
 void clas12ana::InitSFEcalCuts()
 {
-  cout<<"PARAMETERS for SF vs Ecal cuts"<<endl;
+  //  cout<<"PARAMETERS for SF vs Ecal cuts"<<endl;
    for(int i = 1; i < 7; i++)
     {
       for(int j = 0; j < 6; j++)
@@ -222,7 +225,7 @@ void clas12ana::WriteSFEcalCuts()
 
 void clas12ana::InitSFPCuts()
 {
-   cout<<"PARAMETERS for SF vs P cuts"<<endl;
+  //   cout<<"PARAMETERS for SF vs P cuts"<<endl;
    for(int i = 1; i < 7; i++)
     {
       for(int j = 0; j < 6; j++)
@@ -263,16 +266,16 @@ void clas12ana::checkCutParameters()
   //Here we check the previous run and the current run, if the current run differs
   //then we need to set a new set of par files
   bool h_runrange    = (current_run >= 15016 && current_run <= 15042);
-  bool d_runrange    = (current_run >= 15043 && current_run <= 15106);
-  bool he_runrange   = (current_run >= 15108 && current_run <= 15164);
+  bool d_runrange    = ((current_run >= 15043 && current_run <= 15106) || (current_run >= 15433 && current_run <= 15456));
+  bool he_runrange   = ((current_run >= 15108 && current_run <= 15164) || (current_run >= 15458 && current_run <= 15490));
   bool cx4_runrange  = (current_run >= 15178 && current_run <= 15317);
   bool snx4_runrange = (current_run >= 15318 && current_run <= 15328);
   bool ca40_runrange = (current_run >= 15355 && current_run <= 15432);
   bool ca48_runrange = (current_run >= 15829 && current_run <= 15884);
 
   bool h_runrange_prev    = (previous_run >= 15016 && previous_run <= 15042);
-  bool d_runrange_prev    = (previous_run >= 15043 && previous_run <= 15106);
-  bool he_runrange_prev   = (previous_run >= 15108 && previous_run <= 15164);
+  bool d_runrange_prev    = ((previous_run >= 15043 && previous_run <= 15106) || (previous_run >= 15433 && previous_run <= 15456));
+  bool he_runrange_prev   = ((previous_run >= 15108 && previous_run <= 15164) || (previous_run >= 15458 && previous_run <= 15490));
   bool cx4_runrange_prev  = (previous_run >= 15178 && previous_run <= 15317);
   bool snx4_runrange_prev = (previous_run >= 15318 && previous_run <= 15328);
   bool ca40_runrange_prev = (previous_run >= 15355 && previous_run <= 15432);
@@ -613,9 +616,11 @@ bool clas12ana::CDEdgeCuts(const region_part_ptr &p)
       auto py = p -> par() -> getPy();
       double pt = sqrt( pow(px,2) + pow(py,2) );
       double fiducial_phi = (-asin(min_mom_pt/pt) - (pi/2)) * 180/pi;
-      double phi = p->getPhi() * 180/pi;
-      
-      if( (std::abs(phi-fiducial_phi) < cd_edge_cut) || (std::abs(phi-fiducial_phi-120) < cd_edge_cut) || (std::abs(phi-fiducial_phi-240) < cd_edge_cut) )
+      double phi   = p->getPhi() * 180/pi;
+      double theta = p->getTheta() * 180/pi;
+
+      if( theta < theta_cut_CD[0] || theta > theta_cut_CD[1] || 
+	  (std::abs(phi-fiducial_phi) < cd_edge_cut) || (std::abs(phi-fiducial_phi-120) < cd_edge_cut) || (std::abs(phi-fiducial_phi-240) < cd_edge_cut) )
 	return false; //inside bad region
       else
 	return true; //inside good region CD
@@ -726,8 +731,6 @@ void clas12ana::readEcalSFPar(const char* filename)
       //remove 3 lines of header                                                                   
       for(int i = 0; i < 2; ++i)
 	getline(infile, tp);
-      cout<<tp<<endl;
-
 
       for(int i = 1; i < 7; ++i)
 	{
@@ -765,8 +768,6 @@ void clas12ana::readEcalPPar(const char* filename)
       //remove 3 lines of header                                                                   
       for(int i = 0; i < 2; ++i)
 	getline(infile, tp);
-      cout<<tp<<endl;
-
 
       for(int i = 1; i < 7; ++i)
 	{
@@ -914,7 +915,7 @@ void clas12ana::readInputSRCParam(const char* filename)
           double value;
 	  //get cut identifier 
 	  ss >> parameter;
-	  cout << parameter <<endl;
+
           if(parameter == "q2")
             {
 	      ss >> parameter2;
@@ -932,7 +933,6 @@ void clas12ana::readInputSRCParam(const char* filename)
 		  
 		  ++count;
 		}
-	      cout <<"q2 cut HEREEEEEEEEEEE"<< min << " "<<max<<endl;
 	      q2_cut = {min,max};
             }
           else if(parameter == "xb")
@@ -1009,7 +1009,6 @@ void clas12ana::readInputSRCParam(const char* filename)
 
 		  ++count;
 		}
-	      cout << "MISSING MASSSSSSSSS "<<min <<" "<<max<<endl;
 	      mmiss_cut = {min,max};
             }
           else if(parameter == "p/q")
@@ -1165,7 +1164,7 @@ void clas12ana::getLeadRecoilSRC(TLorentzVector beam, TLorentzVector target, TLo
 
       TLorentzVector miss = beam + target - el - ptr; //missing 4-vector                   
       double pmiss    = miss.P();
-      double mmiss    = miss.M2();
+      double mmiss    = miss.M();
       double theta_pq = ptr.Vect().Angle(q.Vect()) * TMath::RadToDeg(); //angle between vectors p_miss and q                                                                               
       double p_q      = ptr.Vect().Mag()/q.Vect().Mag(); // |p|/|q|                               
       if( ptr.P() > mom_lead_cut[0] &&  ptr.P() < mom_lead_cut[1]   && 

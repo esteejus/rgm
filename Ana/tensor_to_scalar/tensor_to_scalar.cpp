@@ -73,9 +73,6 @@ int main(int argc, char ** argv)
   // create instance of clas12ana class
   clas12ana clasAna;
 
-  clasAna.readEcalSFPar("/w/hallb-scshelf2102/clas12/users/esteejus/rgm/Ana/cutFiles/paramsSF_LD2_x2.dat");
-  clasAna.readEcalPPar("/w/hallb-scshelf2102/clas12/users/esteejus/rgm/Ana/cutFiles/paramsPI_LD2_x2.dat");
-
   clasAna.printParams();
 
   clas12root::HipoChain chain;
@@ -334,25 +331,6 @@ int main(int argc, char ** argv)
   reader->AddSpectator("momentum", &momentum);
 
   reader->BookMVA("MLP", "/w/hallb-scshelf2102/clas/clase2/erins/repos/rgm/NeutronVeto/dataset_6gev_pCD/weights/TrainNeutronVeto_TMVA_MLP.weights.xml");
-
-
-  // set up clas12ana cuts
-  //clasAna.setEcalSFCuts();
-  //clasAna.setEcalPCuts();
-  //clasAna.setEcalEdgeCuts(false); // makes particle PID arrays empty
-  //clasAna.setPidCuts(false); // I think I want this to be default?
-  //clasAna.setVertexCuts();
-  //clasAna.setVertexCorrCuts();
-  //clasAna.setDCEdgeCuts(false); // makes particle PID arrays empty
-  //clasAna.setCDEdgeCuts(true);
-  //  clasAna.setCDRegionCuts();
-
-  //clasAna.setVzcuts(-6,1);
-  //  clasAna.setCDCutRegion(2);  
-  //clasAna.setVertexCorrCuts(-3,1);
-
-  // use Andrew's PID for CD protons
-  clasAna.setProtonPidCuts(true);
 
   //Define cut class
   while(chain.Next()==true){

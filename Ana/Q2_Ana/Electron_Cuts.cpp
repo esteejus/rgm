@@ -54,18 +54,6 @@ int main(int argc, char ** argv)
   clas12ana clasAna;
   clas12ana clasAna2;
 
-  //Read in target parameter files                                                                                                                                                           
-  clasAna.readInputParam("../ana.par");
-  clasAna.readEcalSFPar("../paramsSF_40Ca_x2.dat");
-  clasAna.readEcalPPar("../paramsPI_40Ca_x2.dat");
-  clasAna.printParams();
-  
-  clasAna2.readInputParam("../ana.par");
-  clasAna2.readEcalSFPar("../paramsSF_40Ca_x2.dat");
-  clasAna2.readEcalPPar("../paramsPI_40Ca_x2.dat");
-  clasAna2.printParams();
-  
-
   clas12root::HipoChain chain;
   for(int k = 3; k < argc; k++){
     cout<<"Input file "<<argv[k]<<endl;
@@ -178,19 +166,6 @@ int main(int argc, char ** argv)
     sprintf(temp_title,"#chi^{2}/DoF Sector=%d;#chi^{2}/DoF;Counts",i+1);
     h_Chi2DoF_bc[i] = new TH1D(temp_name,temp_title,100,0,100);
   }
-
-  clasAna2.setEcalSFCuts();
-  clasAna2.setEcalPCuts();
-
-  clasAna.setEcalEdgeCuts();
-  //clasAna.setPidCuts();
-
-  clasAna.setVertexCuts();
-  //clasAna.setVertexCorrCuts();
-  clasAna.setDCEdgeCuts();
-  
-  //clasAna.setVzcuts(-6,1);
-  //clasAna.setVertexCorrCuts(-3,1);
 
   while(chain.Next())
     {
