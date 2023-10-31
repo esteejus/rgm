@@ -71,11 +71,6 @@ int main(int argc, char ** argv)
   bool outputDebugPlots = true;
   clas12ana clasAna(outputDebugPlots); 
 
-  clasAna.readEcalSFPar("/w/hallb-scshelf2102/clas12/users/esteejus/rgm/Ana/cutFiles/paramsSF_LD2_x2.dat");
-  clasAna.readEcalPPar("/w/hallb-scshelf2102/clas12/users/esteejus/rgm/Ana/cutFiles/paramsPI_LD2_x2.dat");
-
-
-
   /*
   clasAna.readInputParam("ana.par");
   clasAna.readEcalSFPar("paramsSF_40Ca_x2.dat");
@@ -105,22 +100,16 @@ int main(int argc, char ** argv)
   TH1D *px_com = new TH1D("px_com","Px COM",1000,-1000,1000);
   TH1D *py_com = new TH1D("py_com","Py COM",1000,-1000,1000);
   TH1D *pz_com = new TH1D("pz_com","Pz COM",1000,-1000,1000);
-
   TH1D *epp_h = new TH1D("epp_h","(e,e'pp)",100,0,2);
   TH1D *ep_h  = new TH1D("ep_h","(e,e'p)",100,0,2);
-
   TH1D *missm = new TH1D("missm","Missing mass",100,0.5,1.5);
-
   TH1D *htcc = new TH1D("htcc",";Counts;HTCC N_{e^{-}}",40,0,40);
+  TH1D *el_p_corr_cd = new TH1D("el_p_corr_cd","",100,-10,10);
+  TH1D *el_p_corr_fd = new TH1D("el_p_corr_fd","",100,-10,10);
 
-  //  clasAna.setCDRegionCuts();  
-  //  clasAna.setCDCutRegion(2);  
+  TH1D * lead_theta   = new TH1D("lead_theta","Lead Theta ",100,0,180);
+  TH1D * recoil_theta = new TH1D("recoil_theta","Recoil Theta ",100,0,180);
 
-  clasAna.setPidCuts(false); //clas chi2pid
-  clasAna.setProtonPidCuts(true); //tof vs mom pid (proton)
-
-  clasAna.setVzcuts(-6,1);
-  clasAna.setVertexCorrCuts(-3,1);
 
   while(chain.Next())
     {
@@ -158,6 +147,17 @@ int main(int argc, char ** argv)
 	  q2_h->Fill(q2);
 	  xb_h->Fill(x_b);
 
+	  for(auto &p : clasAna.getByPid(2212))
+	    {
+	      if(p->getRegion() == CD)
+		el_p_corr_cd->Fill(electrons[0]->par()->getVz()-p->par()->getVz());
+	      else if(p->getRegion() == FD)
+		el_p_corr_fd->Fill(electrons[0]->par()->getVz()-p->par()->getVz());
+
+
+	    }
+
+
 	  clasAna.getLeadRecoilSRC(beam,target,el);
 	  auto lead    = clasAna.getLeadSRC();
 	  auto recoil  = clasAna.getRecoilSRC();
@@ -165,13 +165,15 @@ int main(int argc, char ** argv)
 	  if(lead.size() == 1)
 	    {
 
-
 	      SetLorentzVector(lead_ptr,lead[0]);
 	      TLorentzVector miss = beam + target - el - lead_ptr; //photon  4-vector            
+	      lead_theta->Fill(lead_ptr.Theta()*TMath::RadToDeg());
 	      //	      if(lead_ptr.P() > 1)
 	      //		continue;
 
-	      ep_h->Fill(miss.P());
+	      if(lead[0]->getRegion()==FD){cout<<"Hello\n\n\n\n\n"<<endl;}
+
+	      ep_h->Fill(miss.P(),weight);
 
 
 	      if(recoil.size() == 1)
@@ -180,12 +182,14 @@ int main(int argc, char ** argv)
 
 		  SetLorentzVector(recoil_ptr,recoil[0]);
 		  auto com_vec = clasAna.getCOM(lead_ptr,recoil_ptr,q);
+
+		  recoil_theta->Fill(recoil_ptr.Theta()*TMath::RadToDeg());
 		  
 		  px_com->Fill(com_vec.X(),weight);
 		  py_com->Fill(com_vec.Y(),weight);
 		  pz_com->Fill(com_vec.Z(),weight);
 
-		  epp_h->Fill(miss.P());
+		  epp_h->Fill(miss.P(),weight);
 		  
 		}
 	    }
@@ -202,6 +206,8 @@ int main(int argc, char ** argv)
   TFile f(outFile,"RECREATE");
   f.cd();
 
+  lead_theta->Write();
+  recoil_theta->Write();
 
   q2_h->Write();
   xb_h->Write();
@@ -214,6 +220,8 @@ int main(int argc, char ** argv)
   epp_h->Write();
   missm->Write();
   htcc->Write();
+  el_p_corr_fd->Write();
+  el_p_corr_cd->Write();
 
   f.Close();
 

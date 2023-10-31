@@ -66,9 +66,6 @@ int main(int argc, char ** argv)
   clas12ana clasAna;
   clasAna.printParams();
 
-  clasAna.setVzcuts(-6,1);
-  clasAna.setVertexCorrCuts(-3,1);
-
   auto config_c12=chain.GetC12Reader();
 
   //now get reference to (unique)ptr for accessing data in loop

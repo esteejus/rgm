@@ -1,0 +1,11 @@
+##########
+#CLAS12 analysis SRC selection cuts
+#########
+q2		1.5:99	#Q2 min,max cut
+xb	   	1.2:99	#xB min,max cut
+p/q	   	0:0.96	#|p|/|q| min,max cut
+theta_pq	0:180	#angle between q and lead proton
+miss_mass	0:1.1   #missing mass min,max cut
+pmiss           0.25:1	#pmiss min,max cut
+recoil_mom	0.3:1.0	#recoil momentum min,max cut
+lead_mom	1.0:5.0	#lead momentum min,max cut

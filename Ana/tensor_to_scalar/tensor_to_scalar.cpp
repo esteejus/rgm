@@ -73,9 +73,6 @@ int main(int argc, char ** argv)
   // create instance of clas12ana class
   clas12ana clasAna;
 
-  clasAna.readEcalSFPar("/w/hallb-scshelf2102/clas12/users/esteejus/rgm/Ana/cutFiles/paramsSF_LD2_x2.dat");
-  clasAna.readEcalPPar("/w/hallb-scshelf2102/clas12/users/esteejus/rgm/Ana/cutFiles/paramsPI_LD2_x2.dat");
-
   clasAna.printParams();
 
   clas12root::HipoChain chain;
@@ -326,6 +323,7 @@ int main(int argc, char ** argv)
 
   reader->BookMVA("MLP", "/w/hallb-scshelf2102/clas/clase2/erins/repos/rgm/NeutronVeto/dataset_6gev_pCD/weights/TrainNeutronVeto_TMVA_MLP.weights.xml");
 
+<<<<<<< HEAD
 
   // set up clas12ana cuts
   //clasAna.setEcalSFCuts();
@@ -345,6 +343,8 @@ int main(int argc, char ** argv)
   // use Andrew's PID for CD protons
   clasAna.setProtonPidCuts(true);
 
+=======
+>>>>>>> b01c07228f4c5a2144b06af99e132282531e4513
   //Define cut class
   while(chain.Next()==true){
     //Display completed  
