@@ -323,28 +323,6 @@ int main(int argc, char ** argv)
 
   reader->BookMVA("MLP", "/w/hallb-scshelf2102/clas/clase2/erins/repos/rgm/NeutronVeto/dataset_6gev_pCD/weights/TrainNeutronVeto_TMVA_MLP.weights.xml");
 
-<<<<<<< HEAD
-
-  // set up clas12ana cuts
-  //clasAna.setEcalSFCuts();
-  //clasAna.setEcalPCuts();
-  //clasAna.setEcalEdgeCuts(false); // makes particle PID arrays empty
-  //clasAna.setPidCuts(false); // I think I want this to be default?
-  //clasAna.setVertexCuts();
-  //clasAna.setVertexCorrCuts();
-  //clasAna.setDCEdgeCuts(false); // makes particle PID arrays empty
-  //clasAna.setCDEdgeCuts(true);
-  //  clasAna.setCDRegionCuts();
-
-  clasAna.setVzcuts(-5.3,-0.1);
-  //  clasAna.setCDCutRegion(2);  
-  //clasAna.setVertexCorrCuts(-3,1);
-
-  // use Andrew's PID for CD protons
-  clasAna.setProtonPidCuts(true);
-
-=======
->>>>>>> b01c07228f4c5a2144b06af99e132282531e4513
   //Define cut class
   while(chain.Next()==true){
     //Display completed  

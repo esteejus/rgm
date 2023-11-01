@@ -166,7 +166,7 @@
 
    void setVxcuts(double min, double max){vertex_x_cuts.at(0)=min; vertex_x_cuts.at(1)=max;};
    void setVycuts(double min, double max){vertex_y_cuts.at(0)=min; vertex_y_cuts.at(1)=max;};
-   void setVzcuts(double min, double max){vertex_z_cuts.at(0)=min; vertex_z_cuts.at(1)=max;};
+
    void setVertexCorrCuts_FD(double min, double max){vertex_corr_cuts_fd.at(0) = min; vertex_corr_cuts_fd.at(1) = max; };
    void setVertexCorrCuts_CD(double min, double max){vertex_corr_cuts_cd.at(0) = min; vertex_corr_cuts_cd.at(1) = max; };
 
@@ -237,10 +237,12 @@
    map<int,vector<double> > pid_cuts_cd; // map<pid, {min,max cut}> Central Detector (CD)
    map<int,vector<double> > pid_cuts_fd; // map<pid, {min,max cut}> Forward Detector (FD)
 
+   map<int,vector<double> > vertex_z_cuts_cd; // map<pid, {min,max cut}> Central Detector (CD)
+   map<int,vector<double> > vertex_z_cuts_fd; // map<pid, {min,max cut}> Forward Detector (FD)
+
    vector<double> vertex_x_cuts = {-99,99};
    vector<double> vertex_y_cuts = {-99,99};
-   vector<double> vertex_z_cuts = {-99,99};
-   map<string,vector<double> > vertex_cuts;    //map< x,y,z, {min,max}> 
+
    vector<double> vertex_corr_cuts_cd = {-1.8,3.1}; //electron vertex <-> particle vertex correlation cuts
    vector<double> vertex_corr_cuts_fd = {-3.5,5.8}; //electron vertex <-> particle vertex correlation cuts
 
