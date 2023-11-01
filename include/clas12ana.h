@@ -60,6 +60,7 @@
 
    //   void InitDebugPlots();
    void Clear();
+   void clearInputParam();
    void Run(const std::unique_ptr<clas12::clas12reader>& c12);
 
    double getSF(const region_part_ptr &p);

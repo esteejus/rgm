@@ -252,13 +252,13 @@ void clas12ana::checkCutParameters()
   //Defualt SF cuts are set in Init() function and is the < 15542 events
   if(current_run >= 15542)
     {
-      if(previous_run >= 15542) //default; do nothing already been set to >=15542
-	return;
-
-      //Set new SF cuts, new run range
-      this -> readEcalSFPar( (std::string(CLAS12ANA_DIR) +"/Ana/cutFiles/paramsSF_40Ca_x2.dat").c_str() );
-      this -> readEcalPPar( (std::string(CLAS12ANA_DIR) +"/Ana/cutFiles/paramsPI_40Ca_x2.dat").c_str());
-      std::cerr << "WARNING:: Run number changed to " << current_run <<". The SF cuts are changed to reflect this new run range" << std::endl;
+      if(previous_run < 15542) //default; do nothing already been set to >=15542
+	{
+	  //Set new SF cuts, new run range
+	  this -> readEcalSFPar( (std::string(CLAS12ANA_DIR) +"/Ana/cutFiles/paramsSF_40Ca_x2.dat").c_str() );
+	  this -> readEcalPPar( (std::string(CLAS12ANA_DIR) +"/Ana/cutFiles/paramsPI_40Ca_x2.dat").c_str());
+	  std::cerr << "WARNING:: Run number changed to " << current_run <<". The SF cuts are changed to reflect this new run range" << std::endl;
+	}
     }
 
   //note run ranges cover all possible ranges for a given target
@@ -290,74 +290,45 @@ void clas12ana::checkCutParameters()
   //MC runs are always run 11 per CLAS default
   //We assume the USER must supply the parameter file inline in the analysis code
   //Since the MC run# is always 11 there is no automatic feature
-  if(current_run == 11 || previous_run == 11)
-    return; //do nothing
-
-  else if(he_runrange)
+  
+  if(he_runrange && !he_runrange_prev)
     {
-      if(he_runrange_prev) //already set
-	return;
-
-     std::cerr << "WARNING:: Run range changed for run " << current_run << ". Setting ana_he4.par file." << std::endl;
-     this -> readInputParam( (std::string(CLAS12ANA_DIR) + "/Ana/cutFiles/ana_he4.par").c_str() );
-   }
-  else if(ca40_runrange)
+      std::cerr << "WARNING:: Run range changed for run " << current_run << ". Setting ana_he4.par file." << std::endl;
+      this -> readInputParam( (std::string(CLAS12ANA_DIR) + "/Ana/cutFiles/ana_he4.par").c_str() );
+    }
+  else if(ca40_runrange && !ca40_runrange_prev)
     {
-     if(ca40_runrange_prev)
-       return;
-
       std::cerr << "WARNING:: Run range changed for run " << current_run << ". Setting ana_ca40.par file." << std::endl;
       this -> readInputParam( (std::string(CLAS12ANA_DIR) + "/Ana/cutFiles/ana_ca40.par").c_str() );
     }
-  else if(ca48_runrange)
+  else if(ca48_runrange && !ca48_runrange_prev)
     {
-      if(ca48_runrange_prev)
-	return;
-
       std::cerr << "WARNING:: Run range changed for run " << current_run << ". Setting ana_ca48.par file." << std::endl;
       this -> readInputParam( (std::string(CLAS12ANA_DIR) + "/Ana/cutFiles/ana_ca48.par").c_str() );
     }
-  else if(cx4_runrange)
+  else if(cx4_runrange && cx4_runrange_prev)
     {
-      if(cx4_runrange_prev)
-	return;
-
       std::cerr << "WARNING:: Run range changed for run " << current_run << ". Setting ana_cx4.par file." << std::endl;
       this -> readInputParam( (std::string(CLAS12ANA_DIR) + "/Ana/cutFiles/ana_cx4.par").c_str() );
     }
-  else if(snx4_runrange)
+  else if(snx4_runrange && !snx4_runrange_prev)
     {
-      if(snx4_runrange_prev)
-	return;
-
       std::cerr << "WARNING:: Run range changed for run " << current_run << ". Setting ana_cx4.par file which is the same as the snx4 cell." << std::endl;
       this -> readInputParam( (std::string(CLAS12ANA_DIR) + "/Ana/cutFiles/ana_cx4.par").c_str() );
     }
-  else if(d_runrange)
+  else if(d_runrange && !d_runrange_prev)
     {
-      if(d_runrange_prev)
-	return;
-
       std::cerr << "WARNING:: Run range changed for run " << current_run << ". Setting ana_he4.par file. Which is std. liquid cell default." << std::endl;
       this -> readInputParam( (std::string(CLAS12ANA_DIR) + "/Ana/cutFiles/ana_he4.par").c_str() );
     }
-  else if(h_runrange)
+  else if(h_runrange && !h_runrange_prev)
     {
-      if(h_runrange_prev)
-	return;
-
       std::cerr << "WARNING:: Run range changed for run " << current_run << ". Setting ana_he4.par file. Which is std. liquid cell default." << std::endl;
       this -> readInputParam( (std::string(CLAS12ANA_DIR) + "/Ana/cutFiles/ana_he4.par").c_str() );
-    }
-  else
-    {
-      std::cerr << "WARNING:: Run range not found for run " << current_run << " in setting analysis .par file. Setting to defualt ana.par file, is this what you want???" << std::endl;
-      this -> readInputParam( (std::string(CLAS12ANA_DIR) + "/Ana/cutFiles/ana.par").c_str() );
     }
 
   previous_run = current_run;
 
-  this -> printParams();
 }
 
 void clas12ana::Init()
@@ -402,7 +373,7 @@ void clas12ana::Init()
   this -> readEcalPPar( (std::string(CLAS12ANA_DIR) +"/Ana/cutFiles/paramsPI_LD2_x2.dat").c_str());
 
   this -> readInputSRCParam( (std::string(CLAS12ANA_DIR) + "/Ana/cutFiles/src_cuts.par").c_str() );
-  this -> printParams();
+  //  this -> printParams();
 
 }
 
@@ -816,12 +787,21 @@ void clas12ana::readEcalPPar(const char* filename)
   else
     std::cout<<"ECal parameter files does not exist!!!"<<endl;
 
-
 }
 
 
+void clas12ana::clearInputParam()
+{
+  pid_cuts_cd.clear();
+  pid_cuts_fd.clear();
+  vertex_z_cuts_cd.clear();
+  vertex_z_cuts_fd.clear();
+}
+
 void clas12ana::readInputParam(const char* filename)
 {
+  clearInputParam();
+
   ifstream infile;
   infile.open(filename);
 
@@ -906,9 +886,10 @@ void clas12ana::readInputParam(const char* filename)
   else
     cout<<"Parameter file didn't read in "<<endl;
 
+  this->printParams();
+
   return;
 }
-
 
 
 void clas12ana::readInputSRCParam(const char* filename)
@@ -1088,7 +1069,7 @@ void clas12ana::readInputSRCParam(const char* filename)
         }
     }
   else
-    cout<<"Parameter file didn't read in "<<endl;
+    cout<<"SRC parameter file didn't read in "<<endl;
 
   return;
 }
