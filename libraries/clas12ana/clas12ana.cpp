@@ -654,8 +654,8 @@ bool clas12ana::checkVertex(const region_part_ptr &p)
   //need to change the PID for protons which are idientified with TOF cuts if turned on
   //otherwise vertex cuts will not properly be done
 
-  //  if(checkProtonPidCut(p) && f_protonpidCuts)
-  //    pid = 2212;
+  if(checkProtonPidCut(p) && f_protonpidCuts)
+    pid = 2212;
 
   if(p->getRegion() == FD) //forward detector cuts
     {
