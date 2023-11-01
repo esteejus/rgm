@@ -19,6 +19,7 @@
 #include <TCanvas.h>
 #include <TStyle.h>
 #include <TLegend.h>
+#include <TLine.h>
 
 #include "clas12reader.h"
 #include "HipoChain.h"
@@ -127,18 +128,18 @@ int main(int argc, char ** argv)
   /////////////////////////////////////
   //Histo: protons
   /////////////////////////////////////
-  TH1D * h_pvertex = new TH1D("p vertex","Proton vertex - electron vertex;v_{p} - v_{e} (cm);Counts",50,-4,4);
+  TH1D * h_pvertex = new TH1D("p vertex","Proton vertex - electron vertex;v_{p} - v_{e} (cm);Counts",50,-6,6);
   hist_list_1.push_back(h_pvertex);
-  TH2D * h_dbetap = new TH2D("dbeta_p","#Delta #beta vs Momentum;Momentum (GeV/c);#beta_{meas} - p/sqrt(p^{2}+m^{2})",100,0,3,100,-0.2,0.2);
+  TH2D * h_dbetap = new TH2D("dbeta_p","#Delta #beta vs Momentum;Momentum (GeV/c);#beta_{meas} - p/sqrt(p^{2}+m^{2})",100,0,2,100,-0.2,0.2);
   hist_list_2.push_back(h_dbetap);
-  TH1D * h_pchipid = new TH1D("p chipid","Proton #Chi^{2} PID",100,-3,3);
+  TH1D * h_pchipid = new TH1D("p chipid","Proton #Chi^{2} PID",100,-5,5);
   hist_list_1.push_back(h_pchipid);
 
   
   /////////////////////////////////////
   //Histo: all neutrals
   /////////////////////////////////////
-  TH2D * h_mmiss_xb = new TH2D("mmiss_xb_cand","Missing Mass vs xB;xB;Missing Mass",100,0,2,100,0,2);
+  TH2D * h_mmiss_xb = new TH2D("mmiss_xb_cand","Missing Mass vs xB;x_{B};Missing Mass (GeV/c^{2})",50,0,1.2,50,0.7,1.9);
   hist_list_2.push_back(h_mmiss_xb);
   TH1D * h_mmiss_withn = new TH1D("mmiss_withn","Missing Mass d(e,e'pn);Missing Mass (GeV/c^{2})",100,0.,2.);
   hist_list_1.push_back(h_mmiss_withn);
@@ -152,7 +153,7 @@ int main(int argc, char ** argv)
   /////////////////////////////////////
   TH1D * h_nsize = new TH1D("nsize","Number of reconstructed neutrons",10,0,10);
   hist_list_1.push_back(h_nsize);
-  TH2D * h_nangles = new TH2D("n angles","Neutron Angular Distribution;Phi;Theta",48,-180,180,140,30,110);
+  TH2D * h_nangles = new TH2D("n angles","Neutron Angular Distribution;Phi;Theta",48,-180,180,40,30,110);
   hist_list_2.push_back(h_nangles);
 
 
@@ -250,6 +251,38 @@ int main(int argc, char ** argv)
   hist_list_1.push_back(h_neff_thetamiss_numer_ssb);
 
 
+  /////////////////////////////////////
+  //Histo: 2d efficiency stuff
+  /////////////////////////////////////
+  TH2D * h_cand2d = new TH2D("cand2d","Neutron Candidates;p_{miss} (GeV/c);#theta_{miss} (degrees)",15,0.2,1.2,30,40,140);
+  hist_list_2.push_back(h_cand2d);
+  TH2D * h_det2d = new TH2D("det2d","Detected Neutrons;p_{miss} (GeV/c);#theta_{miss} (degrees)",15,0.2,1.2,30,40,140);
+  hist_list_2.push_back(h_det2d);
+
+
+  /////////////////////////////////////
+  //Histo: Extras
+  /////////////////////////////////////
+  TH1D * h_tof_before = new TH1D("tof_before","TOF before cuts",100,-10,40);
+  hist_list_1.push_back(h_tof_before);
+  TH2D * h_andrew = new TH2D("andrew","(pmiss-pn)/pmiss vs #theta_{n,miss};(pmiss-pn)/pmiss;#theta_{n,miss}",40,-2,1,45,0,180);
+  hist_list_2.push_back(h_andrew);
+  TH2D * h_edep_dpp = new TH2D("edep_dpp","Energy Deposition vs #Delta p/p;#Delta p/p;Energy Deposition",40,-2,1,50,0,50);
+  hist_list_2.push_back(h_edep_dpp);
+  TH2D * h_pmiss_thetamiss = new TH2D("pmiss_thetamiss","#theta_{miss} vs p_{miss};#theta_{miss};p_{miss}",45,0,180,50,0,1.3);
+  hist_list_2.push_back(h_pmiss_thetamiss);
+  TH2D * h_pn_thetan = new TH2D("pn_thetan","#theta_{n} vs p_{n};#theta_{n};p_{n} (GeV/c)",45,0,180,50,0,1.3);
+  hist_list_2.push_back(h_pn_thetan);
+  TH2D * h_dpp_pn = new TH2D("dpp_pn","#Delta p/p vs Neutron Momentum;p_{n} (GeV/c);#Delta p/p",50,0,1.5,50,-1.5,1.5);
+  hist_list_2.push_back(h_dpp_pn);
+  TH2D * h_tof_pn = new TH2D("tof_pn","TOF vs p_{n};p_{n} (GeV/c);TOF (ns)",50,0,1.5,50,-10,40);
+  hist_list_2.push_back(h_tof_pn);
+  TH2D * h_tof_pmiss = new TH2D("tof_pmiss","TOF vs p_{miss};p_{miss} (GeV/c);TOF (ns)",50,0,1.5,50,-10,40);
+  hist_list_2.push_back(h_tof_pmiss);
+
+
+
+
   for(int i=0; i<hist_list_1.size(); i++){
     hist_list_1[i]->Sumw2();
     hist_list_1[i]->GetXaxis()->CenterTitle();
@@ -331,42 +364,51 @@ int main(int argc, char ** argv)
     bool is_FD = (prot[0]->getRegion()==FD);
     if(!is_FD) {continue;}
 
-    // protons histos
-    h_pvertex->Fill(vzp-vze,weight);
-    h_dbetap->Fill(pp.Mag(),dbeta,weight);
-    h_pchipid->Fill(chipid,weight);
-
     // proton cuts
+    h_pvertex->Fill(vzp-vze,weight);
     if ((vzp-vze)<-3. || (vzp-vze)>4.) {continue;}
+    h_dbetap->Fill(pp.Mag(),dbeta,weight);
     if (dbeta<-0.02 || dbeta>0.02) {continue;}
+    if (pp.Mag() < 0.3) {continue;}
+    h_pchipid->Fill(chipid,weight);
     if (chipid<-3 || chipid>3) {continue;}
-    if (pp.Mag() < 0.2) {continue;}
 
-    // Missing mass and energy despotiion
+
+
+    // MISSING MOMENTUM
+
+    // Missing mass and energy deposition
     double mmiss = get_mmiss(p_b,p_e,pp);
-    TVector3 pmiss = p_b - p_e - pp;
+    TVector3 pmiss = p_q - pp;
     double thetamiss = pmiss.Theta()*180./M_PI;
 
     // cut on theta component of pmiss
     h_thetamiss_before->Fill(thetamiss,weight);
-    if (thetamiss<40.) {continue;}
-    if (thetamiss>140.) {continue;}
+    h_pmiss_thetamiss->Fill(pmiss.Mag(),thetamiss);
 
-    // xb dependence
-    h_mmiss_xb->Fill(xB,mmiss,weight);
-    //if (xB<0.7) {continue;}
-
-    if (pmiss.Mag() < 0.243) {continue;} // beta = 0.2, p = 0.1918, beta = 0.25, p = 0.243 // was 0.243
-    if (pmiss.Mag() > 1.25) {continue;} // beta = 0.8, p = 1.2533
 
 
     h_theta_ppmiss->Fill(pmiss.Angle(pp)*180./M_PI,weight);
     //if ((pmiss.Angle(pp)*180./M_PI)<40.) {continue;}  // CD ONLY (I THINK)
     
     h_mmiss_pmiss->Fill(pmiss.Mag(),mmiss,weight);
-    h_mmiss_pmissCAND->Fill(pmiss.Mag(),mmiss,weight);
     h_mmiss_theta->Fill(thetamiss,mmiss,weight);
+
+    if (thetamiss<40.) {continue;}
+    if (thetamiss>140.) {continue;}
+    if (pmiss.Mag() < 0.25) {continue;} // beta = 0.2, p = 0.1918, beta = 0.25, p = 0.243 // was 0.243
+    if (pmiss.Mag() > 1.25) {continue;} // beta = 0.8, p = 1.2533
+
+    // xb dependence
+    h_mmiss_xb->Fill(xB,mmiss,weight);
+    if (xB<0.4) {continue;}
+
+
+    h_mmiss_pmissCAND->Fill(pmiss.Mag(),mmiss,weight);
     h_mmiss_thetaCAND->Fill(thetamiss,mmiss,weight);
+
+
+
 
     /*for (int i=0; i<neff_pbins; i++){
       if (mmiss>Mlow && mmiss<Mhigh) { h_neff_pmiss_denom_ssb->Fill(pmiss.Mag(),weight);}  }
@@ -374,54 +416,98 @@ int main(int argc, char ** argv)
     for (int i=0; i<neff_tbins; i++){
       if (mmiss>Mlow && mmiss<Mhigh) { h_neff_thetamiss_denom_ssb->Fill(thetamiss,weight);}  }*/
 
+    if (mmiss>Mlow && mmiss<Mhigh) { h_cand2d->Fill(pmiss.Mag(),thetamiss,weight); }
+
 
     // REQUIRE A NEUTRON HERE
 
 
     // NEUTRONS
-    double sz = neut.size();
-    h_nsize->Fill(sz,weight);
-
-
-    int pick = -1;
+    
+    // from here on out, keep only events with detected neutrons
 
     if (neut.size() < 1){continue;}
-    else
+    int num_neut = 0;
+
+    // loop over neutrons in each event
+    double lowest_dphi = 180; int pick = -1;
+    for (int i=0; i<neut.size(); i++)
     {
-      double lowest_dphi = 180;
-      for (int i=0; i<neut.size(); i++)
+      // only look at neutrons detected in CND or CTOF
+      bool is_CND1 = neut[i]->sci(CND1)->getDetector()==3;
+      bool is_CND2 = neut[i]->sci(CND2)->getDetector()==3;
+      bool is_CND3 = neut[i]->sci(CND3)->getDetector()==3;
+      bool is_CTOF = neut[i]->sci(CTOF)->getDetector()==4;
+      if (!is_CND1 && !is_CND2 && !is_CND3 && !is_CTOF) {continue;}
+
+      // get neutron momentum
+      TVector3 pn;
+      pn.SetMagThetaPhi(neut[i]->getP(),neut[i]->getTheta(),neut[i]->getPhi());
+      double n_theta = neut[i]->getTheta()*180./M_PI;
+      double dpp = (pmiss.Mag()-pn.Mag())/pmiss.Mag();
+      if (pn.Mag()==0) {continue;}
+      if (n_theta==0) {continue;}
+
+      double tof_n = 0;
+      double edep = 0;
+      if (is_CND1)
       {
-        // in CND? if no - skip to next neutron in event
-        bool is_CND1 = neut[i]->sci(CND1)->getDetector()==3;
-        bool is_CND2 = neut[i]->sci(CND2)->getDetector()==3;
-        bool is_CND3 = neut[i]->sci(CND3)->getDetector()==3;
-        bool is_CTOF = neut[i]->sci(CTOF)->getDetector()==4;
-        if (!is_CND1 && !is_CND2 && !is_CND3 && !is_CTOF) {continue;}
+        tof_n = neut[i]->sci(CND1)->getTime() - ts;
+        edep = neut[i]->sci(CND1)->getEnergy();
+      }
+      else if (is_CND2)
+      {
+        tof_n = neut[i]->sci(CND2)->getTime() - ts;
+        edep = neut[i]->sci(CND2)->getEnergy();
+      }
+      else if (is_CND3)
+      {
+        tof_n = neut[i]->sci(CND3)->getTime() - ts;
+        edep = neut[i]->sci(CND3)->getEnergy();
+      }
+      else if (is_CTOF)
+      {
+        tof_n = neut[i]->sci(CTOF)->getTime() - ts;
+        edep = neut[i]->sci(CTOF)->getEnergy();
+      }
 
-        // in expected theta range? if no - skip to next neutron in event
-        double n_theta = neut[i]->getTheta()*180./M_PI;
-        if (n_theta==0) {continue;}
-        if (n_theta<40) {continue;}
-        if (n_theta>140) {continue;}
 
-        // is beta high enough? if no - skip to next neutron in event
-        double beta_n = neut[i]->par()->getBeta();
-        if (beta_n<0.25) {continue;}
+
+
+      // only look at neutrons in correct theta range
+      h_pn_thetan->Fill(n_theta,pn.Mag(),weight);
+
+      //h_mmiss_pmiss->Fill(pmiss.Mag(),mmiss,weight);
+      //h_pmiss_thetamiss->Fill(thetamiss,pmiss.Mag());
+      if (pn.Mag()<0.25) {continue;}
+      if (n_theta<40) {continue;}
+      if (n_theta>140) {continue;}
+
+
+h_edep_dpp->Fill(dpp,edep,weight);
+      if (edep<5) {continue;}
+
+
+h_tof_pn->Fill(pn.Mag(),tof_n,weight);
+h_tof_pmiss->Fill(pmiss.Mag(),tof_n,weight);
+
+
+      // only look at neutrons in correct momentum range
+      h_dpp_pn->Fill(pn.Mag(),dpp,weight);
+      // is beta high enough? if no - skip to next neutron in event
+      double beta_n = neut[i]->par()->getBeta();
+      //if (beta_n<0.25) {continue;}
         
-        // pick neutron with lowest dphi
-        double this_dphi = std::abs( neut[i]->getPhi()*180./M_PI - pmiss.Phi()*180./M_PI );
-        if (this_dphi < lowest_dphi)
-        {
-          pick = i;
-          lowest_dphi = this_dphi;
-
-        }
-
+      // pick neutron with lowest dphi
+      num_neut = num_neut + 1;
+      h_nsize->Fill(num_neut,weight);
+      double this_dphi = std::abs( neut[i]->getPhi()*180./M_PI - pmiss.Phi()*180./M_PI );
+      if (this_dphi < lowest_dphi)
+      {
+        pick = i;
+        lowest_dphi = this_dphi;
       }
     }
-
-
-
     if (pick==-1) {continue;}
 
 
@@ -462,8 +548,7 @@ int main(int argc, char ** argv)
       path = neut[pick]->sci(CTOF)->getPath();
       edep = neut[pick]->sci(CTOF)->getEnergy();
     }
-    if (tof_n<0) {continue;} //{std::cout << "Look out - negative TOF!/n";}
-
+    //if (tof_n<0) {continue;} //{std::cout << "Look out - negative TOF!/n";}
 
 
 
@@ -472,6 +557,10 @@ int main(int argc, char ** argv)
     TVector3 vecX( neut[pick]->par()->getPx(), neut[pick]->par()->getPy(), neut[pick]->par()->getPz() );
     double cos0 = pmiss.Dot(vecX) / (pmiss.Mag() * vecX.Mag() );
     double dphi = pmiss.Phi()*180./M_PI - neut[pick]->getPhi()*180./M_PI;
+h_tof_before->Fill(tof_n,weight);
+h_andrew->Fill((pmiss.Mag()-pn.Mag())/pmiss.Mag(),pmiss.Angle(pn)*180./M_PI,weight);
+//h_edep_dpp->Fill((pmiss.Mag()-pn.Mag())/pmiss.Mag(),edep,weight);
+
 
 
     // fill histos with good neutrons
@@ -518,11 +607,15 @@ int main(int argc, char ** argv)
     h_mmiss_thetaDET->Fill(thetamiss,mmiss,weight);
 
 
-    for (int i=0; i<neff_pbins; i++){
+    for (int i=0; i<neff_pbins; i++){ // is this for loop really necessary?
       if (mmiss>Mlow && mmiss<Mhigh)  { h_neff_pmiss_numer_ssb->Fill(pmiss.Mag(),weight); }   }
 
     for (int i=0; i<neff_tbins; i++){
       if (mmiss>Mlow && mmiss<Mhigh) { h_neff_thetamiss_numer_ssb->Fill(thetamiss,weight); }   }
+
+
+    if (mmiss>Mlow && mmiss<Mhigh) { h_det2d->Fill(pmiss.Mag(),thetamiss,weight); }
+
 
   }
 
@@ -579,17 +672,53 @@ int main(int argc, char ** argv)
   myText->Print(fileName,"pdf");
   myText->Clear();
 
-  myCanvas->Divide(2,2);
+  myCanvas->Divide(1,1);
   myCanvas->cd(1);
   h_pvertex->Draw();
-  myCanvas->cd(2);
+  TLine * l_pvertex1 = new TLine(-3,0,-3,h_pvertex->GetMaximum());
+  l_pvertex1->SetLineColor(kRed);
+  l_pvertex1->SetLineWidth(3);
+  l_pvertex1->Draw("same");
+  TLine * l_pvertex2 = new TLine(4,0,4,h_pvertex->GetMaximum());
+  l_pvertex2->SetLineColor(kRed);
+  l_pvertex2->SetLineWidth(3);
+  l_pvertex2->Draw("same");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
   h_dbetap->Draw("colz");
-  myCanvas->cd(3);
+  TLine * l_dbetap1 = new TLine(0.3,-0.2,0.3,0.2);
+  l_dbetap1->SetLineColor(kRed);
+  l_dbetap1->SetLineWidth(3);
+  l_dbetap1->Draw("same");
+  TLine * l_dbetap2 = new TLine(0,-0.02,2,-0.02);
+  l_dbetap2->SetLineColor(kRed);
+  l_dbetap2->SetLineWidth(3);
+  l_dbetap2->Draw("same");
+  TLine * l_dbetap3 = new TLine(0,0.02,2,0.02);
+  l_dbetap3->SetLineColor(kRed);
+  l_dbetap3->SetLineWidth(3);
+  l_dbetap3->Draw("same");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
   h_pchipid->Draw();
+  TLine * l_chipid1 = new TLine(-3,0,-3,h_pchipid->GetMaximum());
+  l_chipid1->SetLineColor(kRed);
+  l_chipid1->SetLineWidth(3);
+  l_chipid1->Draw("same");
+  TLine * l_chipid2 = new TLine(3,0,3,h_pchipid->GetMaximum());
+  l_chipid2->SetLineColor(kRed);
+  l_chipid2->SetLineWidth(3);
+  l_chipid2->Draw("same");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear(); 
 
-  
   
   /////////////////////
   // NEUTRALS
@@ -614,6 +743,7 @@ int main(int argc, char ** argv)
 
   myCanvas->Divide(1,1);
   myCanvas->cd(1);
+  myCanvas->cd(1)->SetLogz();
   h_mmiss_xb->Draw("colz");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
@@ -974,6 +1104,77 @@ int main(int argc, char ** argv)
 
 
 
+  // EXTRAS
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_tof_before->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_andrew->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_edep_dpp->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_pmiss_thetamiss->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_pn_thetan->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_dpp_pn->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_tof_pn->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_tof_pmiss->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+
+  // 2D Efficiency
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_cand2d->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_det2d->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  TH2D * h_eff2d = (TH2D*)h_det2d->Clone();
+  h_eff2d->Divide(h_cand2d);
+  h_eff2d->Draw("colz");
+  h_eff2d->SetMaximum(0.20);
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
 
 
   // wrap it up
