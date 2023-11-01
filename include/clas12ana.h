@@ -116,9 +116,11 @@
      {
        int pid = p->par()->getPid();
 
-       //Proton PID assignment by user supplied TOF vs momentum curve cuts
        if(checkProtonPidCut(p) && f_protonpidCuts)
 	 pid = 2212;
+
+       if(!checkProtonPidCut(p) && f_protonpidCuts && f_pidCuts && pid == 2212)
+       	 pid = 9999;
 
        if(pid == 11)
 	 electrons.push_back(p);
@@ -257,7 +259,7 @@
    double min_mom_pt           = 0.15;     //min momentum transverse in CD MeV/c
    vector<double> theta_cut_CD = {40,145}; //min,max polar angle cut in CD deg.
 
-   double proton_sigma = 2.;
+   double proton_sigma = 2;
    double ghost_track_cut = 5;    //deg; cuts the angle between CD tracks and FD tracks to remove ghost tracks (track measured in both CD and FD)
  
    std::vector<double> dc_edge_cut_el  = {4.5,3.5,7.5}; //units cm; {region1, region2, region3} cuts for electrons INBENDING
