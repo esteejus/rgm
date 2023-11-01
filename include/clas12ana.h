@@ -119,7 +119,8 @@
        if(checkProtonPidCut(p) && f_protonpidCuts)
 	 pid = 2212;
 
-       if(!checkProtonPidCut(p) && f_protonpidCuts && f_pidCuts && pid == 2212)
+       if(!checkProtonPidCut(p) && f_protonpidCuts && 
+	  f_pidCuts && p->getRegion() == clas12::CD && pid == 2212 )
        	 pid = 9999;
 
        if(pid == 11)
