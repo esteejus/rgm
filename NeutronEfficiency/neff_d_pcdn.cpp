@@ -104,6 +104,16 @@ int main(int argc, char ** argv)
   eventcut myCut(Ebeam,argv[5]);
   myCut.print_cuts();
   clas12root::HipoChain chain;
+
+  /*vector<int> vec = {5567,5568,5569,5570,5572,5573,5574,5575,5576,5577,5578,5579,5580,5581,5582,5583,5586,5587,5588,5589,5590,5591,5592,5593,5594,5595,5598,5599,5600,5601,5602,5603,5604,5606,5607,5608,5609,5610,5611,5612,5613,5614,5615,5616,5617,5618,5619,5620,5622,5623,5624,5625,5626,5627};
+  for (int j = 0; j < vec.size; j++){ // loop over runs
+    std::cout << "Reading from run " << vec[j] << '\n'; // loop over files in run
+    for (int k = 0;)
+  
+  }*/
+
+
+
   for(int k = 6; k < argc; k++){
     cout<<"Input file "<<argv[k]<<endl;
     chain.Add(argv[k]);
