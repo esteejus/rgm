@@ -60,6 +60,7 @@
 
    //   void InitDebugPlots();
    void Clear();
+   void clearInputParam();
    void Run(const std::unique_ptr<clas12::clas12reader>& c12);
 
    double getSF(const region_part_ptr &p);
@@ -115,9 +116,12 @@
      {
        int pid = p->par()->getPid();
 
-       //Proton PID assignment by user supplied TOF vs momentum curve cuts
        if(checkProtonPidCut(p) && f_protonpidCuts)
 	 pid = 2212;
+
+       if(!checkProtonPidCut(p) && f_protonpidCuts && 
+	  f_pidCuts && p->getRegion() == clas12::CD && pid == 2212 )
+       	 pid = 9999;
 
        if(pid == 11)
 	 electrons.push_back(p);
@@ -166,7 +170,7 @@
 
    void setVxcuts(double min, double max){vertex_x_cuts.at(0)=min; vertex_x_cuts.at(1)=max;};
    void setVycuts(double min, double max){vertex_y_cuts.at(0)=min; vertex_y_cuts.at(1)=max;};
-   void setVzcuts(double min, double max){vertex_z_cuts.at(0)=min; vertex_z_cuts.at(1)=max;};
+
    void setVertexCorrCuts_FD(double min, double max){vertex_corr_cuts_fd.at(0) = min; vertex_corr_cuts_fd.at(1) = max; };
    void setVertexCorrCuts_CD(double min, double max){vertex_corr_cuts_cd.at(0) = min; vertex_corr_cuts_cd.at(1) = max; };
 
@@ -237,10 +241,12 @@
    map<int,vector<double> > pid_cuts_cd; // map<pid, {min,max cut}> Central Detector (CD)
    map<int,vector<double> > pid_cuts_fd; // map<pid, {min,max cut}> Forward Detector (FD)
 
+   map<int,vector<double> > vertex_z_cuts_cd; // map<pid, {min,max cut}> Central Detector (CD)
+   map<int,vector<double> > vertex_z_cuts_fd; // map<pid, {min,max cut}> Forward Detector (FD)
+
    vector<double> vertex_x_cuts = {-99,99};
    vector<double> vertex_y_cuts = {-99,99};
-   vector<double> vertex_z_cuts = {-99,99};
-   map<string,vector<double> > vertex_cuts;    //map< x,y,z, {min,max}> 
+
    vector<double> vertex_corr_cuts_cd = {-1.8,3.1}; //electron vertex <-> particle vertex correlation cuts
    vector<double> vertex_corr_cuts_fd = {-3.5,5.8}; //electron vertex <-> particle vertex correlation cuts
 
@@ -254,7 +260,7 @@
    double min_mom_pt           = 0.15;     //min momentum transverse in CD MeV/c
    vector<double> theta_cut_CD = {40,145}; //min,max polar angle cut in CD deg.
 
-   double proton_sigma = 2.;
+   double proton_sigma = 2;
    double ghost_track_cut = 5;    //deg; cuts the angle between CD tracks and FD tracks to remove ghost tracks (track measured in both CD and FD)
  
    std::vector<double> dc_edge_cut_el  = {4.5,3.5,7.5}; //units cm; {region1, region2, region3} cuts for electrons INBENDING

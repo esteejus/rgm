@@ -24,6 +24,7 @@
 #include "HipoChain.h"
 #include "eventcut/eventcut.h"
 #include "eventcut/functions.h"
+#include "clas12ana.h"
 
 using namespace std;
 using namespace clas12;
@@ -61,7 +62,7 @@ double t_hi = 65;
 
 void Usage()
 {
-  std::cerr << "Usage: ./code <MC=1,Data=0> <Ebeam(GeV)> <path/to/output.root> <path/to/output.pdf> <path/to/cutfile.txt> <path/to/input.hipo> \n";
+  std::cerr << "Usage: ./code <MC=1,Data=0> <Ebeam(GeV)> <path/to/output.root> <path/to/output.pdf> <path/to/input.hipo> \n";
 }
 
 
@@ -82,19 +83,10 @@ int main(int argc, char ** argv)
  
   double Ebeam = atof(argv[2]);
 
-  /*std::string rootPath(argv[3]);
-  rootPath += ".root";
-  const char * fullrootpath = rootPath.c_str();*/
-  /*std::string neff_t_name(argv[3]);
-  neff_t_name[strlen(neff_t_name)-6] = '\0';
-  neff_t_filename = neff_t_name.c_str();*/
-
-
   
   // output file names
   TFile * outFile = new TFile(argv[3],"RECREATE");
   char * pdfFile = argv[4];
-  eventcut myCut(Ebeam,argv[5]);
 
   char * basename = argv[3];
   basename[strlen(basename)-5] = '\0';
@@ -104,16 +96,25 @@ int main(int argc, char ** argv)
   p_name.c_str();
 
 
-  myCut.print_cuts();
+
   clas12root::HipoChain chain;
-  for(int k = 6; k < argc; k++){
+  for(int k = 5; k < argc; k++){
     cout<<"Input file "<<argv[k]<<endl;
     chain.Add(argv[k]);
   }
   auto config_c12=chain.GetC12Reader();
   chain.SetReaderTags({0});
   const std::unique_ptr<clas12::clas12reader>& c12=chain.C12ref();
-  chain.db()->turnOffQADB();                 
+  chain.db()->turnOffQADB();
+
+
+  // create instance of clas12ana
+  clas12ana clasAna;
+
+  clasAna.readEcalSFPar("/w/hallb-scshelf2102/clas12/users/esteejus/rgm/Ana/cutFiles/paramsSF_LD2_x2.dat");
+  clasAna.readEcalPPar("/w/hallb-scshelf2102/clas12/users/esteejus/rgm/Ana/cutFiles/paramsPI_LD2_x2.dat");
+
+  clasAna.printParams();
 
         
   /////////////////////////////////////
@@ -263,7 +264,7 @@ int main(int argc, char ** argv)
   hist_list_2.push_back(h_p_phi);
   TH2D * h_pmiss_thetamiss = new TH2D("pmiss_thetamiss","Missing Momentum vs p_{miss} Polar Angle;#theta_{miss} (degrees);p_{miss} (GeV/c)",100,30,150,100,0,1.5);
   hist_list_2.push_back(h_pmiss_thetamiss);
-  TH2D * h_pmiss_pn_cut = new TH2D("pmiss_pn","Missing Momentum vs Neutron Momentum;p_{neutron};p_{miss}",100,0,1.4,100,0,1.4);
+  TH2D * h_pmiss_pn_cut = new TH2D("pmiss_pn_cut","Missing Momentum vs Neutron Momentum;p_{neutron};p_{miss}",100,0,1.4,100,0,1.4);
   hist_list_2.push_back(h_pmiss_pn_cut);
   TH1D * h_mmiss_withn = new TH1D("mmiss_withn","Missing Mass p(e,e'#pi^{+}n);Missing Mass (GeV/c^{2})",100,0.5,1.5);
   hist_list_1.push_back(h_mmiss_withn);
@@ -309,6 +310,7 @@ int main(int argc, char ** argv)
 
   //Define cut class
   while(chain.Next()==true){
+
     //Display completed  
     counter++;
     if((counter%1000000) == 0){
@@ -320,11 +322,11 @@ int main(int argc, char ** argv)
     }    
 
     // get particles by type
-    auto elec=c12->getByID(11);
-    auto prot=c12->getByID(2212);
-    auto phot=c12->getByID(22);
-    auto neut=c12->getByID(2112);
-    auto pip=c12->getByID(211);
+    clasAna.Run(c12);
+    auto elec = clasAna.getByPid(11);
+    auto prot = clasAna.getByPid(2212);
+    auto neut = clasAna.getByPid(2112);
+    auto pip = clasAna.getByPid(211);
     auto allParticles=c12->getDetParticles();
     double weight = 1;
     if(isMC){weight=c12->mcevent()->getWeight();}
@@ -334,11 +336,10 @@ int main(int argc, char ** argv)
 
 
     // GENERAL EVENT SELECTION
-    if(!myCut.electroncut(c12)){continue;}
     if (prot.size() != 0) {continue;} // before p>0 // hen !=0
     if (pip.size() != 1) {continue;} 
     if (elec.size() != 1) {continue;} // before e>1 // then !=1
-    //if ((neut.size() != 0) && (neut.size() != 1)) {continue;} // not there before // TEMP
+
 
 
 
@@ -391,8 +392,8 @@ int main(int argc, char ** argv)
     // missing momentum cuts
     if (thetamiss<40.) {continue;}
     if (thetamiss>140.) {continue;}
-    if (pmiss.Mag() < 0.2) {continue;} // beta=0.2  // previously 0.1918
-    if (pmiss.Mag() > 1.2) {continue;} // beta=0.8  // previoulsy 1.2528
+    if (pmiss.Mag() < 0.25) {continue;} // beta=0.2  // previously 0.1918
+    if (pmiss.Mag() > 1.25) {continue;} // beta=0.8  // previoulsy 1.2528
 
     h_mmiss_theta_denom->Fill(thetamiss,mmiss,weight);
     h_mmiss_cand->Fill(mmiss,weight);   
@@ -1413,11 +1414,9 @@ int main(int argc, char ** argv)
   myCanvas->Divide(3,2);
   //myCanvas->cd(1);
   auto legend = new TLegend(0.8,0.8,0.8,0.8);
-std::cout << "starting loop\n";
   for (int i=0; i<h_eff2d->GetNbinsY(); i++)
   {
-myCanvas->cd(i+1);
-std::cout << "i = " << i << std::endl;
+    myCanvas->cd(i+1);
     TH1D * proj1 = h_eff2d->ProjectionX("",i,i+1,"d"); // overflow/underflow?
     proj1->SetTitle("Efficiency");
     proj1->Draw();

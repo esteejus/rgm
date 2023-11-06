@@ -7,8 +7,6 @@ pid_cuts	-211:0:3:FD	#pi- chi2pid Forward detector cut
 pid_cuts	2212:0.666:4.88:CD	#proton chi2pid Central detector cut
 pid_cuts	 211:0:3:CD	#pi+ chi2pid Central detector cut
 pid_cuts	-211:0:3:CD	#pi- chi2pid Central detector cut
-vertex_cut	z:-6:-1	#vertex z cut min:max
-vertex_cut	x:-6:6	
-vertex_cut	y:-6:6	
-vertex_z_p_cd	-5.3:-0.1	#vertex z cut proton CD min:max
-vertex_z_p_fd	-8.9:2.6	#vertex z cut proton FD min:max
+vertex_z_cut      11:-6.6:2.6:FD        #vertex z cut electron
+vertex_z_cut    2212:-8.9:2.6:FD        #vertex z cut proton FD
+vertex_z_cut    2212:-5.3:-0.1:CD       #vertex z cut proton CD

@@ -252,13 +252,13 @@ void clas12ana::checkCutParameters()
   //Defualt SF cuts are set in Init() function and is the < 15542 events
   if(current_run >= 15542)
     {
-      if(previous_run >= 15542) //default; do nothing already been set to >=15542
-	return;
-
-      //Set new SF cuts, new run range
-      this -> readEcalSFPar( (std::string(CLAS12ANA_DIR) +"/Ana/cutFiles/paramsSF_40Ca_x2.dat").c_str() );
-      this -> readEcalPPar( (std::string(CLAS12ANA_DIR) +"/Ana/cutFiles/paramsPI_40Ca_x2.dat").c_str());
-      std::cerr << "WARNING:: Run number changed to " << current_run <<". The SF cuts are changed to reflect this new run range" << std::endl;
+      if(previous_run < 15542) //default; do nothing already been set to >=15542
+	{
+	  //Set new SF cuts, new run range
+	  this -> readEcalSFPar( (std::string(CLAS12ANA_DIR) +"/Ana/cutFiles/paramsSF_40Ca_x2.dat").c_str() );
+	  this -> readEcalPPar( (std::string(CLAS12ANA_DIR) +"/Ana/cutFiles/paramsPI_40Ca_x2.dat").c_str());
+	  std::cerr << "WARNING:: Run number changed to " << current_run <<". The SF cuts are changed to reflect this new run range" << std::endl;
+	}
     }
 
   //note run ranges cover all possible ranges for a given target
@@ -290,74 +290,45 @@ void clas12ana::checkCutParameters()
   //MC runs are always run 11 per CLAS default
   //We assume the USER must supply the parameter file inline in the analysis code
   //Since the MC run# is always 11 there is no automatic feature
-  if(current_run == 11 || previous_run == 11)
-    return; //do nothing
-
-  else if(he_runrange)
+  
+  if(he_runrange && !he_runrange_prev)
     {
-      if(he_runrange_prev) //already set
-	return;
-
-     std::cerr << "WARNING:: Run range changed for run " << current_run << ". Setting ana_he4.par file." << std::endl;
-     this -> readInputParam( (std::string(CLAS12ANA_DIR) + "/Ana/cutFiles/ana_he4.par").c_str() );
-   }
-  else if(ca40_runrange)
+      std::cerr << "WARNING:: Run range changed for run " << current_run << ". Setting ana_he4.par file." << std::endl;
+      this -> readInputParam( (std::string(CLAS12ANA_DIR) + "/Ana/cutFiles/ana_he4.par").c_str() );
+    }
+  else if(ca40_runrange && !ca40_runrange_prev)
     {
-     if(ca40_runrange_prev)
-       return;
-
       std::cerr << "WARNING:: Run range changed for run " << current_run << ". Setting ana_ca40.par file." << std::endl;
       this -> readInputParam( (std::string(CLAS12ANA_DIR) + "/Ana/cutFiles/ana_ca40.par").c_str() );
     }
-  else if(ca48_runrange)
+  else if(ca48_runrange && !ca48_runrange_prev)
     {
-      if(ca48_runrange_prev)
-	return;
-
       std::cerr << "WARNING:: Run range changed for run " << current_run << ". Setting ana_ca48.par file." << std::endl;
       this -> readInputParam( (std::string(CLAS12ANA_DIR) + "/Ana/cutFiles/ana_ca48.par").c_str() );
     }
-  else if(cx4_runrange)
+  else if(cx4_runrange && cx4_runrange_prev)
     {
-      if(cx4_runrange_prev)
-	return;
-
       std::cerr << "WARNING:: Run range changed for run " << current_run << ". Setting ana_cx4.par file." << std::endl;
       this -> readInputParam( (std::string(CLAS12ANA_DIR) + "/Ana/cutFiles/ana_cx4.par").c_str() );
     }
-  else if(snx4_runrange)
+  else if(snx4_runrange && !snx4_runrange_prev)
     {
-      if(snx4_runrange_prev)
-	return;
-
-      std::cerr << "WARNING:: Run range changed for run " << current_run << ". Setting ana_snx4.par file." << std::endl;
-      this -> readInputParam( (std::string(CLAS12ANA_DIR) + "/Ana/cutFiles/ana_snx4.par").c_str() );
+      std::cerr << "WARNING:: Run range changed for run " << current_run << ". Setting ana_cx4.par file which is the same as the snx4 cell." << std::endl;
+      this -> readInputParam( (std::string(CLAS12ANA_DIR) + "/Ana/cutFiles/ana_cx4.par").c_str() );
     }
-  else if(d_runrange)
+  else if(d_runrange && !d_runrange_prev)
     {
-      if(d_runrange_prev)
-	return;
-
       std::cerr << "WARNING:: Run range changed for run " << current_run << ". Setting ana_he4.par file. Which is std. liquid cell default." << std::endl;
       this -> readInputParam( (std::string(CLAS12ANA_DIR) + "/Ana/cutFiles/ana_he4.par").c_str() );
     }
-  else if(h_runrange)
+  else if(h_runrange && !h_runrange_prev)
     {
-      if(h_runrange_prev)
-	return;
-
       std::cerr << "WARNING:: Run range changed for run " << current_run << ". Setting ana_he4.par file. Which is std. liquid cell default." << std::endl;
       this -> readInputParam( (std::string(CLAS12ANA_DIR) + "/Ana/cutFiles/ana_he4.par").c_str() );
-    }
-  else
-    {
-      std::cerr << "WARNING:: Run range not found for run " << current_run << " in setting analysis .par file. Setting to defualt ana.par file, is this what you want???" << std::endl;
-      this -> readInputParam( (std::string(CLAS12ANA_DIR) + "/Ana/cutFiles/ana.par").c_str() );
     }
 
   previous_run = current_run;
 
-  this -> printParams();
 }
 
 void clas12ana::Init()
@@ -402,7 +373,7 @@ void clas12ana::Init()
   this -> readEcalPPar( (std::string(CLAS12ANA_DIR) +"/Ana/cutFiles/paramsPI_LD2_x2.dat").c_str());
 
   this -> readInputSRCParam( (std::string(CLAS12ANA_DIR) + "/Ana/cutFiles/src_cuts.par").c_str() );
-  this -> printParams();
+  //  this -> printParams();
 
 }
 
@@ -629,16 +600,6 @@ bool clas12ana::CDEdgeCuts(const region_part_ptr &p)
     return true; //neutrals dont apply
 }
 
-
-bool clas12ana::checkVertex(const region_part_ptr &p)
-{
-  //true if inside cut
-  return ( (p->par()->getVx() > vertex_x_cuts.at(0) && p->par()->getVx() < vertex_x_cuts.at(1)) 
-	&& (p->par()->getVy() > vertex_y_cuts.at(0) && p->par()->getVy() < vertex_y_cuts.at(1))
-        && (p->par()->getVz() > vertex_z_cuts.at(0) && p->par()->getVz() < vertex_z_cuts.at(1)) );
-
-}
-
 bool clas12ana::checkVertexCorrelation(const region_part_ptr &el, const region_part_ptr &p)
 {
   //true if inside cut
@@ -649,6 +610,44 @@ bool clas12ana::checkVertexCorrelation(const region_part_ptr &el, const region_p
   else
     return true;
 }
+
+bool clas12ana::checkVertex(const region_part_ptr &p)
+{
+  //function returns true if inside vertex cuts
+  int pid = p->par()->getPid();
+
+  bool in_vxvy = (p->par()->getVx() > vertex_x_cuts.at(0) && p->par()->getVx() < vertex_x_cuts.at(1))
+    && (p->par()->getVy() > vertex_y_cuts.at(0) && p->par()->getVy() < vertex_y_cuts.at(1));
+
+  if(!in_vxvy)
+    return false;    
+
+  //need to change the PID for protons which are idientified with TOF cuts if turned on
+  //otherwise vertex cuts will not properly be done
+
+  if(checkProtonPidCut(p) && f_protonpidCuts)
+    pid = 2212;
+
+  if(p->getRegion() == FD) //forward detector cuts
+    {
+      auto itter = vertex_z_cuts_fd.find(pid);
+      if(itter != vertex_z_cuts_fd.end())
+	return p->par()->getVz() > itter->second.at(0) && p->par()->getVz() < itter->second.at(1);
+      else
+	return true;
+    }
+  else if(p->getRegion() == CD) //central detector cuts
+    {
+      auto itter = vertex_z_cuts_cd.find(pid);
+      if(itter != vertex_z_cuts_cd.end())
+	return p->par()->getVz() > itter->second.at(0) && p->par()->getVz() < itter->second.at(1);
+      else
+	return true;
+    }
+
+  return true;
+}
+
 
 bool clas12ana::checkPidCut(const region_part_ptr &p)
 {
@@ -788,12 +787,21 @@ void clas12ana::readEcalPPar(const char* filename)
   else
     std::cout<<"ECal parameter files does not exist!!!"<<endl;
 
-
 }
 
 
+void clas12ana::clearInputParam()
+{
+  pid_cuts_cd.clear();
+  pid_cuts_fd.clear();
+  vertex_z_cuts_cd.clear();
+  vertex_z_cuts_fd.clear();
+}
+
 void clas12ana::readInputParam(const char* filename)
 {
+  clearInputParam();
+
   ifstream infile;
   infile.open(filename);
 
@@ -843,56 +851,45 @@ void clas12ana::readInputParam(const char* filename)
 		}
             }//end PID cuts section
 
-          else if(parameter == "vertex_cut")
+          else if(parameter == "vertex_z_cut")
             {
+	      //get cut values
 	      ss >> parameter2;
               stringstream ss2(parameter2);
               string pid_v;
-	      int count = 0;
-	      string pid = "";
+	      string detector;
+	      int count = 0; //parameter number
+	      int pid = -99;
 	      vector<double> par;
-
+	      
 	      while(getline(ss2, pid_v, ':'))
 		{
 		  if(count == 0)
-		    pid = pid_v;
-		  else
+		    pid = stoi(pid_v);
+		  else if(count < 3)
 		    par.push_back(atof(pid_v.c_str() ));
-
+		  else if(count == 3)
+		    detector = pid_v;
+		  
 		  count++;
 		}
-
-	      if(pid != "")
-		vertex_cuts.insert(pair<string, vector<double> >(pid, par));
-            }
-          else if(parameter == "vertex_z_p_cd")
-            {
-	      ss >> parameter2;
-              stringstream ss2(parameter2);
-              string value;
-	      double vzmin,vzmax;
-	      int count = 0;
-	      while(getline(ss2, value, ':'))
+	      if(pid != -99) //if pid cut exists in file
 		{
-		  stringstream ss3(value);
-		  if (count == 0)
-		    ss3 >> vzmin;
-		  else
-		    ss3 >> vzmax;
-
-		  ++count;
+		  if(detector == "FD")
+		    vertex_z_cuts_fd.insert(pair<int, vector<double> >(pid, par));
+		  else if(detector == "CD")
+		    vertex_z_cuts_cd.insert(pair<int, vector<double> >(pid, par));
 		}
-	      this->setVzcuts(vzmin,vzmax);
-            }
-
+            }//end vertex z cuts
         }
     }
   else
     cout<<"Parameter file didn't read in "<<endl;
 
+  this->printParams();
+
   return;
 }
-
 
 
 void clas12ana::readInputSRCParam(const char* filename)
@@ -1072,7 +1069,7 @@ void clas12ana::readInputSRCParam(const char* filename)
         }
     }
   else
-    cout<<"Parameter file didn't read in "<<endl;
+    cout<<"SRC parameter file didn't read in "<<endl;
 
   return;
 }
@@ -1082,33 +1079,42 @@ void clas12ana::printParams()
 {
   cout<<endl;
   cout<<"Target Parameters:"<<endl;
-
+  
   cout<<"Central Detector PID cuts:"<<endl;
-  for (auto itr = pid_cuts_cd.begin(); itr != pid_cuts_cd.end(); ++itr) {
-    cout << '\t' << "Particle type: " << itr->first << '\t' <<"{mean,sigma}: ";
-	  for(auto a : itr->second)
-	    cout  << '\t' << a ;
-	  cout<< '\n';
-  }
-
+  for (auto itr = pid_cuts_cd.begin(); itr != pid_cuts_cd.end(); ++itr) 
+    {
+      cout << '\t' << "Particle type: " << itr->first << '\t' <<"{mean,sigma}: ";
+      for(auto a : itr->second)
+	cout  << '\t' << a ;
+      cout<< '\n';
+    }
+  
   cout<<"Forward Detector PID cuts:"<<endl;
-  for (auto itr = pid_cuts_fd.begin(); itr != pid_cuts_fd.end(); ++itr) {
-    cout << '\t' << "Particle type: " << itr->first << '\t' <<"{mean,sigma}: ";
-	  for(auto a : itr->second)
-	    cout  << '\t' << a ;
-	  cout<< '\n';
-  }
+  for (auto itr = pid_cuts_fd.begin(); itr != pid_cuts_fd.end(); ++itr) 
+    {
+      cout << '\t' << "Particle type: " << itr->first << '\t' <<"{mean,sigma}: ";
+      for(auto a : itr->second)
+	cout  << '\t' << a ;
+      cout<< '\n';
+    }
 
+  cout<<"Central Detector Vz cuts:"<<endl;
+  for (auto itr = vertex_z_cuts_cd.begin(); itr != vertex_z_cuts_cd.end(); ++itr) 
+    {
+      cout << '\t' << "Particle type: " << itr->first << '\t' <<"{mean,sigma}: ";
+      for(auto a : itr->second)
+	cout  << '\t' << a ;
+      cout<< '\n';
+    }
 
-  cout<<"Vertex cuts (Electrons):"<<endl;
-  for (auto itr = vertex_cuts.begin(); itr != vertex_cuts.end(); ++itr) {
-    cout << '\t' << "Particle type: " << itr->first << '\t' <<"{min,max}: ";
-	  for(auto a : itr->second)
-	    cout  << '\t' << a ;
-	  cout<< '\n';
-  }
-
-  cout<<"Vertex z-cuts (non-Electrons Particles): Min:"<< vertex_z_cuts.at(0)<< " Max: " << vertex_z_cuts.at(1)<<endl;
+  cout<<"Forward Detector Vz cuts:"<<endl;
+  for (auto itr = vertex_z_cuts_fd.begin(); itr != vertex_z_cuts_fd.end(); ++itr)
+    {
+      cout << '\t' << "Particle type: " << itr->first << '\t' <<"{mean,sigma}: ";
+      for(auto a : itr->second)
+	cout  << '\t' << a ;
+      cout<< '\n';
+    }
 
   cout <<"SRC lead and recoil cuts:"<<endl;
   cout << "Q2 {max,min}: "    << q2_cut[0]<<","<<q2_cut[1]<<endl;

@@ -71,14 +71,6 @@ int main(int argc, char ** argv)
   bool outputDebugPlots = true;
   clas12ana clasAna(outputDebugPlots); 
 
-  /*
-  clasAna.readInputParam("ana.par");
-  clasAna.readEcalSFPar("paramsSF_40Ca_x2.dat");
-  clasAna.readEcalPPar("paramsPI_40Ca_x2.dat");
-  clasAna.printParams();
-  */
-  clasAna.printParams();
-
   auto &c12=chain.C12ref();
 
   auto db=TDatabasePDG::Instance();
@@ -110,7 +102,6 @@ int main(int argc, char ** argv)
   TH1D * lead_theta   = new TH1D("lead_theta","Lead Theta ",100,0,180);
   TH1D * recoil_theta = new TH1D("recoil_theta","Recoil Theta ",100,0,180);
 
-
   while(chain.Next())
     {
 
@@ -118,16 +109,10 @@ int main(int argc, char ** argv)
       if(data_type)
 	weight = c12->mcevent()->getWeight(); //used if MC events have a weight 
 
-      //      cout<<"weight "<<weight<<endl;
       clasAna.Run(c12);
-
-      auto electrons_c12 = c12->getByID(11);
 
       auto electrons = clasAna.getByPid(11);
       auto protons = clasAna.getByPid(2212);
-
-      for(auto &e : electrons_c12)
-	htcc->Fill(e->che(HTCC)->getNphe());
 
       if(electrons.size() == 1)
 	{
@@ -144,8 +129,8 @@ int main(int argc, char ** argv)
 	  double p_q      = 0;
 	  double x_prime  = 0;
 
-	  q2_h->Fill(q2);
-	  xb_h->Fill(x_b);
+	  q2_h->Fill(q2,weight);
+	  xb_h->Fill(x_b,weight);
 
 	  for(auto &p : clasAna.getByPid(2212))
 	    {
@@ -153,8 +138,6 @@ int main(int argc, char ** argv)
 		el_p_corr_cd->Fill(electrons[0]->par()->getVz()-p->par()->getVz());
 	      else if(p->getRegion() == FD)
 		el_p_corr_fd->Fill(electrons[0]->par()->getVz()-p->par()->getVz());
-
-
 	    }
 
 
@@ -168,11 +151,6 @@ int main(int argc, char ** argv)
 	      SetLorentzVector(lead_ptr,lead[0]);
 	      TLorentzVector miss = beam + target - el - lead_ptr; //photon  4-vector            
 	      lead_theta->Fill(lead_ptr.Theta()*TMath::RadToDeg());
-	      //	      if(lead_ptr.P() > 1)
-	      //		continue;
-
-	      if(lead[0]->getRegion()==FD){cout<<"Hello\n\n\n\n\n"<<endl;}
-
 	      ep_h->Fill(miss.P(),weight);
 
 
@@ -199,9 +177,6 @@ int main(int argc, char ** argv)
 
     }
 
-  clasAna.WriteSFEcalCuts();
-
-  missm->Draw();
 
   TFile f(outFile,"RECREATE");
   f.cd();
