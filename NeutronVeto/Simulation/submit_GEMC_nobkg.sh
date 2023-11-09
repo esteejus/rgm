@@ -20,8 +20,8 @@ SUPPORT_DIR=/w/hallb-scshelf2102/clas/clase2/erins/repos/rgm/NeutronVeto/Simulat
 #OUTPUT_FILE=neutrons_bkg
 #OUTPUT_FILE=protons_bkg
 
-OUTPUT_FILE=isotropic_neutrons
-#OUTPUT_FILE=isotropic_protons
+#OUTPUT_FILE=isotropic_neutrons
+OUTPUT_FILE=isotropic_protons
 
 NEVENTS=10000
 GCARD=rgm.gcard
@@ -33,7 +33,7 @@ source /group/clas12/packages/setup.sh
 module load clas12/pro #dev
 #module switch coatjava/8.4.0
 #module switch coatjava/8.6.0 # want to use current version (10.0.2?) 
-module switch gemc/5.4 # switched to 5.3 from 5.1 (has latest cad drawings)
+module switch gemc/5.2 # switched to 5.3 from 5.1 (has latest cad drawings)
 module load sqlite/dev
 
 

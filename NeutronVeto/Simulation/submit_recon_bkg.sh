@@ -29,7 +29,7 @@ source /etc/profile.d/modules.sh
 source /group/clas12/packages/setup.sh
 module load clas12/pro #dev
 #module switch coatjava/8.4.0
-module switch coatjava/9.0.0
+module switch coatjava/10.0.1
 #module switch gemc/5.1 # use 5.3
 module load sqlite/dev
 
