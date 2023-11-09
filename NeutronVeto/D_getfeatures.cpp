@@ -15,6 +15,7 @@
 #include "clas12reader.h"
 #include "HipoChain.h"
 #include "neutron-veto/veto_functions.h"
+#include "clas12ana.h"
 
 
 using namespace std;
@@ -96,6 +97,19 @@ int main(int argc, char ** argv) {
   int counter = 0;
 
 
+  // set up instance of clas12ana
+  clas12ana clasAna;
+
+  clasAna.readEcalSFPar("/w/hallb-scshelf2102/clas12/users/esteejus/rgm/Ana/cutFiles/paramsSF_LD2_x2.dat");
+  clasAna.readEcalPPar("/w/hallb-scshelf2102/clas12/users/esteejus/rgm/Ana/cutFiles/paramsPI_LD2_x2.dat");
+
+  clasAna.printParams();
+
+  clasAna.setProtonPidCuts(true);
+
+  
+
+
 
 //////////////////////////
 /////   HISTOGRAMS   /////
@@ -104,14 +118,23 @@ int main(int argc, char ** argv) {
   // proton stuff
   TH1D * h_psize = new TH1D("psize","Number of Protons in Event",10,0,10);
     hist_list_1.push_back(h_psize);
-  TH2D * h_dbeta_p = new TH2D("dbeta_p","#Delta #beta vs proton momentum",50,0,3,50,-0.2,0.2);
-    hist_list_2.push_back(h_dbeta_p);
-  TH1D * h_vzp = new TH1D("vzp","Vertex difference between proton and electron;Proton Vertex z - Electron Vertex z;Counts",100,-8,8);
-    hist_list_1.push_back(h_vzp);
-  TH1D * h_chipid = new TH1D("chipid","Proton #chi^{2}_{PID};#chi^{2}_{PID};Counts",100,-6,6);
-    hist_list_1.push_back(h_chipid);
-  TH2D * h_pangles = new TH2D("pangles","Proton Angles;phi;theta",48,-180,180,45,0,180);
+  TH2D * h_pangles = new TH2D("pangles","Proton Angular Distribution;#phi_{p} (deg);#theta_{p} (deg)",48,-180,180,45,0,180);
     hist_list_2.push_back(h_pangles);
+
+  TH2D * h_dbeta_p_cd = new TH2D("dbeta_p_cd","#Delta #beta vs proton momentum (CD);p_{p} (GeV/c);#Delta#beta",50,0,3,50,-0.2,0.2);
+    hist_list_2.push_back(h_dbeta_p_cd);
+  TH1D * h_vzp_cd = new TH1D("vzp_cd","Vertex difference between proton and electron (CD);Proton Vertex z - Electron Vertex z (cm);Counts",100,-8,8);
+    hist_list_1.push_back(h_vzp_cd);
+  TH1D * h_chipid_cd = new TH1D("chipid_cd","Proton #chi^{2}_{PID} (CD);#chi^{2}_{PID};Counts",100,-6,6);
+    hist_list_1.push_back(h_chipid_cd);
+
+
+  TH2D * h_dbeta_p_fd = new TH2D("dbeta_p_fd","#Delta #beta vs proton momentum (FD);p_{p} (GeV/c);#Delta#beta",50,0,3,50,-0.2,0.2);
+    hist_list_2.push_back(h_dbeta_p_fd);
+  TH1D * h_vzp_fd = new TH1D("vzp_fd","Vertex difference between proton and electron (FD);Proton Vertex z - Electron Vertex z (cm);Counts",100,-8,8);
+    hist_list_1.push_back(h_vzp_fd);
+  TH1D * h_chipid_fd = new TH1D("chipid_fd","Proton #chi^{2}_{PID} (FD);#chi^{2}_{PID};Counts",100,-6,6);
+    hist_list_1.push_back(h_chipid_fd);
 
   // neutron stuff
   TH1D * h_nsize = new TH1D("nsize","Number of Neutrons in Event",10,0,10);
@@ -120,17 +143,17 @@ int main(int argc, char ** argv) {
 
   // reconstructed momentum
 
-  TH2D * h_nangles = new TH2D("nangles","Neutron Angles;phi;theta",48,-180,180,45,0,180);
+  TH2D * h_nangles = new TH2D("nangles","Neutron Angular Distribution;#phi_{n};#theta_{n}",48,-180,180,45,0,180);
     hist_list_2.push_back(h_nangles);
-  TH1D * h_pxminuspx = new TH1D("pxminuspx","px_{n}-px_{miss};Counts",100,-0.5,0.5);
+  TH1D * h_pxminuspx = new TH1D("pxminuspx","px_{n}-px_{pred};px_{n}-px_{pred} (GeV/c);Counts",100,-0.5,0.5);
     hist_list_1.push_back(h_pxminuspx);
-  TH1D * h_pyminuspy = new TH1D("pyminuspy","py_{n}-py_{miss};Counts",100,-0.5,0.5);
+  TH1D * h_pyminuspy = new TH1D("pyminuspy","py_{n}-py_{pred};py_{n}-py_{pred} (GeV/c);Counts",100,-0.5,0.5);
     hist_list_1.push_back(h_pyminuspy);
-  TH1D * h_pzminuspz = new TH1D("pzminuspz","pz_{n}-pz_{miss};Counts",100,-0.5,0.5);
+  TH1D * h_pzminuspz = new TH1D("pzminuspz","pz_{n}-pz_{pred};pz_{n}-pz_{pred} (GeV/c);Counts",100,-0.5,0.5);
     hist_list_1.push_back(h_pzminuspz);
-  TH1D * h_pminusp = new TH1D("pminusp","p_{n}-p_{gen};Counts",100,-0.5,0.5);
+  TH1D * h_pminusp = new TH1D("pminusp","p_{n}-p_{pred};p_{n}-p_{pred} (GeV/c);Counts",100,-0.5,0.5);
     hist_list_1.push_back(h_pminusp);
-  TH2D * h_pvsp = new TH2D("pvsp","Momentum Resolution;p_{miss} (GeV/c);p_{measured} (GeV/c)",100,0,1,100,0,1);
+  TH2D * h_pvsp = new TH2D("pvsp","Momentum Resolution;p_{pred} (GeV/c);p_{measured} (GeV/c)",100,0,1,100,0,1);
     hist_list_2.push_back(h_pvsp);
   TH1D * h_cos0 = new TH1D("cos0","Cosine of angle between generated and reconstructed p",50,-1.1,1.1);
     hist_list_1.push_back(h_cos0);
@@ -142,41 +165,44 @@ int main(int argc, char ** argv) {
     hist_list_2.push_back(h_sec_phi);
   TH1D * h_mmiss = new TH1D("mmiss","Missing Mass",50,0.5,1.5);
     hist_list_1.push_back(h_mmiss);
-  TH2D * h_mmiss_pn = new TH2D("mmiss_pn","Missing Mass vs Measured Neutron Momentum",50,0,1.25,50,0.5,1.5);
+  TH2D * h_mmiss_pn = new TH2D("mmiss_pn","Missing Mass vs Measured Neutron Momentum;p_{n} (GeV/c);Missing Mass (GeV/c^{2})",50,0,1.25,50,0.5,1.5);
     hist_list_2.push_back(h_mmiss_pn);
   TH2D * h_theta_beta = new TH2D("theta_beta","Neutron theta vs beta;#beta;#theta",50,-0.1,1.1,55,35,145);
     hist_list_2.push_back(h_theta_beta);
   TH2D * h_p_theta = new TH2D("p_theta","Neutron Momentum vs Theta;#theta;p (GeV/c)",55,35,145,50,0,1.2);
     hist_list_2.push_back(h_p_theta);
-  TH2D * h_pmiss_thetamiss = new TH2D("pmiss_thetamiss","pmiss vs #theta_{pmiss};#theta_{pmiss};pmiss",90,0,180,50,0,1.2);
+  TH2D * h_pmiss_thetamiss = new TH2D("pmiss_thetamiss","Missing Momentum vs #theta_{pred};#theta_{pred} (deg);p_{pred} (GeV/c)",90,0,180,50,0,1.2);
     hist_list_2.push_back(h_pmiss_thetamiss);
   TH2D * h_thetapn_pp = new TH2D("thetapn_pp","#theta_{pn} vs p_{p};p_{p} (GeV/c);#theta_{pn}",40,0,1,40,0,180);
     hist_list_2.push_back(h_thetapn_pp);
-  TH1D * h_tof = new TH1D("tof","Time of Flight",200,-10,50);
+  TH1D * h_tof = new TH1D("tof","Time of Flight;TOF (ns);Counts",200,-10,50);
     hist_list_1.push_back(h_tof);
-  TH2D * h_andrew = new TH2D("andrew","(p_{miss}-p_{n})/p_{miss} vs #theta_{n,miss};(p_{miss}-p_{n})/p_{miss};#theta_{n,miss}",100,-2,2,90,0,180);
-    hist_list_2.push_back(h_andrew);
+  TH2D * h_compare = new TH2D("compare","(p_{pred}-p_{n})/p_{pred} vs #theta_{n,pred} (deg);(p_{pred}-p_{n})/p_{pred};#theta_{n,pred}",100,-2,2,90,0,180);
+    hist_list_2.push_back(h_compare);
   TH2D * h_Edep_beta = new TH2D("Edep_beta","Energy deposition vs #beta;#beta;E_{dep}",50,0,1,50,0,100);
     hist_list_2.push_back(h_Edep_beta);
   TH1D * h_p_all = new TH1D("p_all","Momentum",100,0,1.2);
     hist_list_1.push_back(h_p_all);
-  TH1D * h_sectorpn = new TH1D("sector_pn","Sector difference between proton and neutron",40,0,40);
-    hist_list_1.push_back(h_sectorpn);
+
+
+  TH2D * h_dpp_edep = new TH2D("dpp_edep","#Delta p/p vs Energy Deposition;E_{dep} (MeVee);#Delta p/p",100,0,40,100,-0.4,0.4);
+    hist_list_2.push_back(h_dpp_edep);
+
 
 
 
   // good n / bad n set
   TH2D * h_nangles2 = new TH2D("nangles2","Neutron Angles;phi;theta",48,-180,180,45,0,180);
     hist_list_2.push_back(h_nangles2);
-  TH1D * h_pxminuspx2 = new TH1D("pxminuspx2","px_{n}-px_{miss};Counts",100,-0.5,0.5);
+  TH1D * h_pxminuspx2 = new TH1D("pxminuspx2","px_{n}-px_{pred};Counts",100,-0.5,0.5);
     hist_list_1.push_back(h_pxminuspx2);
-  TH1D * h_pyminuspy2 = new TH1D("pyminuspy2","py_{n}-py_{miss};Counts",100,-0.5,0.5);
+  TH1D * h_pyminuspy2 = new TH1D("pyminuspy2","py_{n}-py_{pred};Counts",100,-0.5,0.5);
     hist_list_1.push_back(h_pyminuspy2);
-  TH1D * h_pzminuspz2 = new TH1D("pzminuspz2","pz_{n}-pz_{miss};Counts",100,-0.5,0.5);
+  TH1D * h_pzminuspz2 = new TH1D("pzminuspz2","pz_{n}-pz_{pred};Counts",100,-0.5,0.5);
     hist_list_1.push_back(h_pzminuspz2);
   TH1D * h_pminusp2 = new TH1D("pminusp2","p_{n}-p_{gen};Counts",100,-0.5,0.5);
     hist_list_1.push_back(h_pminusp2);
-  TH2D * h_pvsp2 = new TH2D("pvsp2","Momentum Resolution;p_{miss} (GeV/c);p_{measured} (GeV/c)",100,0,1,100,0,1);
+  TH2D * h_pvsp2 = new TH2D("pvsp2","Momentum Resolution;p_{pred} (GeV/c);p_{measured} (GeV/c)",100,0,1,100,0,1);
     hist_list_2.push_back(h_pvsp2);
   TH1D * h_cos02 = new TH1D("cos02","Cosine of angle between generated and reconstructed p",50,-1.1,1.1);
     hist_list_1.push_back(h_cos02);
@@ -192,23 +218,22 @@ int main(int argc, char ** argv) {
     hist_list_2.push_back(h_theta_beta2);
   TH2D * h_p_theta2 = new TH2D("p_theta2","Neutron Momentum vs Theta;#theta;p (GeV/c)",55,35,145,50,0,1.2);
     hist_list_2.push_back(h_p_theta2);
-  TH2D * h_pmiss_thetamiss2 = new TH2D("pmiss_thetamiss2","pmiss vs #theta_{pmiss};#theta_{pmiss};pmiss",90,0,180,50,0,1.2);
+  TH2D * h_pmiss_thetamiss2 = new TH2D("pmiss_thetamiss2","p_{pred} vs #theta_{pred};#theta_{pred};p_{pred} (GeV/c)",90,0,180,50,0,1.2);
     hist_list_2.push_back(h_pmiss_thetamiss2);
   TH2D * h_thetapn_pp2 = new TH2D("thetapn_pp2","#theta_{pn} vs p_{p};p_{p} (GeV/c);#theta_{pn}",40,0,1,40,0,180);
     hist_list_2.push_back(h_thetapn_pp2);
-  TH1D * h_tof2 = new TH1D("tof2","Time of Flight",200,-10,50);
+  TH1D * h_tof2 = new TH1D("tof2","Time of Flight;TOF (ns);Counts",200,-10,50);
     hist_list_1.push_back(h_tof2);
-  TH2D * h_andrew2 = new TH2D("andrew2","(p_{miss}-p_{n})/p_{miss} vs #theta_{n,miss};(p_{miss}-p_{n})/p_{miss};#theta_{n,miss}",100,-2,2,90,0,180);
-    hist_list_2.push_back(h_andrew2);
+  TH2D * h_compare2 = new TH2D("compare2","(p_{pred}-p_{n})/p_{pred} vs #theta_{n,pred};(p_{pred}-p_{n})/p_{pred};#theta_{n,pred} (deg)",100,-2,2,90,0,180);
+    hist_list_2.push_back(h_compare2);
   TH2D * h_Edep_beta2 = new TH2D("Edep_beta2","Energy deposition vs #beta;#beta;E_{dep}",50,0,1,50,0,100);
     hist_list_2.push_back(h_Edep_beta2);
   TH1D * h_p_cut = new TH1D("p_cut","Momentum",100,0,1.2);
     hist_list_1.push_back(h_p_cut);
-  TH1D * h_sectorpn2 = new TH1D("sector_pn2","Sector difference between proton and neutron",40,0,40);
-    hist_list_1.push_back(h_sectorpn2);
-  TH2D * h_thetapn_dpp = new TH2D("thetapn_dpp","#theta_{pn} vs #Delta p/p;(p_{miss}-p_{n})/p_{miss};#theta_{pn}",100,-2,2,90,0,180);
+
+  TH2D * h_thetapn_dpp = new TH2D("thetapn_dpp","#theta_{pn} vs #Delta p/p;(p_{pred}-p_{n})/p_{pred};#theta_{pn} (deg)",100,-2,2,90,0,180);
     hist_list_2.push_back(h_thetapn_dpp);
-  TH2D * h_thetapn_dpp2 = new TH2D("thetapn_dpp2","#theta_{pn} vs #Delta p/p;(p_{miss}-p_{n})/p_{miss};#theta_{pn}",100,-2,2,90,0,180);
+  TH2D * h_thetapn_dpp2 = new TH2D("thetapn_dpp2","#theta_{pn} vs #Delta p/p;(p_{pred}-p_{n})/p_{pred};#theta_{pn} (deg)",100,-2,2,90,0,180);
     hist_list_2.push_back(h_thetapn_dpp2);
 
 
@@ -217,15 +242,7 @@ int main(int argc, char ** argv) {
   TH1D * h_anglediff2 = new TH1D("angle_diff2","Angle Diff between CVT hit and CND hit",180,0,180);
     hist_list_1.push_back(h_anglediff2);
 
-  TH2D * h_cnd_ctof_sector = new TH2D("cnd_ctof_sector","CND sector vs CTOF sector;CTOF sector;CND sector",100,-52,48,30,-6,24);
-    hist_list_2.push_back(h_cnd_ctof_sector);
-  TH2D * h_cnd_ctof_sector2 = new TH2D("cnd_ctof_sector2","CND sector vs CTOF sector;CTOF sector;CND sector",100,-52,48,30,-6,24);
-    hist_list_2.push_back(h_cnd_ctof_sector2);
 
-  /*TH1D * h_cnd_ctof_secdiff = new TH1D("cnd_ctof_secdiff","CND sector vs CTOF sector difference;CTOF sector - CND sector (deg)",200,-100,100);
-    hist_list_1.push_back(h_cnd_ctof_secdiff);
-  TH1D * h_cnd_ctof_secdiff2 = new TH1D("cnd_ctof_secdiff2","CND sector vs CTOF sector difference;CTOF sector - CND sector (Deg)",200,-100,100);
-    hist_list_1.push_back(h_cnd_ctof_secdiff2);*/
 
 
 
@@ -282,11 +299,11 @@ int numevent = 0;
     layermult = 0; size = 0; cnd_hits = 0; ctof_hits = 0;
     is_CTOF = 0; is_CND1 = 0; is_CND2 = 0; is_CND3 = 0;
 
-    // identify particles from REC::Particle
-    //if (!myCut.electroncut(c12)) {continue;}
-    auto elec=c12->getByID(11);
-    auto prot = c12->getByID(2212);
-    auto neut = c12->getByID(2112);
+    // particle pid
+    clasAna.Run(c12);
+    auto elec = clasAna.getByPid(11);
+    auto prot = clasAna.getByPid(2212);
+    auto neut = clasAna.getByPid(2112);    
     auto allParticles=c12->getDetParticles();
     if (elec.size()!=1) {continue;}
     if (prot.size()!=1) {continue;}
@@ -339,19 +356,41 @@ int numevent = 0;
       double vzp = prot[i]->par()->getVz();
       double chipid = prot[i]->par()->getChi2Pid();
 
+
+
+
       // fill histos
-      h_vzp->Fill(vzp-vze);
-      h_chipid->Fill(chipid);
-      h_dbeta_p->Fill(pp.Mag(),dbeta);
       h_pangles->Fill(pp.Phi()*180./M_PI,p_theta);
 
+      if (prot[i]->getRegion()==FD)
+      {
+        h_vzp_fd->Fill(vzp-vze);
+        if (abs(vzp-vze)>5) {continue;}
+        h_chipid_fd->Fill(chipid);
+        h_dbeta_p_fd->Fill(pp.Mag(),dbeta);
+        if (pp.Mag()<0.5) {continue;}
+        if (abs(dbeta)>0.03) {continue;}
+      }
+      else if (prot[i]->getRegion()==CD)
+      {
+        h_vzp_cd->Fill(vzp-vze);
+        if (abs(vzp-vze)>4) {continue;}
+        h_chipid_cd->Fill(chipid);
+        //if (abs(chipid)>4) {continue;}
+        h_dbeta_p_cd->Fill(pp.Mag(),dbeta);
+        if (pp.Mag()<0.3) {continue;}
+        if (pp.Mag()<3.0) {continue;}
+        if (abs(dbeta)>0.05) {continue;}
+      }
+
+
       // make cuts
-      if ((vzp-vze)<-4. || (vzp-vze)>4.) {continue;}
-      if (chipid<-3. || chipid>3.) {continue;}
-      if (dbeta<-0.05 || dbeta>0.05) {continue;}
+      //if ((vzp-vze)<-4. || (vzp-vze)>4.) {continue;}
+      //if (chipid<-3. || chipid>3.) {continue;}
+      //if (dbeta<-0.05 || dbeta>0.05) {continue;}
       // require proton to be in correct angle and momentum range for the requested etector
-      if (pDet=='F' && ((p_theta>40)                || (pp.Mag()<0.5 || pp.Mag()>3.0))) {continue;}
-      if (pDet=='C' && ((p_theta<40 || p_theta>140) || (pp.Mag()<0.2 || pp.Mag()>1.2))) {continue;}
+      //if (pDet=='F' && ((p_theta>40)                || (pp.Mag()<0.5 || pp.Mag()>3.0))) {continue;}
+      //if (pDet=='C' && ((p_theta<40 || p_theta>140) || (pp.Mag()<0.2 || pp.Mag()>1.2))) {continue;}
       p_index = i;
     }
 
@@ -398,72 +437,35 @@ int numevent = 0;
       is_CND2 = (neut[i]->sci(CND2)->getLayer()==2);
       is_CND3 = (neut[i]->sci(CND3)->getLayer()==3);
       is_CTOF = neut[i]->sci(CTOF)->getDetector()==4;
-      
-      /*int num_hits_inc = 0;
-      if (is_CND1) {num_hits_inc = num_hits_inc + 1;}
-      if (is_CND2) {num_hits_inc = num_hits_inc + 1;}
-      if (is_CND3) {num_hits_inc = num_hits_inc + 1;}*/
 
        
       // put REC::Scintillator information
-      int sector;
       double time;
       double beta = neut[i]->par()->getBeta();
-
       
       if (is_CND1)
       {
-        sector = neut[i]->sci(CND1)->getSector();
         time =   neut[i]->sci(CND1)->getTime() - starttime;
-        energy = neut[i]->sci(CND1)->getEnergy();
-        //if (cnd_sector<0) {cnd_sector = sector;}
       }
       
       if (is_CND3)
       {
-        sector = neut[i]->sci(CND3)->getSector();
         time =   neut[i]->sci(CND3)->getTime() - starttime;
-        energy = neut[i]->sci(CND3)->getEnergy();
-        //if (cnd_sector<0) {cnd_sector = sector;}
       }
       
       if (is_CND2)
       {
-        sector = neut[i]->sci(CND2)->getSector();
         time =   neut[i]->sci(CND2)->getTime() - starttime;
-        energy = neut[i]->sci(CND2)->getEnergy();
-        //if (cnd_sector<0) {cnd_sector = sector;}
       }
       // PROBLEM: this gives preference to 2nd-layer hits
       if (is_CTOF)
       {
-        sector = (neut[i]->sci(CTOF)->getComponent()); // rounded down, ctof component mapped onto cnd sector
         time =   neut[i]->sci(CTOF)->getTime() - starttime;
-        energy = neut[i]->sci(CTOF)->getEnergy();
-        //if (ctof_sector<0) {ctof_sector = sector/2;}
       }
 
       double cos0 = pmiss.Dot(pn) / (pmiss.Mag()*pn.Mag());
 
-      //double cnd_ctof_secdiff = cnd_sector-ctof_sector;
 
-
-      // ESSENTIAL NEUTRONS CUTS
-      h_tof->Fill(time);
-      if (pn_x==0 || pn_y==0 || pn_z==0) {continue;}
-      double n_theta = pn.Theta()*180./M_PI;
-      if (pn.Mag()<0.25 || pn.Mag()>1.25) {continue;}
-      if (n_theta<40 || n_theta>140) {continue;}
-      h_mmiss->Fill(mmiss);
-      h_mmiss_pn->Fill(pn.Mag(),mmiss);
-      if (mmiss>1.05) {continue;}
-      //if (energy<3) {continue;}
-
-
-      // histos
-      h_nangles->Fill(pn.Phi()*180./M_PI,n_theta);
-      h_energy->Fill(energy);
-      h_Edep_beta->Fill(neut[i]->getBeta(),energy);
 
 
       // GET ML FEATURES FOR THIS NEUTRON
@@ -473,12 +475,42 @@ int numevent = 0;
       cnd_energy = ninfo.cnd_energy;
       ctof_energy = ninfo.ctof_energy;
       layermult = ninfo.layermult;
-      energy = ninfo.energy; // technically this is being redefined
+      energy = ninfo.energy;
       size = ninfo.size;
       angle_diff = ninfo.angle_diff;
-    
+
+
+
+
+
+      // ESSENTIAL NEUTRONS CUTS
+      h_tof->Fill(time);
+      if (pn_x==0 || pn_y==0 || pn_z==0) {continue;}
+      double n_theta = pn.Theta()*180./M_PI;
+      if (pn.Mag()<0.25 || pn.Mag()>1.25) {continue;}
+      if (n_theta<40 || n_theta>140) {continue;}
+
+      h_dpp_edep->Fill(energy,dpp);
+
+
+      h_mmiss->Fill(mmiss);
+      h_mmiss_pn->Fill(pn.Mag(),mmiss);
+      if (mmiss>1.05) {continue;}
+      //if (edep<3) {continue;}
+
+
+
+
+
+
+
     
       // FILL HISTOS FOR NEUTRON CANDIDATES
+      h_nangles->Fill(pn.Phi()*180./M_PI,n_theta);
+      h_energy->Fill(energy);
+      h_Edep_beta->Fill(neut[i]->getBeta(),energy);
+
+
       h_cos0->Fill(pmiss.Dot(pn) / (pmiss.Mag()*pn.Mag()));
       h_pxminuspx->Fill(pn_x-pmiss.X());
       h_pyminuspy->Fill(pn_y-pmiss.Y());
@@ -490,12 +522,9 @@ int numevent = 0;
       h_p_theta->Fill(n_theta,pn.Mag());
       h_pmiss_thetamiss->Fill(pmiss.Theta()*180./M_PI,pmiss.Mag());
       h_thetapn_pp->Fill(pp.Mag(),pp.Angle(pn)*180./M_PI);
-      h_andrew->Fill((pmiss.Mag()-pn.Mag())/pmiss.Mag(),pn.Angle(pmiss)*180./M_PI);
+      h_compare->Fill((pmiss.Mag()-pn.Mag())/pmiss.Mag(),pn.Angle(pmiss)*180./M_PI);
       h_p_all->Fill(pmiss.Mag());
-      h_sectorpn->Fill(prot[p_index]->trk(CVT)->getSector()-sector);
       h_anglediff->Fill(angle_diff);
-      //h_cnd_ctof_sector->Fill(ctof_sector,cnd_sector);
-      //h_cnd_ctof_secdiff->Fill(ctof_sector-cnd_sector);
       h_thetapn_dpp->Fill((pmiss.Mag()-pn.Mag())/pmiss.Mag(),pn.Angle(pp)*180./M_PI);
 
       // ML features
@@ -564,13 +593,10 @@ int numevent = 0;
   h_pmiss_thetamiss2->Fill(pmiss.Theta()*180./M_PI,pmiss.Mag());
   h_thetapn_pp2->Fill(pp.Mag(),pp.Angle(pn)*180./M_PI);
   h_tof2->Fill(time);
-  h_andrew2->Fill((pmiss.Mag()-pn.Mag())/pmiss.Mag(),pn.Angle(pmiss)*180./M_PI);
+  h_compare2->Fill((pmiss.Mag()-pn.Mag())/pmiss.Mag(),pn.Angle(pmiss)*180./M_PI);
   h_Edep_beta2->Fill(neut[i]->getBeta(),energy);
   h_p_cut->Fill(pmiss.Mag());
-  h_sectorpn2->Fill(prot[p_index]->trk(CVT)->getSector()-sector);
   h_anglediff2->Fill(angle_diff);
-  //h_cnd_ctof_sector2->Fill(ctof_sector,cnd_sector);
-  //h_cnd_ctof_secdiff2->Fill(ctof_sector-cnd_sector);
   h_thetapn_dpp2->Fill((pmiss.Mag()-pn.Mag())/pmiss.Mag(),pn.Angle(pp)*180./M_PI);
   // ML features
   h_energy_2->Fill(energy);
