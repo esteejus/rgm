@@ -1,26 +1,21 @@
 # Measuring Neutron Efficiency
 
-Run the submit scripts for each channel [ h(e,e'p pi-), d(e,e'pFDn), and d(e,e'pCDn) ] to perform the efficiency analysis for each run.
+Each channel [ i.e. p(e,e' pi+ n) and d(e,e'pn) ] has a program for calculating the neutron efficiency using that channel [ neff_h_epin.cpp and neff_d_pn.cpp, respectively ].
 
-Combine the output from the efficiency analysis into one root file, e.g. using hadd.
+The hydrogen program has an option to use the event selection that was used to obtain the RGK neutron efficiency measured that is reported in the NIM paper, or to use event selection for RGM.
 
-```
-$ROOTSYS/bin/hadd allevents_2gev_pCDn.root /output_directory/hepin_6gev_0150*.root
-$ROOTSYS/bin/hadd allevents_6gev_epin.root /output_directory/dCD_2gev_0150*.root
-```
+The deuterium program has two options for dealing with the inelastic background: cutting on xB to get good separation between the signal and background and then cutting on the missing mass, or fitting the signal and background each to Gaussian distributions and then subtracting the background using the fits.
 
-Run the following macros to combine the neutron candidates and detected neutrons from all runs to get a measure of the neutron efficiency as a function of both momentum and polar angle.
+I have created skims for each channel at the following locations.
 
 ```
-root combine_h_epin_neff.c
-root combine_d_pcdn_neff.c
+/lustre19/expphy/volatile/clas12/users/erins/neutron-efficiency/skims/h_epin
+/lustre19/expphy/volatile/clas12/users/erins/neutron-efficiency/skims/d_pn
+/lustre19/expphy/volatile/clas12/users/erins/neutron-efficiency/skims/d_pn_xb1
 ```
 
-The efficiency will be saved in a root file and also printed to the screen.
+For the h_epin directory, I use RG-M hydrogen 6 GeV data, and the skim requires the predicted momentum of the neutron (q - pion momentum) to fall within 40-140 degrees and 0.2-1.2 GeV/c.
 
-```
-neff_6gev_epin.root
-neff_2gev_pCDn.root
-```
+For the d_pn directory, I use RG-M deuterium 2 GeV data, and the skim requires the predicted momentum of the neutron (p - proton momentum) to fall within 40-140 degrees and 0.25-1.25 GeV/c. It also applies a cut requiring xB>0.3.
 
-The workflow above illustrates the neutron efficiency calculation for the h(e,e'p pi-) and d(e,e'pCDn) channels. The parallelization for the d(e,e'pFDn) channel is still in development.
+For the d_pn_xb1 directory, the event selection is the same as for d_pn, except that the xB cut is xB>0.1.
