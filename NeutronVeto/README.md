@@ -29,6 +29,24 @@ Depending on which dataset you want to train on, change the following settings:
 
 The trained models are xml files stored in their respective directories.
 
+# Visualizing output plots
+
+To combine the root plots from the signal and background files analyzed in parallel slurm jobs, execute the following for each type of event (signal or background, simulation or data).
+
+```
+$ROOTSYS/bin/hadd /path/to/target.root /path/to/source/files/file*.root
+```
+
+Run the following files to produce an output pdf with lots of histograms using the big root file.
+
+```
+root -q print_nsim_plots.c
+root -q print_goodn_plots.c
+root -q print_ppipn_plots.c
+```
+
+The first root script is for simulation (update the name to reflect choice of neutrons/protons). The second is for good neutrons from deuterium. The third is for protons misreconstructed as neutrons from deuterium. Make sure the file name in the script matches the file name from the combined root files.
+
 # Applying the neutron veto
 
 For an example application, use veto_test.cpp as a template.
