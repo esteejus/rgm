@@ -300,10 +300,9 @@ int main(int argc, char ** argv)
   reader->AddVariable("cnd_energy", &cnd_energy);
   reader->AddVariable("ctof_energy", &ctof_energy);
   reader->AddVariable("ctof_hits", &ctof_hits);
-  //reader->AddVariable("angle_diff", &angle_diff);
+  reader->AddVariable("angle_diff", &angle_diff);
   // spectator variable(s)
   reader->AddSpectator("momentum", &momentum);
-
   reader->BookMVA("MLP", "/w/hallb-scshelf2102/clas/clase2/erins/repos/rgm/NeutronVeto/dataset_6gev_pCD/weights/TrainNeutronVeto_TMVA_MLP.weights.xml");
 
 
@@ -669,7 +668,7 @@ int main(int argc, char ** argv)
 
 
   /////////////////////////////////////
-  //CND Neutron Signald & Background
+  //CND Neutron Signal & Background
   /////////////////////////////////////
   myCanvas->Divide(2,2);
   myCanvas->cd(1);
