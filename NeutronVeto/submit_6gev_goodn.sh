@@ -16,12 +16,12 @@
 
 
 OUTPUT=/lustre19/expphy/volatile/clas12/users/erins/neutron-veto/d_6gev
+BUILD_DIR=/w/hallb-scshelf2102/clas/clase2/erins/repos/build_rgm/NeutronVeto
 
 
 source /etc/profile.d/modules.sh
 source /group/clas12/packages/setup.sh
 module load clas12/pro #dev
-module switch coatjava/8.4.0
 module load sqlite/dev
 
 # is energy = not-int a problem???
@@ -31,5 +31,5 @@ module load sqlite/dev
 
 INPUT=/lustre19/expphy/cache/clas12/rg-m/production/pass1/6gev/D/dst/recon/
 
-./D_getfeatures 5.98636 1 C ${OUTPUT}/6gev_root/goodn_01${SLURM_ARRAY_TASK_ID}.root ${OUTPUT}/6gev_txt/goodn_01${SLURM_ARRAY_TASK_ID}.txt ${INPUT}/01${SLURM_ARRAY_TASK_ID}/rec_clas_*.hipo # look for good neutrons
+${BUILD_DIR}/D_getfeatures 5.98636 1 ${OUTPUT}/6gev_root/goodn_01${SLURM_ARRAY_TASK_ID}.root ${OUTPUT}/6gev_txt/goodn_01${SLURM_ARRAY_TASK_ID}.txt ${INPUT}/01${SLURM_ARRAY_TASK_ID}/rec_clas_*.hipo # look for good neutrons
 

@@ -22,14 +22,14 @@ using namespace std;
 using namespace clas12;
 
 void Usage() {
-  std::cerr << "Usage: ./D_getfeatures Ebeam keep_good proton-detector(F/D) output-root output-txt input-hipo\n";
+  std::cerr << "Usage: ./D_getfeatures Ebeam keep_good output-root output-txt input-hipo\n";
 }
 
 double getCVTdiff(std::vector<region_part_ptr> &allParticles, TVector3 &pn);
 
 int main(int argc, char ** argv) {
 
-  if(argc<7) {
+  if(argc<6) {
     std::cerr << "Wrong number of arguments\n";
     Usage();
     return -1;
@@ -42,17 +42,14 @@ int main(int argc, char ** argv) {
   bool keep_good = false;
   if(atoi(argv[2])==1){keep_good=true;}
 
-  // arg 3: proton in Forward Detector or Central Detector
-  char pDet = argv[3][0];
-
-  // args 4-5: output file names
-  TFile * f = new TFile(argv[4],"RECREATE");
+  // args 3-4: output file names
+  TFile * f = new TFile(argv[3],"RECREATE");
   TTree * ntree = new TTree("T","NeutronTree");
-  std::ofstream outtxt(argv[5]);
+  std::ofstream outtxt(argv[4]);
 
-  // arg 6+: input hipo file
+  // arg 5+: input hipo file
   clas12root::HipoChain chain;
-  for (int k=6; k<argc; k++) {
+  for (int k=5; k<argc; k++) {
     std::cout << "Input file " << argv[k] << std::endl;
     chain.Add(argv[k]);
   }
@@ -218,6 +215,12 @@ int main(int argc, char ** argv) {
   TH1D * h_p_cut = new TH1D("p_cut","Momentum",100,0,1.2);
     hist_list_1.push_back(h_p_cut);
 
+  TH2D * h_ptheta_pred = new TH2D("ptheta_pred","Predicted Momentum vs Angle of Final Background Sample;#theta_{pred} (deg);p_{pred} (GeV/c)",110,35,145,100,0.2,1.3);
+    hist_list_2.push_back(h_ptheta_pred);
+  TH2D * h_ptheta = new TH2D("ptheta","Measured Momentum vs Angle of Final Background Sample;#theta_{p} (deg);p_{p} (GeV/c)",110,35,145,100,0.2,1.3);
+    hist_list_2.push_back(h_ptheta);
+
+
   // ML features
   TH1D * h_energy_1 = new TH1D("f_energy_1","Neutron Energy",100,0,100);
     hist_list_1.push_back(h_energy_1);
@@ -339,9 +342,6 @@ int numevent = 0;
       if (abs(vzp-vze)>5.) {continue;}
       //if (chipid<-3. || chipid>3.) {continue;}
 
-
-      //if (pDet=='F' && ((p_theta>40)                || (pp.Mag()<0.5 || pp.Mag()>3.0))) {continue;}
-      //if (pDet=='C' && ((p_theta<40 || p_theta>140) || (pp.Mag()<0.2 || pp.Mag()>1.2))) {continue;}
       p_index = i;
     }
     
@@ -569,6 +569,10 @@ int numevent = 0;
   h_compare2->Fill((pmiss.Mag()-pn.Mag())/pmiss.Mag(),pn.Angle(pmiss)*180./M_PI);
   h_Edep_beta2->Fill(neut[i]->getBeta(),energy);
   h_p_cut->Fill(pmiss.Mag());
+
+  h_ptheta_pred->Fill(pmiss.Theta()*180./M_PI,pmiss.Mag());
+  h_ptheta->Fill(pn.Theta()*180/M_PI,pn.Mag());
+
   // ML features
   h_energy_2->Fill(energy);
   h_layermult_2->Fill(layermult);

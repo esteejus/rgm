@@ -22,14 +22,14 @@ using namespace std;
 using namespace clas12;
 
 void Usage() {
-  std::cerr << "Usage: ./D_getfeatures Ebeam keep_good proton-detector(F/D) output-root output-txt input-hipo\n";
+  std::cerr << "Usage: ./D_getfeatures Ebeam keep_good output-root output-txt input-hipo\n";
 }
 
 
 
 int main(int argc, char ** argv) {
 
-  if(argc<7) {
+  if(argc<6) {
     std::cerr << "Wrong number of arguments\n";
     Usage();
     return -1;
@@ -42,17 +42,14 @@ int main(int argc, char ** argv) {
   bool keep_good = false;
   if(atoi(argv[2])==1){keep_good=true;}
 
-  // arg 3: proton in Forward Detector or Central Detector
-  char pDet = argv[3][0];
-
-  // args 4-5: output file names
-  TFile * f = new TFile(argv[4],"RECREATE");
+  // args 3-4: output file names
+  TFile * f = new TFile(argv[3],"RECREATE");
   TTree * ntree = new TTree("T","NeutronTree");
-  std::ofstream outtxt(argv[5]);
+  std::ofstream outtxt(argv[4]);
 
-  // arg 6+: input hipo file
+  // arg 5+: input hipo file
   clas12root::HipoChain chain;
-  for (int k=6; k<argc; k++) {
+  for (int k=5; k<argc; k++) {
     std::cout << "Input file " << argv[k] << std::endl;
     chain.Add(argv[k]);
   }
@@ -171,7 +168,7 @@ int main(int argc, char ** argv) {
     hist_list_2.push_back(h_theta_beta);
   TH2D * h_p_theta = new TH2D("p_theta","Neutron Momentum vs Theta;#theta;p (GeV/c)",55,35,145,50,0,1.2);
     hist_list_2.push_back(h_p_theta);
-  TH2D * h_pmiss_thetamiss = new TH2D("pmiss_thetamiss","Missing Momentum vs #theta_{pred};#theta_{pred} (deg);p_{pred} (GeV/c)",90,0,180,50,0,1.2);
+  TH2D * h_pmiss_thetamiss = new TH2D("pmiss_thetamiss","Missing Momentum vs #theta_{pred};#theta_{pred} (deg);p_{pred} (GeV/c)",90,0,180,50,0,1.3);
     hist_list_2.push_back(h_pmiss_thetamiss);
   TH2D * h_thetapn_pp = new TH2D("thetapn_pp","#theta_{pn} vs p_{p};p_{p} (GeV/c);#theta_{pn}",40,0,1,40,0,180);
     hist_list_2.push_back(h_thetapn_pp);
@@ -218,7 +215,7 @@ int main(int argc, char ** argv) {
     hist_list_2.push_back(h_theta_beta2);
   TH2D * h_p_theta2 = new TH2D("p_theta2","Neutron Momentum vs Theta;#theta;p (GeV/c)",55,35,145,50,0,1.2);
     hist_list_2.push_back(h_p_theta2);
-  TH2D * h_pmiss_thetamiss2 = new TH2D("pmiss_thetamiss2","p_{pred} vs #theta_{pred};#theta_{pred};p_{pred} (GeV/c)",90,0,180,50,0,1.2);
+  TH2D * h_pmiss_thetamiss2 = new TH2D("pmiss_thetamiss2","p_{pred} vs #theta_{pred};#theta_{pred};p_{pred} (GeV/c)",90,0,180,50,0,1.3);
     hist_list_2.push_back(h_pmiss_thetamiss2);
   TH2D * h_thetapn_pp2 = new TH2D("thetapn_pp2","#theta_{pn} vs p_{p};p_{p} (GeV/c);#theta_{pn}",40,0,1,40,0,180);
     hist_list_2.push_back(h_thetapn_pp2);
@@ -233,6 +230,8 @@ int main(int argc, char ** argv) {
 
   TH2D * h_thetapn_dpp = new TH2D("thetapn_dpp","#theta_{pn} vs #Delta p/p;(p_{pred}-p_{n})/p_{pred};#theta_{pn} (deg)",100,-2,2,90,0,180);
     hist_list_2.push_back(h_thetapn_dpp);
+  TH2D * h_thetapn_dpp1 = new TH2D("thetapn_dpp1","#theta_{pn} vs #Delta p/p;(p_{pred}-p_{n})/p_{pred};#theta_{pn} (deg)",100,-2,2,90,0,180);
+    hist_list_2.push_back(h_thetapn_dpp1);
   TH2D * h_thetapn_dpp2 = new TH2D("thetapn_dpp2","#theta_{pn} vs #Delta p/p;(p_{pred}-p_{n})/p_{pred};#theta_{pn} (deg)",100,-2,2,90,0,180);
     hist_list_2.push_back(h_thetapn_dpp2);
 
@@ -241,6 +240,11 @@ int main(int argc, char ** argv) {
     hist_list_1.push_back(h_anglediff);
   TH1D * h_anglediff2 = new TH1D("angle_diff2","Angle Diff between CVT hit and CND hit",180,0,180);
     hist_list_1.push_back(h_anglediff2);
+
+  TH2D * h_ptheta_pred = new TH2D("ptheta_pred","Predicted Momentum vs Angle for Final Signal Sample;#theta_{pred} (deg);p_{pred} (GeV/c)",110,35,145,100,0.2,1.3);
+    hist_list_2.push_back(h_ptheta_pred);
+  TH2D * h_ptheta = new TH2D("ptheta","Measured Momentum vs Angle for Final Signal Sample;#theta_{n} (deg);p_{n} (GeV/c)",110,35,145,100,0.2,1.3);
+    hist_list_2.push_back(h_ptheta);
 
 
 
@@ -383,14 +387,6 @@ int numevent = 0;
         if (abs(dbeta)>0.05) {continue;}
       }
 
-
-      // make cuts
-      //if ((vzp-vze)<-4. || (vzp-vze)>4.) {continue;}
-      //if (chipid<-3. || chipid>3.) {continue;}
-      //if (dbeta<-0.05 || dbeta>0.05) {continue;}
-      // require proton to be in correct angle and momentum range for the requested etector
-      //if (pDet=='F' && ((p_theta>40)                || (pp.Mag()<0.5 || pp.Mag()>3.0))) {continue;}
-      //if (pDet=='C' && ((p_theta<40 || p_theta>140) || (pp.Mag()<0.2 || pp.Mag()>1.2))) {continue;}
       p_index = i;
     }
 
@@ -526,6 +522,9 @@ int numevent = 0;
       h_p_all->Fill(pmiss.Mag());
       h_anglediff->Fill(angle_diff);
       h_thetapn_dpp->Fill((pmiss.Mag()-pn.Mag())/pmiss.Mag(),pn.Angle(pp)*180./M_PI);
+      if ( cnd_energy<1000 && (pmiss.Mag()>0.25 && pmiss.Mag()<1.25) && (pmiss.Theta()*180./M_PI>40 && pmiss.Theta()*180./M_PI<140) )
+      { h_thetapn_dpp1->Fill((pmiss.Mag()-pn.Mag())/pmiss.Mag(),pn.Angle(pp)*180./M_PI); }
+
 
       // ML features
       h_energy_1->Fill(energy);
@@ -555,7 +554,7 @@ int numevent = 0;
 
   // Determine whether to write to "good (signal) neutron" or "bad (background) neutron" file
 
-  bool good_N = pn.Angle(pmiss)*180./M_PI<20 && abs((pmiss.Mag()-pn.Mag())/pmiss.Mag())<0.2 && cnd_energy<1000 && pp.Angle(pn)*180./M_PI>60 && (pmiss.Mag()>0.25 && pmiss.Mag()<1.25) && (pmiss.Theta()*180./M_PI>40 && pmiss.Theta()*180./M_PI<135);
+  bool good_N = pn.Angle(pmiss)*180./M_PI<20 && abs((pmiss.Mag()-pn.Mag())/pmiss.Mag())<0.2 && cnd_energy<1000 && pp.Angle(pn)*180./M_PI>60 && (pmiss.Mag()>0.25 && pmiss.Mag()<1.25) && (pmiss.Theta()*180./M_PI>40 && pmiss.Theta()*180./M_PI<140);
 
 
   bool bad_N = (pn.Angle(pmiss)*180./M_PI>50 || abs((pmiss.Mag()-pn.Mag())/pmiss.Mag())>0.6) && cnd_energy<1000;// && (pp.Angle(pn)*180./M_PI<60);
@@ -598,6 +597,10 @@ int numevent = 0;
   h_p_cut->Fill(pmiss.Mag());
   h_anglediff2->Fill(angle_diff);
   h_thetapn_dpp2->Fill((pmiss.Mag()-pn.Mag())/pmiss.Mag(),pn.Angle(pp)*180./M_PI);
+
+  h_ptheta_pred->Fill(pmiss.Theta()*180./M_PI,pmiss.Mag());
+  h_ptheta->Fill(pn.Theta()*180./M_PI,pn.Mag());
+
   // ML features
   h_energy_2->Fill(energy);
   h_layermult_2->Fill(layermult);
@@ -607,7 +610,6 @@ int numevent = 0;
   h_ctof_energy_2->Fill(ctof_energy);
   h_ctof_hits_2->Fill(ctof_hits);
   h_anglediff_2->Fill(angle_diff);
-
 
 
   // write events to tree

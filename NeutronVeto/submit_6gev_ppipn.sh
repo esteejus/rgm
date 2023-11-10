@@ -16,6 +16,7 @@
 
 
 OUTPUT=/lustre19/expphy/volatile/clas12/users/erins/neutron-veto/d_6gev
+BUILD_DIR=/w/hallb-scshelf2102/clas/clase2/erins/repos/build_rgm/NeutronVeto
 
 
 
@@ -32,5 +33,5 @@ module load sqlite/dev
 
 INPUT=/lustre19/expphy/cache/clas12/rg-m/production/pass1/6gev/D/dst/recon/
 
-./D_getfeatures_ppim 5.98636 0 C ${OUTPUT}/6gev_root/ppipn_01${SLURM_ARRAY_TASK_ID}.root ${OUTPUT}/6gev_txt/ppipn_01${SLURM_ARRAY_TASK_ID}.txt ${INPUT}/01${SLURM_ARRAY_TASK_ID}/rec_clas_*.hipo # look for bad neutrons using d(e,e'p pi-)p
+${BUILD_DIR}/D_getfeatures_ppim 5.98636 0 ${OUTPUT}/6gev_root/ppipn_01${SLURM_ARRAY_TASK_ID}.root ${OUTPUT}/6gev_txt/ppipn_01${SLURM_ARRAY_TASK_ID}.txt ${INPUT}/01${SLURM_ARRAY_TASK_ID}/rec_clas_*.hipo # look for bad neutrons using d(e,e'p pi-)p
 
