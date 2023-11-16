@@ -306,7 +306,7 @@ void clas12ana::checkCutParameters()
       std::cerr << "WARNING:: Run range changed for run " << current_run << ". Setting ana_ca48.par file." << std::endl;
       this -> readInputParam( (std::string(CLAS12ANA_DIR) + "/Ana/cutFiles/ana_ca48.par").c_str() );
     }
-  else if(cx4_runrange && cx4_runrange_prev)
+  else if(cx4_runrange && !cx4_runrange_prev)
     {
       std::cerr << "WARNING:: Run range changed for run " << current_run << ". Setting ana_cx4.par file." << std::endl;
       this -> readInputParam( (std::string(CLAS12ANA_DIR) + "/Ana/cutFiles/ana_cx4.par").c_str() );
