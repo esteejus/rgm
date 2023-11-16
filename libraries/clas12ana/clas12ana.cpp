@@ -703,6 +703,7 @@ bool clas12ana::checkProtonPidCut(const region_part_ptr &p)
   if(itter != pid_cuts_cd.end())
     {
       double mom = p->par()->getP();
+      proton_sigma=1;
       double exp_beta  = mom/sqrt(pow(mom,2) + pow(mass_proton,2)); //expected beta of particle assuming proton mass
       double tof_diff = (p->getPath()/c)*(1/p->par()->getBeta() - 1/exp_beta); //TOF difference measured - expected
       double up_lim  =  proton_pid_mean->Eval(mom) + proton_sigma*proton_pid_sigma->Eval(mom); 
