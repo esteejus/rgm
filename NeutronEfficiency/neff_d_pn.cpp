@@ -50,7 +50,7 @@ int tgrid_y = ceil((double)neff_tbins/(double)tgrid_x);
 double Mlow = 0.85;
 double Mhigh = 1.05;
 double theta_lo = 40;  // 40 for CD p
-double theta_hi = 120;
+double theta_hi = 140;
 double p_lo = 0.25;
 double p_hi = 0.8;
 double Mdisp_lo = 0.7;
@@ -174,9 +174,9 @@ int main(int argc, char ** argv)
   TH2D * h_pangles_fd = new TH2D("pangles_fd","Proton Angular Distribution (FD);Phi;Theta",180,-180,180,90,0,180);
   hist_list_2.push_back(h_pangles_fd);
 
-  TH2D * h_pmiss_thetamiss_cd = new TH2D("pmiss_thetamiss_cd","Distribution of Expected Neutrons (CD);#theta_{miss};p_{miss} (GeV/c)",120,30,150,100,0,1.5);
+  TH2D * h_pmiss_thetamiss_cd = new TH2D("pmiss_thetamiss_cd","Distribution of Expected Neutrons (CD);#theta_{pred} (deg);p_{pred} (GeV/c)",120,30,150,100,0,1.5);
   hist_list_2.push_back(h_pmiss_thetamiss_cd);
-  TH2D * h_pmiss_thetamiss_fd = new TH2D("pmiss_thetamiss_fd","Distribution of Expected Neutrons (FD);#theta_{miss};p_{miss} (GeV/c)",120,30,150,100,0,1.5);
+  TH2D * h_pmiss_thetamiss_fd = new TH2D("pmiss_thetamiss_fd","Distribution of Expected Neutrons (FD);#theta_{pred} (deg);p_{pred} (GeV/c)",120,30,150,100,0,1.5);
   hist_list_2.push_back(h_pmiss_thetamiss_fd);
 
 
@@ -219,8 +219,7 @@ int main(int argc, char ** argv)
   hist_list_2.push_back(h_mmiss_pmissDET);
   TH1D * h_thetamiss_before = new TH1D("thetamiss_before","Predicted Momentum Polar Angle;#theta_{pred};Counts",100,40,140);
   hist_list_1.push_back(h_thetamiss_before);
-  TH2D * h_pmissangles = new TH2D("pmiss_angles","Predicted Momentum Theta vs Phi;#phi_{pred};#theta_{pred}",90,-180,180,90,0,180);
-  hist_list_2.push_back(h_pmissangles);
+
   TH2D * h_pmissthetamiss = new TH2D("pmissthetamiss","Predicted Momentum Magnitude vs Angle;#theta_{pred};p_{pred} (GeV/c)",110,35,145,100,0.2,1.3);
   hist_list_2.push_back(h_pmissthetamiss);
   
@@ -302,17 +301,14 @@ int main(int argc, char ** argv)
   //Histo: neutron efficiency by angular range
   /////////////////////////////////////
   TH1D * neff_denom_ang[9]; TH1D * neff_numer_ang[9];
-  TH2D * mmiss_denom_ang = new TH2D("mmiss_denom_ang","M_{miss} of Angular Ranges (Denominator)",9,0,9,100,Mdisp_lo,Mdisp_hi);
-  TH2D * mmiss_numer_ang = new TH2D("mmiss_numer_ang","M_{miss} of Angular Ranges (Numerator)",9,0,9,100,Mdisp_lo,Mdisp_hi);
   TH2D * mmiss_pmiss_CAND9[9]; TH2D * mmiss_pmiss_DET9[9];
-  //double ang_range[10] = {50.,55.,60.,65.,70.,80.,90.,105.,120.,140.};
-  std::vector<double> ang_range = {50,55,60,65,70,75,80,85,105,140};
-  double ang_vals[9] = {52.5,57.5,62.5,67.5,72.5,77.5,82.5,95,122.5};
-  double xerr[9] = {2.5,2.5,2.5,2.5,2.5,2.5,2.5,10,17.5};
+  std::vector<double> ang_range = {50,55,60,65,70,75,80,85,100,120};
+  double ang_vals[9] = {52.5,57.5,62.5,67.5,72.5,77.5,82.5,92.5,110};
+  double xerr[9] = {2.5,2.5,2.5,2.5,2.5,2.5,2.5,7.5,10};
   for (int i=0; i<9; i++){
     // numerator and denominator vs pmiss
     sprintf(temp_name,"Efficiency (%d-%d deg);Predicted Neutron Momentum (GeV/c);Efficiency",int(ang_range[i]),int(ang_range[i+1]));
-    sprintf(temp_title,"Neutron Efficiency (%d-%d deg);Predicted Neutron Momentum (GeV/c;Efficiency",int(ang_range[i]),int(ang_range[i+1]));
+    sprintf(temp_title,"Neutron Efficiency (%d-%d deg);Predicted Neutron Momentum (GeV/c);Efficiency",int(ang_range[i]),int(ang_range[i+1]));
     neff_denom_ang[i] = new TH1D(temp_name,temp_title,neff_pbins,0.25,1.0);
     neff_numer_ang[i] = new TH1D(temp_name,temp_title,neff_pbins,0.25,1.0);
     hist_list_1.push_back(neff_denom_ang[i]);
@@ -357,19 +353,19 @@ int main(int argc, char ** argv)
   /////////////////////////////////////
   //Histo: neutron efficiency by theta
   /////////////////////////////////////
-  TH1D * h_neff_thetamiss_denom_ssb = new TH1D("neff_tm_denom_ssb","Neutron Candidates;#theta_{miss} (deg);Counts",neff_tbins,theta_lo,theta_hi);
+  TH1D * h_neff_thetamiss_denom_ssb = new TH1D("neff_tm_denom_ssb","Neutron Candidates;#theta_{pred} (deg);Counts",neff_tbins,theta_lo,theta_hi);
   hist_list_1.push_back(h_neff_thetamiss_denom_ssb);
-  TH1D * h_neff_thetamiss_numer_ssb = new TH1D("neff_tm_numer_ssb","Detected Neutrons;#theta_{miss} (deg);Counts",neff_tbins,theta_lo,theta_hi);
+  TH1D * h_neff_thetamiss_numer_ssb = new TH1D("neff_tm_numer_ssb","Detected Neutrons;#theta_{pred} (deg);Counts",neff_tbins,theta_lo,theta_hi);
   hist_list_1.push_back(h_neff_thetamiss_numer_ssb);
 
 
   /////////////////////////////////////
   //Histos: 2d efficiency stuff
   /////////////////////////////////////
-  TH2D * h_cand2d = new TH2D("cand2d","Neutron Candidates;p_{miss} (GeV/c);#theta_{miss} (degrees)",15,0.2,1.2,30,40,140);
+  TH2D * h_cand2d = new TH2D("cand2d","Neutron Candidates;p_{pred} (GeV/c);#theta_{pred} (degrees)",15,0.2,1.2,30,40,140);
   hist_list_2.push_back(h_cand2d);
   h_cand2d->SetStats(0);
-  TH2D * h_det2d = new TH2D("det2d","Detected Neutrons;p_{miss} (GeV/c);#theta_{miss} (degrees)",15,0.2,1.2,30,40,140);
+  TH2D * h_det2d = new TH2D("det2d","Detected Neutrons;p_{pred} (GeV/c);#theta_{pred} (degrees)",15,0.2,1.2,30,40,140);
   hist_list_2.push_back(h_det2d);
   h_det2d->SetStats(0);
 
@@ -493,7 +489,6 @@ int main(int argc, char ** argv)
 
     // cut on theta component of pmiss
     h_thetamiss_before->Fill(thetamiss,weight);
-    h_pmissangles->Fill(pmiss.Phi()*180./M_PI,pmiss.Theta()*180./M_PI);
     h_pmissthetamiss->Fill(pmiss.Theta()*180./M_PI,pmiss.Mag());
     if (thetamiss<40.) {continue;}
     if (thetamiss>140.) {continue;}
@@ -540,8 +535,6 @@ int main(int argc, char ** argv)
     {
       if (thetamiss>(ang_range[k]) && thetamiss<(ang_range[k+1]))
       {
-        if (backsub) {neff_denom_ang[k]->Fill(pmiss.Mag(),weight);} // remove this once I fix background subtraction
-        if (backsub) {mmiss_denom_ang->Fill(k,mmiss,weight);}
         if (backsub) {mmiss_pmiss_CAND9[k]->Fill(pmiss.Mag(),mmiss,weight);}
         if (!backsub && mmiss>Mlow && mmiss<Mhigh) {neff_denom_ang[k]->Fill(pmiss.Mag(),weight);}
       }
@@ -688,10 +681,6 @@ int main(int argc, char ** argv)
     double theta_np = pn.Angle(pp)*180./M_PI;
     h_theta_np->Fill(theta_np,weight);
 
-    //if (is_CD && theta_np<40.) {continue;}
-    //if (theta_np<40.) {continue;}
-
-
 
     // fill mmiss vs p/theta
     h_mmiss_pmissDET->Fill(pmiss.Mag(),mmiss,weight);
@@ -702,12 +691,6 @@ int main(int argc, char ** argv)
       h_neff_pmiss_numer_ssb->Fill(pmiss.Mag(),weight);
       h_neff_thetamiss_numer_ssb->Fill(thetamiss,weight);
       h_det2d->Fill(pmiss.Mag(),thetamiss,weight);
-      /*if (edep>2) {h_neff_pmiss_numer_2->Fill(pmiss.Mag(),weight);}
-      if (edep>4) {h_neff_pmiss_numer_4->Fill(pmiss.Mag(),weight);}
-      if (edep>6) {h_neff_pmiss_numer_6->Fill(pmiss.Mag(),weight);}
-      if (edep>8) {h_neff_pmiss_numer_8->Fill(pmiss.Mag(),weight);}
-      if (edep>10) {h_neff_pmiss_numer_10->Fill(pmiss.Mag(),weight);}*/
-
     }
     else // no background subtraction - explicit Mmiss cut
     {
@@ -729,15 +712,13 @@ int main(int argc, char ** argv)
     {
       if (thetamiss>(ang_range[k]) && thetamiss<(ang_range[k+1]))
       {
-        if (backsub) {neff_numer_ang[k]->Fill(pmiss.Mag(),weight);} // remove this once I fix background subtraction
-        if (backsub) {mmiss_numer_ang->Fill(k,mmiss,weight);}
         if (backsub) {mmiss_pmiss_DET9[k]->Fill(pmiss.Mag(),mmiss,weight);}
         if (!backsub && mmiss>Mlow && mmiss<Mhigh) {neff_numer_ang[k]->Fill(pmiss.Mag(),weight);}
       }
     }
 
 
-  }
+  } // end event loop
 
 
 
@@ -887,13 +868,15 @@ int main(int argc, char ** argv)
 
   myCanvas->Divide(1,1);
   myCanvas->cd(1);
-  h_pmissangles->Draw("colz");
+  h_pmiss_thetamiss_cd->Draw("colz");
+  h_pmiss_thetamiss_cd->SetStats(0);
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
   myCanvas->Divide(1,1);
   myCanvas->cd(1);
-  h_pmissthetamiss->Draw("colz");
+  h_pmiss_thetamiss_fd->Draw("colz");
+  h_pmiss_thetamiss_fd->SetStats(0);
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
@@ -956,20 +939,6 @@ int main(int argc, char ** argv)
   myCanvas->Clear();
 
 
-  // mmiss in pmiss bins - background subtracted
-  myCanvas->Divide(pgrid_x,pgrid_y);
-  double *Ssub_pCAND0 = hist_projections_backsub(myCanvas, h_mmiss_pmissCAND, neff_pbins, 0, 'p');
-  myCanvas->Print(fileName,"pdf");
-  myCanvas->Clear();
-
-  // mmiss in pmiss bins - background subtracted
-  myCanvas->Divide(pgrid_x,pgrid_y);
-  double *Ssub_pCAND = hist_projections_backsub(myCanvas, h_mmiss_pmissCAND, neff_pbins, 1, 'p');
-  myCanvas->Print(fileName,"pdf");
-  myCanvas->Clear();
-
-
-
 
   // angle between p and pmiss
   myCanvas->Divide(1,1);
@@ -1011,19 +980,6 @@ int main(int argc, char ** argv)
   myCanvas->Clear();
 
 
-  // mmiss by theta bins - background subtracted
-  myCanvas->Divide(tgrid_x,tgrid_y);
-  double *Ssub_tCAND0 = hist_projections_backsub(myCanvas, h_mmiss_thetaCAND, neff_tbins, 0, 't');
-  myCanvas->Print(fileName,"pdf");
-  myCanvas->Clear();
-
-  // mmiss by theta bins - background subtracted
-  myCanvas->Divide(tgrid_x,tgrid_y);
-  double *Ssub_tCAND = hist_projections_backsub(myCanvas, h_mmiss_thetaCAND, neff_tbins, 1, 't');
-  myCanvas->Print(fileName,"pdf");
-  myCanvas->Clear();
-
-
 
   /////////////////////
   // START REQUIRING
@@ -1033,7 +989,7 @@ int main(int argc, char ** argv)
 
   myText->cd();
   text.DrawLatex(0.2,0.9,"Detected neutrons");
-  text.DrawLatex(0.2,0.8,"Compare p_{miss} to p_{n}");
+  text.DrawLatex(0.2,0.8,"Compare p_{pred} to p_{n}");
   myText->Print(fileName,"pdf");
   myText->Clear();
 
@@ -1267,19 +1223,6 @@ int main(int argc, char ** argv)
   myCanvas->Clear();
 
 
-  // mmiss in pmiss bins - background subtracted
-  myCanvas->Divide(pgrid_x,pgrid_y);
-  double * Ssub_pDET0 = hist_projections_backsub(myCanvas, h_mmiss_pmissDET, neff_pbins, 0, 'p');
-  myCanvas->Print(fileName,"pdf");
-  myCanvas->Clear();
-
-  // mmiss in pmiss bins - background subtracted
-  myCanvas->Divide(pgrid_x,pgrid_y);
-  double * Ssub_pDET = hist_projections_backsub(myCanvas, h_mmiss_pmissDET, neff_pbins, 1, 'p');
-  myCanvas->Print(fileName,"pdf");
-  myCanvas->Clear();
-
-
 
   /////////////////////
   // DETECTED NEUTRON
@@ -1305,18 +1248,6 @@ int main(int argc, char ** argv)
   myCanvas->Clear();
 
 
-  myCanvas->Divide(tgrid_x,tgrid_y);
-  double * Ssub_tDET0 = hist_projections_backsub(myCanvas, h_mmiss_thetaDET, neff_tbins, 0, 't');
-  myCanvas->Print(fileName,"pdf");
-  myCanvas->Clear();
-
-
-  myCanvas->Divide(tgrid_x,tgrid_y);
-  double * Ssub_tDET = hist_projections_backsub(myCanvas, h_mmiss_thetaDET, neff_tbins, 1, 't');
-  myCanvas->Print(fileName,"pdf");
-  myCanvas->Clear();
-
-
 
   /////////////////////
   // EFFICIENCY RESULTS
@@ -1326,6 +1257,46 @@ int main(int argc, char ** argv)
   text.DrawLatex(0.2,0.6,"EFFICIENCY RESULTS");
   myText->Print(fileName,"pdf");
   myText->Clear();
+
+
+
+  // BACKGROUND SUBTRACTION IN 9 ANGULAR RANGES
+
+  // mmiss in pmiss bins - background subtracted
+  if (backsub)
+  {
+  for (int i=0; i<9; i++)
+  {
+    // background subtraction for candidates
+    myCanvas->Divide(pgrid_x,pgrid_y);
+    double *Ssub_pCAND00 = hist_projections_backsub(myCanvas, mmiss_pmiss_CAND9[i], neff_pbins, 0, 'p');
+    myCanvas->Print(fileName,"pdf");
+    myCanvas->Clear();
+
+    // fill denominator with background-subtracted values
+    for (int j=0; j<neff_pbins; j++)
+    {
+      neff_denom_ang[i]->SetBinContent(j,*(Ssub_pCAND00+j));
+      neff_denom_ang[i]->SetBinError(i,std::sqrt(*(Ssub_pCAND00+j)));
+    }
+
+    // background subtraction for detected neutrons
+    myCanvas->Divide(pgrid_x,pgrid_y);
+    double *Ssub_pDET00 = hist_projections_backsub(myCanvas, mmiss_pmiss_DET9[i], neff_pbins, 0, 'p');
+    myCanvas->Print(fileName,"pdf");
+    myCanvas->Clear();
+
+    // fill numerator with background-subtracted values
+    for (int j=0; j<neff_pbins; j++)
+    {
+      neff_numer_ang[i]->SetBinContent(j,*(Ssub_pDET00+j));
+      neff_numer_ang[i]->SetBinError(j,std::sqrt(*(Ssub_pDET00+j)));
+    }
+
+  } // end loop over 9 angular ranges
+  } // end "if backsub"
+
+
 
   /*if (backsub) // efficiency vs pmiss using background-subtracted numerator and denominator
   {
@@ -1406,28 +1377,6 @@ int main(int argc, char ** argv)
   
 
 
-  /*// efficiency vs pmiss using S/(S+B) filling
-  myCanvas->Divide(2,2);
-  myCanvas->cd(1);
-  h_neff_pmiss_numer_ssb->Draw();
-  myCanvas->cd(2);
-  h_neff_pmiss_denom_ssb->Draw();
-  myCanvas->cd(3);
-  TH1D * h_neff_pmiss = (TH1D*)h_neff_pmiss_numer_ssb->Clone();
-  h_neff_pmiss->Divide(h_neff_pmiss_denom_ssb);
-  h_neff_pmiss->Draw();
-  h_neff_pmiss->GetYaxis()->SetTitle("efficiency");
-  h_neff_pmiss->GetYaxis()->SetRangeUser(0.,0.16);
-  // print output
-  ofstream outp(p_name);
-  for (int i=0; i<h_neff_pmiss->GetNbinsX(); i++) {
-    outp << h_neff_pmiss->GetXaxis()->GetBinCenter(i) << ' ';
-    outp << h_neff_pmiss->GetBinContent(i) << ' ';
-    outp << h_neff_pmiss->GetBinError(i) << '\n';
-  }
-  outp.close();
-  myCanvas->Print(fileName,"pdf");
-  myCanvas->Clear();*/
 
 
   myCanvas->Divide(1,1);
@@ -1436,33 +1385,6 @@ int main(int argc, char ** argv)
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
-
-
-
-
-
-  /*// efficiency vs theta using S/(S+B) filling
-  myCanvas->Divide(2,2);
-  myCanvas->cd(1);
-  h_neff_thetamiss_numer_ssb->Draw();
-  myCanvas->cd(2);
-  h_neff_thetamiss_denom_ssb->Draw();
-  myCanvas->cd(3);
-  TH1D * h_neff_thetamiss_ssb = (TH1D*)h_neff_thetamiss_numer_ssb->Clone();
-  h_neff_thetamiss_ssb->Divide(h_neff_thetamiss_denom_ssb);
-  h_neff_thetamiss_ssb->Draw();
-  h_neff_thetamiss_ssb->GetYaxis()->SetTitle("efficiency");
-  h_neff_thetamiss_ssb->GetYaxis()->SetRangeUser(0.,0.16);
-  // print output
-  ofstream outtheta(theta_name);
-  for (int i=0; i<h_neff_thetamiss_ssb->GetNbinsX(); i++) {
-    outtheta << h_neff_thetamiss_ssb->GetXaxis()->GetBinCenter(i) << ' ';
-    outtheta << h_neff_thetamiss_ssb->GetBinContent(i) << ' ';
-    outtheta << h_neff_thetamiss_ssb->GetBinError(i) << '\n';
-  }
-  outtheta.close();
-  myCanvas->Print(fileName,"pdf");
-  myCanvas->Clear();*/
 
 
   myCanvas->Divide(1,1);
@@ -1474,7 +1396,7 @@ int main(int argc, char ** argv)
 
 
   // testing Edep dependence
-  myCanvas->Divide(2,2);
+  myCanvas->Divide(1,1);
   myCanvas->cd(1);
   // 2 MeVee
   TH1D* h_neff_pmiss_2 = (TH1D*)h_neff_pmiss_numer_2->Clone();
@@ -1551,75 +1473,16 @@ int main(int argc, char ** argv)
 
 
 
-  // BACKGROUND SUBTRACTION IN 9 ANGULAR RANGES
-
-  // mmiss in pmiss bins - background subtracted
-  if (backsub)
-  {
-  for (int i=0; i<9; i++)
-  {
-    // background subtraction for candidates
-    myCanvas->Divide(pgrid_x,pgrid_y);
-    double *Ssub_pCAND00 = hist_projections_backsub(myCanvas, mmiss_pmiss_CAND9[i], neff_pbins, 0, 'p');
-    myCanvas->Print(fileName,"pdf");
-    myCanvas->Clear();
-
-    // fill denominator with background-subtracted values
-    for (int j=0; j<neff_pbins; j++)
-    {
-      neff_denom_ang[i]->SetBinContent(j,*(Ssub_pCAND00+j));
-      neff_denom_ang[i]->SetBinError(i,std::sqrt(*(Ssub_pCAND00+j)));
-    }
-
-    // background subtraction for detected neutrons
-    myCanvas->Divide(pgrid_x,pgrid_y);
-    double *Ssub_pDET00 = hist_projections_backsub(myCanvas, mmiss_pmiss_DET9[i], neff_pbins, 0, 'p');
-    myCanvas->Print(fileName,"pdf");
-    myCanvas->Clear();
-
-    // fill numerator with background-subtracted values
-    for (int j=0; j<neff_pbins; j++)
-    {
-      neff_numer_ang[i]->SetBinContent(j,*(Ssub_pDET00+j));
-      neff_numer_ang[i]->SetBinError(j,std::sqrt(*(Ssub_pDET00+j)));
-    }
-
-  } // end loop over 9 angular ranges
-  } // end "if backsub"
 
 
 
-  /*// EFFICIENCY BY ANGULAR RANGE
-  if (backsub)
-  {
-    // do background subtraction for angular ranges (denominator)
-    myCanvas->Divide(3,3);
-    double * Ssub_denom_ang = hist_projections_backsub(myCanvas, mmiss_denom_ang, 9, 0, 'p');
-    myCanvas->Print(fileName,"pdf");
-    myCanvas->Clear();
-    for (int i=0; i<9; i++)
-    {
-      neff_denom_ang[i]->SetBinContent(i,*(Ssub_denom_ang+i));
-      neff_denom_ang[i]->SetBinError(i,std::sqrt(*(Ssub_denom_ang+i)));
-    }
 
-    // do background subtraction for angular ranges (numerator)
-    myCanvas->Divide(3,3);
-    double * Ssub_numer_ang = hist_projections_backsub(myCanvas, mmiss_numer_ang, 9, 0, 'p');
-    for (int i=0; i<9; i++)
-    {
-      neff_numer_ang[i]->SetBinContent(i,*(Ssub_numer_ang+i));
-      neff_numer_ang[i]->SetBinError(i,std::sqrt(*(Ssub_numer_ang+i)));
-    }
-    myCanvas->Print(fileName,"pdf");
-    myCanvas->Clear();
-  }*/
-
-
+  // draw neff for 9 angular ranges
   TH1D * neff_ang[9];
   double par[3], p0[9], p0_err[9], p1[9], p1_err[9], p2[9], p2_err[9], ang[9];
   myCanvas->Divide(3,3);
   TF1 * f_poly2 = new TF1("poly2","[0]+[1]*x+[2]*x*x",0.3,1.0);
+  //TF1 * f_poly2 = new TF1("poly2","[0]+[1]*x",0.3,1.0);
   myCanvas->cd(1);
   for (int i=0; i<9; i++)
   {
@@ -1644,13 +1507,15 @@ int main(int argc, char ** argv)
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
-  // draw fit parameters
+
+
+  // draw fit parameters, fit to degree-2 polynomial
   std::cout << "parameter 0 fit\n";
   myCanvas->Divide(1,1);
   myCanvas->cd(1);
   TGraphErrors *gr1 = new TGraphErrors(9,ang_vals,p0,xerr,p0_err);
   gr1->Draw("AP");
-  gr1->SetTitle("fit parameter 0");
+  gr1->SetTitle("fit parameter a_{0}");
   gr1->GetXaxis()->SetTitle("Neutron Polar Angle (deg)");
   gr1->GetYaxis()->SetTitle("fit parameter 0");
   f_poly2->SetParLimits(0,0,1);  f_poly2->SetParLimits(1,-0.1,0);  f_poly2->SetParLimits(2,0,0.1);
@@ -1663,7 +1528,7 @@ int main(int argc, char ** argv)
   myCanvas->cd(1);
   TGraphErrors *gr2 = new TGraphErrors(9,ang_vals,p1,xerr,p1_err);
   gr2->Draw("AP");
-  gr2->SetTitle("fit parameter 1");
+  gr2->SetTitle("fit parameter a_{1}");
   gr2->GetXaxis()->SetTitle("Neutron Polar Angle (deg)");
   gr2->GetYaxis()->SetTitle("fit parameter 1");
   f_poly2->SetParLimits(0,0,0.1);  f_poly2->SetParLimits(1,-0.1,0);  f_poly2->SetParLimits(2,0,0.1);
@@ -1676,7 +1541,7 @@ int main(int argc, char ** argv)
   myCanvas->cd(1);
   TGraphErrors *gr3 = new TGraphErrors(9,ang_vals,p2,xerr,p2_err);
   gr3->Draw("AP");
-  gr3->SetTitle("fit parameter 2");
+  gr3->SetTitle("fit parameter a_{2}");
   gr3->GetXaxis()->SetTitle("Neutron Polar Angle (deg)");
   gr3->GetYaxis()->SetTitle("fit parameter 2");
   f_poly2->SetParLimits(0,-1,0);  f_poly2->SetParLimits(1,0,0.1);  f_poly2->SetParLimits(2,-0.1,0);
@@ -1700,23 +1565,6 @@ int main(int argc, char ** argv)
 
 
 
-  
-  // Fit efficiency to 2D function
-  myCanvas->Divide(1,1);
-  myCanvas->cd(1);
-  h_eff2d->SetTitle("Neutron Efficiency");
-  h_eff2d->Draw("colz");
-  // x is p, y is theta
-  //TF2 * f2 = new TF2("f2","([0]+[1]*y+[2]*y*y) + ([3]+[4]*y+[5]*y*y)*x + ([6]+[7]*y+[8]*y*y)*x*x",0.3,1.1,40,140);
-  TF2 * f2 = new TF2("f2","([0]+[1]*y+[2]*y*y) + ([3]+[4]*y+[5]*y*y)*x",0.3,1.1,40,140);
-
-  f2->SetParLimits(0,0,1);  f2->SetParLimits(1,-2,1);  f2->SetParLimits(2,-2,2);
-  f2->SetParLimits(3,0,1);  f2->SetParLimits(4,-2,1);  f2->SetParLimits(5,-2,2);
-  //f2->SetParLimits(6,0,1);  f2->SetParLimits(7,-2,1);  f2->SetParLimits(8,-2,2);
-  h_eff2d->Fit("f2");
-  f2->Draw("same");
-  myCanvas->Print(fileName,"pdf");
-  myCanvas->Clear();
   // wrap it up
   sprintf(fileName,"%s]",pdfFile);
   myCanvas->Print(fileName,"pdf");
@@ -1881,12 +1729,12 @@ double * hist_projections_backsub(TCanvas * can, TH2D * hist2d, int num_hist, bo
     // fit histogram to Gaussian (signal) + Gaussian (background)
     TF1 * cfit = new TF1("cfit",mmiss_signal_gauss,Mdisp_lo,Mdisp_hi,6);
     cfit->SetLineColor(kMagenta);
-    cfit->SetParameters(10000,0.94,0.05,1200,1.3,0.1);
+    cfit->SetParameters(10000,0.94,0.05,1200,1.2,0.1);
     cfit->SetParLimits(0,0,1000000);
     cfit->SetParLimits(1,0.92,1.01);
     cfit->SetParLimits(2,0.02,0.1);
     cfit->SetParLimits(3,0,1000000);
-    cfit->SetParLimits(4,1.1,1.8);
+    cfit->SetParLimits(4,0.95,1.8);
     cfit->SetParLimits(5,0.05,0.3);
     proj->Fit("cfit","QN");
     // separate signal/background
