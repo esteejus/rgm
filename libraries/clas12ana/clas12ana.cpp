@@ -90,7 +90,8 @@ void clas12ana::Run(const std::unique_ptr<clas12::clas12reader>& c12)
 		       (!checkEcalDiagCuts(el) && f_ecalDiagCuts)|| //ECAL Diagonoal SF cuts
 		       (!EcalEdgeCuts(el) && f_ecalEdgeCuts)     || //ECAL edge cuts
 		       (!checkVertex(el)  && f_vertexCuts)       || //Vertex cut
-		       (!DCEdgeCuts(el)   && f_DCEdgeCuts)) )     //DC edge cut
+		       (!DCEdgeCuts(el)   && f_DCEdgeCuts)       || //DC edge cut
+		       (el->par()->getP() < 0.8)) ) // minium 800 MeV/c cut for electrons in class     
 		    setByPid(el);
 		});
   
