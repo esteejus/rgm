@@ -156,16 +156,6 @@ int main(int argc, char ** argv)
   hist_list_2.push_back(h_lr_angles);
 
 
-  /////////////////////////////////////
-  //Histos: CD background
-  /////////////////////////////////////
-  TH2D * h_beta_p_all = new TH2D("beta_p_all","#beta vs Momentum in the CD;p (GeV/c);#beta",100,0,1.5,100,0,1.5);
-  hist_list_2.push_back(h_beta_p_all);
-  TH2D * h_beta_p_pFD = new TH2D("beta_p_pFD","#beta vs Momentum in the CD (assuming p in FD);p (GeV/c);#beta",100,0,1.5,100,0,1.5);
-  hist_list_2.push_back(h_beta_p_pFD);
-  TH2D * h_beta_p_pCD = new TH2D("beta_p_pCD","#beta vs Momentum in the CD (assuming p in CD);p (GeV/c);#beta",100,0,1.5,100,0,1.5);
-  hist_list_2.push_back(h_beta_p_pCD);
-
 
   /////////////////////////////////////
   //Histos: recoil proton
@@ -179,7 +169,7 @@ int main(int argc, char ** argv)
   TH2D * h_prec_plead = new TH2D("prec_plead","Lead momentum vs Recoil proton momentum;p_{p} (GeV/c);p_{L} (GeV/c)",50,0,1.5,50,0,2);
   hist_list_2.push_back(h_prec_plead);
 
-  TH2D * h_prec_ptheta = new TH2D("prec_ptheta","Recoil Proton Theta vs Momentum;Momentum (GeV/c);#theta (degrees)",50,0.2,1.2,50,20,160);
+  TH2D * h_prec_ptheta = new TH2D("prec_ptheta","Recoil Proton Theta vs Momentum;Momentum (GeV/c);#theta (degrees)",50,0.,1.5,50,0,180);
   hist_list_2.push_back(h_prec_ptheta);
   TH2D * h_prec_angles = new TH2D("prec_angles","Recoil Proton Angular Distribution;phi (deg);theta (deg)",48,-180,180,45,0,180);
   hist_list_2.push_back(h_prec_angles);
@@ -201,7 +191,7 @@ int main(int argc, char ** argv)
   hist_list_1.push_back(h_nrec_p);
   TH2D * h_nrec_plead = new TH2D("nrec_plead","Lead momentum vs Recoil neutron momentum;p_{n} (GeV/c);p_{L} (GeV/c)",50,0,1.5,50,0,2);
   hist_list_2.push_back(h_nrec_plead);
-  TH2D * h_nrec_ptheta = new TH2D("nrec_ptheta","Recoil Neutron Theta vs Momentum;Momentum (GeV/c);#theta (degrees)",30,0.2,1.2,20,40,140);
+  TH2D * h_nrec_ptheta = new TH2D("nrec_ptheta","Recoil Neutron Theta vs Momentum;Momentum (GeV/c);#theta (degrees)",30,0.,1.5,20,0,180);
   hist_list_2.push_back(h_nrec_ptheta);
   TH2D * h_nrec_angles = new TH2D("nrec_angles","Recoil Neutron Angular Distribution;phi (deg);theta (deg)",48,-180,180,45,0,180);
   hist_list_2.push_back(h_nrec_angles);
@@ -217,6 +207,19 @@ int main(int argc, char ** argv)
   TH2D * h_lnangle_pmiss = new TH2D("lnangle_pmiss","Angle between lead proton and recoil neutron vs p_{miss};p_{miss} (GeV/c);#theta_{lead,recoil}",50,0.2,1,90,0,180);
   hist_list_2.push_back(h_lnangle_pmiss);
 
+
+
+
+  /////////////////////////////////////
+  //Histos: yields
+  /////////////////////////////////////
+
+  TH1D * h_e_count = new TH1D("ecount","Electron Yield",20,0.2,1.);
+  TH1D * h_pl_count = new TH1D("plcount","Lead Proton Yield",20,0.2,1.);
+  TH1D * h_psrc_count = new TH1D("psrccount","SRC Proton Yield",20,0.2,1.);
+  TH1D * h_pwrec_count = new TH1D("pwreccount","SRC Proton with Recoil Yield",20,0.2,1.);
+  TH1D * h_pn_count = new TH1D("pncount","pn Yield",20,0.2,1.);
+  TH1D * h_pp_count = new TH1D("ppcount","pp Yield",20,0.2,1.);
 
 
   /////////////////////////////////////
@@ -408,7 +411,6 @@ int main(int argc, char ** argv)
     h_betap->Fill(pL.Mag(),lead[0]->par()->getBeta(),weight);
 
 
-
     // look at TOF distributions
 
 
@@ -448,33 +450,8 @@ int main(int argc, char ** argv)
 
 
     h_pmiss_p->Fill(pmiss.Mag(),weight);
-
-
-
-    // CD background - all charged particles in the CVT
-    for (int i=0; i<allParticles.size(); i++)
-    {
-      if (allParticles[i]->par()->getCharge()==0) {continue;} // look at only charged particles
-      if (allParticles[i]->trk(CVT)->getDetector()!=5) {continue;} // look at only particles in CVT
-      h_beta_p_all->Fill(allParticles[i]->getP(),allParticles[i]->par()->getBeta());
-    }
-
-    for (int i=0; i<prot.size(); i++)
-    {
-      TVector3 pp_temp;
-      pp_temp.SetMagThetaPhi(prot[i]->getP(),prot[i]->getTheta(),prot[i]->getPhi());
-      double mmiss_temp = get_mmiss(pb,pe,pp_temp);
-      h_mmiss_all->Fill(mmiss_temp,weight);
-    }
-    // CD background (assuming p in FD)
-    for (int i=0; i<allParticles.size(); i++)
-    {
-      if (allParticles[i]->par()->getCharge()==0) {continue;} // look at only charged particles
-      if (allParticles[i]->trk(CVT)->getDetector()!=5) {continue;} // look at only particles in CVT
-      if (ltheta<40) {h_beta_p_pFD->Fill(allParticles[i]->getP(),allParticles[i]->par()->getBeta());}
-      if (ltheta>40 && ltheta<140) {h_beta_p_pCD->Fill(allParticles[i]->getP(),allParticles[i]->par()->getBeta());}
-    }
-
+    h_pl_count->Fill(pmiss.Mag(),weight);
+    h_psrc_count->Fill(pmiss.Mag(),weight);
 
 
 
@@ -501,6 +478,10 @@ int main(int argc, char ** argv)
       if (p_recp.Mag()<0.3) {continue;}
       if (p_recp.Mag()>1.0) {continue;}
 
+      /*// EPJA cuts
+      if (p_recp.Theta()*180./M_PI<40 || p_recp.Theta()*180./M_PI>140) {continue;}
+      if (p_recp.Mag()<0.3) {continue;}*/
+
 
       // CORRECT FOR CVT PROTON EFFICIENCY      
       // quadratic fit
@@ -525,6 +506,7 @@ int main(int argc, char ** argv)
       // fill observable histo
       h_pmiss_pp_uncorr->Fill(pmiss.Mag());
       h_pmiss_pp_corr->Fill(pmiss.Mag(),weight/peff); // new
+      h_pp_count->Fill(pmiss.Mag(),weight); // fill counts - no peff correction
 
       // add to "with recoil" p denominator if proton meets recoil conditions
       h_pmiss_p_wrec->Fill(pmiss.Mag(),weight/peff);
@@ -558,6 +540,12 @@ int main(int argc, char ** argv)
       if (p_recn.Mag()<0.3 || p_recn.Mag()>1.0) {continue;}
       if (p_recn.Theta()*180./M_PI<45 || p_recn.Theta()*180./M_PI>120) {continue;}
 
+      /*// EPJA cuts
+      if (p_recn.Theta()*180./M_PI<40 || p_recn.Theta()*180./M_PI>140) {continue;}
+      if (p_recn.Mag()<0.3) {continue;}
+      if (!is_CND1 && !is_CND2 && !is_CND3) {continue;}*/
+
+
 
       h_nrec_angles->Fill(p_recn.Phi()*180./M_PI,p_recn.Theta()*180./M_PI,weight);
       double n_phi = p_recn.Phi()*180./M_PI;
@@ -588,6 +576,10 @@ int main(int argc, char ** argv)
       double mva_cutoff = 0.45;
       if (mlp_alt==1) {mva_cutoff = 0.4;}
       if (mlp_alt==2) {mva_cutoff = 0.5;}
+
+      // fill counts
+      h_pn_count->Fill(pmiss.Mag(),weight);
+
       
 
       if (mvaValue>mva_cutoff) // signal
@@ -645,19 +637,19 @@ int main(int argc, char ** argv)
 
 
 
-
-
     if (rec_n<0) {continue;} // proceed only if we found good neutron
       // fill histo
       TVector3 pn;
       pn.SetXYZ( neut[rec_n]->par()->getPx(), neut[rec_n]->par()->getPy(), neut[rec_n]->par()->getPz() );
       double n_theta = pn.Theta()*180./M_PI;
 
+
       // CORRECTION FOR VETO EFFICIENCY
       double e_s = 0.86; double e_b = 0.225;
       if (mlp_alt == 1) {e_s = 0.88; e_b = 0.255;}
       else if (mlp_alt ==2) {e_s = 0.835; e_b = 0.197;}
-      double p_to_n[7] = {0.34257749, 0.38565891, 0.44772727, 0.49162011, 0.56410256, 0.5060241, 0.56363636};
+
+      double p_to_n[7] = {3.30882, 2.75362, 2.01266, 1.8125, 2.17073, 1.9, 1.55556};
       double this_pton = 0; //double veto_weight = 1;
            if (pmiss.Mag()>=0.3 && pmiss.Mag()<0.4) {this_pton = p_to_n[0];}
       else if (pmiss.Mag()>=0.4 && pmiss.Mag()<0.5) {this_pton = p_to_n[1];}
@@ -666,8 +658,8 @@ int main(int argc, char ** argv)
       else if (pmiss.Mag()>=0.7 && pmiss.Mag()<0.8) {this_pton = p_to_n[4];}
       else if (pmiss.Mag()>=0.8 && pmiss.Mag()<0.9) {this_pton = p_to_n[5];}
       else if (pmiss.Mag()>=0.9 && pmiss.Mag()<1.0) {this_pton = p_to_n[6];}
-      double veto_weight = ( (1-e_b) - e_b*this_pton ) / (e_s-e_b);
-
+      double veto_weight =  ( (1-e_b) - e_b*this_pton ) / (e_s-e_b);
+//std::cout << veto_weight << '\n';
 
       // CORRECTION FOR CND EFFICIENCY
       double p0 = 1; double p1 = 1;
@@ -697,9 +689,10 @@ int main(int argc, char ** argv)
       double neff = p0 + p1*pn.Mag();
       if (neff<=0) {continue;} // just in case
 
+//if (p_recn.Mag()<0.3) {continue;} // THIS IS A HUGE PROBLEM! It eliminates all the events in which the final particle with PID 2112 has momentum of 0, even if they have a good neutron in the event.
+
       h_pmiss_pn_uncorr->Fill(pmiss.Mag(),weight);
       h_pmiss_pn_corr->Fill(pmiss.Mag(),veto_weight*weight/neff);
-
 
       // add to "with recoil" p denominator if neutron meets recoil conditions
       h_pmiss_p_wrec->Fill(pmiss.Mag(),veto_weight*weight/neff);
@@ -781,18 +774,14 @@ int main(int argc, char ** argv)
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
-  myCanvas->Divide(2,2);
-  myCanvas->cd(1);  h_beta_p_all->Draw("colz");
-  myCanvas->cd(2);  h_beta_p_pFD->Draw("colz");
-  myCanvas->cd(3);  h_beta_p_pCD->Draw("colz");
-  myCanvas->cd(4);  h_mmiss_all->Draw();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);  h_pangles->Draw("colz");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
 
-
-  myCanvas->Divide(2,2);
-  myCanvas->cd(1);  h_pangles->Draw("colz");
+  myCanvas->Divide(1,1);
   myCanvas->cd(2);  h_pmisstheta->Draw();
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
@@ -1069,16 +1058,12 @@ int main(int argc, char ** argv)
 
 
   // here we show the charged particle veto correction for pn
-  double e_sig = 0.85; double e_bkg = 0.10;
   myCanvas->Divide(1,1);
   myCanvas->cd(1);
   h_n_background->SetLineColor(kRed+1);
   h_n_background->Draw();
   h_n_signal->SetLineColor(kCyan-3);
   h_n_signal->Draw("same");
-  //h_n_background->Scale(
-
-  h_n_signal->Scale(1-e_bkg);
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
@@ -1176,8 +1161,14 @@ int main(int argc, char ** argv)
   myCanvas->Clear();
 
 
-
-
+  // write yield counts to root file
+  h_e_count->Write();
+  h_pl_count->Write();
+  h_psrc_count->Write();
+  h_pwrec_count->Write();
+  h_pn_count->Write();
+  h_pp_count->Write();
+  h_pmiss_p_wrec->Write();
 
 
   // wrap it up
@@ -1186,7 +1177,14 @@ int main(int argc, char ** argv)
 
   std::cout << "SIGNAL NEUTRONS:" << '\t' << n_signal << '\n';
   std::cout << "BACKGROUND NEUTRONS:" << '\t' << n_background << '\n';
-  std::cout << "NEUTRON SIGNAL/BACKGROUND:" << '\t' << (double)n_signal/(double)n_background << '\n' << '\n';
+  std::cout << "NEUTRON BACKGROUND/SIGNAL:" << '\t' << (double)n_background/(double)n_signal << '\n' << '\n';
+
+  for (int j=1; j<pmiss_bins+1; j++) // skip underflow and overflow bins
+  {
+    double num_b = h_n_background->GetBinContent(j);
+    double num_s = h_n_signal->GetBinContent(j);
+    std::cout << num_b << '\t' << num_s << '\t' << num_b/num_s << '\n';
+  }
 
 
   //outFile->Close(); // THIS LINE CAUSES ERRORS!
