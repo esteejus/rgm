@@ -40,9 +40,8 @@ const double m_piplus = 0.13957039;
 
 
 // efficiency constants
-int neff_pbins = 20;
-int neff_tbins = 20;
-int tbins_ana = 9;
+int neff_pbins = 12;
+int neff_tbins = 12;
 int pgrid_x = ceil(sqrt(neff_pbins));
 int pgrid_y = ceil((double)neff_pbins/(double)pgrid_x);
 int tgrid_x = ceil(sqrt(neff_tbins));
@@ -115,8 +114,8 @@ int main(int argc, char ** argv)
   // clas12ana
   clas12ana clasAna;
 
-  clasAna.readEcalSFPar("/w/hallb-scshelf2102/clas12/users/esteejus/rgm/Ana/cutFiles/paramsSF_LD2_x2.dat");
-  clasAna.readEcalPPar("/w/hallb-scshelf2102/clas12/users/esteejus/rgm/Ana/cutFiles/paramsPI_LD2_x2.dat");
+  clasAna.readEcalSFPar("/w/hallb-scshelf2102/clas12/users/esteejus/rgm/Ana/cutFiles/paramsSF_40Ca_x2.dat");
+  clasAna.readEcalPPar("/w/hallb-scshelf2102/clas12/users/esteejus/rgm/Ana/cutFiles/paramsPI_40Ca_x2.dat");
 
   //clasAna.printParams();
 
@@ -146,8 +145,8 @@ int main(int argc, char ** argv)
   gStyle->SetTitleXOffset(0.8);
   gStyle->SetTitleYOffset(0.8);
 
-  char temp_name[100];
-  char temp_title[100];
+  char temp_name_n[100]; char temp_name_d[100];
+  char temp_title_n[100]; char temp_title_d[100];
 
 
   /////////////////////////////////////
@@ -302,22 +301,26 @@ int main(int argc, char ** argv)
   /////////////////////////////////////
   TH1D * neff_denom_ang[9]; TH1D * neff_numer_ang[9];
   TH2D * mmiss_pmiss_CAND9[9]; TH2D * mmiss_pmiss_DET9[9];
-  std::vector<double> ang_range = {50,55,60,65,70,75,80,85,100,120};
-  double ang_vals[9] = {52.5,57.5,62.5,67.5,72.5,77.5,82.5,92.5,110};
-  double xerr[9] = {2.5,2.5,2.5,2.5,2.5,2.5,2.5,7.5,10};
+  std::vector<double> ang_range = {45,50,55,60,65,70,75,80,95,120};
+  double ang_vals[9] = {47.5,52.5,57.5,62.5,67.5,72.5,77.5,87.5,107.5};
+  double xerr[9] = {2.5,2.5,2.5,2.5,2.5,2.5,2.5,7.5,12.5};
   for (int i=0; i<9; i++){
     // numerator and denominator vs pmiss
-    sprintf(temp_name,"Efficiency (%d-%d deg);Predicted Neutron Momentum (GeV/c);Efficiency",int(ang_range[i]),int(ang_range[i+1]));
-    sprintf(temp_title,"Neutron Efficiency (%d-%d deg);Predicted Neutron Momentum (GeV/c);Efficiency",int(ang_range[i]),int(ang_range[i+1]));
-    neff_denom_ang[i] = new TH1D(temp_name,temp_title,neff_pbins,0.25,1.0);
-    neff_numer_ang[i] = new TH1D(temp_name,temp_title,neff_pbins,0.25,1.0);
+    sprintf(temp_name_n,"Efficiency (%d-%d deg) (numer)",int(ang_range[i]),int(ang_range[i+1]));
+    sprintf(temp_title_n,"Neutron Efficiency (%d-%d deg) (numer);Predicted Neutron Momentum (GeV/c);Efficiency",int(ang_range[i]),int(ang_range[i+1]));
+    sprintf(temp_name_d,"Efficiency (%d-%d deg) (denom)",int(ang_range[i]),int(ang_range[i+1]));
+    sprintf(temp_title_d,"Neutron Efficiency (%d-%d deg) (denom);Predicted Neutron Momentum (GeV/c);Efficiency",int(ang_range[i]),int(ang_range[i+1]));
+    neff_denom_ang[i] = new TH1D(temp_name_d,temp_title_d,neff_pbins,0.25,1.0);
+    neff_numer_ang[i] = new TH1D(temp_name_n,temp_title_n,neff_pbins,0.25,1.0);
     hist_list_1.push_back(neff_denom_ang[i]);
     hist_list_1.push_back(neff_numer_ang[i]);
     // mmiss vs pmiss - for background subtraction
-    sprintf(temp_name,"mmiss_pmiss (%d-%d deg);p_{pred} (GeV/c);M_{miss} (GeV/c^{2})",int(ang_range[i]),int(ang_range[i+1]));
-    sprintf(temp_title,"M_{miss} vs p_{pred} (%d-%d deg);p_{pred} (GeV/c);M_{miss} (GeV/c^{2})",int(ang_range[i]),int(ang_range[i+1]));
-    mmiss_pmiss_CAND9[i] = new TH2D(temp_name,temp_title,100,p_lo,p_hi,30,Mdisp_lo,Mdisp_hi);
-    mmiss_pmiss_DET9[i] = new TH2D(temp_name,temp_title,100,p_lo,p_hi,30,Mdisp_lo,Mdisp_hi);
+    sprintf(temp_name_n,"mmiss_pmiss (%d-%d deg) (numer)",int(ang_range[i]),int(ang_range[i+1]));
+    sprintf(temp_title_n,"M_{miss} vs p_{pred} (%d-%d deg) (numer);p_{pred} (GeV/c);M_{miss} (GeV/c^{2})",int(ang_range[i]),int(ang_range[i+1]));
+    sprintf(temp_name_d,"mmiss_pmiss (%d-%d deg) (denom)",int(ang_range[i]),int(ang_range[i+1]));
+    sprintf(temp_title_d,"M_{miss} vs p_{pred} (%d-%d deg) (denom);p_{pred} (GeV/c);M_{miss} (GeV/c^{2})",int(ang_range[i]),int(ang_range[i+1]));
+    mmiss_pmiss_CAND9[i] = new TH2D(temp_name_d,temp_title_d,100,p_lo,p_hi,30,Mdisp_lo,Mdisp_hi);
+    mmiss_pmiss_DET9[i] = new TH2D(temp_name_n,temp_title_n,100,p_lo,p_hi,30,Mdisp_lo,Mdisp_hi);
   }
 
 
@@ -362,10 +365,10 @@ int main(int argc, char ** argv)
   /////////////////////////////////////
   //Histos: 2d efficiency stuff
   /////////////////////////////////////
-  TH2D * h_cand2d = new TH2D("cand2d","Neutron Candidates;p_{pred} (GeV/c);#theta_{pred} (degrees)",15,0.2,1.2,30,40,140);
+  TH2D * h_cand2d = new TH2D("cand2d","Neutron Efficiency;p_{pred} (GeV/c);#theta_{pred} (degrees)",15,0.2,1.2,30,40,140);
   hist_list_2.push_back(h_cand2d);
   h_cand2d->SetStats(0);
-  TH2D * h_det2d = new TH2D("det2d","Detected Neutrons;p_{pred} (GeV/c);#theta_{pred} (degrees)",15,0.2,1.2,30,40,140);
+  TH2D * h_det2d = new TH2D("det2d","Neutron Efficiency;p_{pred} (GeV/c);#theta_{pred} (degrees)",15,0.2,1.2,30,40,140);
   hist_list_2.push_back(h_det2d);
   h_det2d->SetStats(0);
 
@@ -566,6 +569,33 @@ int main(int argc, char ** argv)
         bool is_CTOF = neut[i]->sci(CTOF)->getDetector()==4;
         if (!is_CND1 && !is_CND2 && !is_CND3 && !is_CTOF) {continue;}
 
+        int status = 0; double edep = 0;
+        if (is_CND1)
+        {
+          status = status + neut[i]->sci(CND1)->getStatus();
+          edep = edep + neut[i]->sci(CND1)->getEnergy();
+        }
+        if (is_CND2)
+        {
+          status = status + neut[i]->sci(CND2)->getStatus();
+          edep = edep + neut[i]->sci(CND2)->getEnergy();
+        }
+        if (is_CND3)
+        {
+          status = status + neut[i]->sci(CND3)->getStatus();
+          edep = edep + neut[i]->sci(CND3)->getEnergy();
+        }
+        if (is_CTOF)
+        {
+          edep = edep + neut[i]->sci(CTOF)->getEnergy();
+        }
+
+        if (status!=0) {continue;}
+
+        if (edep<5) {continue;}
+
+
+
         // in expected theta range? if no - skip to next neutron in event
         double n_theta = neut[i]->getTheta()*180./M_PI;
         if (n_theta==0) {continue;}
@@ -600,6 +630,15 @@ int main(int argc, char ** argv)
     double tof_n = 0;
     double edep = 0;
 
+    // define neutron kinematics
+    TVector3 pn;
+    pn.SetMagThetaPhi(neut[pick]->getP(),neut[pick]->getTheta(),neut[pick]->getPhi());
+    TVector3 vecX( neut[pick]->par()->getPx(), neut[pick]->par()->getPy(), neut[pick]->par()->getPz() );
+    double cos0 = pmiss.Dot(vecX) / (pmiss.Mag() * vecX.Mag() );
+    double dphi = pmiss.Phi()*180./M_PI - neut[pick]->getPhi()*180./M_PI;
+    double dp = (pmiss.Mag()-pn.Mag());
+    double dpp = dp/pmiss.Mag();
+
     if (is_CND1)
     {
       tof_n = neut[pick]->sci(CND1)->getTime() - ts;
@@ -624,31 +663,24 @@ int main(int argc, char ** argv)
     h_tof->Fill(tof_n,weight);
 
 
-    // define neutron kinematics
-    TVector3 pn;
-    pn.SetMagThetaPhi(neut[pick]->getP(),neut[pick]->getTheta(),neut[pick]->getPhi());
-    TVector3 vecX( neut[pick]->par()->getPx(), neut[pick]->par()->getPy(), neut[pick]->par()->getPz() );
-    double cos0 = pmiss.Dot(vecX) / (pmiss.Mag() * vecX.Mag() );
-    double dphi = pmiss.Phi()*180./M_PI - neut[pick]->getPhi()*180./M_PI;
-    double dp = (pmiss.Mag()-pn.Mag());
-    double dpp = dp/pmiss.Mag();
+    // energy deposition cut
+    h_pn_edep->Fill(edep,pn.Mag(),weight);
+    h_dpp_edep->Fill(edep,(pmiss.Mag()-pn.Mag())/pmiss.Mag(),weight);
+    h_thetapn_edep->Fill(edep,pn.Angle(pp)*180./M_PI,weight);
+    h_cos0_edep->Fill(edep,cos0,weight);
+    h_theta_edep->Fill(neut[pick]->getTheta()*180./M_PI,edep,weight);
+    if (edep<5) {continue;}//if (edep<1.5) {continue;}
+
+
 
 
 
     // compare neutrons to predicted neutron momentum
     h_pmiss_pn->Fill(pn.Mag(),pmiss.Mag(),weight);
     h_dtheta_dphi->Fill(dphi,pmiss.Theta()*180./M_PI - neut[pick]->getTheta()*180./M_PI,weight);
-    h_theta_edep->Fill(neut[pick]->getTheta()*180./M_PI,edep,weight);
+
     h_cos0->Fill(cos0,weight);
 
-
-    // energy deposition cut
-    h_pn_edep->Fill(edep,pn.Mag(),weight);
-    h_dpp_edep->Fill(edep,(pmiss.Mag()-pn.Mag())/pmiss.Mag(),weight);
-    h_thetapn_edep->Fill(edep,pn.Angle(pp)*180./M_PI,weight);
-    h_cos0_edep->Fill(edep,cos0,weight);
-
-    if (edep<1.5) {continue;}
 
     // pn / pmiss magnitude and angular cut
     h_compare->Fill(dp,pn.Angle(pmiss)*180./M_PI);
@@ -732,7 +764,6 @@ int main(int argc, char ** argv)
     hist_list_2[i]->Write();
   }
 
-  h_mmiss_pmissDET->Write();
 
 
 
@@ -1277,7 +1308,7 @@ int main(int argc, char ** argv)
     for (int j=0; j<neff_pbins; j++)
     {
       neff_denom_ang[i]->SetBinContent(j,*(Ssub_pCAND00+j));
-      neff_denom_ang[i]->SetBinError(i,std::sqrt(*(Ssub_pCAND00+j)));
+      neff_denom_ang[i]->SetBinError(j,std::sqrt(*(Ssub_pCAND00+j)));
     }
 
     // background subtraction for detected neutrons
@@ -1398,7 +1429,7 @@ int main(int argc, char ** argv)
   // testing Edep dependence
   myCanvas->Divide(1,1);
   myCanvas->cd(1);
-  // 2 MeVee
+/*  // 2 MeVee
   TH1D* h_neff_pmiss_2 = (TH1D*)h_neff_pmiss_numer_2->Clone();
   h_neff_pmiss_2->Divide(h_neff_pmiss_denom_ssb);
   h_neff_pmiss_2->SetLineColor(kRed);
@@ -1411,7 +1442,8 @@ int main(int argc, char ** argv)
   h_neff_pmiss_4->SetLineColor(kOrange);
   h_neff_pmiss_4->SetStats(0);
   h_neff_pmiss_4->Draw("same");
-  h_neff_pmiss_4->GetYaxis()->SetRangeUser(0,0.16);
+  h_neff_pmiss_4->GetYaxis()->SetRangeUser(0,0.16);*/
+// 2 and 4 MeVee no longer relevant since I cut at 5 MeVee
   // 6 MeVee
   TH1D * h_neff_pmiss_6 = (TH1D*)h_neff_pmiss_numer_6->Clone();
   h_neff_pmiss_6->Divide(h_neff_pmiss_denom_ssb);
@@ -1437,8 +1469,8 @@ int main(int argc, char ** argv)
   TLegend * leg = new TLegend(0.65,0.65,0.89,0.89);
   leg->SetTextFont(72);
   leg->SetTextSize(0.04);
-  leg->AddEntry(h_neff_pmiss_2,"2 MeVee");
-  leg->AddEntry(h_neff_pmiss_4,"4 MeVee");
+//  leg->AddEntry(h_neff_pmiss_2,"2 MeVee");
+//  leg->AddEntry(h_neff_pmiss_4,"4 MeVee");
   leg->AddEntry(h_neff_pmiss_6,"6 MeVee");
   leg->AddEntry(h_neff_pmiss_8,"8 MeVee");
   leg->AddEntry(h_neff_pmiss_10,"10 MeVee");
@@ -1479,10 +1511,10 @@ int main(int argc, char ** argv)
 
   // draw neff for 9 angular ranges
   TH1D * neff_ang[9];
-  double par[3], p0[9], p0_err[9], p1[9], p1_err[9], p2[9], p2_err[9], ang[9];
+  double par[3], p0[9], p0_err[9], p1[9], p1_err[9], ang[9]; //p2[9], p2_err[9]
   myCanvas->Divide(3,3);
   TF1 * f_poly2 = new TF1("poly2","[0]+[1]*x+[2]*x*x",0.3,1.0);
-  //TF1 * f_poly2 = new TF1("poly2","[0]+[1]*x",0.3,1.0);
+  TF1 * f_poly1 = new TF1("poly1","[0]+[1]*x",0.3,1.0);
   myCanvas->cd(1);
   for (int i=0; i<9; i++)
   {
@@ -1495,17 +1527,44 @@ int main(int argc, char ** argv)
     neff_ang[i]->SetLineColor(kBlue-i);
     neff_ang[i]->Draw();
     // fit data to function
-    if (!backsub) {f_poly2->SetParLimits(2,0,1);} // set limit only with xB cut - low stats
-    f_poly2->SetLineColor(kBlue-i);
-    neff_ang[i]->Fit("poly2","Q","",0.3,1.0);
+    //if (!backsub) {f_poly1->SetParLimits(2,0,1);} // set limit only with xB cut - low stats
+    f_poly1->SetLineColor(kBlue-i);
+    f_poly1->SetParLimits(0,0.12,0.25); f_poly1->SetParLimits(1,-0.2,-0.02);
+    neff_ang[i]->Fit("poly1","Q","",0.3,1.0);
     // get parameters
-    f_poly2->GetParameters(par);
-    p0[i] = par[0];  p0_err[i] = f_poly2->GetParError(0);
-    p1[i] = par[1];  p1_err[i] = f_poly2->GetParError(1);
-    p2[i] = par[2];  p2_err[i] = f_poly2->GetParError(2);
+    f_poly1->GetParameters(par);
+    p0[i] = par[0];  p0_err[i] = f_poly1->GetParError(0);
+    p1[i] = par[1];  p1_err[i] = f_poly1->GetParError(1);
+    //p2[i] = par[2];  p2_err[i] = f_poly2->GetParError(2);
   }
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
+
+
+  // print parameters
+  std::cout << "\nPARAMETER 0 VALUES\n";
+  for (int i=0; i<9; i++)
+  {
+    std::cout << p0[i] << ", ";
+  }
+  std::cout << "\nPARAMETER 0 ERRORS\n";
+  for (int i=0; i<9; i++)
+  {
+    std::cout << p0_err[i] << ", ";
+  }
+  std::cout << "\nPARAMETER 1 VALUES\n";
+  for (int i=0; i<9; i++)
+  {
+    std::cout << p1[i] << ", ";
+  }
+  std::cout << "\nPARAMETER 1 ERRORS\n";
+  for (int i=0; i<9; i++)
+  {
+    std::cout << p1_err[i] << ", ";
+  }
+  std::cout << '\n';
+
+
 
 
 
@@ -1518,8 +1577,9 @@ int main(int argc, char ** argv)
   gr1->SetTitle("fit parameter a_{0}");
   gr1->GetXaxis()->SetTitle("Neutron Polar Angle (deg)");
   gr1->GetYaxis()->SetTitle("fit parameter 0");
-  f_poly2->SetParLimits(0,0,1);  f_poly2->SetParLimits(1,-0.1,0);  f_poly2->SetParLimits(2,0,0.1);
-  gr1->Fit("poly2","","",50,140);
+  //f_poly1->SetParLimits(0,0,1);  f_poly1->SetParLimits(1,-0.1,0);// f_poly2->SetParLimits(2,0,0.1);
+  //gr1->Fit("poly1","","",50,140);
+  //gr1->Write();
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
@@ -1531,12 +1591,13 @@ int main(int argc, char ** argv)
   gr2->SetTitle("fit parameter a_{1}");
   gr2->GetXaxis()->SetTitle("Neutron Polar Angle (deg)");
   gr2->GetYaxis()->SetTitle("fit parameter 1");
-  f_poly2->SetParLimits(0,0,0.1);  f_poly2->SetParLimits(1,-0.1,0);  f_poly2->SetParLimits(2,0,0.1);
-  gr2->Fit("poly2","","",50,140);
+  //f_poly1->SetParLimits(0,-0.1,0.1);  f_poly1->SetParLimits(1,-0.1,0.1);// f_poly2->SetParLimits(2,0,0.1);
+  //gr2->Fit("poly1","","",50,140);
+  //gr2->Write();
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
-  std::cout << "parameter 2 fit\n";
+  /*std::cout << "parameter 2 fit\n";
   myCanvas->Divide(1,1);
   myCanvas->cd(1);
   TGraphErrors *gr3 = new TGraphErrors(9,ang_vals,p2,xerr,p2_err);
@@ -1547,7 +1608,7 @@ int main(int argc, char ** argv)
   f_poly2->SetParLimits(0,-1,0);  f_poly2->SetParLimits(1,0,0.1);  f_poly2->SetParLimits(2,-0.1,0);
   gr3->Fit("poly2","","",50,140);
   myCanvas->Print(fileName,"pdf");
-  myCanvas->Clear();
+  myCanvas->Clear();*/
 
 
 
@@ -1684,7 +1745,7 @@ double * hist_projections(TCanvas * can, TH2D * hist2d, int num_hist, char v)
 }
 
 
-
+// THE BACKGROUND GETS SUBTRACTED WHETHER subtract_bk is 0 or 1
 double * hist_projections_backsub(TCanvas * can, TH2D * hist2d, int num_hist, bool subtract_bk, char v)
 {
   double p_start_val[num_hist];
