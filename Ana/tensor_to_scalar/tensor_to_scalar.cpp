@@ -210,6 +210,7 @@ int main(int argc, char ** argv)
   hist_list_2.push_back(h_nrec_plead);
   TH2D * h_nrec_ptheta = new TH2D("nrec_ptheta","Recoil Neutron Theta vs Momentum;Momentum (GeV/c);#theta (degrees)",30,0.,1.5,20,0,180);
   hist_list_2.push_back(h_nrec_ptheta);
+
   TH2D * h_nrec_angles = new TH2D("nrec_angles","Recoil Neutron Angular Distribution;phi (deg);theta (deg)",90,-180,180,45,40,130);
   hist_list_2.push_back(h_nrec_angles);
   TH2D * h_good_nrec_angles = new TH2D("good_nrec_angles","Recoil Neutron Angular Distribution;phi (deg);theta (deg)",48,-180,180,45,40,130);
@@ -349,7 +350,7 @@ int main(int argc, char ** argv)
   TH2D * h_cos0_edep = new TH2D("cos0_edep","cos #theta_{pmiss,pn} vs E_{dep};E_{dep} (MeVee);cos #theta_{pmiss,pn}",50,0,25,50,-1,1);
     hist_list_2.push_back(h_cos0_edep);
 
-  TH1D * h_tof_after_edep = new TH1D("tof_after_edep","TOF;TOF (ns)",200,0,40);
+  TH1D * h_tof_after_edep = new TH1D("tof_after_edep","TOF;TOF (ns)",500,0,50);
     hist_list_1.push_back(h_tof_after_edep);
 
   TH1D * h_pmiss_offtime = new TH1D("pmiss_offtime","p_{miss} (off-time background);p_{miss} (GeV/c)",50,0,2);
@@ -360,7 +361,8 @@ int main(int argc, char ** argv)
     hist_list_2.push_back(h_theta_pn_offtime2);
   TH1D * h_cos0_offtime = new TH1D("cos0_offtime","cos #theta_{pmiss,pn}",50,-1,1);
     hist_list_1.push_back(h_cos0_offtime);
-
+  TH2D * h_angles_offtime = new TH2D("angles_offtime","Off-time Neutron Angular Distribution;phi (deg);theta (deg)",90,-180,180,45,40,130);
+  hist_list_2.push_back(h_angles_offtime);
 
 
   // fiducial cuts - p>0.2, 40<theta<140
@@ -402,7 +404,11 @@ int main(int argc, char ** argv)
   reader->AddSpectator("momentum", &momentum);
 
   //reader->BookMVA("MLP", "/w/hallb-scshelf2102/clas/clase2/erins/repos/rgm/NeutronVeto/dataset_6gev_pCD/weights/TrainNeutronVeto_TMVA_MLP.weights.xml");
-  reader->BookMVA("MLP", "/w/hallb-scshelf2102/clas12/erins/rgm/NeutronVeto/dataset_6gev_old_march/weights/TrainNeutronVeto_TMVA_MLP.weights.xml");
+  //reader->BookMVA("MLP", "/w/hallb-scshelf2102/clas12/erins/rgm/NeutronVeto/dataset_6gev_old_march/weights/TrainNeutronVeto_TMVA_MLP.weights.xml");
+  //reader->BookMVA("MLP", "/w/hallb-scshelf2102/clas12/erins/rgm/NeutronVeto/dataset_6gev_e5_march/weights/TrainNeutronVeto_TMVA_MLP.weights.xml");
+  //reader->BookMVA("MLP", "/w/hallb-scshelf2102/clas12/erins/rgm/NeutronVeto/dataset_sim_eN_bknd/weights/TrainNeutronVeto_TMVA_MLP.weights.xml");
+  reader->BookMVA("MLP", "/w/hallb-scshelf2102/clas12/erins/rgm/NeutronVeto/dataset_d6_e5_allCD_march/weights/TrainNeutronVeto_TMVA_MLP.weights.xml");
+
 
   int n_background = 0;
   int n_signal = 0;
@@ -419,9 +425,7 @@ int main(int argc, char ** argv)
   int s_e10 = 0; int b_e10 = 0;
   int s_e11 = 0; int b_e11 = 0;
   int s_e12 = 0; int b_e12 = 0;
-  int s_e15 = 0; int b_e15 = 0;
-  int s_e20 = 0; int b_e20 = 0;
-  int s_e25 = 0; int b_e25 = 0;
+
 
   /*double edep_val[30] = {2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31};
   int S_edep[30]; int B_edep[30];*/
@@ -519,6 +523,7 @@ int main(int argc, char ** argv)
     h_pangles->Fill(lphi,ltheta,weight);
     h_p_theta->Fill(ltheta,pL.Mag(),weight);
     if (ltheta<40 || ltheta>140) {continue;}
+    //if (ltheta>40) {continue;}
     if (pL.Mag()<1.0) {continue;}
 
     // xB cut
@@ -627,11 +632,11 @@ int main(int argc, char ** argv)
     h_nsize->Fill(neut.size(),weight);
     TVector3 p_recn;
     double n_cos0; int num_neutrons_passing_cuts = 0;
-    double n_weight = 1;
 
     for (int i=0; i<neut.size(); i++)
     {
 
+      double n_weight = 1;
       // GET NEUTRON KINEMATICS
       p_recn.SetMagThetaPhi(neut[i]->getP(),neut[i]->getTheta(),neut[i]->getPhi());
       bool is_CND1 = neut[i]->sci(CND1)->getDetector()==3;
@@ -640,32 +645,32 @@ int main(int argc, char ** argv)
       bool is_CTOF = neut[i]->sci(CTOF)->getDetector()==4;
       if (!is_CND1 && !is_CND2 && !is_CND3 && !is_CTOF) {continue;}
       
-      status = 0;
-      if (is_CND1)
+
+
+      if (is_CTOF) // tof from CTOF is most likely to be positive
+      {
+        tof = neut[i]->sci(CTOF)->getTime() - starttime;
+      }
+      else if (is_CND1)
       {
         tof = neut[i]->sci(CND1)->getTime() - starttime;
-        status = status + neut[i]->sci(CND1)->getStatus();
       }
       else if (is_CND2)
       {
         tof = neut[i]->sci(CND2)->getTime() - starttime;
-        status = status + neut[i]->sci(CND2)->getStatus();
       }
       else if (is_CND3)
       {
         tof = neut[i]->sci(CND3)->getTime() - starttime;
-        status = status + neut[i]->sci(CND3)->getStatus();
-      }
-      else if (is_CTOF)
-      {
-        tof = neut[i]->sci(CTOF)->getTime() - starttime;
       }
 
+//std::cout << is_CND1 << ' ' << neut[i]->sci(CND1)->getTime()-starttime << '\t' << is_CND2 << ' ' << neut[i]->sci(CND2)->getTime()-starttime << '\t' << is_CND3 << ' ' << neut[i]->sci(CND3)->getTime()-starttime << '\t' << is_CTOF << ' ' << neut[i]->sci(CTOF)->getTime()-starttime << '\n';
+
+      status = neut[i]->sci(CND1)->getStatus() + neut[i]->sci(CND2)->getStatus() + neut[i]->sci(CND3)->getStatus() + neut[i]->sci(CTOF)->getStatus();
       double path = neut[i]->getPath();
       double beta = neut[i]->par()->getBeta();
       double n_phi = p_recn.Phi()*180./M_PI; pn_mag = p_recn.Mag(); pn_theta = p_recn.Theta()*180./M_PI;
       n_cos0 = pmiss.Dot(p_recn) / (pmiss.Mag() * p_recn.Mag());
-      beta = neut[i]->par()->getBeta();
 
       // calculate features for ML
       Struct ninfo = getFeatures(neut, allParticles, i);
@@ -688,7 +693,7 @@ int main(int argc, char ** argv)
 
 
       // FILL MVA VALUE HISTOGRAM
-      double mva_cutoff = 0.45;
+      double mva_cutoff = 0.43;
       if (mlp_alt==1) {mva_cutoff = 0.4;}
       if (mlp_alt==2) {mva_cutoff = 0.5;}
       if (mlp_alt==3) {mva_cutoff = -0.1;}
@@ -702,6 +707,8 @@ int main(int argc, char ** argv)
 
       h_theta_pn_all->Fill(pn_mag,pn_theta,weight);
       h_cos0_all->Fill(n_cos0,weight);
+
+      tree->Fill();
 
 
       // DOUBLE HITS
@@ -720,7 +727,7 @@ int main(int argc, char ** argv)
       h_cos0_edep->Fill(energy,n_cos0,weight);
       edep = energy;
 
-      if (tof>4 && tof<9)
+      if (tof>2 && tof<8)
       {
         if (edep>12) {s_e12 = s_e12 + 1;}
         if (edep>11) {s_e11 = s_e11 + 1;}
@@ -733,7 +740,7 @@ int main(int argc, char ** argv)
         if (edep>4) {s_e4 = s_e4 + 1;}
         if (edep>3) {s_e3 = s_e3 + 1;}
       }
-      else if (tof>20 && tof<25)
+      else if (tof>22 && tof<28)
       {
         if (edep>12) {b_e12 = b_e12 + 1;}
         if (edep>11) {b_e11 = b_e11 + 1;}
@@ -760,21 +767,22 @@ int main(int argc, char ** argv)
         h_theta_pn_offtime1->Fill(pn_mag,pn_theta,weight);
         h_theta_pn_offtime2->Fill(pn_mag,pn_theta,weight);
       }
-      else if (tof>26 && tof<41)
+      else if (tof>26 && tof<41) // previously 26-41
       {
         h_pmiss_offtime->Fill(pmiss.Mag(),weight);
         h_cos0_offtime->Fill(n_cos0,weight);
+        h_angles_offtime->Fill(p_recn.Phi()*180./M_PI,p_recn.Theta()*180./M_PI,n_weight*weight);
         // assign negative weight and kinematics in signal region
-        n_weight = -1;
+        n_weight = -1*weight;
         tof = tof - 26;
         beta = path/tof/29.98;
-        p_recn.SetMag( 1/sqrt(1-beta*beta)*0.939565346*path/tof/29.98 );
+        p_recn.SetMag( 1/sqrt(1-beta*beta)*0.939565346*path/tof/29.98);
         pn_mag = p_recn.Mag();
         n_cos0 = pmiss.Dot(p_recn) / (pmiss.Mag() * p_recn.Mag());
         h_theta_pn_offtime2->Fill(pn_mag,pn_theta,n_weight*weight);
       }
       if (beta>0.8) {continue;} // in case we made tof too low
-
+      if (tof>15) {continue;}
 
       // limit to central detector acceptance
       h_nrec_ptheta->Fill(p_recn.Mag(),p_recn.Theta()*180./M_PI,n_weight*weight);
@@ -787,7 +795,7 @@ int main(int argc, char ** argv)
       if (!is_CND1 && !is_CND2 && !is_CND3) {continue;}*/
 
 
-      // fiducial cuts - exclude off-time events
+      // fiducial cuts - only works for tof>0 neutrons
       //if (n_weight>0)
       //{
         h_nrec_angles->Fill(p_recn.Phi()*180./M_PI,p_recn.Theta()*180./M_PI,n_weight*weight);
@@ -799,11 +807,6 @@ int main(int argc, char ** argv)
 
       // fill counts
       h_pn_count->Fill(pmiss.Mag(),n_weight*weight);
-
-
-
-      num_neutrons_passing_cuts = num_neutrons_passing_cuts + 1;
-      tree->Fill();
 
 
 
@@ -824,7 +827,7 @@ int main(int argc, char ** argv)
         rec_n = i; // pick this neutron! ... but what if there's more than 1?
 
         n_signal = n_signal + 1;
-        h_n_signal->Fill(pmiss.Mag(),weight); // no n_weight?
+        h_n_signal->Fill(pmiss.Mag(),n_weight*weight); // no n_weight?
 
       }
       else
@@ -841,16 +844,128 @@ int main(int argc, char ** argv)
 //std::cout << rec_n << '\n'; // there's an issue here! sometimes this returns 0
 
         n_background = n_background + 1;
-        h_n_background->Fill(pmiss.Mag(),weight); // no n_weight?
+        h_n_background->Fill(pmiss.Mag(),n_weight*weight); // no n_weight?
       }
+
+
+      if (mvaValue<mva_cutoff) {continue;} // keep only "signal" according to ML
+
+      num_neutrons_passing_cuts = num_neutrons_passing_cuts + 1;
+
+
+      // CORRECTION FOR VETO EFFICIENCY
+      double e_s = 0.8694; double e_b = 0.1993;
+      if (mlp_alt == 1) {e_s = 0.88; e_b = 0.255;}
+      else if (mlp_alt ==2) {e_s = 0.835; e_b = 0.197;}
+      else if (mlp_alt ==3) {e_s = 1.0; e_b = 0.0;}
+
+      //double p_to_n[7] = {3.30882, 2.75362, 2.01266, 1.8125, 2.17073, 1.9, 1.55556};
+      //double p_to_n[7] = {3.72043,2.536,2.37168,1.84483,2.23214,1.65854,1.56522};
+      //double p_to_n[7] = {3.89286,2.81667,1.8375,1.95238,3.82759,1.44118,1.56522};
+      //double p_to_n[7] = {2.26,1.54,1.36,1.44,0.87,0.93,0.91};
+      double p_to_n[7] = {3.47,1.97,1.605,1.664,1.13,1.137,1.265};
+      //double p_to_n[7] = {3.25,1.99,1.72,1.75,1.295,1.36,1.36};
+
+
+      double this_pton = 0; //double veto_weight = 1;
+           if (pmiss.Mag()>=0.3 && pmiss.Mag()<0.4) {this_pton = p_to_n[0];}
+      else if (pmiss.Mag()>=0.4 && pmiss.Mag()<0.5) {this_pton = p_to_n[1];}
+      else if (pmiss.Mag()>=0.5 && pmiss.Mag()<0.6) {this_pton = p_to_n[2];}
+      else if (pmiss.Mag()>=0.6 && pmiss.Mag()<0.7) {this_pton = p_to_n[3];}
+      else if (pmiss.Mag()>=0.7 && pmiss.Mag()<0.8) {this_pton = p_to_n[4];}
+      else if (pmiss.Mag()>=0.8 && pmiss.Mag()<0.9) {this_pton = p_to_n[5];}
+      else if (pmiss.Mag()>=0.9 && pmiss.Mag()<1.0) {this_pton = p_to_n[6];}
+      double veto_weight =  ( (1-e_b) - e_b*this_pton ) / (e_s-e_b);
+
+
+
+
+      // CORRECTION FOR CND EFFICIENCY
+      double p0 = 1; double p1 = 1;
+
+      // regular neff calculation
+      double a0[9] = {0.159544, 0.182436, 0.181101, 0.175683, 0.173993, 0.163625, 0.165443, 0.164552, 0.172197};
+      double a1[9] = {-0.0929541, -0.1145, -0.121558, -0.120495, -0.121615, -0.10955, -0.116232, -0.117866, -0.131201};
+
+
+      //double a0[9] = {0.157777, 0.180446, 0.178342, 0.173709, 0.170933, 0.160873, 0.163368, 0.163457, 0.172305};
+      //double a1[9] = {-0.0922353, -0.113674, -0.119523, -0.119093, -0.118729, -0.107379, -0.114865, -0.118671, -0.134541};
+
+      // alternative neff calculation
+      if (neff_alt)
+      {
+        double a0_copy[9] = {0.150667, 0.179507, 0.176628, 0.161647, 0.165556, 0.149483, 0.143256, 0.123192, 0.160634};
+        double a1_copy[9] = {-0.0587484, -0.0893895, -0.0959979, -0.0815217, -0.0924589, -0.070879, -0.0710916, -0.0480029, -0.103235};
+        //double a0_copy[9] = {0.149367, 0.177568, 0.173983, 0.15981, 0.147528, 0.14766, 0.140342, 0.122255, 0.164534};
+        //double a1_copy[9] = {-0.0585118, -0.0892072, -0.0946001, -0.0811451, -0.0669726, -0.0740947, -0.0689309, -0.0485866, -0.117414};
+        memcpy(a0, a0_copy, 9); memcpy(a1, a1_copy, 9);
+      }
+
+      if      (pn_theta>45 && pn_theta<=50)  {p0 = a0[0]; p1 = a1[0];}
+      else if (pn_theta>50 && pn_theta<=55)  {p0 = a0[1]; p1 = a1[1];}
+      else if (pn_theta>55 && pn_theta<=60)  {p0 = a0[2]; p1 = a1[2];}
+      else if (pn_theta>60 && pn_theta<=65)  {p0 = a0[3]; p1 = a1[3];}
+      else if (pn_theta>65 && pn_theta<=70)  {p0 = a0[4]; p1 = a1[4];}
+      else if (pn_theta>70 && pn_theta<=75)  {p0 = a0[5]; p1 = a1[5];}
+      else if (pn_theta>75 && pn_theta<=80)  {p0 = a0[6]; p1 = a1[6];}
+      else if (pn_theta>80 && pn_theta<=95)  {p0 = a0[7]; p1 = a1[7];}
+      else if (pn_theta>95 && pn_theta<=120) {p0 = a0[8]; p1 = a1[8];}
+
+      double neff = p0 + p1*p_recn.Mag();
+      if (neff<=0) {continue;} // just in case
+
+
+
+      h_pmiss_pn_uncorr->Fill(pmiss.Mag(),n_weight*weight);
+      h_pmiss_pn_corr->Fill(pmiss.Mag(),n_weight*veto_weight*weight/neff);
+
+      // add to "with recoil" p denominator if neutron meets recoil conditions
+      h_pmiss_p_wrec->Fill(pmiss.Mag(),n_weight*veto_weight*weight/neff);
+
+
+
+      // histos that used to be in mvaValue>mva_cutoff section
+      h_good_nrec_angles->Fill(p_recn.Phi()*180./M_PI,p_recn.Theta()*180./M_PI,n_weight*weight);   
+      // see if neutron is close in angle to pmiss
+      h_ncos0->Fill(n_cos0,n_weight*weight);
+      // compared to pmiss
+      h_pn_pmiss->Fill(pmiss.Mag(),p_recn.Mag(),n_weight*weight);
+
+      // get momenta/angles of recoil neutrons (this was originally for candidates)
+      h_nrec_plead->Fill(p_recn.Mag(),pL.Mag(),n_weight*weight);
+      h_nrec_p->Fill(p_recn.Mag(),n_weight*weight);
+      h_nptheta->Fill(p_recn.Theta()*180./M_PI,pmiss.Mag(),n_weight*weight);
+      h_nrec_plead_angle->Fill(p_recn.Angle(pL)*180./M_PI,n_weight*weight);
+      h_lnangle_pmiss->Fill(pmiss.Mag(),p_recn.Angle(pL)*180./M_PI,n_weight*weight);
+
+
+
+
+
+
+      // off-time subtraction built in
+      h_pmiss_pn_uncorr->Fill(pmiss.Mag(),n_weight*weight);
+      h_pmiss_pn_corr->Fill(pmiss.Mag(),n_weight*veto_weight*weight/neff);
+      h_pneutron_pn_uncorr->Fill(pmiss.Mag(),n_weight*weight);
+      h_pneutron_pn_corr->Fill(pmiss.Mag(),n_weight*veto_weight*weight/neff);
+      // add to "with recoil" p denominator if neutron meets recoil conditions
+      h_pmiss_p_wrec->Fill(pmiss.Mag(),n_weight*veto_weight*weight/neff);
+
+
+
+
+
+
+
+
     } // end loop over neutrons
 
     
-    h_nsize2->Fill(num_neutrons_passing_cuts,n_weight*weight);
+    h_nsize2->Fill(num_neutrons_passing_cuts,weight);
 
 
 
-
+/*
 
     // ANALYZE THE SELECTED NEUTRON AND APPLY CORRECTIONS
 
@@ -867,7 +982,7 @@ int main(int argc, char ** argv)
       else if (is_CND2) { tof = neut[rec_n]->sci(CND2)->getTime() - starttime; }
       else if (is_CND3) { tof = neut[rec_n]->sci(CND3)->getTime() - starttime; }
       else if (is_CTOF) { tof = neut[rec_n]->sci(CTOF)->getTime() - starttime; }
-//std::cout << tof << '\n';
+
       double path = neut[rec_n]->getPath();
 
       if (tof>25)
@@ -875,7 +990,7 @@ int main(int argc, char ** argv)
         n_weight = -1;
         tof = tof - 26;
         beta = path/tof/29.98;
-        pn.SetMag( 1/sqrt(1-beta*beta)*0.939565346*path/tof/29.98 );
+        pn.SetMagThetaPhi( 1/sqrt(1-beta*beta)*0.939565346*path/tof/29.98 , 0., 0.);
         n_cos0 = pmiss.Dot(pn) / (pmiss.Mag() * pn.Mag());
       }
       if (p_recn.Mag()<0.3 || p_recn.Mag()>1.0) {continue;}
@@ -904,7 +1019,7 @@ int main(int argc, char ** argv)
       else if (pmiss.Mag()>=0.8 && pmiss.Mag()<0.9) {this_pton = p_to_n[5];}
       else if (pmiss.Mag()>=0.9 && pmiss.Mag()<1.0) {this_pton = p_to_n[6];}
       double veto_weight =  ( (1-e_b) - e_b*this_pton ) / (e_s-e_b);
-//std::cout << veto_weight << '\n';
+
 
       // CORRECTION FOR CND EFFICIENCY
       double p0 = 1; double p1 = 1;
@@ -947,18 +1062,18 @@ int main(int argc, char ** argv)
 
 
       // histos that used to be in mvaValue>mva_cutoff section
-      h_good_nrec_angles->Fill(p_recn.Phi()*180./M_PI,p_recn.Theta()*180./M_PI,n_weight*weight);   
+      h_good_nrec_angles->Fill(pn.Phi()*180./M_PI,pn.Theta()*180./M_PI,n_weight*weight);   
       // see if neutron is close in angle to pmiss
       h_ncos0->Fill(n_cos0,n_weight*weight);
       // compared to pmiss
-      h_pn_pmiss->Fill(pmiss.Mag(),p_recn.Mag(),n_weight*weight);
+      h_pn_pmiss->Fill(pmiss.Mag(),pn.Mag(),n_weight*weight);
 
       // get momenta/angles of recoil neutrons (this was originally for candidates)
-      h_nrec_plead->Fill(p_recn.Mag(),pL.Mag(),n_weight*weight);
-      h_nrec_p->Fill(p_recn.Mag(),n_weight*weight);
-      h_nptheta->Fill(p_recn.Theta()*180./M_PI,pmiss.Mag(),n_weight*weight);
-      h_nrec_plead_angle->Fill(p_recn.Angle(pL)*180./M_PI,n_weight*weight);
-      h_lnangle_pmiss->Fill(pmiss.Mag(),p_recn.Angle(pL)*180./M_PI,n_weight*weight);
+      h_nrec_plead->Fill(pn.Mag(),pL.Mag(),n_weight*weight);
+      h_nrec_p->Fill(pn.Mag(),n_weight*weight);
+      h_nptheta->Fill(pn.Theta()*180./M_PI,pmiss.Mag(),n_weight*weight);
+      h_nrec_plead_angle->Fill(pn.Angle(pL)*180./M_PI,n_weight*weight);
+      h_lnangle_pmiss->Fill(pmiss.Mag(),pn.Angle(pL)*180./M_PI,n_weight*weight);
 
 
 
@@ -973,15 +1088,7 @@ int main(int argc, char ** argv)
       // add to "with recoil" p denominator if neutron meets recoil conditions
       h_pmiss_p_wrec->Fill(pmiss.Mag(),n_weight*veto_weight*weight/neff);
 
-      /*if (tof>26 && tof<41) // might have cut some of these out
-      {
-        h_pmiss_pn_uncorr->Fill(pmiss.Mag(),weight);
-        h_pmiss_pn_corr->Fill(pmiss.Mag(),veto_weight*weight/neff);
-        h_pneutron_pn_uncorr->Fill(pmiss.Mag(),weight);
-        h_pneutron_pn_corr->Fill(pmiss.Mag(),veto_weight*weight/neff);
-        // add to "with recoil" p denominator if neutron meets recoil conditions
-        h_pmiss_p_wrec->Fill(pmiss.Mag(),veto_weight*weight/neff);
-      }*/
+*/
 
   }
 
@@ -1289,6 +1396,11 @@ int main(int argc, char ** argv)
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);  h_angles_offtime->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
 
 
 
@@ -1466,6 +1578,7 @@ int main(int argc, char ** argv)
   h_n_background->Draw();
   h_n_signal->SetLineColor(kCyan-3);
   h_n_signal->Draw("same");
+  h_n_signal->SetMinimum(0);
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
@@ -1617,11 +1730,6 @@ int main(int argc, char ** argv)
   std::cout << "edep > 12" << '\t' << s_e12 << '\t' << b_e12 << '\t' << (double)s_e12/(double)b_e12 << '\t' << sqrt((double)s_e12)/(double)s_e12 << '\t' << sqrt((double)s_e12+(double)b_e12)/((double)(s_e12)) << '\n';
 
 
-  std::cout << "edep > 15" << '\t' << s_e15 << '\t' << b_e15 << '\t' << (double)s_e15/(double)b_e15 << '\t' << sqrt((double)s_e15)/(double)s_e15 << '\t' << sqrt((double)s_e15+(double)b_e15)/((double)(s_e15)) << '\n';
-
-  std::cout << "edep > 20" << '\t' << s_e20 << '\t' << b_e20 << '\t' << (double)s_e20/(double)b_e20 << '\t' << sqrt((double)s_e20)/(double)s_e20 << '\t' << sqrt((double)s_e20+(double)b_e20)/((double)(s_e20)) << '\n';
-
-  std::cout << "edep > 25" << '\t' << s_e25 << '\t' << b_e25 << '\t' << (double)s_e25/(double)b_e25 << '\t' << sqrt((double)s_e25)/(double)s_e25 << '\t' << sqrt((double)s_e25+(double)b_e25)/((double)(s_e25)) << '\n';
 
 
 
