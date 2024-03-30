@@ -68,7 +68,22 @@ int main(int argc, char ** argv)
  
   double Ebeam = atof(argv[2]);
 
+  // set up output root file (and tree)
   TFile * outFile = new TFile(argv[3],"RECREATE");
+  TTree * tree = new TTree("T","myTree");
+  double tof, edep, pn_mag, pn_theta, beta, status;
+  tree->Branch("tof",&tof,"tof/D");
+  tree->Branch("edep",&edep,"edep/D");
+  tree->Branch("pn_mag",&pn_mag,"pn_mag/D");
+  tree->Branch("pn_theta",&pn_theta,"pn_theta/D");
+  tree->Branch("beta",&beta,"beta/D");
+  tree->Branch("status",&status,"status/D");
+
+
+
+
+
+  // set up output pdf file
   char * pdfFile = argv[4];
 
   // parameters for error analysis
@@ -171,7 +186,7 @@ int main(int argc, char ** argv)
 
   TH2D * h_prec_ptheta = new TH2D("prec_ptheta","Recoil Proton Theta vs Momentum;Momentum (GeV/c);#theta (degrees)",50,0.,1.5,50,0,180);
   hist_list_2.push_back(h_prec_ptheta);
-  TH2D * h_prec_angles = new TH2D("prec_angles","Recoil Proton Angular Distribution;phi (deg);theta (deg)",48,-180,180,45,0,180);
+  TH2D * h_prec_angles = new TH2D("prec_angles","Recoil Proton Angular Distribution;phi (deg);theta (deg)",90,-180,180,45,40,130);
   hist_list_2.push_back(h_prec_angles);
 
   TH1D * h_prec_plead_angle = new TH1D("prec_plead_angle","Angle between lead proton and recoil proton;#theta_{lead,recoil};Counts",45,0,180);
@@ -185,6 +200,8 @@ int main(int argc, char ** argv)
   /////////////////////////////////////
   TH1D * h_nsize = new TH1D("nsize","Number of Neutrons in Event",10,0,10);
   hist_list_1.push_back(h_nsize);
+  TH1D * h_nsize2 = new TH1D("nsize2","Number of Neutrons in Event",10,0,10);
+  hist_list_1.push_back(h_nsize2);
   TH1D * h_ncos0 = new TH1D("ncos0","Cosine of #theta_{pmiss,pn}",100,-1.1,1.1);
   hist_list_1.push_back(h_ncos0);
   TH1D * h_nrec_p = new TH1D("nrec_p","Recoil Neutron Momentum",100,0,2);
@@ -193,9 +210,9 @@ int main(int argc, char ** argv)
   hist_list_2.push_back(h_nrec_plead);
   TH2D * h_nrec_ptheta = new TH2D("nrec_ptheta","Recoil Neutron Theta vs Momentum;Momentum (GeV/c);#theta (degrees)",30,0.,1.5,20,0,180);
   hist_list_2.push_back(h_nrec_ptheta);
-  TH2D * h_nrec_angles = new TH2D("nrec_angles","Recoil Neutron Angular Distribution;phi (deg);theta (deg)",48,-180,180,45,0,180);
+  TH2D * h_nrec_angles = new TH2D("nrec_angles","Recoil Neutron Angular Distribution;phi (deg);theta (deg)",90,-180,180,45,40,130);
   hist_list_2.push_back(h_nrec_angles);
-  TH2D * h_good_nrec_angles = new TH2D("good_nrec_angles","Recoil Neutron Angular Distribution;phi (deg);theta (deg)",48,-180,180,45,0,180);
+  TH2D * h_good_nrec_angles = new TH2D("good_nrec_angles","Recoil Neutron Angular Distribution;phi (deg);theta (deg)",48,-180,180,45,40,130);
   hist_list_2.push_back(h_good_nrec_angles);
 
   TH2D * h_pn_pmiss = new TH2D("pn_pmiss","Neutron Momentum vs Missing Momentum;p_{miss} (GeV/c);Neutron Momentum (GeV/c)",100,0,1.5,100,0,1.5);
@@ -239,6 +256,19 @@ int main(int argc, char ** argv)
   TH1D * h_pmiss_pn_corr = new TH1D("pmiss_pn_corr","Missing Momentum (e,e'p_{SRC}n_{rec}) (efficiency corrected);p_{miss} (GeV/c);Counts",pmiss_bins,0.3,1);
   hist_list_1.push_back(h_pmiss_pn_corr);
 
+  TH1D * h_pproton_pp_uncorr = new TH1D("pproton_pp_uncorr","Proton Momentum (e,e'p_{SRC}p_{rec});p_{p} (GeV/c);Counts",pmiss_bins,0.3,1);
+  hist_list_1.push_back(h_pproton_pp_uncorr);
+  TH1D * h_pproton_pp_corr = new TH1D("pproton_pp_corr","Proton (e,e'p_{SRC}p_{rec}) (efficiency corrected);p_{p} (GeV/c);Counts",pmiss_bins,0.3,1);
+  hist_list_1.push_back(h_pproton_pp_corr);
+  TH1D * h_pneutron_pn_uncorr = new TH1D("pneutron_pn_uncorr","Neutron Momentum (e,e'p_{SRC}n_{rec});p_{n} (GeV/c);Counts",pmiss_bins,0.3,1);
+  hist_list_1.push_back(h_pneutron_pn_uncorr);
+  TH1D * h_pneutron_pn_corr = new TH1D("pneutron_pn_corr","Neutron Momentum (e,e'p_{SRC}n_{rec}) (efficiency corrected);p_{n} (GeV/c);Counts",pmiss_bins,0.3,1);
+  hist_list_1.push_back(h_pneutron_pn_corr);
+
+
+
+
+
   TH1D * h_pn = new TH1D("pn","Momentum (e,e'p_{SRC}n_{rec});p_{n} (GeV/c);Counts",pmiss_bins,0.3,1);
   hist_list_1.push_back(h_pn);
   TH1D * h_pn_corr = new TH1D("pn_corr","Momentum (e,e'p_{SRC}n_{rec}) (efficiency corrected);p_{n} (GeV/c);Counts",pmiss_bins,0.3,1);
@@ -249,9 +279,9 @@ int main(int argc, char ** argv)
   /////////////////////////////////////
   //Histos: ML features
   /////////////////////////////////////
-  TH1D * h_mvaValue_MLP = new TH1D("mvaValue_MLP","MVA Value (MLP);MVA Output Value;Counts",100,0,1);
+  TH1D * h_mvaValue_MLP = new TH1D("mvaValue_MLP","MVA Value (MLP);MVA Output Value;Counts",20,0,1);
     hist_list_1.push_back(h_mvaValue_MLP);
-  TH1D * h_mvaValue_BDT = new TH1D("mvaValue_BDT","MVA Value (BDT);MVA Output Value;Counts",100,-0.5,0.5);
+  TH1D * h_mvaValue_BDT = new TH1D("mvaValue_BDT","MVA Value (BDT);MVA Output Value;Counts",20,-0.5,0.5);
     hist_list_1.push_back(h_mvaValue_BDT);
 
   TH1D * h_energy_s = new TH1D("f_energy_s","Neutron Energy",40,0,300);
@@ -292,6 +322,50 @@ int main(int argc, char ** argv)
     hist_list_1.push_back(h_n_signal);
   TH1D * h_n_background = new TH1D("n_background","ML Signal and Background;Momentum (GeV/c);Counts",pmiss_bins,0.3,1);
     hist_list_1.push_back(h_n_background);
+
+
+  /////////////////////////////////////
+  //Histos: neutron background
+  /////////////////////////////////////
+  TH2D * h_theta_pn_all = new TH2D("theta_pn_all","#theta_{n} vs p (all);p (GeV/c);#theta_{n} (deg)",50,0,1.5,50,0,180);
+    hist_list_2.push_back(h_theta_pn_all);
+  TH1D * h_tof_all = new TH1D("tof_all","TOF;TOF (ns)",500,-20,50);
+    hist_list_1.push_back(h_tof_all);
+  TH1D * h_cos0_all = new TH1D("cos0_all","cos #theta_{pmiss,pn}",50,-1,1);
+    hist_list_1.push_back(h_cos0_all);
+  // look at status = 1
+  TH2D * h_theta_pn_doublehits = new TH2D("theta_pn_doublehits","#theta_{n} vs p (double hits);p (GeV/c);#theta_{n} (deg)",50,0,1.5,50,0,180);
+    hist_list_2.push_back(h_theta_pn_doublehits);
+  TH1D * h_tof_doublehits = new TH1D("tof_doublehits","TOF (double hits);TOF (ns)",100,-10,30);
+    hist_list_1.push_back(h_tof_doublehits);
+  TH1D * h_cos0_doublehits = new TH1D("cos0_doublehits","cos #theta_{pmiss,pn}",50,-1,1);
+    hist_list_1.push_back(h_cos0_doublehits);
+  // look at energy deposition cut
+  
+
+  // look at off-time
+  TH1D * h_tof_etest = new TH1D("tof_etest","TOF;TOF (ns)",500,0,50);
+    hist_list_1.push_back(h_tof_etest);
+  TH2D * h_cos0_edep = new TH2D("cos0_edep","cos #theta_{pmiss,pn} vs E_{dep};E_{dep} (MeVee);cos #theta_{pmiss,pn}",50,0,25,50,-1,1);
+    hist_list_2.push_back(h_cos0_edep);
+
+  TH1D * h_tof_after_edep = new TH1D("tof_after_edep","TOF;TOF (ns)",200,0,40);
+    hist_list_1.push_back(h_tof_after_edep);
+
+  TH1D * h_pmiss_offtime = new TH1D("pmiss_offtime","p_{miss} (off-time background);p_{miss} (GeV/c)",50,0,2);
+    hist_list_1.push_back(h_pmiss_offtime);
+  TH2D * h_theta_pn_offtime1 = new TH2D("theta_pn_offtime1","#theta_{n} vs p (before off-time subtraction);p (GeV/c);#theta_{n} (deg)",50,0,1.5,50,0,180);
+    hist_list_2.push_back(h_theta_pn_offtime1);
+  TH2D * h_theta_pn_offtime2 = new TH2D("theta_pn_offtime2","#theta_{n} vs p (after off-time subtraction);p (GeV/c);#theta_{n} (deg)",50,0,1.5,50,0,180);
+    hist_list_2.push_back(h_theta_pn_offtime2);
+  TH1D * h_cos0_offtime = new TH1D("cos0_offtime","cos #theta_{pmiss,pn}",50,-1,1);
+    hist_list_1.push_back(h_cos0_offtime);
+
+
+
+  // fiducial cuts - p>0.2, 40<theta<140
+
+
   
 
 
@@ -327,10 +401,32 @@ int main(int argc, char ** argv)
 
   reader->AddSpectator("momentum", &momentum);
 
-  reader->BookMVA("MLP", "/w/hallb-scshelf2102/clas/clase2/erins/repos/rgm/NeutronVeto/dataset_6gev_pCD/weights/TrainNeutronVeto_TMVA_MLP.weights.xml");
+  //reader->BookMVA("MLP", "/w/hallb-scshelf2102/clas/clase2/erins/repos/rgm/NeutronVeto/dataset_6gev_pCD/weights/TrainNeutronVeto_TMVA_MLP.weights.xml");
+  reader->BookMVA("MLP", "/w/hallb-scshelf2102/clas12/erins/rgm/NeutronVeto/dataset_6gev_old_march/weights/TrainNeutronVeto_TMVA_MLP.weights.xml");
 
   int n_background = 0;
   int n_signal = 0;
+
+
+  // energy deposition stuff
+  int s_e3 = 0; int b_e3 = 0;
+  int s_e4 = 0; int b_e4 = 0;
+  int s_e5 = 0; int b_e5 = 0;
+  int s_e6 = 0; int b_e6 = 0; 
+  int s_e7 = 0; int b_e7 = 0;
+  int s_e8 = 0; int b_e8 = 0;
+  int s_e9 = 0; int b_e9 = 0;
+  int s_e10 = 0; int b_e10 = 0;
+  int s_e11 = 0; int b_e11 = 0;
+  int s_e12 = 0; int b_e12 = 0;
+  int s_e15 = 0; int b_e15 = 0;
+  int s_e20 = 0; int b_e20 = 0;
+  int s_e25 = 0; int b_e25 = 0;
+
+  /*double edep_val[30] = {2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31};
+  int S_edep[30]; int B_edep[30];*/
+
+
 
 
   //Define cut class
@@ -355,6 +451,8 @@ int main(int argc, char ** argv)
     auto allParticles=c12->getDetParticles();
     double weight = 1;
     if(isMC){weight=c12->mcevent()->getWeight();}
+
+    double starttime = c12->event()->getStartTime();
 
 
     // initial cuts
@@ -490,11 +588,15 @@ int main(int argc, char ** argv)
       if (peff_alt==1) {double peff = 1.38158493*p_recp.Mag() -0.30256513;}
 
 
-
       // get momenta/angles of recoil protons
       h_prec_plead->Fill(p_recp.Mag(),pL.Mag(),weight);
       h_prec_p->Fill(p_recp.Mag(),weight);
       h_prec_angles->Fill(p_recp.Phi()*180./M_PI,p_recp.Theta()*180./M_PI,weight);
+      double p_phi = p_recp.Phi()*180./M_PI;
+      if (p_phi>-120 && p_phi<-100) {continue;}
+      if (p_phi>0 && p_phi<20) {continue;}
+      if (p_phi>120 && p_phi<140) {continue;}
+
 
       h_prec_plead_angle->Fill(p_recp.Angle(pL)*180./M_PI,weight);
       h_lpangle_pmiss->Fill(pmiss.Mag(),p_recp.Angle(pL)*180./M_PI,weight);
@@ -504,8 +606,10 @@ int main(int argc, char ** argv)
       h_pcos0->Fill(p_cos0,weight);
 
       // fill observable histo
-      h_pmiss_pp_uncorr->Fill(pmiss.Mag());
+      h_pmiss_pp_uncorr->Fill(pmiss.Mag(),weight);
       h_pmiss_pp_corr->Fill(pmiss.Mag(),weight/peff); // new
+      h_pproton_pp_uncorr->Fill(p_recp.Mag(),weight);
+      h_pproton_pp_corr->Fill(p_recp.Mag(),weight/peff); // new
       h_pp_count->Fill(pmiss.Mag(),weight); // fill counts - no peff correction
 
       // add to "with recoil" p denominator if proton meets recoil conditions
@@ -522,37 +626,46 @@ int main(int argc, char ** argv)
     int rec_n = -1;
     h_nsize->Fill(neut.size(),weight);
     TVector3 p_recn;
-    double n_cos0;
+    double n_cos0; int num_neutrons_passing_cuts = 0;
+    double n_weight = 1;
 
     for (int i=0; i<neut.size(); i++)
     {
+
+      // GET NEUTRON KINEMATICS
       p_recn.SetMagThetaPhi(neut[i]->getP(),neut[i]->getTheta(),neut[i]->getPhi());
-      // recoil n must be in CND
       bool is_CND1 = neut[i]->sci(CND1)->getDetector()==3;
       bool is_CND2 = neut[i]->sci(CND2)->getDetector()==3;
       bool is_CND3 = neut[i]->sci(CND3)->getDetector()==3;
       bool is_CTOF = neut[i]->sci(CTOF)->getDetector()==4;
       if (!is_CND1 && !is_CND2 && !is_CND3 && !is_CTOF) {continue;}
+      
+      status = 0;
+      if (is_CND1)
+      {
+        tof = neut[i]->sci(CND1)->getTime() - starttime;
+        status = status + neut[i]->sci(CND1)->getStatus();
+      }
+      else if (is_CND2)
+      {
+        tof = neut[i]->sci(CND2)->getTime() - starttime;
+        status = status + neut[i]->sci(CND2)->getStatus();
+      }
+      else if (is_CND3)
+      {
+        tof = neut[i]->sci(CND3)->getTime() - starttime;
+        status = status + neut[i]->sci(CND3)->getStatus();
+      }
+      else if (is_CTOF)
+      {
+        tof = neut[i]->sci(CTOF)->getTime() - starttime;
+      }
 
-
-      // limit to central detector acceptance
-      h_nrec_ptheta->Fill(p_recn.Mag(),p_recn.Theta()*180./M_PI,weight);
-      if (p_recn.Mag()<0.3 || p_recn.Mag()>1.0) {continue;}
-      if (p_recn.Theta()*180./M_PI<45 || p_recn.Theta()*180./M_PI>120) {continue;}
-
-      /*// EPJA cuts
-      if (p_recn.Theta()*180./M_PI<40 || p_recn.Theta()*180./M_PI>140) {continue;}
-      if (p_recn.Mag()<0.3) {continue;}
-      if (!is_CND1 && !is_CND2 && !is_CND3) {continue;}*/
-
-
-
-      h_nrec_angles->Fill(p_recn.Phi()*180./M_PI,p_recn.Theta()*180./M_PI,weight);
-      double n_phi = p_recn.Phi()*180./M_PI;
-      if (n_phi>-106 && n_phi<-90) {continue;}
-      if (n_phi>14 && n_phi<29) {continue;}
-      if (n_phi>134 && n_phi<149) {continue;}
-
+      double path = neut[i]->getPath();
+      double beta = neut[i]->par()->getBeta();
+      double n_phi = p_recn.Phi()*180./M_PI; pn_mag = p_recn.Mag(); pn_theta = p_recn.Theta()*180./M_PI;
+      n_cos0 = pmiss.Dot(p_recn) / (pmiss.Mag() * p_recn.Mag());
+      beta = neut[i]->par()->getBeta();
 
       // calculate features for ML
       Struct ninfo = getFeatures(neut, allParticles, i);
@@ -572,84 +685,216 @@ int main(int argc, char ** argv)
       h_mvaValue_MLP->Fill(mvaValue,weight);
       h_mvaValue_BDT->Fill(mvaValue,weight);
 
+
+
       // FILL MVA VALUE HISTOGRAM
       double mva_cutoff = 0.45;
       if (mlp_alt==1) {mva_cutoff = 0.4;}
       if (mlp_alt==2) {mva_cutoff = 0.5;}
+      if (mlp_alt==3) {mva_cutoff = -0.1;}
+     
+ 
+      // KINEMATICS OF ALL NEUTRONS
+      h_tof_all->Fill(tof,weight);
+
+      if (pn_mag==0) {continue;}
+      if (tof<=0) {continue;}
+
+      h_theta_pn_all->Fill(pn_mag,pn_theta,weight);
+      h_cos0_all->Fill(n_cos0,weight);
+
+
+      // DOUBLE HITS
+      if (status>0)
+      {
+        h_theta_pn_doublehits->Fill(pn_mag,pn_theta,weight);
+        h_tof_doublehits->Fill(tof,weight);
+        h_cos0_doublehits->Fill(n_cos0,weight);
+      }
+      if (status!=0) {continue;}
+
+
+
+      // ENERGY DEPOSITION CUT
+      h_tof_etest->Fill(tof,weight);
+      h_cos0_edep->Fill(energy,n_cos0,weight);
+      edep = energy;
+
+      if (tof>4 && tof<9)
+      {
+        if (edep>12) {s_e12 = s_e12 + 1;}
+        if (edep>11) {s_e11 = s_e11 + 1;}
+        if (edep>10) {s_e10 = s_e10 + 1;}
+        if (edep>9) {s_e9 = s_e9 + 1;}
+        if (edep>8) {s_e8 = s_e8 + 1;}
+        if (edep>7) {s_e7 = s_e7 + 1;}
+        if (edep>6) {s_e6 = s_e6 + 1;}
+        if (edep>5) {s_e5 = s_e5 + 1;}
+        if (edep>4) {s_e4 = s_e4 + 1;}
+        if (edep>3) {s_e3 = s_e3 + 1;}
+      }
+      else if (tof>20 && tof<25)
+      {
+        if (edep>12) {b_e12 = b_e12 + 1;}
+        if (edep>11) {b_e11 = b_e11 + 1;}
+        if (edep>10) {b_e10 = b_e10 + 1;}
+        if (edep>9) {b_e9 = b_e9 + 1;}
+        if (edep>8) {b_e8 = b_e8 + 1;}
+        if (edep>7) {b_e7 = b_e7 + 1;}
+        if (edep>6) {b_e6 = b_e6 + 1;}
+        if (edep>5) {b_e5 = b_e5 + 1;}
+        if (edep>4) {b_e4 = b_e4 + 1;}
+        if (edep>3) {b_e3 = b_e3 + 1;}
+      }
+
+      // edep cut
+      if (edep<5) {continue;}
+      h_tof_after_edep->Fill(tof);
+
+
+
+      // OFF-TIME BACKGROUND
+
+      if (tof>0 && tof<15)
+      {
+        h_theta_pn_offtime1->Fill(pn_mag,pn_theta,weight);
+        h_theta_pn_offtime2->Fill(pn_mag,pn_theta,weight);
+      }
+      else if (tof>26 && tof<41)
+      {
+        h_pmiss_offtime->Fill(pmiss.Mag(),weight);
+        h_cos0_offtime->Fill(n_cos0,weight);
+        // assign negative weight and kinematics in signal region
+        n_weight = -1;
+        tof = tof - 26;
+        beta = path/tof/29.98;
+        p_recn.SetMag( 1/sqrt(1-beta*beta)*0.939565346*path/tof/29.98 );
+        pn_mag = p_recn.Mag();
+        n_cos0 = pmiss.Dot(p_recn) / (pmiss.Mag() * p_recn.Mag());
+        h_theta_pn_offtime2->Fill(pn_mag,pn_theta,n_weight*weight);
+      }
+      if (beta>0.8) {continue;} // in case we made tof too low
+
+
+      // limit to central detector acceptance
+      h_nrec_ptheta->Fill(p_recn.Mag(),p_recn.Theta()*180./M_PI,n_weight*weight);
+      if (p_recn.Mag()<0.3 || p_recn.Mag()>1.0) {continue;}
+      if (p_recn.Theta()*180./M_PI<45 || p_recn.Theta()*180./M_PI>120) {continue;}
+
+      /*// EPJA cuts
+      if (p_recn.Theta()*180./M_PI<40 || p_recn.Theta()*180./M_PI>140) {continue;}
+      if (p_recn.Mag()<0.3) {continue;}
+      if (!is_CND1 && !is_CND2 && !is_CND3) {continue;}*/
+
+
+      // fiducial cuts - exclude off-time events
+      //if (n_weight>0)
+      //{
+        h_nrec_angles->Fill(p_recn.Phi()*180./M_PI,p_recn.Theta()*180./M_PI,n_weight*weight);
+        if (n_phi>-120 && n_phi<-100) {continue;}
+        if (n_phi>0 && n_phi<20) {continue;}
+        if (n_phi>120 && n_phi<140) {continue;}
+      //}
+
 
       // fill counts
-      h_pn_count->Fill(pmiss.Mag(),weight);
+      h_pn_count->Fill(pmiss.Mag(),n_weight*weight);
 
-      
+
+
+      num_neutrons_passing_cuts = num_neutrons_passing_cuts + 1;
+      tree->Fill();
+
+
+
+      // APPLY MACHINE LEARNING
 
       if (mvaValue>mva_cutoff) // signal
       {
         // ML features
-        h_energy_s->Fill(energy,weight);
-        h_layermult_s->Fill(layermult,weight);
-        h_size_s->Fill(size,weight);
-        h_cnd_hits_s->Fill(cnd_hits,weight);
-        h_cnd_energy_s->Fill(cnd_energy,weight);
-        h_ctof_energy_s->Fill(ctof_energy,weight);
-        h_ctof_hits_s->Fill(ctof_hits,weight);
-        h_anglediff_s->Fill(angle_diff,weight);
-        h_good_nrec_angles->Fill(p_recn.Phi()*180./M_PI,p_recn.Theta()*180./M_PI,weight);
-
-        
-        // see if neutron is close in angle to pmiss
-        n_cos0 = pmiss.Dot(p_recn) / (pmiss.Mag() * p_recn.Mag());
-        h_ncos0->Fill(n_cos0,weight);
-        // compared to pmiss
-        h_pn_pmiss->Fill(pmiss.Mag(),p_recn.Mag(),weight);
-
-
-        // get momenta/angles of recoil neutrons (this was originally for candidates)
-        h_nrec_plead->Fill(p_recn.Mag(),pL.Mag(),weight);
-        h_nrec_p->Fill(p_recn.Mag(),weight);
-        h_nptheta->Fill(p_recn.Theta()*180./M_PI,pmiss.Mag(),weight);
-        h_nrec_plead_angle->Fill(p_recn.Angle(pL)*180./M_PI,weight);
-        h_lnangle_pmiss->Fill(pmiss.Mag(),p_recn.Angle(pL)*180./M_PI,weight);
-
+        h_energy_s->Fill(energy,n_weight*weight);
+        h_layermult_s->Fill(layermult,n_weight*weight);
+        h_size_s->Fill(size,n_weight*weight);
+        h_cnd_hits_s->Fill(cnd_hits,n_weight*weight);
+        h_cnd_energy_s->Fill(cnd_energy,n_weight*weight);
+        h_ctof_energy_s->Fill(ctof_energy,n_weight*weight);
+        h_ctof_hits_s->Fill(ctof_hits,n_weight*weight);
+        h_anglediff_s->Fill(angle_diff,n_weight*weight);
 
         rec_n = i; // pick this neutron! ... but what if there's more than 1?
 
         n_signal = n_signal + 1;
-        h_n_signal->Fill(pmiss.Mag(),weight);
+        h_n_signal->Fill(pmiss.Mag(),weight); // no n_weight?
 
       }
       else
       {
         // ML features
-        h_energy_b->Fill(energy,weight);
-        h_layermult_b->Fill(layermult,weight);
-        h_size_b->Fill(size,weight);
-        h_cnd_hits_b->Fill(cnd_hits,weight);
-        h_cnd_energy_b->Fill(cnd_energy,weight);
-        h_ctof_energy_b->Fill(ctof_energy,weight);
-        h_ctof_hits_b->Fill(ctof_hits,weight);
-        h_anglediff_b->Fill(angle_diff,weight);
+        h_energy_b->Fill(energy,n_weight*weight);
+        h_layermult_b->Fill(layermult,n_weight*weight);
+        h_size_b->Fill(size,n_weight*weight);
+        h_cnd_hits_b->Fill(cnd_hits,n_weight*weight);
+        h_cnd_energy_b->Fill(cnd_energy,n_weight*weight);
+        h_ctof_energy_b->Fill(ctof_energy,n_weight*weight);
+        h_ctof_hits_b->Fill(ctof_hits,n_weight*weight);
+        h_anglediff_b->Fill(angle_diff,n_weight*weight);
 //std::cout << rec_n << '\n'; // there's an issue here! sometimes this returns 0
 
         n_background = n_background + 1;
-        h_n_background->Fill(pmiss.Mag(),weight);
+        h_n_background->Fill(pmiss.Mag(),weight); // no n_weight?
       }
-    }
+    } // end loop over neutrons
+
+    
+    h_nsize2->Fill(num_neutrons_passing_cuts,n_weight*weight);
 
 
 
-    if (rec_n<0) {continue;} // proceed only if we found good neutron
-      // fill histo
+
+
+    // ANALYZE THE SELECTED NEUTRON AND APPLY CORRECTIONS
+
+    if (rec_n<0) {continue;} // proceed only if we found a good neutron
+      // recalculate kinematics
       TVector3 pn;
       pn.SetXYZ( neut[rec_n]->par()->getPx(), neut[rec_n]->par()->getPy(), neut[rec_n]->par()->getPz() );
       double n_theta = pn.Theta()*180./M_PI;
+      bool is_CND1 = neut[rec_n]->sci(CND1)->getDetector()==3;
+      bool is_CND2 = neut[rec_n]->sci(CND2)->getDetector()==3;
+      bool is_CND3 = neut[rec_n]->sci(CND3)->getDetector()==3;
+      bool is_CTOF = neut[rec_n]->sci(CTOF)->getDetector()==4;      
+      if (is_CND1) { tof = neut[rec_n]->sci(CND1)->getTime() - starttime; }
+      else if (is_CND2) { tof = neut[rec_n]->sci(CND2)->getTime() - starttime; }
+      else if (is_CND3) { tof = neut[rec_n]->sci(CND3)->getTime() - starttime; }
+      else if (is_CTOF) { tof = neut[rec_n]->sci(CTOF)->getTime() - starttime; }
+//std::cout << tof << '\n';
+      double path = neut[rec_n]->getPath();
+
+      if (tof>25)
+      {
+        n_weight = -1;
+        tof = tof - 26;
+        beta = path/tof/29.98;
+        pn.SetMag( 1/sqrt(1-beta*beta)*0.939565346*path/tof/29.98 );
+        n_cos0 = pmiss.Dot(pn) / (pmiss.Mag() * pn.Mag());
+      }
+      if (p_recn.Mag()<0.3 || p_recn.Mag()>1.0) {continue;}
+
+      n_cos0 = pmiss.Dot(pn) / (pmiss.Mag() * pn.Mag());
+
+
+
 
 
       // CORRECTION FOR VETO EFFICIENCY
       double e_s = 0.86; double e_b = 0.225;
       if (mlp_alt == 1) {e_s = 0.88; e_b = 0.255;}
       else if (mlp_alt ==2) {e_s = 0.835; e_b = 0.197;}
+      else if (mlp_alt ==3) {e_s = 1.0; e_b = 0.0;}
 
-      double p_to_n[7] = {3.30882, 2.75362, 2.01266, 1.8125, 2.17073, 1.9, 1.55556};
+      //double p_to_n[7] = {3.30882, 2.75362, 2.01266, 1.8125, 2.17073, 1.9, 1.55556};
+      double p_to_n[7] = {3.72043,2.536,2.37168,1.84483,2.23214,1.65854,1.56522};
+
       double this_pton = 0; //double veto_weight = 1;
            if (pmiss.Mag()>=0.3 && pmiss.Mag()<0.4) {this_pton = p_to_n[0];}
       else if (pmiss.Mag()>=0.4 && pmiss.Mag()<0.5) {this_pton = p_to_n[1];}
@@ -665,38 +910,78 @@ int main(int argc, char ** argv)
       double p0 = 1; double p1 = 1;
 
       // regular neff calculation
-      double a0[9] = {0.186947, 0.211831, 0.203986, 0.199245, 0.195636, 0.18393, 0.186905, 0.18791, 0.19951 };
-      double a1[9] = {-0.117272, -0.144642, -0.144253, -0.145586, -0.144762, -0.132524, -0.142502, -0.150404, -0.1738 };
+      //double a0[9] = {0.186947, 0.211831, 0.203986, 0.199245, 0.195636, 0.18393, 0.186905, 0.18791, 0.19951 };
+      //double a1[9] = {-0.117272, -0.144642, -0.144253, -0.145586, -0.144762, -0.132524, -0.142502, -0.150404, -0.1738 };
+      double a0[9] = {0.157777, 0.180446, 0.178342, 0.173709, 0.170933, 0.160873, 0.163368, 0.163457, 0.172305};
+      double a1[9] = {-0.0922353, -0.113674, -0.119523, -0.119093, -0.118729, -0.107379, -0.114865, -0.118671, -0.134541};
 
       // alternative neff calculation
       if (neff_alt)
       {
-        double a0_copy[9] = {0.177487, 0.207873, 0.198617, 0.181738, 0.180914, 0.169454, 0.160552, 0.138531, 0.178826 }; // alternative neff
-        double a1_copy[9] = {-0.0786727, -0.116044, -0.115987, -0.100439, -0.102689, -0.0958549, -0.0890577, -0.0641776, -0.126627 }; // alternative neff
+        double a0_copy[9] = {0.149367, 0.177568, 0.173983, 0.15981, 0.147528, 0.14766, 0.140342, 0.122255, 0.164534};
+        double a1_copy[9] = {-0.0585118, -0.0892072, -0.0946001, -0.0811451, -0.0669726, -0.0740947, -0.0689309, -0.0485866, -0.117414};
+        //double a0_copy[9] = {0.177487, 0.207873, 0.198617, 0.181738, 0.180914, 0.169454, 0.160552, 0.138531, 0.178826 }; // alternative neff
+        //double a1_copy[9] = {-0.0786727, -0.116044, -0.115987, -0.100439, -0.102689, -0.0958549, -0.0890577, -0.0641776, -0.126627 }; // alternative neff
         memcpy(a0, a0_copy, 9); memcpy(a1, a1_copy, 9);
       }
 
-      if      (n_theta>45 && n_theta<50)  {p0 = a0[0]; p1 = a1[0];}
-      else if (n_theta>50 && n_theta<55)  {p0 = a0[1]; p1 = a1[1];}
-      else if (n_theta>55 && n_theta<60)  {p0 = a0[2]; p1 = a1[2];}
-      else if (n_theta>60 && n_theta<65)  {p0 = a0[3]; p1 = a1[3];}
-      else if (n_theta>65 && n_theta<70)  {p0 = a0[4]; p1 = a1[4];}
-      else if (n_theta>70 && n_theta<75)  {p0 = a0[5]; p1 = a1[5];}
-      else if (n_theta>75 && n_theta<80)  {p0 = a0[6]; p1 = a1[6];}
-      else if (n_theta>80 && n_theta<95)  {p0 = a0[7]; p1 = a1[7];}
-      else if (n_theta>95 && n_theta<120) {p0 = a0[8]; p1 = a1[8];}
+      if      (n_theta>45 && n_theta<=50)  {p0 = a0[0]; p1 = a1[0];}
+      else if (n_theta>50 && n_theta<=55)  {p0 = a0[1]; p1 = a1[1];}
+      else if (n_theta>55 && n_theta<=60)  {p0 = a0[2]; p1 = a1[2];}
+      else if (n_theta>60 && n_theta<=65)  {p0 = a0[3]; p1 = a1[3];}
+      else if (n_theta>65 && n_theta<=70)  {p0 = a0[4]; p1 = a1[4];}
+      else if (n_theta>70 && n_theta<=75)  {p0 = a0[5]; p1 = a1[5];}
+      else if (n_theta>75 && n_theta<=80)  {p0 = a0[6]; p1 = a1[6];}
+      else if (n_theta>80 && n_theta<=95)  {p0 = a0[7]; p1 = a1[7];}
+      else if (n_theta>95 && n_theta<=120) {p0 = a0[8]; p1 = a1[8];}
 
       double neff = p0 + p1*pn.Mag();
       if (neff<=0) {continue;} // just in case
 
-//if (p_recn.Mag()<0.3) {continue;} // THIS IS A HUGE PROBLEM! It eliminates all the events in which the final particle with PID 2112 has momentum of 0, even if they have a good neutron in the event.
-
-      h_pmiss_pn_uncorr->Fill(pmiss.Mag(),weight);
-      h_pmiss_pn_corr->Fill(pmiss.Mag(),veto_weight*weight/neff);
+      h_pmiss_pn_uncorr->Fill(pmiss.Mag(),n_weight*weight);
+      h_pmiss_pn_corr->Fill(pmiss.Mag(),n_weight*veto_weight*weight/neff);
 
       // add to "with recoil" p denominator if neutron meets recoil conditions
-      h_pmiss_p_wrec->Fill(pmiss.Mag(),veto_weight*weight/neff);
+      h_pmiss_p_wrec->Fill(pmiss.Mag(),n_weight*veto_weight*weight/neff);
 
+
+
+      // histos that used to be in mvaValue>mva_cutoff section
+      h_good_nrec_angles->Fill(p_recn.Phi()*180./M_PI,p_recn.Theta()*180./M_PI,n_weight*weight);   
+      // see if neutron is close in angle to pmiss
+      h_ncos0->Fill(n_cos0,n_weight*weight);
+      // compared to pmiss
+      h_pn_pmiss->Fill(pmiss.Mag(),p_recn.Mag(),n_weight*weight);
+
+      // get momenta/angles of recoil neutrons (this was originally for candidates)
+      h_nrec_plead->Fill(p_recn.Mag(),pL.Mag(),n_weight*weight);
+      h_nrec_p->Fill(p_recn.Mag(),n_weight*weight);
+      h_nptheta->Fill(p_recn.Theta()*180./M_PI,pmiss.Mag(),n_weight*weight);
+      h_nrec_plead_angle->Fill(p_recn.Angle(pL)*180./M_PI,n_weight*weight);
+      h_lnangle_pmiss->Fill(pmiss.Mag(),p_recn.Angle(pL)*180./M_PI,n_weight*weight);
+
+
+
+
+
+
+      // off-time subtraction built in
+      h_pmiss_pn_uncorr->Fill(pmiss.Mag(),n_weight*weight);
+      h_pmiss_pn_corr->Fill(pmiss.Mag(),n_weight*veto_weight*weight/neff);
+      h_pneutron_pn_uncorr->Fill(pmiss.Mag(),n_weight*weight);
+      h_pneutron_pn_corr->Fill(pmiss.Mag(),n_weight*veto_weight*weight/neff);
+      // add to "with recoil" p denominator if neutron meets recoil conditions
+      h_pmiss_p_wrec->Fill(pmiss.Mag(),n_weight*veto_weight*weight/neff);
+
+      /*if (tof>26 && tof<41) // might have cut some of these out
+      {
+        h_pmiss_pn_uncorr->Fill(pmiss.Mag(),weight);
+        h_pmiss_pn_corr->Fill(pmiss.Mag(),veto_weight*weight/neff);
+        h_pneutron_pn_uncorr->Fill(pmiss.Mag(),weight);
+        h_pneutron_pn_corr->Fill(pmiss.Mag(),veto_weight*weight/neff);
+        // add to "with recoil" p denominator if neutron meets recoil conditions
+        h_pmiss_p_wrec->Fill(pmiss.Mag(),veto_weight*weight/neff);
+      }*/
 
   }
 
@@ -714,7 +999,7 @@ int main(int argc, char ** argv)
 
 
 
-
+  tree->Write();
 
 
 
@@ -864,6 +1149,30 @@ int main(int argc, char ** argv)
 
   myCanvas->Divide(1,1);
   myCanvas->cd(1);  h_prec_angles->Draw("colz");
+  TLine * l_p1 = new TLine(-120,40,-120,130);
+  l_p1->SetLineColor(kRed);
+  l_p1->SetLineWidth(3);
+  l_p1->Draw("same");
+  TLine * l_p2 = new TLine(-100,40,-100,130);
+  l_p2->SetLineColor(kRed);
+  l_p2->SetLineWidth(3);
+  l_p2->Draw("same");
+  TLine * l_p3 = new TLine(0,40,0,130);
+  l_p3->SetLineColor(kRed);
+  l_p3->SetLineWidth(3);
+  l_p3->Draw("same");
+  TLine * l_p4 = new TLine(20,40,20,130);
+  l_p4->SetLineColor(kRed);
+  l_p4->SetLineWidth(3);
+  l_p4->Draw("same");
+  TLine * l_p5 = new TLine(120,40,120,130);
+  l_p5->SetLineColor(kRed);
+  l_p5->SetLineWidth(3);
+  l_p5->Draw("same");
+  TLine * l_p6 = new TLine(140,40,140,130);
+  l_p6->SetLineColor(kRed);
+  l_p6->SetLineWidth(3);
+  l_p6->Draw("same");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
@@ -885,6 +1194,9 @@ int main(int argc, char ** argv)
 
 
 
+
+  // NEUTRONS
+
   myText->cd();
   text.DrawLatex(0.2,0.9,"Recoil neutrons");
   myText->Print(fileName,"pdf");
@@ -894,6 +1206,93 @@ int main(int argc, char ** argv)
   myCanvas->cd(1);  h_nsize->Draw();
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);  h_nsize2->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  // neutron background
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);  h_tof_all->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1); 
+  myCanvas->cd(1)->SetLogz();
+  h_theta_pn_all->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);  h_cos0_all->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  // double hits
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  myCanvas->cd(1)->SetLogz();
+  h_theta_pn_doublehits->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);  h_tof_doublehits->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);  h_cos0_doublehits->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  // off-time
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);  h_tof_etest->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);  h_cos0_edep->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);  h_tof_after_edep->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);  h_pmiss_offtime->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);  h_cos0_offtime->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);  h_theta_pn_offtime1->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_theta_pn_offtime2->SetMinimum(0.);
+  h_theta_pn_offtime2->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+
+
+
+
 
   myCanvas->Divide(1,1);
   myCanvas->cd(1);  h_ncos0->Draw();
@@ -906,34 +1305,37 @@ int main(int argc, char ** argv)
   myCanvas->Clear();
 
   myCanvas->Divide(1,1);
-  myCanvas->cd(1);  h_nrec_ptheta->Draw("colz");
+  myCanvas->cd(1); myCanvas->cd(1)->SetLogz();
+  h_nrec_ptheta->Draw("colz");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
 
   myCanvas->Divide(1,1);
-  myCanvas->cd(1);  h_nrec_angles->Draw("colz");
-  TLine * l_n1 = new TLine(-106,0,-106,180);
+  myCanvas->cd(1);
+  h_nrec_angles->SetMinimum(0.);
+  h_nrec_angles->Draw("colz");
+  TLine * l_n1 = new TLine(-106,40,-106,130);
   l_n1->SetLineColor(kRed);
   l_n1->SetLineWidth(3);
   l_n1->Draw("same");
-  TLine * l_n2 = new TLine(-90,0,-90,180);
+  TLine * l_n2 = new TLine(-90,40,-90,130);
   l_n2->SetLineColor(kRed);
   l_n2->SetLineWidth(3);
   l_n2->Draw("same");
-  TLine * l_n3 = new TLine(14,0,14,180);
+  TLine * l_n3 = new TLine(14,40,14,130);
   l_n3->SetLineColor(kRed);
   l_n3->SetLineWidth(3);
   l_n3->Draw("same");
-  TLine * l_n4 = new TLine(29,0,29,180);
+  TLine * l_n4 = new TLine(29,40,29,130);
   l_n4->SetLineColor(kRed);
   l_n4->SetLineWidth(3);
   l_n4->Draw("same");
-  TLine * l_n5 = new TLine(134,0,134,180);
+  TLine * l_n5 = new TLine(134,40,134,130);
   l_n5->SetLineColor(kRed);
   l_n5->SetLineWidth(3);
   l_n5->Draw("same");
-  TLine * l_n6 = new TLine(149,0,149,180);
+  TLine * l_n6 = new TLine(149,40,149,130);
   l_n6->SetLineColor(kRed);
   l_n6->SetLineWidth(3);
   l_n6->Draw("same");
@@ -1161,6 +1563,20 @@ int main(int argc, char ** argv)
   myCanvas->Clear();
 
 
+  // channels
+  myCanvas->Divide(2,2);
+  myCanvas->cd(1);
+  h_pproton_pp_uncorr->Draw();
+  myCanvas->cd(2);
+  h_pproton_pp_corr->Draw();
+  myCanvas->cd(3);
+  h_pneutron_pn_uncorr->Draw();
+  myCanvas->cd(4);
+  h_pneutron_pn_corr->Draw();
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();
+
+
   // write yield counts to root file
   h_e_count->Write();
   h_pl_count->Write();
@@ -1187,7 +1603,38 @@ int main(int argc, char ** argv)
   }
 
 
+  // energy deposition
+  std::cout << "cut"      << '\t' << "S"  << '\t' << "B"  << '\t' << "S/B" << '\t' << "sqrt(S)/S" << '\t' << "sqrt(S+B)/S" << '\n';
+  std::cout << "edep > 3" << '\t' << s_e3 << '\t' << b_e3 << '\t' << (double)s_e3/(double)b_e3 << '\t' << sqrt((double)s_e3)/(double)s_e3 << '\t' << sqrt((double)s_e3+(double)b_e3)/((double)(s_e3)) << '\n';
+  std::cout << "edep > 4" << '\t' << s_e4 << '\t' << b_e4 << '\t' << (double)s_e4/(double)b_e4 << '\t' << sqrt((double)s_e4)/(double)s_e4 << '\t' << sqrt((double)s_e4+(double)b_e4)/((double)(s_e4)) << '\n';
+  std::cout << "edep > 5" << '\t' << s_e5 << '\t' << b_e5 << '\t' << (double)s_e5/(double)b_e5 << '\t' << sqrt((double)s_e5)/(double)s_e5 << '\t' << sqrt((double)s_e5+(double)b_e5)/((double)(s_e5)) << '\n';
+  std::cout << "edep > 6" << '\t' << s_e6 << '\t' << b_e6 << '\t' << (double)s_e6/(double)b_e6 << '\t' << sqrt((double)s_e6)/(double)s_e6 << '\t' << sqrt((double)s_e6+(double)b_e6)/((double)(s_e6)) << '\n';
+  std::cout << "edep > 7" << '\t' << s_e7 << '\t' << b_e7 << '\t' << (double)s_e7/(double)b_e7 << '\t' << sqrt((double)s_e7)/(double)s_e7 << '\t' << sqrt((double)s_e7+(double)b_e7)/((double)(s_e7)) << '\n';
+  std::cout << "edep > 8" << '\t' << s_e8 << '\t' << b_e8 << '\t' << (double)s_e8/(double)b_e8 << '\t' << sqrt((double)s_e8)/(double)s_e8 << '\t' << sqrt((double)s_e8+(double)b_e8)/((double)(s_e8)) << '\n';
+  std::cout << "edep > 9" << '\t' << s_e9 << '\t' << b_e9 << '\t' << (double)s_e9/(double)b_e9 << '\t' << sqrt((double)s_e9)/(double)s_e9 << '\t' << sqrt((double)s_e9+(double)b_e9)/((double)(s_e9)) << '\n';
+  std::cout << "edep > 10" << '\t' << s_e10 << '\t' << b_e10 << '\t' << (double)s_e10/(double)b_e10 << '\t' << sqrt((double)s_e10)/(double)s_e10 << '\t' << sqrt((double)s_e10+(double)b_e10)/((double)(s_e10)) << '\n';
+  std::cout << "edep > 11" << '\t' << s_e11 << '\t' << b_e11 << '\t' << (double)s_e11/(double)b_e11 << '\t' << sqrt((double)s_e11)/(double)s_e11 << '\t' << sqrt((double)s_e11+(double)b_e11)/((double)(s_e11)) << '\n';
+  std::cout << "edep > 12" << '\t' << s_e12 << '\t' << b_e12 << '\t' << (double)s_e12/(double)b_e12 << '\t' << sqrt((double)s_e12)/(double)s_e12 << '\t' << sqrt((double)s_e12+(double)b_e12)/((double)(s_e12)) << '\n';
+
+
+  std::cout << "edep > 15" << '\t' << s_e15 << '\t' << b_e15 << '\t' << (double)s_e15/(double)b_e15 << '\t' << sqrt((double)s_e15)/(double)s_e15 << '\t' << sqrt((double)s_e15+(double)b_e15)/((double)(s_e15)) << '\n';
+
+  std::cout << "edep > 20" << '\t' << s_e20 << '\t' << b_e20 << '\t' << (double)s_e20/(double)b_e20 << '\t' << sqrt((double)s_e20)/(double)s_e20 << '\t' << sqrt((double)s_e20+(double)b_e20)/((double)(s_e20)) << '\n';
+
+  std::cout << "edep > 25" << '\t' << s_e25 << '\t' << b_e25 << '\t' << (double)s_e25/(double)b_e25 << '\t' << sqrt((double)s_e25)/(double)s_e25 << '\t' << sqrt((double)s_e25+(double)b_e25)/((double)(s_e25)) << '\n';
+
+
+
+
+/*  for (int i=0; i<30; i++)
+  {
+    std::cout << "edep > " << edep_val[i] << '\t' << S_edep[i] << '\t' << B_edep[i] << '\t' << sqrt((double)S_edep[i]/(double)B_edep[i]) << '\t' << sqrt((double)S_edep[i]+(double)B_edep[i])/((double)S_edep[i]) << '\n';
+  }*/
+
+
+
   //outFile->Close(); // THIS LINE CAUSES ERRORS!
+
 }
 
 

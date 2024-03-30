@@ -4,7 +4,7 @@
 # OUTDIR contains 100 background RG-A CLAS12 files each with 20k events
 
 INPUT_DIR=/lustre19/expphy/volatile/clas12/users/erins/neutron-veto/sim_rgm_bknd/mchipo
-BKGD_DIR=/lustre19/expphy/volatile/clas12/rg-m/bkgfiles/rgm_fall2021/tor-1.00_sol-1.00/Cx4_5986MeV
+BKGD_DIR=/cache/clas12/rg-m/production/bkgfiles//tor-1.00_sol-1.00/Cx4_5986MeV
 OUTPUT_DIR=/lustre19/expphy/volatile/clas12/users/erins/neutron-veto/sim_rgm_bknd/mchipo_bkg
 
 
