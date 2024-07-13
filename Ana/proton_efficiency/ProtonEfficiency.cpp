@@ -89,8 +89,8 @@ int main(int argc, char ** argv) {
   gStyle->SetTitleXOffset(0.8);
   gStyle->SetTitleYOffset(0.8);
 
-  char temp_name[100];
-  char temp_title[100];
+  char temp_name_d[100]; char temp_name_n[100]; char temp_name1[100]; char temp_name2[100];
+  char temp_title_d[100]; char temp_title_n[100]; char temp_title1[100]; char temp_title2[100];
 
   double momentum;
   int event;
@@ -147,23 +147,15 @@ int main(int argc, char ** argv) {
     hist_list_2.push_back(h_pp_ppi_denom);
 
 
-  
-
-
-
   // second proton information
   TH2D * h_pangles2 = new TH2D("pangles2","CD Proton Angles;phi;theta",180,-180,180,90,0,180);
     hist_list_2.push_back(h_pangles2);
-  TH2D * h_theta_beta = new TH2D("theta_beta","Proton theta vs beta;#beta;#theta",50,-0.1,1.1,55,35,145);
-    hist_list_2.push_back(h_theta_beta);
   TH2D * h_p_theta = new TH2D("p_theta","Proton Momentum vs Theta;#theta;p (GeV/c)",55,35,145,50,0,1.2);
     hist_list_2.push_back(h_p_theta);
   TH1D * h_tof = new TH1D("tof","Time of Flight",100,-10,20);
     hist_list_1.push_back(h_tof);
   TH2D * h_Edep_beta = new TH2D("Edep_beta","Energy deposition vs #beta;#beta;E_{dep}",50,0,1,50,0,100);
     hist_list_2.push_back(h_Edep_beta);
-  TH1D * h_p_all = new TH1D("p_all","Momentum",100,0,1.2);
-    hist_list_1.push_back(h_p_all);
 
 
   // comparison of second proton to expected proton
@@ -187,12 +179,8 @@ int main(int argc, char ** argv) {
     hist_list_1.push_back(h_cos0);
   TH1D * h_cos0_mcut = new TH1D("cos0_mcut","cos #theta, expected and reconstructed p (0.85 < M_{miss} < 1.05 GeV/c^{2})",50,-1.1,1.1);
     hist_list_1.push_back(h_cos0_mcut);
-  TH2D * h_pmiss_thetamiss = new TH2D("pmiss_thetamiss","pmiss vs #theta_{pmiss};#theta_{pmiss};pmiss",90,0,180,50,0,1.2);
-    hist_list_2.push_back(h_pmiss_thetamiss);
   TH2D * h_selection = new TH2D("selection","(p_{miss}-p_{n})/p_{miss} vs #theta_{n,miss};(p_{miss}-p_{n})/p_{miss};#theta_{n,miss}",100,-3,1,90,0,180);
     hist_list_2.push_back(h_selection);
-
-
 
 
   // numerator
@@ -208,38 +196,37 @@ int main(int argc, char ** argv) {
     hist_list_2.push_back(h_pp_ppi_numer);
 
 
-
-
   // efficiency stuff
   TH1D * h_eff_p_denom = new TH1D("eff_p_denom","Proton Efficiency;Expected Proton Momentum (GeV/c);Counts",peff_pbins,p_min,p_max);
     hist_list_1.push_back(h_eff_p_denom);
   TH1D * h_eff_p_numer = new TH1D("eff_p_numer","Proton Efficiency;Expected Proton Momentum (GeV/c);Counts",peff_pbins,p_min,p_max);
     hist_list_1.push_back(h_eff_p_numer);
-  //TH1D * h_eff_p = new TH1D("eff_p","Proton Efficiency;Expected Proton Momentum (GeV/c);Counts",peff_pbins,p_min,p_max);
-    //hist_list_1.push_back(h_eff_p);
     
   TH1D * peff_denom_ang[4]; TH1D * peff_numer_ang[4];
   TH2D * mmiss_pmiss_CAND9[4]; TH2D * mmiss_pmiss_DET9[4];
-  std::vector<double> ang_range = {45,65,75,90,120};// {45,50,55,60,65,70,75,80,95,120};
-  double ang_vals[4] = {55,70,82.5,105};// {47.5,52.5,57.5,62.5,67.5,72.5,77.5,87.5,107.5};
-  double xerr[4] = {10,5,7.5,15};// {2.5,2.5,2.5,2.5,2.5,2.5,2.5,7.5,12.5};
+  std::vector<double> ang_range = {45,65,75,90,120};
+  double ang_vals[4] = {55,70,82.5,105};
+  double xerr[4] = {10,5,7.5,15};
 
   for (int i=0; i<4; i++){
     // numerator and denominator vs pmiss
-    sprintf(temp_name,"Proton Efficiency (%d-%d deg);Predicted Proton Momentum (GeV/c);Efficiency",int(ang_range[i]),int(ang_range[i+1]));
-    sprintf(temp_title,"Proton Efficiency (%d-%d deg);Predicted Proton Momentum (GeV/c);Efficiency",int(ang_range[i]),int(ang_range[i+1]));
-    peff_denom_ang[i] = new TH1D(temp_name,temp_title,peff_pbins,p_min,p_max);
-    peff_numer_ang[i] = new TH1D(temp_name,temp_title,peff_pbins,p_min,p_max);
+    sprintf(temp_name_d,"Proton Efficiency (%d-%d deg);Predicted Proton Momentum (GeV/c);Efficiency",int(ang_range[i]),int(ang_range[i+1]));
+    sprintf(temp_title_d,"Proton Efficiency (%d-%d deg);Predicted Proton Momentum (GeV/c);Efficiency",int(ang_range[i]),int(ang_range[i+1]));
+    sprintf(temp_name_n,"Proton Efficiency (%d-%d deg);Predicted Proton Momentum (GeV/c);Efficiency",int(ang_range[i]),int(ang_range[i+1]));
+    sprintf(temp_title_n,"Proton Efficiency (%d-%d deg);Predicted Proton Momentum (GeV/c);Efficiency",int(ang_range[i]),int(ang_range[i+1]));
+    peff_denom_ang[i] = new TH1D(temp_name_d,temp_title_d,peff_pbins,p_min,p_max);
+    peff_numer_ang[i] = new TH1D(temp_name_n,temp_title_n,peff_pbins,p_min,p_max);
     hist_list_1.push_back(peff_denom_ang[i]);
     hist_list_1.push_back(peff_numer_ang[i]);
     // mmiss vs pmiss - for background subtraction
-    sprintf(temp_name,"mmiss_pmiss (%d-%d deg);p_{pred} (GeV/c);M_{miss} (GeV/c^{2})",int(ang_range[i]),int(ang_range[i+1]));
-    sprintf(temp_title,"M_{miss} vs p_{pred} (%d-%d deg);p_{pred} (GeV/c);M_{miss} (GeV/c^{2})",int(ang_range[i]),int(ang_range[i+1]));
-    mmiss_pmiss_CAND9[i] = new TH2D(temp_name,temp_title,100,p_min,p_max,30,0.5,1.5);
-    mmiss_pmiss_DET9[i] = new TH2D(temp_name,temp_title,100,p_min,p_max,30,0.5,1.5);
+    sprintf(temp_name1,"mmiss_pmiss (%d-%d deg);p_{pred} (GeV/c);M_{miss} (GeV/c^{2})",int(ang_range[i]),int(ang_range[i+1]));
+    sprintf(temp_title1,"M_{miss} vs p_{pred} (%d-%d deg);p_{pred} (GeV/c);M_{miss} (GeV/c^{2})",int(ang_range[i]),int(ang_range[i+1]));
+    sprintf(temp_name2,"mmiss_pmiss (%d-%d deg);p_{pred} (GeV/c);M_{miss} (GeV/c^{2})",int(ang_range[i]),int(ang_range[i+1]));
+    sprintf(temp_title2,"M_{miss} vs p_{pred} (%d-%d deg);p_{pred} (GeV/c);M_{miss} (GeV/c^{2})",int(ang_range[i]),int(ang_range[i+1]));
+
+    mmiss_pmiss_CAND9[i] = new TH2D(temp_name1,temp_title1,100,p_min,p_max,30,0.5,1.5);
+    mmiss_pmiss_DET9[i] = new TH2D(temp_name2,temp_title2,100,p_min,p_max,30,0.5,1.5);
   }
-
-
 
 
   TH1D * h_eff_t_denom = new TH1D("eff_t_denom","Proton Efficiency;#theta_{miss};Counts",peff_tbins,t_min,t_max);
@@ -254,18 +241,6 @@ int main(int argc, char ** argv) {
 
 
 
-  // extras
-  TH2D * h_mmiss2_w = new TH2D("mmiss2_w","M_{miss} vs W;W;M_{miss}",50,0,6,50,0,3);
-    hist_list_2.push_back(h_mmiss2_w);
-  TH2D * h_mmiss2_pmiss = new TH2D("mmiss2_pmiss","M_{miss} vs p_{miss};p_{miss};M_{miss}",50,0,1.5,50,0,3);
-    hist_list_2.push_back(h_mmiss2_pmiss);
-  TH1D * h_mmiss2 = new TH1D("mmiss2","M_{miss} of p #pi-",50,0,4);
-    hist_list_1.push_back(h_mmiss2);
-  TH2D * h_mmiss2_q2 = new TH2D("mmiss2_q2","M_{miss} vs Q^2;Q^2;M_{miss}",50,0,3,50,0,3);
-    hist_list_2.push_back(h_mmiss2_q2);
-  TH2D * h_mmiss2_xb = new TH2D("mmiss2_xb","M_{miss} vs x_B;x_B;M_{miss}",50,0,3,50,0,3);
-    hist_list_2.push_back(h_mmiss2_xb);
-
 
 
 const double mP = 0.93828;
@@ -279,7 +254,6 @@ const double c = 29.9792458;
 int numevent = 0;
   while(chain.Next())
   {
-
     // if multiple files in chain
     // we need to update when file changes
     if(currc12!=c12.get()){
@@ -289,12 +263,6 @@ int numevent = 0;
     }
 
     clasAna.Run(c12);
-
-    // identify particles from REC::Particle
-    /*auto elec=c12->getByID(11);
-    auto prot = c12->getByID(2212);
-    auto piplus = c12->getByID(211);
-    auto piminus = c12->getByID(-211);*/
     auto allParticles=c12->getDetParticles();
 
     auto elec = clasAna.getByPid(11);
@@ -394,7 +362,7 @@ int numevent = 0;
       // pi theta
       h_pitheta->Fill(pi_theta);
       bool is_FD = piminus[i]->getRegion()==FD;
-      if (!is_FD) {continue;} // make consistent with FD proton - theta cut or detector cut?
+      if (!is_FD) {continue;}
 
       // dbeta
       ppi.SetMagThetaPhi(piminus[i]->getP(),piminus[i]->getTheta(),piminus[i]->getPhi());
@@ -478,14 +446,13 @@ int numevent = 0;
     // EXTRA STUFF
     TVector3 pmiss2 = pp1+ppi;
     double mmiss2 = pow( pow(Ep+Epi,2.) - pmiss2.Mag(), 0.5);
-    h_mmiss2_pmiss->Fill(pmiss.Mag(),mmiss2);
-    h_mmiss2->Fill(mmiss2);
+
+
 
     double W2 = pow(nu + mD,2.) - pq.Mag2();
     double W = pow(W2,0.5);
-    h_mmiss2_w->Fill(W,mmiss2);
-    h_mmiss2_q2->Fill(QSq,mmiss);
-    h_mmiss2_xb->Fill(xB,mmiss);
+
+
     h_pp_ppi_denom->Fill(pp1.Mag(),ppi.Mag());
 
     // write event to hipo file
@@ -532,26 +499,17 @@ int numevent = 0;
       double p_theta = pp2.Theta()*180./M_PI;
       h_pangles2->Fill(pp2.Phi()*180./M_PI,p_theta);
       // keep only Central Detector protons
-      //bool is_CD = (prot[i]->getRegion()==CD);
-      //if (!is_CD) {continue;}
       if (p_theta<45 || p_theta>120) {continue;}
 
       // proton momentum
       h_p_theta->Fill(p_theta,pp2.Mag());
       if (pp2.Mag()<p_min || pp2.Mag()>p_max) {continue;}
 
-
-
       //if (energy<3) {continue;}
-
 
       // histos
       h_Edep_beta->Fill(prot[i]->getBeta(),energy);
     
-    h_mmiss2_w->Fill(W,mmiss2);
-    h_mmiss2_q2->Fill(QSq,mmiss);
-    h_mmiss2_xb->Fill(xB,mmiss);
-
 
       // FILL HISTOS FOR PROTON CANDIDATES
       h_cos0->Fill(cos0);
@@ -561,11 +519,10 @@ int numevent = 0;
       h_pminusp->Fill(pp2.Mag()-pmiss.Mag());
       h_pvsp->Fill(pmiss.Mag(),pp2.Mag());
       h_dpp_p->Fill(pmiss.Mag(),(pmiss.Mag()-pp2.Mag())/pmiss.Mag());
-      h_theta_beta->Fill(beta,p_theta);
-      h_pmiss_thetamiss->Fill(pmiss.Theta()*180./M_PI,pmiss.Mag());
+
 
       h_selection->Fill((pmiss.Mag()-pp2.Mag())/pmiss.Mag(),pp2.Angle(pmiss)*180./M_PI);
-      h_p_all->Fill(pmiss.Mag());
+
 
       if (mmiss>0.85 && mmiss<1.05) {
         h_cos0_mcut->Fill(cos0);
@@ -574,14 +531,8 @@ int numevent = 0;
       }
 
 
-      // pick good protons
-      //if (pp2.Angle(pmiss)*180./M_PI>20) {continue;}
-      //if (cos0<0.8) {continue;}
-      //if (abs((pmiss.Mag()-pp2.Mag())/pmiss.Mag())>0.2) {continue;}
-
 
       h_mmiss_det->Fill(mmiss);
-      //h_mmiss_pp->Fill(pp2.Mag(),mmiss);
       h_mmiss_pp->Fill(pmiss.Mag(),mmiss);
       h_mmiss_pt->Fill(pmiss.Theta()*180./M_PI,mmiss);
       h_pp_ppi_numer->Fill(pp1.Mag(),ppi.Mag());
@@ -1043,8 +994,10 @@ f->cd();
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 hist_list_1.push_back(h_eff_p);
-  //h_eff_p->Write();
-  
+  h_eff_p->Write();
+
+
+
 
   // fit for proton efficiency: a*sin(bx)+cx
   myCanvas->Divide(1,1);
@@ -1053,33 +1006,18 @@ hist_list_1.push_back(h_eff_p);
   TF1 * twogauss = new TF1("twogauss","[0]*exp(-pow((x-[1]),2.)/(2*pow([2],2.))) + [3]*exp(-pow((x-[4]),2.)/(2*pow([5],2.)))",0.2,1.0);
   TF1 * sqrtfun = new TF1("sqrtfun","[0]*sqrt([1]*x-[2])",0.2,1.0);
   h_eff_p->Draw();
-  //sinefun->SetParameter(0,0.1);  sinefun->SetParameter(1,12);  sinefun->SetParameter(2,1.3);  sinefun->SetParameter(4,0.9);  sinefun->SetParameter(5,0.1);
-  //h_eff_p->Fit("sinefun","","",0.2,1.0);
-  //twogauss->SetParameter(0,0.7); twogauss->SetParameter(1,0.45); twogauss->SetParameter(2,0.05);
-  //twogauss->SetParameter(3,1);   twogauss->SetParameter(4,0.85); twogauss->SetParameter(5,0.05);
-  //h_eff_p->Fit("twogauss","","",0.2,1.0);
-  //sqrtfun->SetParameter(0,0.9);  sqrtfun->SetParameter(1,1.2);  sqrtfun->SetParameter(2,0.3);
-  //sqrtfun->SetParLimits(0,0.5,1.2); sqrtfun->SetParLimits(1,1,2); sqrtfun->SetParLimits(2,0,1);
-  //h_eff_p->Fit("sqrtfun","","",0.2,1.0);
 
-  //TF1 * twolines = new TF1("twolines",func_twolines,0.2,1.0,3);
-  //h_eff_p->Fit("twolines","QN");
 
-  //TF1 * linfun = new TF1("poly1",0.2,1.0);
-  //h_eff_p->Fit("linfun","","",0.2,1.0);
-  //h_eff_p->Fit("pol1");
+  TF1 * quadfun = new TF1("quadratic","[0]+[1]*x+[2]*x*x",0.2,1.0);
+  quadfun->SetParameter(0,-1);  quadfun->SetParLimits(0,-2,-0.5);
+  quadfun->SetParameter(1,5);   quadfun->SetParLimits(1,4,5);
+  quadfun->SetParameter(2,-3);  quadfun->SetParLimits(2,-3,-2);
+  //h_eff_p->Fit("quadfun","","",0.2,1.0);
+  h_eff_p->Fit("quadratic");
 
 
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
-
-  for (int i=0; i<16; i++) {std::cout << h_eff_p->GetBinContent(i) << ", ";}
-  
-
-
-  // fit for proton efficiency
-  
-
 
 
 
@@ -1126,9 +1064,6 @@ h_eff_p_numer_test->Add(peff_numer_ang[i]);
 
 
 
-
-
-
   // draw peff for 9 angular ranges
   TH1D * peff_ang[4];
   double par[3], p0[9], p0_err[9], p1[9], p1_err[9], p2[9], p2_err[9], ang[9];
@@ -1151,46 +1086,13 @@ h_eff_p_numer_test->Add(peff_numer_ang[i]);
 
 
 
-myCanvas->Divide(2,2);
-myCanvas->cd(1);
-h_eff_p_denom->Draw();
-myCanvas->cd(2);
-h_eff_p_numer->Draw();
-myCanvas->Print(fileName,"pdf");
-myCanvas->Clear();
-
-/*myCanvas->Divide(1,1);
-myCanvas->cd(1);
-h_eff_p_numer_test->Divide(h_eff_p_denom);
-h_eff_p_numer_test->Draw();
-myCanvas->Print(fileName,"pdf");
-myCanvas->Clear();*/
-
-
-
-
-
-  // efficiency - theta
-/*  myCanvas->Divide(1,1);
+  myCanvas->Divide(2,2);
   myCanvas->cd(1);
-  h_eff_t_denom->Draw();
+  h_eff_p_denom->Draw();
+  myCanvas->cd(2);
+  h_eff_p_numer->Draw();
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
-
-  myCanvas->Divide(1,1);
-  myCanvas->cd(1);
-  h_eff_t_numer->Draw();
-  myCanvas->Print(fileName,"pdf");
-  myCanvas->Clear();
-
-  myCanvas->Divide(1,1);
-  myCanvas->cd(1);
-  TH1D * h_peff_t = (TH1D*)h_eff_t_numer->Clone();
-  h_peff_t->Divide(h_eff_t_denom);
-  h_peff_t->SetStats(0);
-  h_peff_t->Draw();
-  myCanvas->Print(fileName,"pdf");
-  myCanvas->Clear();*/
 
 
 
