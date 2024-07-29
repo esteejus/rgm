@@ -28,10 +28,12 @@ using namespace clas12;
 
 const double c = 29.9792458;
 
+
 void SetLorentzVector(TLorentzVector &p4,clas12::region_part_ptr rp){
   p4.SetXYZM(rp->par()->getPx(),rp->par()->getPy(),rp->par()->getPz(),p4.M());
 
 }
+
 
 double Cut_Params[] = {0.0152222,
 		       0.816844,
@@ -92,8 +94,6 @@ int main(int argc, char ** argv)
       return -1;
     }
 
-
-
   int isMC = atoi(argv[1]);
   TString outFile = argv[2];
   char * pdfFile = argv[3];
@@ -101,9 +101,7 @@ int main(int argc, char ** argv)
   cout<<"Ouput file "<< outFile <<endl;
   cout<<"Ouput PDF file "<< pdfFile <<endl;
 
-
   clas12ana clasAna;
-
 
   clas12root::HipoChain chain;
   for(int k = 4; k < argc; k++){
@@ -220,6 +218,8 @@ int main(int argc, char ** argv)
   hist_list.push_back(h_mom_DT);
   TH2D * h_mom_beta = new TH2D("mom_beta","#beta vs. Momentum;Momentum [GeV];#beta",100,0,3,100,0,1.1);
   hist_list.push_back(h_mom_beta);
+  TH1D * h_mom125_beta = new TH1D("mom125_beta","#beta;#beta;Counts",100,0.6,1.0);
+  hist_list.push_back(h_mom125_beta);
   TH1D * h_DT_mom_bin[4];
   for(int i = 0; i < 4; i++){
     sprintf(temp_name,"DT_mom_bin_%d",i+1);
@@ -237,11 +237,15 @@ int main(int argc, char ** argv)
 
   TH2D * h_mom_beta_2212 = new TH2D("mom_beta_2212","#beta vs. Momentum;Momentum [GeV];#beta",100,0,3,100,0,1.1);
   hist_list.push_back(h_mom_beta_2212);
+  TH1D * h_mom125_beta_2212 = new TH1D("mom125_beta_2212","#beta;#beta;Counts",100,0.6,1.0);
+  hist_list.push_back(h_mom125_beta_2212);
 
   TH2D * h_mom_DT_wPID = new TH2D("mom_DT_wPID","#Delta ToF vs. Momentum;p [GeV];#Delta ToF [ns]",100,0,3,200,-2,2);
   hist_list.push_back(h_mom_DT_wPID);
   TH2D * h_mom_beta_wPID = new TH2D("mom_beta_wPID","#beta vs. Momentum;Momentum [GeV];#beta",100,0,3,100,0,1.1);
   hist_list.push_back(h_mom_beta_wPID);
+  TH1D * h_mom125_beta_wPID = new TH1D("mom125_beta_wPID","#beta;#beta;Counts",100,0.6,1.0);
+  hist_list.push_back(h_mom125_beta_wPID);
   TH2D * h_mom_Chi2PID_wPID = new TH2D("mom_Chi2PID_wPID","#chi^{2}_{PID} vs. Momentum [GeV];Momentum [GeV];#chi^{2}_{PID}",100,0,3,100,-10,10);
   hist_list.push_back(h_mom_Chi2PID_wPID);
   TH1D * h_Chi2PID_wPID = new TH1D("Chi2PID_wPID","#chi^{2}_{PID};#chi^{2}_{PID};Counts",100,-10,10);
@@ -371,6 +375,8 @@ int main(int argc, char ** argv)
 	    h_ToF_Path->Fill((*p)->getTime(),(*p)->getPath(),weight);
 	    h_mom_DT->Fill(mom,DT_proton,weight);
 	    h_mom_beta->Fill(mom,beta,weight);
+	    if((mom>1.27) && (mom<1.3)){
+	      h_mom125_beta->Fill(beta,weight);}
 	    h_DT_mom_bin[mom_bin]->Fill(DT_proton,weight);
 	    int theta_bin = theta<60?0:theta<80?1:2;
 	    int phi_bin = phi<-120?0:phi<-60?1:phi<0?2:phi<60?3:phi<120?4:5;
@@ -378,11 +384,15 @@ int main(int argc, char ** argv)
 
 	    if(hpid==2212){
 	      h_mom_beta_2212->Fill(mom,beta,weight);
+	      if((mom>1.27) && (mom<1.3)){
+		h_mom125_beta_2212->Fill(beta,weight);}
 	    }
 
 	    if(pass_cut(mom,DT_proton,2) && (DT_proton>-0.75)){
 	      h_mom_DT_wPID->Fill(mom,DT_proton,weight);
 	      h_mom_beta_wPID->Fill(mom,beta,weight);
+	      if((mom>1.27) && (mom<1.3)){
+		h_mom125_beta_wPID->Fill(beta,weight);}
 	      h_mom_Chi2PID_wPID->Fill(mom,Chi2PID,weight);
 	      h_Chi2PID_wPID->Fill(Chi2PID,weight);
 	    }
@@ -582,7 +592,7 @@ int main(int argc, char ** argv)
   /////////////////////////////////////
   //PID Cuts
   /////////////////////////////////////
-  myCanvas->Divide(1,1);
+  /*myCanvas->Divide(1,1);
   myCanvas->cd(1);
   h_StartTime->Draw("colz");
   myCanvas->Print(fileName,"pdf");
@@ -611,7 +621,7 @@ int main(int argc, char ** argv)
   h_ToF_Path->Draw("colz");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();  
-
+  */
   myCanvas->Divide(1,1);
   myCanvas->cd(1);
   h_mom_DT->Draw("colz");
@@ -647,6 +657,17 @@ int main(int argc, char ** argv)
   myCanvas->Divide(1,1);
   myCanvas->cd(1);
   h_mom_beta_wPID->Draw("colz");
+  myCanvas->Print(fileName,"pdf");
+  myCanvas->Clear();  
+
+  myCanvas->Divide(1,1);
+  myCanvas->cd(1);
+  h_mom125_beta->SetLineColor(1);
+  h_mom125_beta->Draw("SAME");
+  h_mom125_beta_2212->SetLineColor(2);
+  h_mom125_beta_2212->Draw("SAME");
+  h_mom125_beta_wPID->SetLineColor(3);
+  h_mom125_beta_wPID->Draw("SAME");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();  
 

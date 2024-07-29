@@ -68,30 +68,19 @@ int main(int argc, char ** argv)
   double mass_p = db->GetParticle(2212)->Mass();
   double mD = 1.8756;
 
-  //double beam_E = 5.98636;
-  double beam_E = 2.07;
+  double beam_E = 5.98636;
 
   //some particles
   TLorentzVector beam(0,0,beam_E,beam_E);
   TLorentzVector target(0,0,0,mD);
+  TLorentzVector deut_ptr(0,0,0,mD);
   TLorentzVector el(0,0,0,db->GetParticle(11)->Mass());
   TLorentzVector lead_ptr(0,0,0,db->GetParticle(2212)->Mass());
   TLorentzVector recoil_ptr(0,0,0,db->GetParticle(2212)->Mass());
   TLorentzVector ntr(0,0,0,db->GetParticle(2112)->Mass());
 
   clas12ana clasAna;
-  clasAna.readInputParam("/w/hallb-scshelf2102/clas12/users/awild/RGM/rgm/Ana/ana.par");
-  clasAna.readEcalSFPar("/w/hallb-scshelf2102/clas12/users/awild/RGM/rgm/Ana/paramsSF_40Ca_x2.dat");
-  clasAna.readEcalPPar("/w/hallb-scshelf2102/clas12/users/awild/RGM/rgm/Ana/paramsPI_40Ca_x2.dat");
-
   clasAna.printParams();
-
-  clasAna.setEcalSFCuts();
-  clasAna.setEcalEdgeCuts();
-  clasAna.setPidCuts();
-  clasAna.setVertexCuts();
-  clasAna.setVertexCorrCuts();
-  clasAna.setDCEdgeCuts();
   
   while(chain.Next())
     {
@@ -116,26 +105,20 @@ int main(int argc, char ** argv)
 	  TLorentzVector q = beam - el;
           double Q2 = -q.M2();
           double xB = Q2/(2 * mass_p * (beam.E() - el.E()));
-	  /*if(xB>0.8){
-	    chain.WriteEvent();
-	    }*/
-	  //if(pip.size()!=1){continue;}
-	  //if(pim.size()!=1){continue;}
-	  chain.WriteEvent();
-
-	  /*
-	  clasAna.getLeadRecoilSRC(beam,target,el);
-	  auto lead    = clasAna.getLeadSRC();
-	  auto recoil  = clasAna.getRecoilSRC();
-
-	  if(lead.size() == 1)
-	    chain.WriteEvent();
-
-	}
-	  */
+	  if(xB<1){continue;}
+	  if(Q2<1){continue;}
+	  int lead_ctr = 0;
+	  for(auto p = protons.begin(); p != protons.end();++p){	    
+	    SetLorentzVector(lead_ptr,(*p));
+	    TLorentzVector miss = q + deut_ptr - lead_ptr;
+	    if(lead_ptr.P()<1){continue;}
+	    //if(miss.P()<0.3){continue;}
+	    lead_ctr++;
+	  }
 	  
+	  if(lead_ctr==0){continue;}
+	  chain.WriteEvent();	  
 	}
-
     }
   return 0;
 }

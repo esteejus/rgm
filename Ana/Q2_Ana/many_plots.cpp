@@ -56,6 +56,11 @@ void many_plots::Write_hist_set(TFile *f, char fileName[100], TCanvas * myCanvas
     h_epp_Q2bin[i]->SetLineColor(1);
     h_epp_Q2bin[i]->Draw("SAME");
   }
+  for(int i=0; i<10; i++){
+    myCanvas->cd(2);
+    h_ep_Q2bin[i]->SetLineColor(i+1);
+    h_ep_Q2bin[i]->Draw("SAME");
+  }  
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();  
 

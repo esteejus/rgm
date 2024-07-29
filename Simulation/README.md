@@ -1,14 +1,13 @@
 # Setup Environment on Farm
 ```
-source environment_gemc.csh
+source ../environment.csh
 ```
 
-# Optional Compile GCF generator (if recurse-submodules used in pull)
+# GCF Code Github
+If you want to create GCF simulation files, you can pull the GCF code here:
 ```
-cd Simulation/GCF_Generator_Suite/src
-cmake ./ -DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_COMPILER=gcc (for ifarm)
-cmake ./ (anywhere else)
-make
+cd /path/to/new/GCF/directory
+git clone git@github.com:JacksonPybus/GCF_Generator_Suite.git
 ```
 
 # Generating LUND files
@@ -33,7 +32,7 @@ root 'GENIE_to_LUND("inputFile","outputFile",nFiles,"target-type",A,Z)'
 ```
 
 Convert GCF simulations to LUND
-Takes root output of GCF simulations and converts to LUND format.
+Takes root output of GCF simulations and converts to LUND format. Note that you need a root tree with branches for pLead, pRed, pe, pRel, q, and weight.
 ```
 root 'GCF_to_LUND("inputFile","outputFile","target-type",A,Z)'
 ```
@@ -53,6 +52,11 @@ Submit to Slurm on the JLab farm using
 sbatch submit_GEMC.sh
 ```
 
+Alternatively, I have also included a script to run GCF, GEMC, and reconstruction all in the same submit. Make sure that you already have the GCF code installed and running.
+```
+submit_GCF_GEMC_RECON.sh
+```
+
 Check the status of the simulations using
 ```
 squeue -u yourUserName
@@ -60,3 +64,5 @@ squeue -u yourUserName
 
 *General tips for submitting on the farm. Submit an array of 1-1 just to test one file works without crashing. Log outputs can be found in /farm_out/userName/. Submit a reasonable amount of jobs i.e. no more than 1000 and try to keep your output file size < 1Tb 
 
+# GCards and Yaml Files
+The yaml files and gcards can be found in the submit folder. The torus field is set to -1 for most files. Make sure that this is consistent with the data files.
