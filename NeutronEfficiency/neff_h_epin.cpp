@@ -74,7 +74,7 @@ void Usage()
 int main(int argc, char ** argv)
 {
 
-  if(argc < 8)
+  if(argc < 6)
     {
       std::cerr<<"Wrong number of arguments.\n";
       Usage();
@@ -91,7 +91,7 @@ int main(int argc, char ** argv)
 
   double Mlow = (is_rgk ? 0.7 : 0.85);
   double Mhigh = (is_rgk ? 1 : 1.05);
-  double edep_cut = (is_rgk ? 2.5 : 1.5);
+  double edep_cut = (is_rgk ? 2.5 : 5.0);
  
   double Ebeam = atof(argv[3]);
 
@@ -155,7 +155,7 @@ int main(int argc, char ** argv)
   /////////////////////////////////////
   //Histos: pions
   /////////////////////////////////////
-  TH1D * h_pivertex = new TH1D("pi vertex","Pion vertex - electron vertex;v_{pi+} - v_{e} (cm);Counts",50,-5,5);
+  TH1D * h_pivertex = new TH1D("pi vertex","Pion vertex - electron vertex;v_{pi+} - v_{e} (cm)",50,-5,5);
   hist_list_1.push_back(h_pivertex);
   TH2D * h_dbetap = new TH2D("dbeta_p","#Delta #beta vs Momentum;Momentum (GeV/c);#beta_{meas} - p/sqrt(p^{2}+m^{2})",100,0,4,100,-0.2,0.2);
   hist_list_2.push_back(h_dbetap);
@@ -193,7 +193,7 @@ int main(int argc, char ** argv)
   //Histos: mmiss vs pmiss by angle int
   /////////////////////////////////////
   // denominator
-  TH2D * h_mmiss_pmiss_allt_denom = new TH2D("mmiss_pmiss_allt_denom","Neutron Candidates (all angles);p_{pred} (GeV/c);M_{pred} (GeV/c^{2})",100,p_lo,p_hi,100,0.5,1.5);
+  TH2D * h_mmiss_pmiss_allt_denom = new TH2D("mmiss_pmiss_allt_denom","Neutron Candidates (all angles);p_{pred} (GeV/c);Missing Mass (GeV/c^{2})",100,p_lo,p_hi,100,0.5,1.5);
   hist_list_1.push_back(h_mmiss_pmiss_allt_denom);
   TH2D * h_mmiss_pmiss_int1_denom = new TH2D("mmiss_pmiss_int1_denom","Neutron Candidates (int1);p_{pred} (GeV/c);M_{miss} (GeV/c^{2})",100,p_lo,p_hi,100,0.5,1.5);
   hist_list_1.push_back(h_mmiss_pmiss_int1_denom);
@@ -202,7 +202,7 @@ int main(int argc, char ** argv)
   TH2D * h_mmiss_pmiss_int3_denom = new TH2D("mmiss_pmiss_int3_denom","Neutron Candidates (int3);p_{pred} (GeV/c);M_{miss} (GeV/c^{2})",100,p_lo,p_hi,100,0.5,1.5);
   hist_list_1.push_back(h_mmiss_pmiss_int3_denom);
   // numerator
-  TH2D * h_mmiss_pmiss_allt_numer = new TH2D("mmiss_pmiss_allt_numer","Neutron Candidates (all angles);p_{pred} (GeV/c);M_{miss} (GeV/c^{2})",100,p_lo,p_hi,100,0.5,1.5);
+  TH2D * h_mmiss_pmiss_allt_numer = new TH2D("mmiss_pmiss_allt_numer","Neutron Candidates (all angles);p_{pred} (GeV/c);Missing Mass (GeV/c^{2})",100,p_lo,p_hi,100,0.5,1.5);
   hist_list_1.push_back(h_mmiss_pmiss_allt_numer);
   TH2D * h_mmiss_pmiss_int1_numer = new TH2D("mmiss_pmiss_int1_numer","Neutron Candidates (int1);p_{pred} (GeV/c);M_{miss} (GeV/c^{2})",100,p_lo,p_hi,100,0.5,1.5);
   hist_list_1.push_back(h_mmiss_pmiss_int1_numer);
@@ -215,22 +215,22 @@ int main(int argc, char ** argv)
   //Histos: pmiss by angle int
   /////////////////////////////////////
   // denominator
-  TH1D * h_pmiss_allt_denomD = new TH1D("pmiss_allt_denom","Neutron Candidates (all angles);p_{pred} (GeV/c);Counts",neff_pbins,p_lo,p_hi);
+  TH1D * h_pmiss_allt_denomD = new TH1D("pmiss_allt_denom","Neutron Candidates (all angles);p_{pred} (GeV/c);Efficiency",neff_pbins,p_lo,p_hi);
   hist_list_1.push_back(h_pmiss_allt_denomD);
-  TH1D * h_pmiss_int1_denomD = new TH1D("pmiss_int1_denom","Neutron Candidates (int1);p_{pred} (GeV/c);Counts",neff_pbins,p_lo,p_hi);
+  TH1D * h_pmiss_int1_denomD = new TH1D("pmiss_int1_denom","Neutron Candidates (int1);p_{pred} (GeV/c);Efficiency",neff_pbins,p_lo,p_hi);
   hist_list_1.push_back(h_pmiss_int1_denomD);
-  TH1D * h_pmiss_int2_denomD = new TH1D("pmiss_int2_denom","Neutron Candidates (int2);p_{pred} (GeV/c);Counts",neff_pbins,p_lo,p_hi);
+  TH1D * h_pmiss_int2_denomD = new TH1D("pmiss_int2_denom","Neutron Candidates (int2);p_{pred} (GeV/c);Efficiency",neff_pbins,p_lo,p_hi);
   hist_list_1.push_back(h_pmiss_int2_denomD);
-  TH1D * h_pmiss_int3_denomD = new TH1D("pmiss_int3_denom","Neutron Candidates (int3);p_{pred} (GeV/c);Counts",neff_pbins,p_lo,p_hi);
+  TH1D * h_pmiss_int3_denomD = new TH1D("pmiss_int3_denom","Neutron Candidates (int3);p_{pred} (GeV/c);Efficiency",neff_pbins,p_lo,p_hi);
   hist_list_1.push_back(h_pmiss_int3_denomD);
   // numerator
-  TH1D * h_pmiss_allt_numerD = new TH1D("pmiss_allt_numer","Neutrons (all angles);p_{pred} (GeV/c);Counts",neff_pbins,p_lo,p_hi);
+  TH1D * h_pmiss_allt_numerD = new TH1D("pmiss_allt_numer","Neutrons (all angles);p_{pred} (GeV/c);Efficiency",neff_pbins,p_lo,p_hi);
   hist_list_1.push_back(h_pmiss_allt_numerD);
-  TH1D * h_pmiss_int1_numerD = new TH1D("pmiss_int1_numer","Neutrons (int1);p_{pred} (GeV/c);Counts",neff_pbins,p_lo,p_hi);
+  TH1D * h_pmiss_int1_numerD = new TH1D("pmiss_int1_numer","Neutrons (int1);p_{pred} (GeV/c);Efficiency",neff_pbins,p_lo,p_hi);
   hist_list_1.push_back(h_pmiss_int1_numerD);
-  TH1D * h_pmiss_int2_numerD = new TH1D("pmiss_int2_numer","Neutrons (int2);p_{pred} (GeV/c);Counts",neff_pbins,p_lo,p_hi);
+  TH1D * h_pmiss_int2_numerD = new TH1D("pmiss_int2_numer","Neutrons (int2);p_{pred} (GeV/c);Efficiency",neff_pbins,p_lo,p_hi);
   hist_list_1.push_back(h_pmiss_int2_numerD);
-  TH1D * h_pmiss_int3_numerD = new TH1D("pmiss_int3_numer","Neutrons (int3);p_{pred} (GeV/c);Counts",neff_pbins,p_lo,p_hi);
+  TH1D * h_pmiss_int3_numerD = new TH1D("pmiss_int3_numer","Neutrons (int3);p_{pred} (GeV/c);Efficiency",neff_pbins,p_lo,p_hi);
   hist_list_1.push_back(h_pmiss_int3_numerD);
 
 
@@ -489,31 +489,27 @@ int main(int argc, char ** argv)
     double beta_n = neut[pick]->par()->getBeta();
     double tof_n = 0;
     double path = 0;
-    double energy = 0;
-    if (is_CND1)
+    double energy = neut[pick]->sci(CND1)->getEnergy() + neut[pick]->sci(CND2)->getEnergy() + neut[pick]->sci(CND3)->getEnergy() + neut[pick]->sci(CTOF)->getEnergy();
+    
+    if (!is_rgk && is_CTOF)
+    {
+      tof_n = neut[pick]->sci(CTOF)->getTime() - ts;
+      path = neut[pick]->sci(CTOF)->getPath();
+    }
+    else if (is_CND1)
     {
       tof_n = neut[pick]->sci(CND1)->getTime() - ts;
       path = neut[pick]->sci(CND1)->getPath();
-      energy = energy + neut[pick]->sci(CND1)->getEnergy();
-      
     }
     else if (is_CND2)
     {
       tof_n = neut[pick]->sci(CND2)->getTime() - ts;
       path = neut[pick]->sci(CND2)->getPath();
-      energy = energy + neut[pick]->sci(CND2)->getEnergy();
     }
     else if (is_CND3)
     {
       tof_n = neut[pick]->sci(CND3)->getTime() - ts;
       path = neut[pick]->sci(CND3)->getPath();
-      energy = energy + neut[pick]->sci(CND3)->getEnergy();
-    }
-    else if (!is_rgk && is_CTOF)
-    {
-      tof_n = neut[pick]->sci(CTOF)->getTime() - ts;
-      path = neut[pick]->sci(CTOF)->getPath();
-      energy = energy + neut[pick]->sci(CTOF)->getEnergy();
     }
 
     // tof and energy cuts
@@ -752,7 +748,7 @@ int main(int argc, char ** argv)
   myCanvas->Clear();
 
   // all angles
-  myCanvas->Divide(pgrid_x,pgrid_y);
+  myCanvas->Divide(1,1);
   double * justhereforthehist0 = hist_projections(myCanvas,h_mmiss_pmiss_allt_denom,neff_pbins, 'p', Mlow, Mhigh);
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
@@ -764,7 +760,7 @@ int main(int argc, char ** argv)
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
-  myCanvas->Divide(pgrid_x,pgrid_y);
+  myCanvas->Divide(1,1);
   double * sigd_int1 = hist_projections(myCanvas,h_mmiss_pmiss_int1_denom,neff_pbins, 'p', Mlow, Mhigh);
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
@@ -775,6 +771,8 @@ int main(int argc, char ** argv)
     h_pmiss_int1_denom->SetBinContent(i,*(sigd_int1+i));
 //std::cout << "int 1, val " << i << " = " << *(sigd_int1+i) << '\n';
     h_pmiss_int1_denom->SetBinError(i,sqrt(*(sigd_int1+i)));
+//std::cout << *(sigd_int1+i);
+//std::cout
   }
 
   // theta interval 2
@@ -784,7 +782,7 @@ int main(int argc, char ** argv)
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
-  myCanvas->Divide(pgrid_x,pgrid_y);
+  myCanvas->Divide(1,1);
   double * sigd_int2 = hist_projections(myCanvas,h_mmiss_pmiss_int2_denom,neff_pbins, 'p', Mlow, Mhigh);
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
@@ -804,7 +802,7 @@ int main(int argc, char ** argv)
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
-  myCanvas->Divide(pgrid_x,pgrid_y);
+  myCanvas->Divide(1,1);
   myCanvas->cd(1);
   double * sigd_int3 = hist_projections(myCanvas,h_mmiss_pmiss_int3_denom,neff_pbins, 'p', Mlow, Mhigh);
   myCanvas->Print(fileName,"pdf");
@@ -860,7 +858,7 @@ int main(int argc, char ** argv)
   myCanvas->Clear();
 
 
-  myCanvas->Divide(tgrid_x,tgrid_y);
+  myCanvas->Divide(1,1);
   myCanvas->cd(1);
   double * sigd_t = hist_projections(myCanvas,h_mmiss_theta_denom,neff_tbins, 't', Mlow, Mhigh);
   myCanvas->Print(fileName,"pdf");
@@ -1041,7 +1039,7 @@ int main(int argc, char ** argv)
   myCanvas->Clear();
 
   // all angles
-  myCanvas->Divide(pgrid_x,pgrid_y);
+  myCanvas->Divide(1,1);
   double * justhereforthehist = hist_projections(myCanvas,h_mmiss_pmiss_allt_numer,neff_pbins, 'p', Mlow, Mhigh);
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
@@ -1053,7 +1051,7 @@ int main(int argc, char ** argv)
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
-  myCanvas->Divide(pgrid_x,pgrid_y);
+  myCanvas->Divide(1,1);
   double * sign_int1 = hist_projections(myCanvas,h_mmiss_pmiss_int1_numer,neff_pbins, 'p', Mlow, Mhigh);
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
@@ -1072,7 +1070,7 @@ int main(int argc, char ** argv)
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
-  myCanvas->Divide(pgrid_x,pgrid_y);
+  myCanvas->Divide(1,1);
   double * sign_int2 = hist_projections(myCanvas,h_mmiss_pmiss_int2_numer,neff_pbins, 'p', Mlow, Mhigh);
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
@@ -1091,7 +1089,7 @@ int main(int argc, char ** argv)
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 
-  myCanvas->Divide(pgrid_x,pgrid_y);
+  myCanvas->Divide(1,1);
   double * sign_int3 = hist_projections(myCanvas,h_mmiss_pmiss_int3_numer,neff_pbins, 'p', Mlow, Mhigh);
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
@@ -1134,7 +1132,7 @@ int main(int argc, char ** argv)
   myCanvas->Clear();
 
 
-  myCanvas->Divide(tgrid_x,tgrid_y);
+  myCanvas->Divide(1,1);
   hist_projections(myCanvas,h_mmiss_theta_numer,neff_tbins, 't', Mlow, Mhigh);
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
@@ -1530,6 +1528,7 @@ double * hist_projections(TCanvas * can, TH2D * hist2d, int num_hist, char v, do
   double x_max = hist2d->GetXaxis()->GetXmax();
   double dp = (x_max-x_min)/num_hist;
   double * S = new double[num_hist];
+  TLegend *legend = new TLegend(0.9,0.3,0.6,0.9);
   for (int i=0; i<num_hist; i++)
   {
     p_start_val[i] = x_min + i*dp;
@@ -1537,12 +1536,16 @@ double * hist_projections(TCanvas * can, TH2D * hist2d, int num_hist, char v, do
     int bin2 = hist2d->GetXaxis()->FindBin(p_start_val[i]+dp) - 1;
 
     // make projection for x interval
-    can->cd(i+1);
-    TH1D * proj = hist2d->ProjectionY("",bin1,bin2,"d");
+    can->cd(1);//can->cd(i+1);
+    TH1D * proj = hist2d->ProjectionY("",bin1,bin2);
+    proj->GetXaxis()->SetTitleSize(0.05);
+    proj->GetXaxis()->SetLabelSize(0.05);
+    proj->GetYaxis()->SetLabelSize(0.05);
+    proj->SetStats(0);
 
     // create name of missing mass histogram for current momentum/theta interval
     std::ostringstream sObj1, sObj2;
-    std::string leftTitle = "Missing Mass in ("; std::string midTitle = ",";
+    std::string leftTitle = "("; std::string midTitle = ",";
     std::string rightTitle;
     if (v=='p')
     {
@@ -1561,12 +1564,22 @@ double * hist_projections(TCanvas * can, TH2D * hist2d, int num_hist, char v, do
       std::cout << "Invalid projection variable for missing mass\n";
     }
     std::string result = leftTitle + sObj1.str() + midTitle + sObj2.str() + rightTitle;
-    proj->SetTitle(result.c_str());
+    //proj->SetTitle(result.c_str());
+    proj->SetTitle("");
+    //proj->SetTitleSize(0.05);
 
     // draw
-    proj->Draw();
+    proj->Scale(1.0/proj->GetMaximum());
+    proj->SetLineColor(i+30);
+    proj->SetLineWidth(2);
+    proj->SetMarkerStyle(i+19);
+    proj->SetMarkerSize(1.5);
+    proj->Draw("SAME");
+    legend->AddEntry(proj,result.c_str(),"lpf");
     S[i] = proj->Integral(proj->GetXaxis()->FindBin(Mlow),proj->GetXaxis()->FindBin(Mhigh));
   }
+  //legend->SetTextSize(0.01);
+  legend->Draw();
   return S;
 }
 
