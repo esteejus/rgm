@@ -167,11 +167,11 @@ int main(int argc, char ** argv)
   /////////////////////////////////////
   //CND Neutron Signal
   /////////////////////////////////////
-  TH2D * h_pn_angles_sig = new TH2D("pn_angles_sig","Angular Separation between Proton and Neutron (Signal);#Delta#phi = #phi_{p} - #phi_{n};#Delta#theta = #theta_{p} - #theta_{n}",360,-180,180,360,-180,180);
+  TH2D * h_pn_angles_sig = new TH2D("pn_angles_sig","Angular Separation between Proton and Neutron (Signal);#Delta#phi = #phi_{p} - #phi_{n};#Delta#theta = #theta_{p} - #theta_{n}",180,-180,180,180,-180,180);
   hist_list_2.push_back(h_pn_angles_sig);
-  TH2D * h_n_thetaphi_sig = new TH2D("n_thetaphi_sig","Angular Distribution of Neutrons (Signal);#phi (deg);#theta (deg)",48,-180,180,100,40,140);
+  TH2D * h_n_thetaphi_sig = new TH2D("n_thetaphi_sig","Angular Distribution of Neutrons (Signal);#phi (deg);#theta (deg)",48,-180,180,50,40,140);
   hist_list_2.push_back(h_n_thetaphi_sig);
-  TH2D * h_pn_pmiss_sig = new TH2D("pn_pmiss_sig","Neutron Measured Momentum vs Predicted Momentum (Signal);Neutron Predicted Momentum (GeV/c);Neutron Momentum (GeV/c)",100,0,1.2,100,0,1.2);
+  TH2D * h_pn_pmiss_sig = new TH2D("pn_pmiss_sig","Neutron Measured Momentum vs Predicted Momentum (Signal);Neutron Predicted Momentum (GeV/c);Neutron Momentum (GeV/c)",50,0,1.2,50,0,1.2);
   hist_list_2.push_back(h_pn_pmiss_sig);
   TH1D * h_cos0_sig = new TH1D("cos0_sig","Angle between p_{n} and p_{miss} (Signal);cos #theta_{pn,pmiss};Counts",20,-1.1,1.1);
   hist_list_1.push_back(h_cos0_sig);
@@ -196,11 +196,11 @@ int main(int argc, char ** argv)
   /////////////////////////////////////
   //CND Neutron Background
   /////////////////////////////////////
-  TH2D * h_pn_angles_back = new TH2D("pn_angles_back","Angular Separation between Proton and Neutron (Background);#Delta#phi = #phi_{p} - #phi_{n};#Delta#theta = #theta_{p} - #theta_{n}",360,-180,180,360,-180,180);
+  TH2D * h_pn_angles_back = new TH2D("pn_angles_back","Angular Separation between Proton and Neutron (Background);#Delta#phi = #phi_{p} - #phi_{n};#Delta#theta = #theta_{p} - #theta_{n}",180,-180,180,180,-180,180);
   hist_list_2.push_back(h_pn_angles_back);
-  TH2D * h_n_thetaphi_back = new TH2D("n_thetaphi_back","Angular Distribution of Neutrons (Background);#phi (deg);#theta (deg)",48,-180,180,100,40,140);
+  TH2D * h_n_thetaphi_back = new TH2D("n_thetaphi_back","Angular Distribution of Neutrons (Background);#phi (deg);#theta (deg)",48,-180,180,50,40,140);
   hist_list_2.push_back(h_n_thetaphi_back);
-  TH2D * h_pn_pmiss_back = new TH2D("pn_pmiss_back","Neutron Measured Momentum vs Predicted Momentum (Background);Neutron Predicted Momentum (GeV/c);Neutron Momentum (GeV/c)",100,0,1.2,100,0,1.2);
+  TH2D * h_pn_pmiss_back = new TH2D("pn_pmiss_back","Neutron Measured Momentum vs Predicted Momentum (Background);Neutron Predicted Momentum (GeV/c);Neutron Momentum (GeV/c)",50,0,1.2,50,0,1.2);
   hist_list_2.push_back(h_pn_pmiss_back);
   TH1D * h_cos0_back = new TH1D("cos0_back","Angle between p_{n} and p_{miss} (Background);cos #theta_{pn,pmiss};Counts",20,-1.1,1.1);
   hist_list_1.push_back(h_cos0_back);
@@ -303,8 +303,8 @@ int main(int argc, char ** argv)
   reader->AddVariable("angle_diff", &angle_diff);
   // spectator variable(s)
   reader->AddSpectator("momentum", &momentum);
-  reader->BookMVA("MLP", "/w/hallb-scshelf2102/clas/clase2/erins/repos/rgm/NeutronVeto/dataset_6gev_pCD/weights/TrainNeutronVeto_TMVA_MLP.weights.xml");
-
+  //reader->BookMVA("MLP", "/w/hallb-scshelf2102/clas/clase2/erins/repos/rgm/NeutronVeto/dataset_6gev_pCD/weights/TrainNeutronVeto_TMVA_MLP.weights.xml");
+  reader->BookMVA("MLP", "/w/hallb-scshelf2102/clas12/erins/rgm/NeutronVeto/dataset_d6_e5_allCD_march/weights/TrainNeutronVeto_TMVA_MLP.weights.xml");
 
 
 
@@ -450,9 +450,10 @@ int main(int argc, char ** argv)
           tof = neutrons[j]->sci(clas12::CTOF)->getTime() - starttime;
         }
 
-        if (Edep<3) {continue;}
+        if (Edep<5) {continue;}
+        if (tof<0 || tof>15) {continue;}
 
-        //if (!!CTOF) {continue;}
+
         //if (!CND && !CTOF) {continue;}
         if (!(neutrons[j]->getRegion()==CD)) {continue;}
 
@@ -462,11 +463,12 @@ int main(int argc, char ** argv)
         if (beta_frommom_n==0) {continue;}
         if (theta_n==0) {continue;}
         if (phi_n==0) {continue;}
-        if (p_n.Mag()<0.25) {continue;}
+
 
         // good neutron candidates start here
-        if (theta_n<40 || theta_n>140) {continue;}
-        if (p_n.Mag()<0.25 || p_n.Mag()>1.2) {continue;}
+        if (theta_n<45 || theta_n>140) {continue;}
+        if (p_pred.Mag()<0.2 || p_pred.Mag()>1.2) {continue;}
+        if (p_n.Mag()<0.2 || p_n.Mag()>1.2) {continue;}
 
         nn_CND_good += 1;
 
@@ -497,7 +499,7 @@ int main(int argc, char ** argv)
         // BDT: signal cut>0.1, background cut<0.1
         // MLP: signal cut>0.5, background<0.5
 
-        if (mvaValue>0.5) // signal
+        if (mvaValue>0.43) // signal
         {
           h_pn_angles_sig->Fill(p_p.Phi()*180./M_PI-p_n.Phi()*180./M_PI, p_p.Theta()*180./M_PI-p_n.Theta()*180./M_PI, weight);
           h_pn_pmiss_sig->Fill(p_pred.Mag(),p_n.Mag(),weight);

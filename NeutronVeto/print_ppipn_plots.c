@@ -20,7 +20,7 @@ void print_ppipn_plots() {
   TH1D * h_tof = (TH1D*)f->Get("tof");
   TH2D * h_mmiss_pn = (TH2D*)f->Get("mmiss_pn");
   TH1D * h_nangles = (TH1D*)f->Get("nangles");
-  TH2D * h_compare = (TH2D*)f->Get("andrew");
+  TH2D * h_compare = (TH2D*)f->Get("compare");
 
   // neutron signal selection
   TH1D * h_pxminuspx2 = (TH1D*)f->Get("pxminuspx2");
@@ -30,7 +30,7 @@ void print_ppipn_plots() {
   TH2D * h_pvsp2 = (TH2D*)f->Get("pvsp2");
   TH2D * h_pmiss_thetamiss = (TH2D*)f->Get("pmiss_thetamiss");
   TH1D * h_nangles2 = (TH1D*)f->Get("nangles2");
-  TH2D * h_compare2 = (TH2D*)f->Get("andrew2");
+  TH2D * h_compare2 = (TH2D*)f->Get("compare2");
   TH1D * h_tof2 = (TH1D*)f->Get("tof2");
 
   // neutron background selection
@@ -96,7 +96,7 @@ void print_ppipn_plots() {
   TLine * l_pangles = new TLine(-180,40,180,40);
   l_pangles->SetLineColor(kRed);
   l_pangles->SetLineWidth(3);
-  l_pangles->Draw("same");
+  //l_pangles->Draw("same");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 

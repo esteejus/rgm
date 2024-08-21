@@ -230,7 +230,6 @@ int main(int argc, char ** argv)
     momentum = p_g.Mag();
 
 
-
   double starttime = c12->event()->getStartTime();
 
 
@@ -247,11 +246,16 @@ int main(int argc, char ** argv)
     p.SetXYZ(px,py,pz);
     double n_theta = p.Theta()*180./M_PI;
     
+//std::cout << 
+//std::cout << px_g << '\t' << py_g << '\t' << px_g << '\n';
 
-//std::cout << p_g.Mag() << '\t' << p.Mag() << '\n';
 
     // reject neutrons outside desired momentum range
     if (px==0 || py==0 || pz==0) {continue;}
+
+
+std::cout << p_g.Mag() << '\t' << p.Mag() << '\n';
+
     if (p.Mag()<0.25) {continue;}
     if (p_g.Mag()<0.25) {continue;}
 
@@ -339,7 +343,7 @@ if (beta>1) {continue;}
     h_cos0->Fill(p_g.Dot(p) / (p_g.Mag()*p.Mag()));
     h_cos0_edep->Fill(energy, p_g.Dot(p)/(p_g.Mag()*p.Mag()));
 
-if (edep<1.5) {continue;}
+if (edep<5) {continue;}
 
     h_pxminuspx->Fill((px_g-px)/px_g,weight);
     h_pyminuspy->Fill((py_g-py)/py_g,weight);

@@ -90,12 +90,22 @@ int TrainNeutronVeto_TMVA( TString myMethodList = "" )
    //
    // Boosted Decision Trees
    Use["BDT"]             = 1; // uses Adaptive Boost
+   Use["BDTG"]            = 1; // uses Gradient Boost
    //
    // Friedman's RuleFit method, ie, an optimised series of cuts ("rules")
    Use["RuleFit"]         = 1;
 
    // Categorized methods
    Use["MLPcat"]          = 1; // what does 0/1 mean???
+
+
+   // other models
+   Use["PDERS"]           = 1;
+   Use["SVM"]             = 1;
+   Use["KNN"]             = 1;
+   Use["HMatrix"]         = 1;
+
+
    // ---------------------------------------------------------------
 
    std::cout << std::endl;
@@ -124,15 +134,15 @@ int TrainNeutronVeto_TMVA( TString myMethodList = "" )
    // Here the preparation phase begins
 
 
-   // simulation
+/*   // simulation
    TChain * chS = new TChain("T");
    TChain * chB = new TChain("T");
    TString inputDirectory = "/lustre19/expphy/volatile/clas12/users/erins/neutron-veto/sim_rgm_bknd/ana_root/";
    for (int i=1; i<100; i++)
    {
-     TString filenameS = inputDirectory + "neutrons_" + i + ".root";
+     TString filenameS = inputDirectory + "ana2_neutrons_" + i + ".root";
      chS->Add(filenameS.Data());
-     TString filenameB = inputDirectory + "protons_" + i + ".root";
+     TString filenameB = inputDirectory + "ana2_protons_" + i + ".root";
      chB->Add(filenameB.Data());
    }
 
@@ -141,7 +151,7 @@ int TrainNeutronVeto_TMVA( TString myMethodList = "" )
    // use 5000 events to train*/
    
 
-   /*// D 2 GeV
+/*   // D 2 GeV
    TChain * chS = new TChain("T");
    TChain * chB = new TChain("T");
    TString inputDirectory = "/lustre19/expphy/volatile/clas12/users/erins/neutron-veto/d_2gev/2gev_root/";
@@ -149,9 +159,9 @@ int TrainNeutronVeto_TMVA( TString myMethodList = "" )
    //vector<int> vec = {5568};
    for (int i=0; i<vec.size(); i++)
    {
-     TString filenameS = inputDirectory + "goodn_01" + vec[i] + ".root";
+     TString filenameS = inputDirectory + "goodn_pCD_01" + vec[i] + ".root";
      chS->Add(filenameS.Data());
-     TString filenameB = inputDirectory + "ppipn_01" + vec[i] + ".root";
+     TString filenameB = inputDirectory + "ppipn_pCD_01" + vec[i] + ".root";
      chB->Add(filenameB.Data());
    }
 
@@ -161,7 +171,7 @@ int TrainNeutronVeto_TMVA( TString myMethodList = "" )
    TTree *background     = chB;*/
 
 
-   /* // D 6 GeV
+   // D 6 GeV
    TChain * chS = new TChain("T");
    TChain * chB = new TChain("T");
    TString inputDirectory = "/lustre19/expphy/volatile/clas12/users/erins/neutron-veto/d_6gev/6gev_root/";
@@ -170,13 +180,13 @@ int TrainNeutronVeto_TMVA( TString myMethodList = "" )
    for (int i=0; i<vec.size(); i++)
    {
 std::cout << "NOW READING " << vec[i] << '\n';
-     TString filenameS = inputDirectory + "goodn_pCD_01" + vec[i] + ".root";
+     TString filenameS = inputDirectory + "goodn_e5_pCD_01" + vec[i] + ".root";
      chS->Add(filenameS.Data());
-     TString filenameB = inputDirectory + "ppipn_pCD_01" + vec[i] + ".root";
+     TString filenameB = inputDirectory + "ppipn_e5_CD_01" + vec[i] + ".root";
      chB->Add(filenameB.Data());
    }
    TTree *signalTree     = chS;
-   TTree *background     = chB;*/
+   TTree *background     = chB;
 
 
 
@@ -192,7 +202,7 @@ std::cout << "NOW READING " << vec[i] << '\n';
 
 
    // Create a ROOT output file where TMVA will store ntuples, histograms, etc.
-   TString outfileName( "TMVA_sim.root" );
+   TString outfileName( "TMVA.root" );
    TFile* outputFile = TFile::Open( outfileName, "RECREATE" );
 
    // Create the factory object. Later you can choose the methods
@@ -208,7 +218,7 @@ std::cout << "NOW READING " << vec[i] << '\n';
    TMVA::Factory *factory = new TMVA::Factory( "TrainNeutronVeto_TMVA", outputFile,
                                                "!V:!Silent:Color:DrawProgressBar:Transformations=I;D;P;G,D:AnalysisType=Classification" );
 
-   TMVA::DataLoader *dataloader=new TMVA::DataLoader("dataset_sim");
+   TMVA::DataLoader *dataloader=new TMVA::DataLoader("dataset_sim_may_JUNK");
    // If you wish to modify default settings
    // (please check "src/Config.h" to see all available global options)
    //
@@ -278,14 +288,50 @@ std::cout << "NOW READING " << vec[i] << '\n';
    //
    // TMVA ANN: MLP (recommended ANN) -- all ANNs in TMVA are Multilayer Perceptrons
    if (Use["MLP"])
-      factory->BookMethod( dataloader, TMVA::Types::kMLP, "MLP", "H:!V:NeuronType=tanh:VarTransform=N:NCycles=600:HiddenLayers=N+5:TestRate=5:!UseRegulator" );
+      factory->BookMethod( dataloader, TMVA::Types::kMLP, "MLP", "H:!V:NeuronType=tanh:VarTransform=N:NCycles=800:HiddenLayers=N+5:TestRate=5:!UseRegulator" );
+
 
    if (Use["BDT"])  // Adaptive Boost
       factory->BookMethod( dataloader, TMVA::Types::kBDT, "BDT",
                            "!H:!V:NTrees=850:MinNodeSize=2.5%:MaxDepth=4:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20" );
 
+
+   // Decorrelated likelihood
+   if (Use["LikelihoodD"])
+     factory->BookMethod( dataloader, TMVA::Types::kLikelihood, "LikelihoodD",
+                            "!H:!V:TransformOutput:PDFInterpol=Spline2:NSmoothSig[0]=20:NSmoothBkg[0]=20:NSmooth=5:NAvEvtPerBin=50:VarTransform=Decorrelate" );
  
-   //
+
+   if (Use["PDERS"])
+       factory->BookMethod( dataloader, TMVA::Types::kPDERS, "PDERS",
+                            "!H:!V:NormTree=T:VolumeRangeMode=Adaptive:KernelEstimator=Gauss:GaussSigma=0.3:NEventsMin=400:NEventsMax=600" );
+
+   if (Use["KNN"])
+       factory->BookMethod( dataloader, TMVA::Types::kKNN, "KNN",
+                            "H:nkNN=20:ScaleFrac=0.8:SigmaFact=1.0:Kernel=Gaus:UseKernel=F:UseWeight=T:!Trim" );
+
+
+  // H-Matrix (chi2-squared) method
+   if (Use["HMatrix"])
+       factory->BookMethod( dataloader, TMVA::Types::kHMatrix, "HMatrix", "!H:!V:VarTransform=None" );
+
+
+  // Fisher discriminant
+   if (Use["Fisher"])
+       factory->BookMethod( dataloader, TMVA::Types::kFisher, "Fisher", "H:!V:Fisher:VarTransform=None:CreateMVAPdfs:PDFInterpolMVAPdf=Spline2:NbinsMVAPdf=50:NsmoothMVAPdf=10" );
+
+
+  if (Use["BDTG"]) // Gradient Boost
+       factory->BookMethod( dataloader, TMVA::Types::kBDT, "BDTG",
+                            "!H:!V:NTrees=1000:MinNodeSize=2.5%:BoostType=Grad:Shrinkage=0.10:UseBaggedBoost:BaggedSampleFraction=0.5:nCuts=20:MaxDepth=2" );
+
+
+
+  if (Use["RuleFit"])
+       factory->BookMethod( dataloader, TMVA::Types::kRuleFit, "RuleFit",
+                            "H:!V:RuleFitModule=RFTMVA:Model=ModRuleLinear:MinImp=0.001:RuleMinDist=0.001:NTrees=20:fEventsMin=0.01:fEventsMax=0.5:GDTau=-1.0:GDTauPrec=0.01:GDStep=0.01:GDNSteps=10000:GDErrScale=1.02" );  //
+
+
    // --------------------------------------------------------------------------------------------------
    //  Now you can optimize the setting (configuration) of the MVAs using the set of training events
    // STILL EXPERIMENTAL and only implemented for BDT's !
