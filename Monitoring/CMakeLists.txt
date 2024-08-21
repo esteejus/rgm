@@ -2,6 +2,6 @@ foreach(fnameSrc monitor_ep.cpp monitor_en.cpp monitor_epp.cpp monitor_epn.cpp m
   message(STATUS ${fnameSRC})
   string (REPLACE ".cpp" "" fnameExe ${fnameSrc})
   add_executable(${fnameExe} ${fnameSrc})
-  target_link_libraries(${fnameExe} ${ROOT_LIBRARIES} -lEG -lClas12Banks -lHipo4 -lClas12Root -L${CLAS12ROOT}/lib -L${CLAS12ROOT}/ccdb/lib NeutronVeto EventCut)
+  target_link_libraries(${fnameExe} ${ROOT_LIBRARIES} -lEG -lClas12Banks PkgConfig::hipo4 -lClas12Root -L${CLAS12ROOT}/lib -L${CLAS12ROOT}/ccdb/lib NeutronVeto EventCut)
 endforeach()
 

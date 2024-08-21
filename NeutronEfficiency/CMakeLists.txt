@@ -1,5 +1,5 @@
 foreach(fnameSrc neff_h_epin.cpp neff_d_pn.cpp)
   string (REPLACE ".cpp" "" fnameExe ${fnameSrc})
   add_executable(${fnameExe} ${fnameSrc})
-  target_link_libraries(${fnameExe} ${ROOT_LIBRARIES} -lEG -lClas12Banks -lHipo4 -lClas12Root -L${CLAS12ROOT}/lib -L${CLAS12ROOT}/ccdb/lib NeutronVeto EventCut Clas12Ana Clas12Debug)
+  target_link_libraries(${fnameExe} ${ROOT_LIBRARIES} -lEG -lClas12Banks PkgConfig::hipo4 -lClas12Root -L${CLAS12ROOT}/lib -L${CLAS12ROOT}/ccdb/lib NeutronVeto EventCut Clas12Ana Clas12Debug)
 endforeach()

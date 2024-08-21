@@ -256,9 +256,8 @@
    double pcal_energy_cut      = 0.06;     //(GeV) minimum energy cut
    double ecal_edge_cut        = 14;       //cm
    double ecal_diag_cut        = 0.2;      //diagonal cut on SF
-   double cd_edge_cut          = 10;       //deg phi
+   double cd_edge_cut          = 0.5;       //distance to edge cut
    double min_mom_pt           = 0.15;     //min momentum transverse in CD MeV/c
-   vector<double> theta_cut_CD = {40,145}; //min,max polar angle cut in CD deg.
 
    double proton_sigma = 2;
    double ghost_track_cut = 5;    //deg; cuts the angle between CD tracks and FD tracks to remove ghost tracks (track measured in both CD and FD)

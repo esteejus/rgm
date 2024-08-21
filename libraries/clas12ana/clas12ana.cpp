@@ -584,18 +584,20 @@ bool clas12ana::CDEdgeCuts(const region_part_ptr &p)
   //cut all charged particles
   if(p->par()->getCharge() != 0 &&  p->getRegion() == CD) //neutral particles don't follow cuts
     {
-      auto px = p -> par() -> getPx();
-      auto py = p -> par() -> getPy();
-      double pt = sqrt( pow(px,2) + pow(py,2) );
-      double fiducial_phi = (-asin(min_mom_pt/pt) - (pi/2)) * 180/pi;
-      double phi   = p->getPhi() * 180/pi;
-      double theta = p->getTheta() * 180/pi;
+      double edge_first = p->traj(CVT,7)->getEdge();
+      TVector3 hit_first(p->traj(CVT,7)->getX(),p->traj(CVT,7)->getY(),p->traj(CVT,7)->getZ());
+      double hp_first = hit_first.Phi()*180/M_PI;
+      int hit_reg_first = hp_first<-90?1:hp_first<30?2:hp_first<150?3:1;
+      
+      double edge_last = p->traj(CVT,12)->getEdge();
+      TVector3 hit_last(p->traj(CVT,12)->getX(),p->traj(CVT,12)->getY(),p->traj(CVT,12)->getZ());
+      double hp_last = hit_last.Phi()*180/M_PI;
+      int hit_reg_last = hp_last<-90?1:hp_last<30?2:hp_last<150?3:1;
 
-      if( theta < theta_cut_CD[0] || theta > theta_cut_CD[1] || 
-	  (std::abs(phi-fiducial_phi) < cd_edge_cut) || (std::abs(phi-fiducial_phi-120) < cd_edge_cut) || (std::abs(phi-fiducial_phi-240) < cd_edge_cut) )
-	return false; //inside bad region
-      else
-	return true; //inside good region CD
+      if(!((edge_first>cd_edge_cut) && (edge_last>cd_edge_cut) && (hit_reg_first == hit_reg_last))){
+	return false;} //inside bad region
+      else{
+	return true;} //inside good region CD
     }
   else
     return true; //neutrals dont apply
@@ -704,6 +706,7 @@ bool clas12ana::checkProtonPidCut(const region_part_ptr &p)
   if(itter != pid_cuts_cd.end())
     {
       double mom = p->par()->getP();
+      //proton_sigma=2;
       double exp_beta  = mom/sqrt(pow(mom,2) + pow(mass_proton,2)); //expected beta of particle assuming proton mass
       double tof_diff = (p->getPath()/c)*(1/p->par()->getBeta() - 1/exp_beta); //TOF difference measured - expected
       double up_lim  =  proton_pid_mean->Eval(mom) + proton_sigma*proton_pid_sigma->Eval(mom); 
