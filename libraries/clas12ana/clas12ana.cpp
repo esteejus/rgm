@@ -1163,10 +1163,8 @@ void clas12ana::getLeadRecoilSRC(TLorentzVector beam, TLorentzVector target, TLo
   if( !(q2 > q2_cut[0] && xb > xb_cut[0]) )
     return; 
   
-  int lead_idx   = -1;
-  int lead_mult  = 0;
-
-
+  std::vector<int> lead_idx;
+  
   for(int idx_ptr = 0; idx_ptr != protons.size(); ++idx_ptr)
     {
 
@@ -1183,24 +1181,25 @@ void clas12ana::getLeadRecoilSRC(TLorentzVector beam, TLorentzVector target, TLo
 	  theta_pq > theta_pq_cut[0]  && theta_pq < theta_pq_cut[1] &&
 	  p_q > pq_cut[0] && p_q < pq_cut[1])
 	{
-	  lead_idx = idx_ptr;
-	  lead_mult++; //check for double lead
+	  //Incorporate new code to check for multiple leads
+	  lead_idx.push_back(idx_ptr);
 	}
     }
-
-  if(lead_idx == -1 || lead_mult != 1)
-    return;
   
-  lead_proton.push_back(protons.at(lead_idx));
+  for(int i = 0; i < lead_idx.size(); i++){
+    lead_proton.push_back(protons.at(lead_idx.at(i)));
+  }
 
 
   int recoil_idx = -1;
 
   for(int idx_ptr = 0; idx_ptr != protons.size(); ++idx_ptr)
     {
-      if(idx_ptr == lead_idx)
-	continue;
-
+      for(int i = 0; i < lead_idx.size(); i++){
+	if(idx_ptr == lead_idx.at(i)){
+	  continue;
+	}
+      }
       if(protons[idx_ptr]->par()->getP() > recoil_mom_cut[0] && protons[idx_ptr]->par()->getP() < recoil_mom_cut[1])
 	recoil_proton.push_back(protons.at(idx_ptr));
 
