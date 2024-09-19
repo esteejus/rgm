@@ -15,6 +15,7 @@ gcfSRC::gcfSRC(int thisZ, int thisN, char* uType)
   Z = thisZ;
   N = thisN;
   A=Z+N;
+  std::cout<<"Your nucleus is Z="<<Z<<", N="<<N<<" \n\n";
   set_Contacts();
 }  
 
@@ -25,6 +26,7 @@ gcfSRC::gcfSRC(int thisZ, int thisN, NNModel uType)
   Z = thisZ;
   N = thisN;
   A=Z+N;
+  std::cout<<"Your nucleus is Z="<<Z<<", N="<<N<<" \n\n";
   set_Contacts();
 }
 
