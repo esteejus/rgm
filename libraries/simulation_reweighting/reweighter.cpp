@@ -1,6 +1,6 @@
 #include "reweighter.h"
 
-reweighter::reweighter(double E, int Z, int N)
+reweighter::reweighter(double E, int Z, int N, ffModel thisMod, char * input_uType_fin)
 {
   Ebeam = E;
   
@@ -12,10 +12,10 @@ reweighter::reweighter(double E, int Z, int N)
   sigma_cm_init = 0.2;
   CS_config_init = new eNCrossSection(cc1,kelly);
 
-  uType_fin="AV18";
+  uType_fin=input_uType_fin;
   gcf_config_fin = new gcfSRC(Z_nuc,N_nuc,uType_fin);
-  sigma_cm_fin = 0.15;
-  CS_config_fin = new eNCrossSection(cc1,kelly);
+  sigma_cm_fin = 0.1;
+  CS_config_fin = new eNCrossSection(cc1,thisMod);
   /*
   double P_new[4][2] = {{10,10},
 			{10,10},

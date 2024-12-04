@@ -22,7 +22,7 @@ using namespace clas12;
 class reweighter
 {
 public:
-  reweighter(double E, int Z, int N);
+  reweighter(double E, int Z, int N, ffModel thisMod, char * input_uType_fin);
   ~reweighter();
   
   double get_weight_noT(clas12::mcparticle* mcInfo);
