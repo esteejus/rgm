@@ -16,6 +16,7 @@
 #include <TCanvas.h>
 #include <TStyle.h>
 #include <TDatabasePDG.h>
+#include <TLine.h>
 #include "TF1.h"
 #include "TFitResult.h"
 #include "TFitResultPtr.h"
@@ -317,7 +318,7 @@ int main(int argc, char ** argv)
 	    double pbg = lead_ptr.Rho()/(beta*gamma);
 
 	    if(beta<0.2){continue;}
-
+	    if(mom<0.3){continue;}
 	    if((*p)->getRegion() != CD){continue;}
 
 	    double edge_first = (*p)->traj(CVT,7)->getEdge();
@@ -517,12 +518,18 @@ int main(int argc, char ** argv)
   myCanvas->Divide(1,1);
   myCanvas->cd(1);
   h_edge_first_CD_bc->Draw();
+  TLine *line1 = new TLine(0.5,0,0.5,h_edge_first_CD_bc->GetMaximum());
+  line1->SetLineColor(2);
+  line1->Draw("SAME");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();  
 
   myCanvas->Divide(1,1);
   myCanvas->cd(1);
   h_edge_last_CD_bc->Draw();
+  TLine *line2 = new TLine(0.5,0,0.5,h_edge_last_CD_bc->GetMaximum());
+  line2->SetLineColor(2);
+  line2->Draw("SAME");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();  
 
