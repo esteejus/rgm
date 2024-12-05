@@ -1195,11 +1195,13 @@ void clas12ana::getLeadRecoilSRC(TLorentzVector beam, TLorentzVector target, TLo
 
   for(int idx_ptr = 0; idx_ptr != protons.size(); ++idx_ptr)
     {
+      bool isLead = false;
       for(int i = 0; i < lead_idx.size(); i++){
 	if(idx_ptr == lead_idx.at(i)){
-	  continue;
+	  isLead = true;
 	}
       }
+      if(isLead){continue;}
       if(protons[idx_ptr]->par()->getP() > recoil_mom_cut[0] && protons[idx_ptr]->par()->getP() < recoil_mom_cut[1])
 	recoil_proton.push_back(protons.at(idx_ptr));
 
