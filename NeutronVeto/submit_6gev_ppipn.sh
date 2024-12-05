@@ -1,7 +1,7 @@
 #!/bin/bash                                                                                                          
 #SBATCH --nodes=1                                                                                                    
 #SBATCH --ntasks=1                                                                                                   
-#SBATCH --mem-per-cpu=500
+#SBATCH --mem-per-cpu=700
 #SBATCH --account=clas12                                                                                             
 #SBATCH --job-name=veto_ppipn
 #SBATCH --partition=production                                
@@ -16,14 +16,14 @@
 
 
 OUTPUT=/lustre19/expphy/volatile/clas12/users/erins/neutron-veto/d_6gev
-BUILD_DIR=/w/hallb-scshelf2102/clas/clase2/erins/repos/build_rgm/NeutronVeto
+BUILD_DIR=/w/hallb-scshelf2102/clas12/erins/build_rgm/NeutronVeto
 
 
 
 source /etc/profile.d/modules.sh
 source /group/clas12/packages/setup.sh
 module load clas12/pro #dev
-module switch coatjava/8.4.0
+#module switch coatjava/8.4.0
 module load sqlite/dev
 
 # is energy = not-int a problem???
@@ -31,7 +31,7 @@ module load sqlite/dev
 
 # COOKED RG-M
 
-INPUT=/lustre19/expphy/cache/clas12/rg-m/production/pass1/6gev/D/dst/recon/
+INPUT=/lustre19/expphy/cache/clas12/rg-m/production/pass1/6gev/D/dst/recon
 
-${BUILD_DIR}/D_getfeatures_ppim 5.98636 0 ${OUTPUT}/6gev_root/ppipn_01${SLURM_ARRAY_TASK_ID}.root ${OUTPUT}/6gev_txt/ppipn_01${SLURM_ARRAY_TASK_ID}.txt ${INPUT}/01${SLURM_ARRAY_TASK_ID}/rec_clas_*.hipo # look for bad neutrons using d(e,e'p pi-)p
+${BUILD_DIR}/D_getfeatures_ppim 5.98636 0 ${OUTPUT}/6gev_root/ppipn_e5_CD_01${SLURM_ARRAY_TASK_ID}.root ${OUTPUT}/6gev_txt/ppipn_e5_CD_01${SLURM_ARRAY_TASK_ID}.txt ${INPUT}/01${SLURM_ARRAY_TASK_ID}/rec_clas_01${SLURM_ARRAY_TASK_ID}.evio.*.hipo # look for bad neutrons using d(e,e'p pi-)p
 

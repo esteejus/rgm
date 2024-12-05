@@ -3,25 +3,24 @@
 #SBATCH --ntasks=1                                                                                                   
 #SBATCH --mem-per-cpu=700
 #SBATCH --account=clas12                                                                                             
-#SBATCH --job-name=veto_goodn
+#SBATCH --job-name=veto_ppipn
 #SBATCH --partition=production                                
 #SBATCH --time=3:00:00                                                                                               
 #SBATCH --output=/farm_out/%u/%x-%j-%N.out                                                                           
 #SBATCH --error=//farm_out/%u/%x-%j-%N.err
 
 
-                                          
-#SBATCH --array=5045,5046,5047,5049,5050,5051,5052,5053,5054,5055,5056,5057,5058,5059,5060,5061,5062,5065,5066,5067,5072,5073,5074,5075,5077,5078,5079,5081,5082,5093,5094,5095,5096,5097,5098,5099,5100,5101,5102,5103,5104,5105,5106,5434,5435,5436,5437,5439,5441,5442,5443,5444,5445,5447,5448,5449,5450,5451,5452,5454,5455,5456
+#SBATCH --array=5567,5568,5569,5570,5572,5573,5574,5575,5576,5577,5578,5579,5580,5581,5583,5586,5587,5588,5589,5590,5591,5592,5593,5594,5595,5598,5599,5600,5601,5602,5603,5604,5606,5607,5608,5609,5610,5611,5612,5613,5614,5615,5616,5617,5618,5619,5620,5622,5623,5624,5625,5626,5627
 
 
 
-OUTPUT=/lustre19/expphy/volatile/clas12/users/erins/neutron-veto/d_6gev
+OUTPUT=/lustre19/expphy/volatile/clas12/users/erins/neutron-veto/d_2gev
 BUILD_DIR=/w/hallb-scshelf2102/clas12/erins/build_rgm/NeutronVeto
 
 
 source /etc/profile.d/modules.sh
 source /group/clas12/packages/setup.sh
-module load clas12/pro #dev
+#module load clas12/pro #dev
 module load sqlite/dev
 
 # is energy = not-int a problem???
@@ -29,7 +28,7 @@ module load sqlite/dev
 
 # COOKED RG-M
 
-INPUT=/lustre19/expphy/cache/clas12/rg-m/production/pass1/6gev/D/dst/recon/
+INPUT=/lustre19/expphy/cache/clas12/rg-m/production/pass1/2gev/D/dst/recon/
 
-${BUILD_DIR}/D_getfeatures 5.98636 1 ${OUTPUT}/6gev_root/goodn_e5_pCD_01${SLURM_ARRAY_TASK_ID}.root ${OUTPUT}/6gev_txt/goodn_e5_pCD_01${SLURM_ARRAY_TASK_ID}.txt ${INPUT}/01${SLURM_ARRAY_TASK_ID}/rec_clas_01${SLURM_ARRAY_TASK_ID}.evio.*.hipo # look for good neutrons
+${BUILD_DIR}/D_getfeatures_ppim 2.07052 0 ${OUTPUT}/2gev_root/ppipn_e5_pCD_01${SLURM_ARRAY_TASK_ID}.root ${OUTPUT}/2gev_txt/ppipn_e5_pCD_01${SLURM_ARRAY_TASK_ID}.txt ${INPUT}/01${SLURM_ARRAY_TASK_ID}/rec_clas_01${SLURM_ARRAY_TASK_ID}.evio.*.hipo # look for good neutrons
 

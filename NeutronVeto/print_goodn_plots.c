@@ -134,11 +134,11 @@ void print_goodn_plots() {
 
   myCanvas->Divide(1,1);
   myCanvas->cd(1); h_pmiss_thetamiss->Draw("colz");
-  TLine * l_ptmiss1 = new TLine(40,0,40,1.2);
+  TLine * l_ptmiss1 = new TLine(45,0,45,1.3);
   l_ptmiss1->SetLineColor(kRed);
   l_ptmiss1->SetLineWidth(3);
   l_ptmiss1->Draw("same");
-  TLine * l_ptmiss2 = new TLine(140,0,140,1.2);
+  TLine * l_ptmiss2 = new TLine(140,0,140,1.3);
   l_ptmiss2->SetLineColor(kRed);
   l_ptmiss2->SetLineWidth(3);
   l_ptmiss2->Draw("same");
@@ -146,10 +146,10 @@ void print_goodn_plots() {
   l_ptmiss3->SetLineColor(kRed);
   l_ptmiss3->SetLineWidth(3);
   l_ptmiss3->Draw("same");
-  TLine * l_ptmiss4 = new TLine(0,0.8,180,0.8);
+  TLine * l_ptmiss4 = new TLine(0,1.25,180,1.25);
   l_ptmiss4->SetLineColor(kRed);
   l_ptmiss4->SetLineWidth(3);
-  //l_ptmiss4->Draw("same");
+  l_ptmiss4->Draw("same");
   myCanvas->Print(fileName,"pdf");
   myCanvas->Clear();
 

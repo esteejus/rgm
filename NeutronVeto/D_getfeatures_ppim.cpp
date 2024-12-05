@@ -93,14 +93,14 @@ int main(int argc, char ** argv) {
   int counter = 0;
 
   // set up instance of clas12ana
-  clas12ana clasAna;
+  clas12ana * clasAna = new clas12ana();
 
-  clasAna.readEcalSFPar("/w/hallb-scshelf2102/clas12/users/esteejus/rgm/Ana/cutFiles/paramsSF_LD2_x2.dat");
-  clasAna.readEcalPPar("/w/hallb-scshelf2102/clas12/users/esteejus/rgm/Ana/cutFiles/paramsPI_LD2_x2.dat");
+  clasAna->readEcalSFPar("/w/hallb-scshelf2102/clas12/users/esteejus/rgm/Ana/cutFiles/paramsSF_LD2_x2.dat");
+  clasAna->readEcalPPar("/w/hallb-scshelf2102/clas12/users/esteejus/rgm/Ana/cutFiles/paramsPI_LD2_x2.dat");
 
-  clasAna.printParams();
+  clasAna->printParams();
 
-  clasAna.setProtonPidCuts(true);
+  clasAna->setProtonPidCuts(true);
 
 
 //////////////////////////
@@ -112,15 +112,15 @@ int main(int argc, char ** argv) {
     hist_list_1.push_back(h_psize);
   TH2D * h_pangles = new TH2D("pangles","Proton Angles;phi;theta",48,-180,180,45,0,180);
     hist_list_2.push_back(h_pangles);
-  TH1D * h_vzp = new TH1D("vzp","Vertex difference between proton and electron;Proton Vertex z - Electron Vertex z (cm);Counts",100,-8,8);
+  TH1D * h_vzp = new TH1D("vzp","Vertex difference between proton and electron;z_{p} - z_{e} (cm);Counts",100,-8,8);
     hist_list_1.push_back(h_vzp);
-  TH2D * h_dbeta_p = new TH2D("dbeta_p","#Delta #beta vs proton momentum",50,0,3,50,-0.2,0.2);
+  TH2D * h_dbeta_p = new TH2D("dbeta_p","#Delta #beta_{p} vs proton momentum;p_{p} (GeV/c);#Delta#beta_{p}",50,0,3,50,-0.2,0.2);
     hist_list_2.push_back(h_dbeta_p);
 
   // pion stuff
-  TH2D * h_dbeta_pi = new TH2D("dbeta_pi","#Delta #beta vs pion momentum;p_{#pi} (GeV/c);#Delta#beta",50,0,3,50,-0.2,0.2);
+  TH2D * h_dbeta_pi = new TH2D("dbeta_pi","#Delta #beta_{#pi} vs pion momentum;p_{#pi} (GeV/c);#Delta#beta_{#pi}",50,0,3,50,-0.2,0.2);
     hist_list_2.push_back(h_dbeta_pi);
-  TH1D * h_dvz_pi = new TH1D("dvz_pi","Vertex z difference between #pi^{-} and e;vtz_{#pi}-vtz_{e} (cm)",100,-10,10);
+  TH1D * h_dvz_pi = new TH1D("dvz_pi","Vertex z difference between #pi^{-} and e;z_{#pi}-z_{e} (cm)",100,-10,10);
     hist_list_1.push_back(h_dvz_pi);
   TH2D * h_piangles = new TH2D("piangles","Pion Angular Distribution;#phi_{#pi} (deg);#theta_{#pi} (deg)",48,-180,180,45,0,180);
     hist_list_2.push_back(h_piangles);
@@ -154,8 +154,11 @@ int main(int argc, char ** argv) {
     hist_list_2.push_back(h_sec_phi);
   TH1D * h_mmiss = new TH1D("mmiss","Missing Mass",50,0.5,1.5);
     hist_list_1.push_back(h_mmiss);
-  TH2D * h_mmiss_pn = new TH2D("mmiss_pn","Missing Mass vs Measured Neutron Momentum",50,0,1.5,50,0.5,1.5);
+  TH2D * h_mmiss_pn = new TH2D("mmiss_pn","Missing Mass vs Measured Neutron Momentum;p_{n} (GeV/c);M_{miss} (GeV/c^{2})",50,0.25,1.,50,0.5,1.5);
     hist_list_2.push_back(h_mmiss_pn);
+  TH2D * h_mmiss_pmiss = new TH2D("mmiss_pmiss","Missing Mass vs Predicted Neutron Momentum",50,0,1.5,50,0.5,1.5);
+    hist_list_2.push_back(h_mmiss_pmiss);
+
   TH2D * h_theta_beta = new TH2D("theta_beta","Neutron theta vs beta;#beta;#theta",50,-0.1,1.1,55,35,145);
     hist_list_2.push_back(h_theta_beta);
   TH2D * h_p_theta = new TH2D("p_theta","Neutron Momentum vs Theta;#theta;p (GeV/c)",55,35,145,50,0,1.2);
@@ -275,12 +278,12 @@ int numevent = 0;
     layermult = 0; size = 0; cnd_hits = 0; ctof_hits = 0;
 
     // particle pid
-    clasAna.Run(c12);
-    auto elec = clasAna.getByPid(11);
-    auto prot = clasAna.getByPid(2212);
-    auto neut = clasAna.getByPid(2112);
-    auto piplus = clasAna.getByPid(211);
-    auto piminus = clasAna.getByPid(-211);
+    clasAna->Run(c12);
+    auto elec = clasAna->getByPid(11);
+    auto prot = clasAna->getByPid(2212);
+    auto neut = clasAna->getByPid(2112);
+    auto piplus = clasAna->getByPid(211);
+    auto piminus = clasAna->getByPid(-211);
     auto allParticles=c12->getDetParticles();
     if (elec.size()!=1) {continue;}
     if (prot.size()<1) {continue;}
@@ -336,21 +339,24 @@ int numevent = 0;
       // make cuts
       h_dbeta_p->Fill(pp.Mag(),dbeta);
       if (pp.Mag()<0.5) {continue;}
+      if (pp.Mag()>3.0) {continue;}
       if (abs(dbeta)>0.05) {continue;}
 
       h_vzp->Fill(vzp-vze);
       if (abs(vzp-vze)>5.) {continue;}
       //if (chipid<-3. || chipid>3.) {continue;}
+      
+      double p_theta = pp.Theta()*180./M_PI;
+      h_pangles->Fill(pp.Phi()*180./M_PI,p_theta);
+      //if (p_theta>40) {continue;}
 
       p_index = i;
     }
     
     if (p_index<0) {continue;}
     pp.SetMagThetaPhi(prot[p_index]->getP(),prot[p_index]->getTheta(),prot[p_index]->getPhi());
-    
     double p_theta = pp.Theta()*180./M_PI;
-    h_pangles->Fill(pp.Phi()*180./M_PI,p_theta);
-    if (p_theta>40) {continue;}
+
 
 
 //////////////////////////
@@ -369,7 +375,12 @@ int numevent = 0;
       double dbeta_pi = piminus[i]->par()->getBeta() - ppi.Mag()/sqrt(ppi.Mag2()+mPi*mPi);
       h_dbeta_pi->Fill(ppi.Mag(),dbeta_pi);
       if (ppi.Mag()<0.5) {continue;}
+      if (ppi.Mag()>3.0) {continue;}
       if (abs(dbeta_pi)>0.05) {continue;}
+
+      double pi_theta = ppi.Theta()*180./M_PI;
+      h_piangles->Fill(ppi.Phi()*180./M_PI,pi_theta);
+      //if (pi_theta>40) {continue;}
 
       pi_index = i;
     }
@@ -377,7 +388,9 @@ int numevent = 0;
 
     ppi.SetMagThetaPhi(piminus[pi_index]->getP(),piminus[pi_index]->getTheta(),piminus[pi_index]->getPhi());
     double pi_theta = ppi.Theta()*180./M_PI;
-    h_piangles->Fill(ppi.Phi()*180./M_PI,pi_theta);
+
+
+    //if (p_theta<40 && pi_theta<40) {continue;}
 
 
 
@@ -418,7 +431,7 @@ int numevent = 0;
       if (!is_CND1 && !is_CND2 && !is_CND3 && !is_CTOF) {continue;}
        
       // put REC::Scintillator information
-      int sector;
+      int sector; int status = 0;
       double time;
       double beta = neut[i]->par()->getBeta();
       
@@ -426,18 +439,21 @@ int numevent = 0;
       {
         sector = neut[i]->sci(CND1)->getSector();
         time =   neut[i]->sci(CND1)->getTime() - starttime;
+        status = status + neut[i]->sci(CND1)->getStatus();
       }
       
       if (is_CND3)
       {
         sector = neut[i]->sci(CND3)->getSector();
         time =   neut[i]->sci(CND3)->getTime() - starttime;
+        status = status + neut[i]->sci(CND3)->getStatus();
       }
       
       if (is_CND2)
       {
         sector = neut[i]->sci(CND2)->getSector();
         time =   neut[i]->sci(CND2)->getTime() - starttime;
+        status = status + neut[i]->sci(CND2)->getStatus();
       }
       // PROBLEM: this gives preference to 2nd-layer hits
       if (is_CTOF)
@@ -445,7 +461,7 @@ int numevent = 0;
         sector = (neut[i]->sci(CTOF)->getComponent())/2; // rounded down, ctof component mapped onto cnd sector
         time =   neut[i]->sci(CTOF)->getTime() - starttime;
       }
-
+      if (status!=0) {continue;}
 
       // GET ML FEATURES FOR THIS NEUTRON
       Struct ninfo = getFeatures(neut, allParticles, i);
@@ -462,17 +478,47 @@ int numevent = 0;
       double cos0 = pmiss.Dot(pn) / (pmiss.Mag()*pn.Mag());
      
       // ESSENTIAL NEUTRONS CUTS
-      if (pn_x==0 || pn_y==0 || pn_z==0) {continue;}
       h_tof->Fill(time);
-      h_mmiss_pn->Fill(pn.Mag(),mmiss);
-      if (mmiss>1.05) {continue;}
-      h_tof2->Fill(time);
+      if (pn_x==0 || pn_y==0 || pn_z==0) {continue;}
+      if (time>10) {continue;}
 
+
+      h_pvsp->Fill(pmiss.Mag(),pn.Mag());
+
+      // select particle in momentum and angle accepted by CND
       double n_theta = pn.Theta()*180./M_PI;
-      if (pn.Mag()<0.25 || pn.Mag()>1.25) {continue;}
-      if (n_theta<40 || n_theta>140) {continue;}
+      if (pn.Mag()<0.25 || pn.Mag()>1) {continue;}
+      if (n_theta<45 || n_theta>140) {continue;}
+
+
+      h_mmiss_pn->Fill(pn.Mag(),mmiss);
+      h_mmiss_pmiss->Fill(pmiss.Mag(),mmiss);
       h_mmiss->Fill(mmiss);
-      //if (energy<3) {continue;}
+
+      if (mmiss>1.) {continue;}
+
+
+
+      h_pmiss_thetamiss->Fill(pmiss.Theta()*180./M_PI,pmiss.Mag());
+      h_thetapn_pp->Fill(pp.Mag(),pp.Angle(pn)*180./M_PI);
+
+      if (cnd_energy>1000) {continue;}
+      if (pmiss.Mag()<0.3 || pmiss.Mag()>1.) {continue;}
+      if (pmiss.Theta()*180./M_PI<45 || pmiss.Theta()*180./M_PI>140) {continue;}
+
+
+
+
+      if (energy<5) {continue;}
+
+
+
+      h_compare->Fill((pmiss.Mag()-pn.Mag())/pmiss.Mag(),pn.Angle(pmiss)*180./M_PI);
+
+
+
+
+      h_tof2->Fill(time);
 
 
       // histos
@@ -490,13 +536,10 @@ int numevent = 0;
       h_pyminuspy->Fill(pn_y-pmiss.Y());
       h_pzminuspz->Fill(pn_z-pmiss.Z());
       h_pminusp->Fill(pn.Mag()-pmiss.Mag());
-      h_pvsp->Fill(pmiss.Mag(),pn.Mag());
       h_dpp->Fill(pmiss.Mag(),(pmiss.Mag()-pn.Mag())/pmiss.Mag());
       h_theta_beta->Fill(beta,n_theta);
       h_p_theta->Fill(n_theta,pn.Mag());
-      h_pmiss_thetamiss->Fill(pmiss.Theta()*180./M_PI,pmiss.Mag());
-      h_thetapn_pp->Fill(pp.Mag(),pp.Angle(pn)*180./M_PI);
-      h_compare->Fill((pmiss.Mag()-pn.Mag())/pmiss.Mag(),pn.Angle(pmiss)*180./M_PI);
+
       h_p_all->Fill(pmiss.Mag());
       // ML features
       h_energy_1->Fill(energy);
@@ -529,7 +572,7 @@ int numevent = 0;
   // good_N not used!
   bool good_N = pn.Angle(pmiss)*180./M_PI<20 && abs((pmiss.Mag()-pn.Mag())/pmiss.Mag())<0.2 && cnd_energy<1000; // this never gets used!! which is good - there are no neutrons in this channel.
 
-  bool bad_N = (pn.Angle(pmiss)*180./M_PI<50 && abs((pmiss.Mag()-pn.Mag())/pmiss.Mag())<0.5) && cnd_energy<1000 && (pmiss.Mag()>0.25 && pmiss.Mag()<1.25) && (pmiss.Theta()*180./M_PI>40 && pmiss.Theta()*180./M_PI<140);
+  bool bad_N = (pn.Angle(pmiss)*180./M_PI<50 && abs((pmiss.Mag()-pn.Mag())/pmiss.Mag())<0.5) && cnd_energy<1000 && (pmiss.Mag()>0.25 && pmiss.Mag()<1.) && (pmiss.Theta()*180./M_PI>45 && pmiss.Theta()*180./M_PI<140);
 
   bool keep_this_one = keep_good ? good_N : bad_N;
 
@@ -606,6 +649,8 @@ int numevent = 0;
 
   std::cout << '\n' <<counter << " events counted!\n\n";
 
+
+  h_vzp->Write();
 
   outtxt.close();
   ntree->Write();
