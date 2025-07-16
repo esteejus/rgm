@@ -34,7 +34,6 @@ void Usage()
 }
 
 
-
 int main(int argc, char ** argv)
 {
 
@@ -44,6 +43,8 @@ int main(int argc, char ** argv)
       return -1;
     }
 
+  clas12ana clasAna;
+  clasAna.printParams();
 
   //make c12writer for the output hipo file
   char * outName = argv[1];
@@ -78,9 +79,6 @@ int main(int argc, char ** argv)
   TLorentzVector lead_ptr(0,0,0,db->GetParticle(2212)->Mass());
   TLorentzVector recoil_ptr(0,0,0,db->GetParticle(2212)->Mass());
   TLorentzVector ntr(0,0,0,db->GetParticle(2112)->Mass());
-
-  clas12ana clasAna;
-  clasAna.printParams();
   
   while(chain.Next())
     {
@@ -107,16 +105,10 @@ int main(int argc, char ** argv)
           double xB = Q2/(2 * mass_p * (beam.E() - el.E()));
 	  if(xB<1){continue;}
 	  if(Q2<1){continue;}
-	  int lead_ctr = 0;
-	  for(auto p = protons.begin(); p != protons.end();++p){	    
-	    SetLorentzVector(lead_ptr,(*p));
-	    TLorentzVector miss = q + deut_ptr - lead_ptr;
-	    if(lead_ptr.P()<1){continue;}
-	    //if(miss.P()<0.3){continue;}
-	    lead_ctr++;
-	  }
-	  
-	  if(lead_ctr==0){continue;}
+	  clasAna.getLeadRecoilSRC(beam,deut_ptr,el);
+	  auto lead    = clasAna.getLeadSRC();
+	  auto recoil  = clasAna.getRecoilSRC();
+	  if(lead.size()!=1){continue;}
 	  chain.WriteEvent();	  
 	}
     }
